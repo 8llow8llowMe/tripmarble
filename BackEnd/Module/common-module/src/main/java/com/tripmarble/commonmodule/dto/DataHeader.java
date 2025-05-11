@@ -1,7 +1,7 @@
 package com.tripmarble.commonmodule.dto;
 
 public record DataHeader(boolean success, String resultCode, Object resultMessage) {
-
+    
     public static DataHeader ok() {
         return new DataHeader(true, null, null);
     }
