@@ -50,6 +50,8 @@ subprojects { project ->
     }
 
     dependencies {
+        // Spring Boot Starter
+        implementation 'org.springframework.boot:spring-boot-starter'
         // Lombok & DevTools
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
