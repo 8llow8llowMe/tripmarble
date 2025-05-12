@@ -1,6 +1,6 @@
-package com.tripmarble.commonmodule.config;
+package com.followfollowme.tripmarble.common.config;
 
-import com.tripmarble.commonmodule.property.JasyptProperties;
+import com.followfollowme.tripmarble.common.property.JasyptProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
