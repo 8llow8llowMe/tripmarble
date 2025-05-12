@@ -1,4 +1,4 @@
-package com.tripmarble.commonmodule.property;
+package com.followfollowme.tripmarble.common.property;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
