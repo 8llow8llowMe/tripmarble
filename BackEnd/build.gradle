@@ -8,7 +8,7 @@ plugins {
 bootJar { enabled = false }
 jar { enabled = false }
 
-group = 'com.tripmarble'
+group = 'com.followfollowme'
 version = '0.0.1-SNAPSHOT'
 
 // 공통 레포지토리
