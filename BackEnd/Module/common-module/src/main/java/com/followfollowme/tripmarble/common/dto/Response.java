@@ -1,4 +1,4 @@
-package com.tripmarble.commonmodule.dto;
+package com.followfollowme.tripmarble.common.dto;
 
 public record Response<T>(DataHeader dataHeader, T dataBody) {
 
