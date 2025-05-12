@@ -1,4 +1,4 @@
-package com.tripmarble.authservice;
+package com.followfollowme.tripmarble;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
