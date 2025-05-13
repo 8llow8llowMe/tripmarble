@@ -13,3 +13,5 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 }
 
+jar { enabled = true }
+bootJar { enabled = false }
