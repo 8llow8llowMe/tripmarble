@@ -6,6 +6,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @EnableConfigurationProperties(JasyptProperties.class)
-public class CommonPropertiesConfig {
+public class JasyptPropertiesConfig {
 
 }
