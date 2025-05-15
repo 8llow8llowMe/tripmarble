@@ -10,12 +10,13 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import java.time.Duration;
-import java.util.Date;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.time.Duration;
+import java.util.Date;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -54,6 +55,7 @@ public class JwtAuthProvider {
         Date now = new Date();
 
         return Jwts.builder()
+            .claims(claims)
             .issuedAt(now)
             .expiration(new Date(now.getTime() + expiration.toMillis()))
             .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
