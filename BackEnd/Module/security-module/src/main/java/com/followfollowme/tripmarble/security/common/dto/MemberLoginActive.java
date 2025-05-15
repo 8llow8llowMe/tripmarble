@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record MemberLoginActive(
-    long id,
+    Long id,
     SecurityRole role
 ) {
 
