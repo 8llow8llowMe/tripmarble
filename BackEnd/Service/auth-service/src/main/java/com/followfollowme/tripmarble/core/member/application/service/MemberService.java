@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.core.member.application.service;
 
+import com.followfollowme.tripmarble.core.member.adapter.in.web.dto.MemberMyInfoResponse;
 import com.followfollowme.tripmarble.core.member.application.command.MemberSignupCommand;
 import com.followfollowme.tripmarble.core.member.application.port.in.MemberUseCase;
 import com.followfollowme.tripmarble.core.member.application.port.out.MemberRepositoryPort;
@@ -37,5 +38,13 @@ public class MemberService implements MemberUseCase {
             .build();
 
         memberRepositoryPort.save(member);
+    }
+
+    @Override
+    public MemberMyInfoResponse getMyInfoMember(Long memberId) {
+        Member member = memberRepositoryPort.findById(memberId)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        return MemberMyInfoResponse.from(member);
     }
 }

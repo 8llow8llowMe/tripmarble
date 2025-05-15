@@ -4,9 +4,10 @@ import com.followfollowme.tripmarble.core.member.adapter.out.persistence.entity.
 import com.followfollowme.tripmarble.core.member.adapter.out.persistence.repository.MemberRepository;
 import com.followfollowme.tripmarble.core.member.application.port.out.MemberRepositoryPort;
 import com.followfollowme.tripmarble.core.member.domain.model.Member;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -57,6 +58,20 @@ public class MemberRepositoryAdapter implements MemberRepositoryPort {
                 .role(entity.getRole())
                 .build()
             );
+    }
+
+    @Override
+    public Optional<Member> findById(Long memberId) {
+        return memberRepository.findById(memberId)
+            .map(entity -> Member.builder()
+                .id(entity.getId())
+                .email(entity.getEmail())
+                .name(entity.getName())
+                .nickname(entity.getNickname())
+                .password(entity.getPassword())
+                .profileImage(entity.getProfileImage())
+                .role(entity.getRole())
+                .build());
     }
 
 }
