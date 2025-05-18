@@ -40,7 +40,7 @@ public class AuthService implements AuthUseCase {
         try {
             tokenStorePort.save(member.id(), refreshToken);
         } catch (RedisConnectionFailureException e) {
-            log.warn("Redis 연결 실패 - RefreshToken 저장 안됨", e);
+            log.warn("Redis 연결 실패 - RefreshToken 저장 안됨: {}", e.getMessage());
         }
 
         return AuthLoginResponse.builder()
