@@ -1,4 +1,6 @@
 dependencies {
     // Spring Cloud Gateway
     implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+    // Eureka Client for Service Discovery (Eureka 클라이언트)
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 }
