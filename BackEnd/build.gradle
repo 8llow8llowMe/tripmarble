@@ -21,7 +21,7 @@ allprojects {
 // 서브모듈 공통 설정
 subprojects { project ->
     // 껍데이 그룹 프로젝트 필터링
-    if (project.name in ['Service', 'Module']) {
+    if (project.name in ['Service', 'Module', 'Cloud']) {
         // 필요 최소한의 설정만 하고 Spring Boot / bootJar 모두 끔
         apply plugin: 'java'
 
@@ -63,4 +63,24 @@ subprojects { project ->
     }
 
     tasks.named('test') { useJUnitPlatform() }
+}
+
+// Spring Cloud BOM & 공통 의존성
+subprojects.findAll {
+    it.name in ['auth-service',
+                'api-gateway',]
+}.each { project ->
+    project.ext.set('springCloudVersion', '2024.0.0')
+
+    project.dependencyManagement {
+        imports {
+            // Spring Cloud BOM 적용
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${project.springCloudVersion}"
+        }
+    }
+
+    project.dependencies {
+        // Cloud 공통 설정용 (bootstrap.yml 인식)
+        implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+    }
 }
