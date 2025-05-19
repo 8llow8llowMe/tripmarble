@@ -4,6 +4,7 @@ rootProject.name = 'backend'
 include 'Module:common-module'
 include 'Module:persistence-module'
 include 'Module:security-module'
+include 'Module:redis-module'
 
 // Services
 include 'Service:auth-service'
