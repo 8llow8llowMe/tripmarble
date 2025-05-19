@@ -25,15 +25,15 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Response<AuthLoginResponse>> login(
         @RequestBody AuthLoginRequest request) {
-        AuthLoginResponse loginResponse = authUseCase.loginAuth(AuthLoginCommand.from(request));
+        AuthLoginResponse loginResponse = authUseCase.login(AuthLoginCommand.from(request));
         return ResponseEntity.ok().body(Response.success(loginResponse));
     }
 
     @PostMapping("/logout")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public ResponseEntity<Response<Void>> logoutMember(
+    public ResponseEntity<Response<Void>> logout(
         @AuthenticationPrincipal MemberLoginActive loginActive) {
-        authUseCase.logoutAuth(loginActive.id());
+        authUseCase.logout(loginActive.id());
         return ResponseEntity.ok().body(Response.success());
     }
 }
