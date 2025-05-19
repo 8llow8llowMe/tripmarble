@@ -69,7 +69,8 @@ subprojects { project ->
 subprojects.findAll {
     it.name in ['auth-service',
                 'api-gateway',
-                'service-discovery']
+                'service-discovery',
+                'trip-service']
 }.each { project ->
     project.ext.set('springCloudVersion', '2024.0.0')
 
