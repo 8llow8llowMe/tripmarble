@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.apigateway.filter;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatusCode;
@@ -14,7 +15,7 @@ public class LoggingGlobalFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange,
-        org.springframework.cloud.gateway.filter.GatewayFilterChain chain) {
+        GatewayFilterChain chain) {
         // 요청 로깅
         logRequest(exchange);
 
