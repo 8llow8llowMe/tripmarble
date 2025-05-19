@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.core.member.adapter.in.web.dto;
 
+import com.followfollowme.tripmarble.core.auth.adapter.out.persistence.external.oauth.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.core.member.domain.model.Member;
 import com.followfollowme.tripmarble.security.common.enums.SecurityRole;
 import lombok.Builder;
@@ -11,7 +12,8 @@ public record MemberMyInfoResponse(
     String name,
     String nickname,
     String profileImage,
-    SecurityRole role
+    SecurityRole role,
+    OAuthProvider provider
 ) {
 
     public static MemberMyInfoResponse from(Member member) {
@@ -22,6 +24,7 @@ public record MemberMyInfoResponse(
             .nickname(member.nickname())
             .profileImage(member.profileImage())
             .role(member.role())
+            .provider(member.provider())
             .build();
     }
 }
