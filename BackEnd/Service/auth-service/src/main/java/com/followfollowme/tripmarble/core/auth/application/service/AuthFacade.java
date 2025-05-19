@@ -14,14 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthFacade implements AuthUseCase {
 
-    private final CrendentialLoginProcessor crendentialLoginProcessor;
+    private final CredentialLoginProcessor credentialLoginProcessor;
     private final OAuthLoginProcessor oAuthLoginProcessor;
     private final TokenService tokenService;
     private final OAuthAuthorizationUrlProvider oAuthAuthorizationUrlProvider;
 
     @Override
     public AuthLoginResponse login(AuthLoginCommand command) {
-        return crendentialLoginProcessor.login(command);
+        return credentialLoginProcessor.login(command);
     }
 
     @Override
