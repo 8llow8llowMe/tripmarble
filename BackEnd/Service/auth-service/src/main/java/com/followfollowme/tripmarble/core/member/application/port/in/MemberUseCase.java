@@ -5,7 +5,7 @@ import com.followfollowme.tripmarble.core.member.application.command.MemberSignu
 
 public interface MemberUseCase {
 
-    void signupMember(MemberSignupCommand command);
+    void signup(MemberSignupCommand command);
 
-    MemberMyInfoResponse getMyInfoMember(Long memberId);
+    MemberMyInfoResponse getMyInfo(Long memberId);
 }
