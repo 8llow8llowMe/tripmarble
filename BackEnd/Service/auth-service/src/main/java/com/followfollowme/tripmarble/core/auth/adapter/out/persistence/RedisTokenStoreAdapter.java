@@ -11,9 +11,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RedisTokenStoreAdapter implements TokenStorePort {
 
-
     private static final String KEY_PREFIX = "refreshToken::";
-
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtAuthProperties jwtAuthProperties;
 
