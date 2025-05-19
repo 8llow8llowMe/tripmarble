@@ -36,6 +36,11 @@ logging:
       type.descriptor.sql: trace
       org.hibernate.SQLQuery: debug
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
 # snowflake
 snowflake:
   datacenter-id: 1
