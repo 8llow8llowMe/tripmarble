@@ -22,7 +22,7 @@ public class MemberService implements MemberUseCase {
     private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
-    public void signupMember(MemberSignupCommand command) {
+    public void signup(MemberSignupCommand command) {
         if (memberRepositoryPort.existByEmail(command.email())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
@@ -42,7 +42,7 @@ public class MemberService implements MemberUseCase {
     }
 
     @Override
-    public MemberMyInfoResponse getMyInfoMember(Long memberId) {
+    public MemberMyInfoResponse getMyInfo(Long memberId) {
         Member member = memberRepositoryPort.findById(memberId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 

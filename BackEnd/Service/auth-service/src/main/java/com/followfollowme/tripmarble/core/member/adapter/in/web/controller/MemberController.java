@@ -25,17 +25,17 @@ public class MemberController {
     private final MemberUseCase memberUseCase;
 
     @PostMapping("/signup")
-    public ResponseEntity<Response<Void>> signupMember(
+    public ResponseEntity<Response<Void>> signup(
         @Valid @RequestBody MemberSignupRequest request) {
-        memberUseCase.signupMember(MemberSignupCommand.from(request));
+        memberUseCase.signup(MemberSignupCommand.from(request));
         return ResponseEntity.ok().body(Response.success());
     }
 
     @GetMapping("/me")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public ResponseEntity<Response<MemberMyInfoResponse>> getMyInfoMember(
+    public ResponseEntity<Response<MemberMyInfoResponse>> getMyInfo(
         @AuthenticationPrincipal MemberLoginActive loginActive) {
-        MemberMyInfoResponse myInfoResponse = memberUseCase.getMyInfoMember(loginActive.id());
+        MemberMyInfoResponse myInfoResponse = memberUseCase.getMyInfo(loginActive.id());
         return ResponseEntity.ok().body(Response.success(myInfoResponse));
     }
 }
