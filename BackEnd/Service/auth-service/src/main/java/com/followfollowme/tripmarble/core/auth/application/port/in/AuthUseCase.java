@@ -6,4 +6,6 @@ import com.followfollowme.tripmarble.core.auth.application.command.AuthLoginComm
 public interface AuthUseCase {
 
     AuthLoginResponse loginAuth(AuthLoginCommand command);
+
+    void logoutAuth(long memberId);
 }

@@ -48,4 +48,10 @@ public class AuthService implements AuthUseCase {
             .memberId(member.id())
             .build();
     }
+
+    @Override
+    public void logoutAuth(long memberId) {
+        tokenStorePort.find(memberId)
+            .ifPresent(token -> tokenStorePort.delete(memberId));
+    }
 }

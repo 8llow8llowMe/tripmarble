@@ -5,8 +5,10 @@ import com.followfollowme.tripmarble.core.auth.adapter.in.web.dto.AuthLoginReque
 import com.followfollowme.tripmarble.core.auth.adapter.in.web.dto.AuthLoginResponse;
 import com.followfollowme.tripmarble.core.auth.application.command.AuthLoginCommand;
 import com.followfollowme.tripmarble.core.auth.application.port.in.AuthUseCase;
+import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,5 +26,12 @@ public class AuthController {
         @RequestBody AuthLoginRequest request) {
         AuthLoginResponse loginResponse = authUseCase.loginAuth(AuthLoginCommand.from(request));
         return ResponseEntity.ok().body(Response.success(loginResponse));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Response<Void>> logoutMember(
+        @AuthenticationPrincipal MemberLoginActive loginActive) {
+        authUseCase.logoutAuth(loginActive.id());
+        return ResponseEntity.ok().body(Response.success());
     }
 }
