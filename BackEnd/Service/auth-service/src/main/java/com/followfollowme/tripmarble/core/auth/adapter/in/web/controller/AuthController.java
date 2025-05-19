@@ -8,6 +8,7 @@ import com.followfollowme.tripmarble.core.auth.application.port.in.AuthUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<Response<Void>> logoutMember(
         @AuthenticationPrincipal MemberLoginActive loginActive) {
         authUseCase.logoutAuth(loginActive.id());
