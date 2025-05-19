@@ -11,3 +11,4 @@ include 'Service:auth-service'
 
 // Spring Cloud
 include 'Cloud:api-gateway'
+include 'Cloud:service-discovery'
