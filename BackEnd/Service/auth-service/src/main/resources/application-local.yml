@@ -24,6 +24,11 @@ spring:
           batch_size: 1000
         default_batch_fetch_size: 100
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 # log 관리
 logging:
   level:
@@ -35,3 +40,10 @@ logging:
 snowflake:
   datacenter-id: 1
   worker-id: 1
+
+# JWT
+jwt:
+  access-key: ENC(YDO9DGO7lP8iCqeTNW/SXWCv0697ep+bbGvMnjoJfMDEtWy1Zq/yfZDsovoggEcmLLOtZfHSpLYoRO0YEUlrOl3CvD5KWXo55haCMx7cZMg=)
+  refresh-key: ENC(mWLDPbHV38tl17kR0HbB8vmA1AZ/GKmjRmGFoI5IkOyWMIJPIHj91lFxCPLnmOHTPe4O/ZsVG0UKVd3YJuzkDyCuS7lMS1NjFeJOfs3y5ks=)
+  access-expiration: PT420M
+  refresh-expiration: PT10080M
