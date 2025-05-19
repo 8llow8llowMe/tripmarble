@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.core.member.adapter.out.persistence.entity;
 
+import com.followfollowme.tripmarble.core.auth.adapter.out.persistence.external.oauth.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.persistence.entity.BaseEntity;
 import com.followfollowme.tripmarble.security.common.enums.SecurityRole;
 import jakarta.persistence.Column;
@@ -53,7 +54,13 @@ public class MemberEntity extends BaseEntity {
     private String profileImage;
 
     @Comment("권한")
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private SecurityRole role;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Comment("소셜 로그인 제공업체")
+    private OAuthProvider provider;
+
 }
