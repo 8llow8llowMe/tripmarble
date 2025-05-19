@@ -35,6 +35,7 @@ public class MemberService implements MemberUseCase {
             .nickname(command.nickname())
             .profileImage(null)
             .role(SecurityRole.USER)
+            .provider(null)
             .build();
 
         memberRepositoryPort.save(member);
