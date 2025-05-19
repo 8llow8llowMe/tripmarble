@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.core.member.domain.model;
 
+import com.followfollowme.tripmarble.core.auth.adapter.out.persistence.external.oauth.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.security.common.enums.SecurityRole;
 import lombok.Builder;
 
@@ -11,7 +12,8 @@ public record Member(
     String name,
     String nickname,
     String profileImage,
-    SecurityRole role
+    SecurityRole role,
+    OAuthProvider provider
 ) {
 
 }
