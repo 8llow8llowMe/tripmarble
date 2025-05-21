@@ -5,6 +5,7 @@ include 'Module:common-module'
 include 'Module:persistence-module'
 include 'Module:security-module'
 include 'Module:redis-module'
+include 'Module:storage-module'
 
 // Services
 include 'Service:auth-service'
