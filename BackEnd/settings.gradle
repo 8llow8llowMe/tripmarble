@@ -12,5 +12,5 @@ include 'Service:auth-service'
 include 'Service:trip-service'
 
 // Spring Cloud
-include 'Cloud:api-gateway'
-include 'Cloud:service-discovery'
+include 'cloud:api-gateway'
+include 'cloud:service-discovery'
