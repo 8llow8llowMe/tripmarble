@@ -21,7 +21,7 @@ allprojects {
 // 서브모듈 공통 설정
 subprojects { project ->
     // 껍데이 그룹 프로젝트 필터링
-    if (project.name in ['Service', 'core', 'cloud']) {
+    if (project.name in ['service', 'core', 'cloud']) {
         // 필요 최소한의 설정만 하고 Spring Boot / bootJar 모두 끔
         apply plugin: 'java'
 
