@@ -8,8 +8,8 @@ include 'core:redis-module'
 include 'core:storage-module'
 
 // Services
-include 'Service:auth-service'
-include 'Service:trip-service'
+include 'service:auth-service'
+include 'service:trip-service'
 
 // Spring Cloud
 include 'cloud:api-gateway'
