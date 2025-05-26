@@ -1,11 +1,11 @@
 rootProject.name = 'backend'
 
 // Cores
-include 'core:common-module'
-include 'core:persistence-module'
-include 'core:security-module'
-include 'core:redis-module'
-include 'core:storage-module'
+include 'core:common-core'
+include 'core:persistence-core'
+include 'core:security-core'
+include 'core:redis-core'
+include 'core:storage-core'
 
 // Services
 include 'service:auth-service'
