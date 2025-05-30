@@ -22,7 +22,7 @@ public class TokenService {
         String refreshToken = jwtAuthProvider.issueRefreshToken();
 
         try {
-
+            tokenStorePort.save(memberId, refreshToken);
         } catch (RedisConnectionFailureException e) {
             log.warn("Redis 연결 실패, RefreshToken 저장 안됨: {}", e.getMessage());
         }
