@@ -16,6 +16,6 @@ import org.springframework.context.annotation.Import;
     AuthSecurityConfig.class,
     RedisConfig.class
 })
-public class AuthServiceModuleConfig {
+public class AuthServiceInfraConfig {
 
 }
