@@ -10,6 +10,7 @@ include 'core:storage-core'
 // Services
 include 'service:auth-service'
 include 'service:trip-service'
+include 'service:batch-service'
 
 // Spring Cloud
 include 'cloud:api-gateway'
