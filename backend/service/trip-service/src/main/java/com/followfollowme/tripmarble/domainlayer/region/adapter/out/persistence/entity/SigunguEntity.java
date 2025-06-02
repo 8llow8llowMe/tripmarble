@@ -2,9 +2,12 @@ package com.followfollowme.tripmarble.domainlayer.region.adapter.out.persistence
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
@@ -20,24 +23,29 @@ import org.hibernate.annotations.Comment;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-    name = "region",
+    name = "sigungu",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_region_code", columnNames = "region_code")
+        @UniqueConstraint(name = "uk_sigungu_code", columnNames = "sigungu_code")
     }
 )
-public class RegionEntity {
+public class SigunguEntity {
 
     @Id
-    @Comment("시도 아이디 (지역 아이디)")
-    @Column(columnDefinition = "INT UNSIGNED")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(columnDefinition = "BIGINT UNSIGNED")
+    @Comment("시군구 아이디")
     private Long id;
 
-    @Comment("시도 코드")
-    @Column(length = 5)
-    private String regionCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id", nullable = false)
+    @Comment("시도 (region) 외래 키")
+    private RegionEntity region;
 
-    @Comment("시도명")
+    @Comment("시군구 코드")
     @Column(length = 30)
-    private String regionName;
+    private String sigunguCode;
+
+    @Comment("시군구명")
+    @Column(nullable = false, length = 30)
+    private String sigunguName;
 }
