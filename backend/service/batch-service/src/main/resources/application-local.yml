@@ -8,3 +8,17 @@ spring:
     url: jdbc:mysql://localhost:3306/tripmarble?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true       # 데이터베이스 URL
     username: ENC(OL9lhGYuBl819xoaLMPAxuTVlN8pJ3GE)
     password: ENC(Q7kGpk90tMWOMI0Eoa6+xqjXROMGqmTxIiKQvkZldzw=)
+
+tourapi:
+  service-key: ENC(FbAofRjn3s74FsQJDjQ5BASbkmx6QtzSQynZ2TOqEptNHCD6+u5yNN+IXUmDULCFLfLZSJX95nkEGDHpjass4duq1cjqgoFZDmqQ3ctoCUY+Q47QsxQNYFtyGNAvWufVYTcuVjTqlYo=)
+  categories:
+    # 지역 코드 관련 API
+    area:
+      apis:
+        ldong-code2:
+          url: ENC(KtXU464b0bi4g+tXsOHfRgnClqov9+BmDScMaUYRxVmdNpVPHbeBBNQrdQUsBJRsE6JF5PlI4fclHQxOCI4P+Q==)
+    # 지역/위치 기반
+    area-based:
+      apis:
+        area-based-list2:
+          url: ENC(AaFjBGv9o0yE0+DqOUM+oCZpf/idDAi/I3wpsz/qCC+JnZtqqsIALzd1k1w+p0Sj/hV6bB9R0tEgdSpZkFyAfbxCs2MNDg5X)
