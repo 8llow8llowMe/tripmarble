@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.member.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberMyInfoResponse;
+import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberUseCase;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
@@ -11,15 +12,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class MemberService implements MemberUseCase {
+public class MemberFacade implements MemberUseCase {
 
     private final MemberRepositoryPort memberRepositoryPort;
     private final PasswordEncoder passwordEncoder;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final ProfileImageUploader profileImageUploader;
 
     @Override
     public void signup(MemberSignupCommand command) {
@@ -42,10 +45,16 @@ public class MemberService implements MemberUseCase {
     }
 
     @Override
-    public MemberMyInfoResponse getMyInfo(Long memberId) {
+    public MemberMyInfoResponse getMyInfo(long memberId) {
         Member member = memberRepositoryPort.findById(memberId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         return MemberMyInfoResponse.from(member);
     }
+
+    @Override
+    public MemberProfileUploadResponse uploadProfileImage(long memberId, MultipartFile imageFile) {
+        return profileImageUploader.upload(memberId, imageFile);
+    }
+    
 }
