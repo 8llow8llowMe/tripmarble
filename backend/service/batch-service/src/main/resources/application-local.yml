@@ -11,14 +11,26 @@ spring:
 
 tourapi:
   service-key: ENC(FbAofRjn3s74FsQJDjQ5BASbkmx6QtzSQynZ2TOqEptNHCD6+u5yNN+IXUmDULCFLfLZSJX95nkEGDHpjass4duq1cjqgoFZDmqQ3ctoCUY+Q47QsxQNYFtyGNAvWufVYTcuVjTqlYo=)
+  default-params:
+    numOfRows: 100
+    pageNo: 1
+    mobileOS: WEB
+    mobileApp: tripmarble
+    _type: JSON
   categories:
     # 지역 코드 관련 API
     area:
       apis:
         ldong-code2:
           url: ENC(KtXU464b0bi4g+tXsOHfRgnClqov9+BmDScMaUYRxVmdNpVPHbeBBNQrdQUsBJRsE6JF5PlI4fclHQxOCI4P+Q==)
+          params:
+            lDongRegnCd: 11
+            lDongListYn: Y
     # 지역/위치 기반
     area-based:
       apis:
         area-based-list2:
           url: ENC(AaFjBGv9o0yE0+DqOUM+oCZpf/idDAi/I3wpsz/qCC+JnZtqqsIALzd1k1w+p0Sj/hV6bB9R0tEgdSpZkFyAfbxCs2MNDg5X)
+          params:
+            contentTypeId: 12
+            areaCode: 1
