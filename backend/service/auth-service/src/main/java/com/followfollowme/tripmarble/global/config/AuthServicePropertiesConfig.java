@@ -4,6 +4,7 @@ import com.followfollowme.tripmarble.common.config.JasyptPropertiesConfig;
 import com.followfollowme.tripmarble.persistence.config.SnowflakePropertiesConfig;
 import com.followfollowme.tripmarble.redis.config.RedisPropertiesConfig;
 import com.followfollowme.tripmarble.security.auth.config.JwtAuthPropertiesConfig;
+import com.followfollowme.tripmarble.storage.config.MinioPropertiesConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -13,7 +14,8 @@ import org.springframework.context.annotation.Import;
     JwtAuthPropertiesConfig.class,
     SnowflakePropertiesConfig.class,
     RedisPropertiesConfig.class,
-    OAuthPropertiesConfig.class
+    OAuthPropertiesConfig.class,
+    MinioPropertiesConfig.class
 })
 public class AuthServicePropertiesConfig {
 
