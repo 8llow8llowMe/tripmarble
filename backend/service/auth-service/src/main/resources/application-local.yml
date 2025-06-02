@@ -52,3 +52,10 @@ jwt:
   refresh-key: ENC(mWLDPbHV38tl17kR0HbB8vmA1AZ/GKmjRmGFoI5IkOyWMIJPIHj91lFxCPLnmOHTPe4O/ZsVG0UKVd3YJuzkDyCuS7lMS1NjFeJOfs3y5ks=)
   access-expiration: PT420M
   refresh-expiration: PT10080M
+
+# minio
+minio:
+  url: http://localhost:9000
+  bucket-prefix: tripmarble
+  access-key: 8llow8llowme
+  secret-key: 8llow8llowme!234
