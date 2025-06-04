@@ -5,7 +5,7 @@ import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.Membe
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberSignupRequest;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
-import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberUseCase;
+import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberWebUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "회원", description = "회원 관련 API 입니다.")
 public class MemberWebController {
 
-    private final MemberUseCase memberUseCase;
+    private final MemberWebUseCase memberWebUseCase;
 
     @Operation(
         summary = "일반 회원가입",
@@ -38,7 +38,7 @@ public class MemberWebController {
     @PostMapping("/signup")
     public ResponseEntity<Response<Void>> signup(
         @Valid @RequestBody MemberSignupRequest request) {
-        memberUseCase.signup(MemberSignupCommand.from(request));
+        memberWebUseCase.signup(MemberSignupCommand.from(request));
         return ResponseEntity.ok().body(Response.success());
     }
 
@@ -50,7 +50,7 @@ public class MemberWebController {
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<Response<MemberMyInfoResponse>> getMyInfo(
         @AuthenticationPrincipal MemberLoginActive loginActive) {
-        MemberMyInfoResponse myInfoResponse = memberUseCase.getMyInfo(loginActive.id());
+        MemberMyInfoResponse myInfoResponse = memberWebUseCase.getMyInfo(loginActive.id());
         return ResponseEntity.ok().body(Response.success(myInfoResponse));
     }
 
@@ -63,7 +63,7 @@ public class MemberWebController {
     public ResponseEntity<Response<MemberProfileUploadResponse>> uploadProfileImage(
         @AuthenticationPrincipal MemberLoginActive loginActive,
         @RequestPart MultipartFile imageFile) {
-        MemberProfileUploadResponse profileUploadResponse = memberUseCase.uploadProfileImage(
+        MemberProfileUploadResponse profileUploadResponse = memberWebUseCase.uploadProfileImage(
             loginActive.id(), imageFile);
         return ResponseEntity.ok().body(Response.success(profileUploadResponse));
     }
