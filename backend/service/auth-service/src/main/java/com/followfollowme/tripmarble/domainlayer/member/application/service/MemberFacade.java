@@ -3,6 +3,8 @@ package com.followfollowme.tripmarble.domainlayer.member.application.service;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberMyInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
+import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
+import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberInternalUseCase;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
@@ -28,7 +30,7 @@ public class MemberFacade implements MemberWebUseCase, MemberInternalUseCase {
     @Override
     public void signup(MemberSignupCommand command) {
         if (memberRepositoryPort.existByEmail(command.email())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            throw new MemberException(MemberErrorCode.EXIST_MEMBER_EMAIL);
         }
 
         Member member = Member.builder()
@@ -48,7 +50,7 @@ public class MemberFacade implements MemberWebUseCase, MemberInternalUseCase {
     @Override
     public MemberMyInfoResponse getMyInfo(long memberId) {
         Member member = memberRepositoryPort.findById(memberId)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         return MemberMyInfoResponse.from(member);
     }
