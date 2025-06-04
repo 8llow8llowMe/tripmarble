@@ -7,16 +7,16 @@ import com.followfollowme.tripmarble.security.common.exception.SecurityJwtExcept
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Jwts.SIG;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.time.Duration;
 import java.util.Date;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -58,7 +58,7 @@ public class JwtAuthProvider {
             .claims(claims)
             .issuedAt(now)
             .expiration(new Date(now.getTime() + expiration.toMillis()))
-            .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+            .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SIG.HS512)
             .compact();
     }
 
