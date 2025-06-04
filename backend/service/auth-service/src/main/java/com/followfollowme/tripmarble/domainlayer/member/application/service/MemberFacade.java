@@ -3,7 +3,8 @@ package com.followfollowme.tripmarble.domainlayer.member.application.service;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberMyInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
-import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberUseCase;
+import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberInternalUseCase;
+import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
 import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
@@ -17,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class MemberFacade implements MemberUseCase {
+public class MemberFacade implements MemberWebUseCase, MemberInternalUseCase {
 
     private final MemberRepositoryPort memberRepositoryPort;
     private final PasswordEncoder passwordEncoder;
@@ -56,5 +57,5 @@ public class MemberFacade implements MemberUseCase {
     public MemberProfileUploadResponse uploadProfileImage(long memberId, MultipartFile imageFile) {
         return profileImageUploader.upload(memberId, imageFile);
     }
-    
+
 }
