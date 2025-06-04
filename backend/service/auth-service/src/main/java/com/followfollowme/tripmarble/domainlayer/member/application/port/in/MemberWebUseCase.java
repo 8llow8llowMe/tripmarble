@@ -5,7 +5,7 @@ import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.Membe
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
 import org.springframework.web.multipart.MultipartFile;
 
-public interface MemberUseCase {
+public interface MemberWebUseCase {
 
     void signup(MemberSignupCommand command);
 
