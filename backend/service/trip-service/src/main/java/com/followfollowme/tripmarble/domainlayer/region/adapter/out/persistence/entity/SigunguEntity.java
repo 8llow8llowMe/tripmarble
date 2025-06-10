@@ -32,7 +32,7 @@ public class SigunguEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "BIGINT UNSIGNED")
+    @Column(columnDefinition = "INT UNSIGNED")
     @Comment("시군구 아이디")
     private Long id;
 
