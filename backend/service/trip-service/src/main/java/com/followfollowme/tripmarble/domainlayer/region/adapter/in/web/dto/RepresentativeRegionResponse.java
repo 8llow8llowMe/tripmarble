@@ -1,5 +1,12 @@
 package com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto;
 
-public record RepresentativeRegionResponse() {
+import lombok.Builder;
+
+@Builder
+public record RepresentativeRegionResponse(
+    long id,
+    String name,
+    String imageUrl
+) {
 
 }
