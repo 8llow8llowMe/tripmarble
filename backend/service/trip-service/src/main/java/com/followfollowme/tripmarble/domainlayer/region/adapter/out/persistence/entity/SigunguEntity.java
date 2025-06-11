@@ -25,7 +25,7 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "sigungu",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_sigungu_code", columnNames = "sigungu_code")
+        @UniqueConstraint(name = "uk_region_sigungu_code", columnNames = {"region_id", "sigungu_code"})
     }
 )
 public class SigunguEntity {
