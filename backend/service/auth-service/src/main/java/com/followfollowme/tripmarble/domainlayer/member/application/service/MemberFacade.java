@@ -5,6 +5,7 @@ import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.Membe
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
+import com.followfollowme.tripmarble.domainlayer.member.application.mapper.MemberMapper;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberInternalUseCase;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
@@ -26,6 +27,7 @@ public class MemberFacade implements MemberWebUseCase, MemberInternalUseCase {
     private final PasswordEncoder passwordEncoder;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
     private final ProfileImageUploader profileImageUploader;
+    private final MemberMapper memberMapper;
 
     @Override
     public void signup(MemberSignupCommand command) {
@@ -52,7 +54,7 @@ public class MemberFacade implements MemberWebUseCase, MemberInternalUseCase {
         Member member = memberRepositoryPort.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
-        return MemberMyInfoResponse.from(member);
+        return memberMapper.toMyInfoResponseFromDomain(member);
     }
 
     @Override
