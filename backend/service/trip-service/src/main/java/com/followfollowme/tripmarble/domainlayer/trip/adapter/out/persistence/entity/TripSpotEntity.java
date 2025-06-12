@@ -2,10 +2,13 @@ package com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.e
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -30,12 +33,13 @@ public class TripSpotEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("여행지 정보 ID")
-    @Column(name = "trip_spot_id", columnDefinition = "BIGINT UNSIGNED")
+    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
-//    @Comment("관광 타입 ID")
-//    @Column(name = "trip_content_type_id")
-//    private String contentTypeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trip_content_type_id", nullable = false)
+    @Comment("여행 콘텐츠 타입 ID (FK)")
+    private TripContentTypeEntity tripContentType;
 
     @Comment("제목")
     @Column(nullable = false)
