@@ -5,10 +5,9 @@ import com.followfollowme.tripmarble.domainlayer.region.adapter.out.persistence.
 import com.followfollowme.tripmarble.domainlayer.region.application.mapper.RepresentativeRegionMapper;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RepresentativeRegionRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.RepresentativeRegion;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
