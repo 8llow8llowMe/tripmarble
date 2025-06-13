@@ -8,6 +8,7 @@ import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripContentTy
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class TripContentTypeFacade implements TripContentTypeWebUseCase {
     private final TripContentTypeMapper tripContentTypeMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<TripContentTypeResponse> getAllTripContentTypes() {
         List<TripContentType> tripContentTypes = tripContentTypeRepositoryPort.findAll();
         return tripContentTypeMapper.toResponseListFromDomainList(tripContentTypes);
