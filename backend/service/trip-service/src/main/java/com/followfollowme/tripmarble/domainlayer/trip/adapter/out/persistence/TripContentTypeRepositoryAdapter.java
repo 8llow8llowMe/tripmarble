@@ -1,6 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence;
 
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.TripContentTypeEntity;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.repository.TripContentTypeRepository;
+import com.followfollowme.tripmarble.domainlayer.trip.application.mapper.TripContentTypeMapper;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripContentTypeRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripContentType;
 import java.util.List;
@@ -12,15 +14,11 @@ import org.springframework.stereotype.Component;
 public class TripContentTypeRepositoryAdapter implements TripContentTypeRepositoryPort {
 
     private final TripContentTypeRepository tripContentTypeRepository;
+    private final TripContentTypeMapper tripContentTypeMapper;
 
     @Override
     public List<TripContentType> findAll() {
-        return tripContentTypeRepository.findAll().stream()
-            .map(entity -> TripContentType.builder()
-                .id(entity.getId())
-                .contentTypeId(entity.getContentTypeId())
-                .contentTypeName(entity.getContentTypeName())
-                .build())
-            .toList();
+        List<TripContentTypeEntity> entities = tripContentTypeRepository.findAll();
+        return tripContentTypeMapper.toDomainListFromEntityList(entities);
     }
 }
