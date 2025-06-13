@@ -11,9 +11,9 @@ public interface TripContentTypeMapper {
 
     // 엔티티 리스트 -> 도메인 리스트
     List<TripContentType> toDomainListFromEntityList(
-        List<TripContentTypeEntity> tripContentTypeEntities);
+        List<TripContentTypeEntity> entities);
 
     // 도메인 리스트 -> DTO 리스트
     List<TripContentTypeResponse> toResponseListFromDomainList(
-        List<TripContentType> domainTripContentTypes);
+        List<TripContentType> domains);
 }
