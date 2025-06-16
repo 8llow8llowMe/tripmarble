@@ -41,6 +41,10 @@ public class TripSpotEntity {
     @Comment("여행 콘텐츠 타입 ID (FK)")
     private TripContentTypeEntity tripContentType;
 
+    @Comment("여행 콘텐츠 아이디")
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer contentId;
+
     @Comment("제목")
     @Column(nullable = false)
     private String title;
@@ -58,10 +62,10 @@ public class TripSpotEntity {
     private String addr2;
 
     @Comment("X좌표 (경도)")
-    private String mapX;
+    private Double mapX;
 
     @Comment("Y좌표 (위도)")
-    private String mapY;
+    private Double mapY;
 
     @Comment("지도 레벨")
     private String mlevel;
