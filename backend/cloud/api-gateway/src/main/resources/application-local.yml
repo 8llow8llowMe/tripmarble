@@ -1,6 +1,15 @@
 server:
   port: 8000
 
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: trip-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/trip-spots/**, /api/v1/trip-content-types
+
 eureka:
   client:
     serviceUrl:
