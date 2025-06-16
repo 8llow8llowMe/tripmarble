@@ -42,8 +42,8 @@ public class TripSpotEntity {
     private TripContentTypeEntity tripContentType;
 
     @Comment("여행 콘텐츠 아이디")
-    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
-    private Integer contentId;
+    @Column(columnDefinition = "BIGINT UNSIGNED", nullable = false)
+    private Long contentId;
 
     @Comment("제목")
     @Column(nullable = false)
@@ -62,25 +62,32 @@ public class TripSpotEntity {
     private String addr2;
 
     @Comment("X좌표 (경도)")
+    @Column(nullable = false)
     private Double mapX;
 
     @Comment("Y좌표 (위도)")
+    @Column(nullable = false)
     private Double mapY;
 
     @Comment("지도 레벨")
-    private String mlevel;
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer mlevel;
 
     @Comment("지역 코드")
-    private String areaCode;
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer areaCode;
 
     @Comment("시군구 코드")
-    private String sigunguCode;
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer sigunguCode;
 
     @Comment("법정동 시도 코드")
-    private String ldongRegnCd;
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer ldongRegnCd;
 
     @Comment("법정동 시군구 코드")
-    private String ldongSignguCd;
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer ldongSignguCd;
 
     @Comment("서비스 분류 코드 대분류")
     private String cat1;
