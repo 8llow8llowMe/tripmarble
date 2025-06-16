@@ -37,8 +37,6 @@ public class MinioInitializer {
                             .bucket(bucketName)
                             .build()
                     );
-                } else {
-                    log.info("버킷이 이미 존재함: {}", bucketName);
                 }
 
             } catch (Exception e) {
