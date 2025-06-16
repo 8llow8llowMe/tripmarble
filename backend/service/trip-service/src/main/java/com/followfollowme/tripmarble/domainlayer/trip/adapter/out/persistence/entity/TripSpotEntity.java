@@ -25,7 +25,8 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "trip_spot",
     indexes = {
-        @Index(name = "idx_tripspot_ldong", columnList = "ldong_regn_cd, ldong_signgu_cd")
+        @Index(name = "idx_tripspot_ldong", columnList = "ldong_regn_cd, ldong_signgu_cd"),
+        @Index(name = "idx_tripspot_content_id", columnList = "content_id")
     }
 )
 public class TripSpotEntity {
