@@ -58,8 +58,8 @@ public class MemberFacade implements MemberWebUseCase, MemberInternalUseCase {
     }
 
     @Override
-    public MemberProfileUploadResponse uploadProfileImage(long memberId, MultipartFile imageFile) {
-        return profileImageUploader.upload(memberId, imageFile);
+    public MemberProfileUploadResponse uploadProfileImage(MultipartFile imageFile) {
+        return profileImageUploader.upload(imageFile);
     }
 
 }

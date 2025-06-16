@@ -64,7 +64,7 @@ public class MemberWebController {
         @AuthenticationPrincipal MemberLoginActive loginActive,
         @RequestPart MultipartFile imageFile) {
         MemberProfileUploadResponse profileUploadResponse = memberWebUseCase.uploadProfileImage(
-            loginActive.id(), imageFile);
+            imageFile);
         return ResponseEntity.ok().body(Response.success(profileUploadResponse));
     }
 
