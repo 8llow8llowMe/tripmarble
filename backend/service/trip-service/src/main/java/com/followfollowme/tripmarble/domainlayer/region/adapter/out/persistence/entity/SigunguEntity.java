@@ -43,8 +43,8 @@ public class SigunguEntity {
     private RegionEntity region;
 
     @Comment("시군구 코드")
-    @Column(length = 30, nullable = false)
-    private String sigunguCode;
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer sigunguCode;
 
     @Comment("시군구명")
     @Column(nullable = false, length = 30)
