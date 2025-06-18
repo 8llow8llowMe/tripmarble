@@ -34,8 +34,8 @@ public class RegionEntity {
     private Long id;
 
     @Comment("시도 코드")
-    @Column(length = 5)
-    private String regionCode;
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer regionCode;
 
     @Comment("시도명")
     @Column(length = 30)
