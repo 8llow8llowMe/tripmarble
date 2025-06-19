@@ -29,7 +29,6 @@ public class RegionEntity {
 
     @Id
     @Comment("시도 아이디 (지역 아이디)")
-    @Column(columnDefinition = "INT UNSIGNED")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
