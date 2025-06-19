@@ -31,12 +31,11 @@ public class TripSpotDetailEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("여행지 상세 정보 ID")
-    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     @Comment("여행 콘텐츠 ID (trip_spot의 content_id와 동일)")
-    @Column(nullable = false)
-    private Long contentId;
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer contentId;
 
     @Comment("홈페이지")
     private String homepage;

@@ -34,7 +34,6 @@ public class TripSpotEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("여행지 정보 ID")
-    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,9 +41,9 @@ public class TripSpotEntity {
     @Comment("여행 콘텐츠 타입 ID (FK)")
     private TripContentTypeEntity tripContentType;
 
-    @Comment("여행 콘텐츠 아이디")
-    @Column(columnDefinition = "BIGINT UNSIGNED", nullable = false)
-    private Long contentId;
+    @Comment("여행 콘텐츠 ID")
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer contentId;
 
     @Comment("제목")
     @Column(nullable = false)

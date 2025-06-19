@@ -30,12 +30,11 @@ public class TripContentTypeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("여행 콘텐츠 타입 ID")
-    @Column(columnDefinition = "INT UNSIGNED")
     private Long id;
 
     @Comment("공공 API 연동용 관광 타입 ID (자연키)")
-    @Column(name = "content_type_id", nullable = false)
-    private String contentTypeId;
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer contentTypeId;
 
     @Comment("관광 타입 명칭")
     @Column(length = 20, nullable = false)
