@@ -14,7 +14,7 @@ public class TripSpotDetailRepositoryAdapter implements TripSpotDetailRepository
     private final TripSpotDetailRepository tripSpotDetailRepository;
 
     @Override
-    public Optional<TripSpotDetail> findByContentId(String contentId) {
+    public Optional<TripSpotDetail> findByContentId(int contentId) {
         return tripSpotDetailRepository.findByContentId(contentId)
             .map(tripSpotDetailEntity -> TripSpotDetail.builder()
                 .id(tripSpotDetailEntity.getId())
