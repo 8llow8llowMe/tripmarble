@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TripSpotDetailRepository extends JpaRepository<TripSpotDetailEntity, Long> {
 
-    Optional<TripSpotDetailEntity> findByContentId(String contentId);
+    Optional<TripSpotDetailEntity> findByContentId(int contentId);
 }
