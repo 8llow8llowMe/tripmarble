@@ -24,10 +24,8 @@ public class TripSpotFacade implements TripSpotWebUseCase, TripSpotInternalUseCa
         TripSpot tripSpot = tripSpotRepositoryPort.findById(tripSpotId)
             .orElseThrow(() -> new IllegalArgumentException("해당 여행지 정보를 찾을 수 없습니다: " + tripSpotId));
 
-        TripSpotDetail tripSpotDetail = tripSpotDetailRepositoryPort.findByContentId(
-                tripSpot.contentId())
-            .orElseThrow(() -> new IllegalArgumentException(
-                "해당 여행지 정보를 찾을 수 없습니다: " + tripSpot.contentId()));
+        TripSpotDetail tripSpotDetail = tripSpotDetailRepositoryPort.findByContentId(tripSpot.contentId())
+            .orElseThrow(() -> new IllegalArgumentException("해당 여행지 정보를 찾을 수 없습니다: " + tripSpot.contentId()));
 
         // TODO: 여행지 상세 정보 Response DTO 정의
         return TripSpotWithDetailViewResponse.builder()
