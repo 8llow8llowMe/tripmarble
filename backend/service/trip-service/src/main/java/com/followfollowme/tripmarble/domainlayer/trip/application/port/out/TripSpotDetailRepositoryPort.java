@@ -5,5 +5,5 @@ import java.util.Optional;
 
 public interface TripSpotDetailRepositoryPort {
 
-    Optional<TripSpotDetail> findByContentId(String contentId);
+    Optional<TripSpotDetail> findByContentId(int contentId);
 }
