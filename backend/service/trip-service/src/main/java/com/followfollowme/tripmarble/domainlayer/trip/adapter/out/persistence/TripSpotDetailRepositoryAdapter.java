@@ -3,9 +3,10 @@ package com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.repository.TripSpotDetailRepository;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotDetailRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpotDetail;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -21,8 +22,6 @@ public class TripSpotDetailRepositoryAdapter implements TripSpotDetailRepository
                 .contentId(tripSpotDetailEntity.getContentId())
                 .homepage(tripSpotDetailEntity.getHomepage())
                 .overview(tripSpotDetailEntity.getOverview())
-                .createdTime(tripSpotDetailEntity.getCreatedTime())
-                .modifiedTime(tripSpotDetailEntity.getModifiedTime())
                 .build());
     }
 }

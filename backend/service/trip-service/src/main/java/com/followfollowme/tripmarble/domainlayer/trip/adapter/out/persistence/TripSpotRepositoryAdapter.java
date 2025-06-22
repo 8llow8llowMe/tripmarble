@@ -3,9 +3,10 @@ package com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.repository.TripSpotRepository;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -17,7 +18,7 @@ public class TripSpotRepositoryAdapter implements TripSpotRepositoryPort {
     public Optional<TripSpot> findById(long tripSpotId) {
         return tripSpotRepository.findById(tripSpotId)
             .map(tripSpotEntity -> TripSpot.builder()
-                .tripContentTypeId(tripSpotEntity.getTripContentType().getContentTypeId())
+                .contentTypeId(tripSpotEntity.getContentTypeId())
                 .contentId(tripSpotEntity.getContentId())
                 .title(tripSpotEntity.getTitle())
                 .tel(tripSpotEntity.getTel())
