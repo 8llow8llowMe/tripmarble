@@ -32,7 +32,7 @@ public class TripContentTypeEntity {
     @Comment("여행 콘텐츠 타입 ID")
     private Long id;
 
-    @Comment("공공 API 연동용 관광 타입 ID (자연키)")
+    @Comment("TourAPI 콘텐츠 타입 ID (자연키)")
     @Column(columnDefinition = "INT UNSIGNED", nullable = false)
     private Integer contentTypeId;
 
