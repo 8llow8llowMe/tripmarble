@@ -10,7 +10,11 @@ React + Next.js 기반의 TripMarble 웹앱 레포지토리입니다.
 - React 18.2.0
 - Sass 1.77.8
 - TypeScript 5.x
+- react-redux 9.1.2
+- redux persist 6.0.0
 - pnpm 사용
+
+- 토스트 라이브러리 고려
 
 ---
 
