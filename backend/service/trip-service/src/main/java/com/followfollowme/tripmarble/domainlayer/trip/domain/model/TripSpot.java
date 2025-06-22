@@ -5,7 +5,7 @@ import lombok.Builder;
 @Builder
 public record TripSpot(
     long id,
-    long contentTypeId,
+    int contentTypeId,
     int contentId,
     String title,
     String tel,
