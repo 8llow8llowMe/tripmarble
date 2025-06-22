@@ -22,4 +22,10 @@ public class SigunguRepositoryAdapter implements SigunguRepositoryPort {
         List<SigunguEntity> entities = sigunguRepository.findAllByRegionId(regionId);
         return sigunguMapper.toDomainListFromEntityList(entities);
     }
+
+    @Override
+    public List<Sigungu> findAllByIdIn(List<Long> sigunguIds) {
+        List<SigunguEntity> entities = sigunguRepository.findAllByIdIn(sigunguIds);
+        return sigunguMapper.toDomainListFromEntityList(entities);
+    }
 }
