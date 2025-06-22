@@ -1,26 +1,16 @@
-import Head from "next/head";
-// utils
-import { buildMeta } from "@/lib/meta/seo";
+import type { Metadata } from "next";
 // styles
 import styles from "./Search.module.scss";
 // components
 import Input from "@/components/common/Input/Input";
 
-const { title, description } = buildMeta(
-  "Search",
-  "원하는 여행지를 검색해보세요"
-);
-
+export const metadata: Metadata = {
+  title: "Search",
+  description: "원하는 여행지를 검색해보세요",
+};
 export default function SearchPage() {
   return (
     <>
-      <Head>
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <div className={styles.container}>
         <div className={styles.section}>
           <div className={styles.subTitle}>원하는 여행지를 검색해보세요!</div>

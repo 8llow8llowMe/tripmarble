@@ -1,21 +1,22 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import { convertingToString } from "@/utils/common";
 import SearchPage from "@/app/[category]/(search)/SearchPage";
-import NotFound from "@/app/[category]/(not-found)/not-found";
 
 const categoryComponentMap: Record<string, React.ComponentType> = {
   search: SearchPage,
   // plan: PlanPage,
-  default: NotFound,
 };
 
 export default function CategoryPage() {
   const params = useParams();
-  const categoryName = convertingToString(params?.category) as string;
-  const PageComponent =
-    categoryComponentMap[categoryName] || categoryComponentMap["default"];
+  const categoryName = convertingToString(params?.category);
+  
+  if (!categoryName || !(categoryName in categoryComponentMap)) {
+    notFound();
+  }
 
+  const PageComponent = categoryComponentMap[categoryName as keyof typeof categoryComponentMap];
   return <PageComponent />;
 }
