@@ -1,0 +1,8 @@
+{
+  "name": "tripmarble",
+  "private": true,
+  "workspaces": [
+    "web",
+    "mobile"
+  ]
+}
