@@ -44,7 +44,7 @@ public class AuthController {
         description = "로그인 한 회원을 로그아웃 하는 기능입니다."
     )
     @PostMapping("/logout")
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<Void>> logout(@AuthenticationPrincipal MemberLoginActive loginActive) {
         authUseCase.logout(loginActive.id());
         return ResponseEntity.ok().body(Response.success());
@@ -67,8 +67,8 @@ public class AuthController {
             + "해당 서비스에 회원 정보가 없는 경우 회원가입 후 로그인을 하는 기능입니다."
     )
     @PostMapping("/{provider}/login")
-    public ResponseEntity<Response<AuthLoginResponse>> loginWithOAuthCode(@PathVariable OAuthProvider provider,
-        @RequestParam("code") String authCode) {
+    public ResponseEntity<Response<AuthLoginResponse>> loginWithOAuthCode(
+        @PathVariable OAuthProvider provider, @RequestParam("code") String authCode) {
         AuthLoginResponse loginResponse = authUseCase.loginWithOAuthCode(provider, authCode);
         return ResponseEntity.ok().body(Response.success(loginResponse));
     }
