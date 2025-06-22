@@ -8,4 +8,6 @@ import java.util.List;
 public interface SigunguRepository extends JpaRepository<SigunguEntity, Long> {
 
     List<SigunguEntity> findAllByRegionId(long regionId);
+
+    List<SigunguEntity> findAllByIdIn(List<Long> sigunguIds);
 }
