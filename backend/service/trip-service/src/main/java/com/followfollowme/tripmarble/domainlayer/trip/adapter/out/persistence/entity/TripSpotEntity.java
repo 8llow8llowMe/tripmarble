@@ -10,12 +10,15 @@ import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -24,10 +27,13 @@ import org.hibernate.annotations.Comment;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
     name = "trip_spot",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_tripspot_content_id", columnNames = "content_id")
+    },
     indexes = {
-        @Index(name = "idx_tripspot_ldong", columnList = "ldong_regn_cd, ldong_signgu_cd"),
-        @Index(name = "idx_tripspot_content_id", columnList = "content_id")
+        @Index(name = "idx_tripspot_ldong", columnList = "ldong_regn_cd, ldong_signgu_cd")
     }
+
 )
 public class TripSpotEntity {
 
@@ -115,4 +121,10 @@ public class TripSpotEntity {
 
     @Comment("저작권 유형")
     private String cpyrhtDivCd;
+
+    @Comment("등록일")
+    private LocalDateTime createdTime;
+
+    @Comment("수정일")
+    private LocalDateTime modifiedTime;
 }

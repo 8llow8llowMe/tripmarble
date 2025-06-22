@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,18 +37,10 @@ public class TripSpotDetailEntity {
     @Column(columnDefinition = "INT UNSIGNED", nullable = false)
     private Integer contentId;
 
-    @Comment("홈페이지")
+    @Comment("홈페이지 URL")
     private String homepage;
 
     @Comment("상세 설명")
     @Column(columnDefinition = "TEXT")
     private String overview;
-
-    @Comment("등록일시")
-    @Column(nullable = false)
-    private LocalDateTime createdTime;
-
-    @Comment("수정일시")
-    @Column(nullable = false)
-    private LocalDateTime modifiedTime;
 }
