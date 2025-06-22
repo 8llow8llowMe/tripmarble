@@ -7,4 +7,6 @@ import java.util.List;
 public interface SigunguRepositoryPort {
 
     List<Sigungu> findAllByRegionId(long regionId);
+
+    List<Sigungu> findAllByIdIn(List<Long> sigunguIds);
 }
