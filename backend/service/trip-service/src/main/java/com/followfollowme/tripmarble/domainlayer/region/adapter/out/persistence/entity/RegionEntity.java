@@ -32,7 +32,7 @@ public class RegionEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Comment("시도 코드")
+    @Comment("TourAPI 시도 코드 (자연키)")
     @Column(columnDefinition = "INT UNSIGNED", nullable = false)
     private Integer regionCode;
 

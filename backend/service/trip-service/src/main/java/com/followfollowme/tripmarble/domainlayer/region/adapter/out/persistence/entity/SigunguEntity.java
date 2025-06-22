@@ -25,8 +25,7 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "sigungu",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_region_sigungu_code", columnNames = {"region_id",
-            "sigungu_code"})
+        @UniqueConstraint(name = "uk_region_sigungu_code", columnNames = {"region_id", "sigungu_code"})
     }
 )
 public class SigunguEntity {
@@ -41,7 +40,7 @@ public class SigunguEntity {
     @Comment("시도 (region) 외래 키")
     private RegionEntity region;
 
-    @Comment("시군구 코드")
+    @Comment("TourAPI 시군구 코드 (자연키)")
     @Column(columnDefinition = "INT UNSIGNED", nullable = false)
     private Integer sigunguCode;
 
