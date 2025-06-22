@@ -14,8 +14,6 @@ React + Next.js 기반의 TripMarble 웹앱 레포지토리입니다.
 - redux persist 6.0.0
 - pnpm 사용
 
-- 토스트 라이브러리 고려
-
 ---
 
 ### Scripts
