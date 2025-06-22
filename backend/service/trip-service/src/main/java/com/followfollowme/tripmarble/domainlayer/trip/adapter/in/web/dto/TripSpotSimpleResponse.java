@@ -3,11 +3,10 @@ package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto;
 import lombok.Builder;
 
 @Builder
-public record TripSpotWithDetailViewResponse(
+public record TripSpotSimpleResponse(
     long tripSpotId,
-    String contentTypeName,
-    String homepageUrl,
-    String overview
+    int contentId,
+    String title,
+    String thumbnailImage
 ) {
-
 }
