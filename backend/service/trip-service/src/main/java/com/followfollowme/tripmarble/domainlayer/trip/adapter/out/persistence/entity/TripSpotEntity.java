@@ -30,7 +30,6 @@ import java.time.LocalDateTime;
     indexes = {
         @Index(name = "idx_tripspot_ldong", columnList = "ldong_regn_cd, ldong_signgu_cd")
     }
-
 )
 public class TripSpotEntity {
 
