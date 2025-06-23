@@ -33,8 +33,5 @@ tourapi:
     area-based-list2:
       apis:
         # 지역기반 관광정보 조회 API
-        area-based-list2:
+        region-based-trip-spot-list:
           url: ENC(AaFjBGv9o0yE0+DqOUM+oCZpf/idDAi/I3wpsz/qCC+JnZtqqsIALzd1k1w+p0Sj/hV6bB9R0tEgdSpZkFyAfbxCs2MNDg5X)
-          params:
-            contentTypeId: 12
-            areaCode: 1
