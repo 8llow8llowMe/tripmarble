@@ -7,6 +7,7 @@ import SpotsPage from "@/app/[category]/(spots)/SpotsPage";
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import LoginPage from "@/app/[category]/(user)/page";
 =======
 >>>>>>> ad9ee0b ([FE/web] feat: 여행지 목록 페이지 제작)
@@ -17,11 +18,22 @@ import LoginPage from "@/app/[category]/(user)/page";
 import LoginPage from "@/app/[category]/(user)/(login)/LoginPage";
 import ProfilePage from "@/app/[category]/(user)/(profile)/ProfilePage";
 >>>>>>> a679a8f ([FE/web] feat: profile 페이지 퍼블리싱)
+=======
+import LoginPage from "@/app/[category]/(user)/(login)/LoginPage";
+import ProfilePage from "@/app/[category]/(user)/(profile)/ProfilePage";
+=======
+<<<<<<< HEAD
+import LoginPage from "@/app/[category]/(user)/page";
+=======
+>>>>>>> ad9ee0b ([FE/web] feat: 여행지 목록 페이지 제작)
+>>>>>>> f02144a ([FE/web] feat: 여행지 목록 페이지 제작)
+>>>>>>> 0d5d2d4 ([FE/web] feat: 여행지 목록 페이지 제작)
 
 const categoryComponentMap: Record<string, React.ComponentType> = {
   search: SearchPage,
   // plan: PlanPage,
   spots: SpotsPage,
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
   login: LoginPage,
@@ -34,6 +46,15 @@ const categoryComponentMap: Record<string, React.ComponentType> = {
 =======
   profile: ProfilePage,
 >>>>>>> a679a8f ([FE/web] feat: profile 페이지 퍼블리싱)
+=======
+  login: LoginPage,
+<<<<<<< HEAD
+  profile: ProfilePage,
+=======
+=======
+>>>>>>> ad9ee0b ([FE/web] feat: 여행지 목록 페이지 제작)
+>>>>>>> f02144a ([FE/web] feat: 여행지 목록 페이지 제작)
+>>>>>>> 0d5d2d4 ([FE/web] feat: 여행지 목록 페이지 제작)
 };
 
 export default function CategoryPage() {
