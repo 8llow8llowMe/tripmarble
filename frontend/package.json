@@ -1,8 +1,13 @@
 {
   "name": "tripmarble",
   "private": true,
-  "workspaces": [
-    "web",
-    "mobile"
-  ]
+  "workspaces": {
+    "packages": ["web", "mobile"],
+    "nohoist": [
+      "**/react",
+      "**/react-dom",
+      "**/react-native",
+      "**/react-native/**"
+    ]
+  }
 }
