@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import styles from "./Search.module.scss";
 // components
 import Input from "@/components/common/Input/Input";
+import CircleList from "@/components/common/CircleList/CircleList";
+import { spotsData } from "@/constants/spots";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -19,13 +21,7 @@ export default function SearchPage() {
 
         <div className={styles.section}>
           <div className={styles.subTitle}>추천 여행지</div>
-          <div className={styles.recommendations}>
-            {[...Array(8)].map((_, idx) => (
-              <div key={idx} className={styles.circleItem}>
-                여행지 {idx + 1}
-              </div>
-            ))}
-          </div>
+          <CircleList baseHref="/spots" items={spotsData} />
         </div>
       </div>
     </>
