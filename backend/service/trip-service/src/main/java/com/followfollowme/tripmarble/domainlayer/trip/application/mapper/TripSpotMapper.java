@@ -1,8 +1,10 @@
 package com.followfollowme.tripmarble.domainlayer.trip.application.mapper;
 
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotSimpleResponse;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotWithDetailViewResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.TripSpotEntity;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
+import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpotDetail;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -19,9 +21,29 @@ public interface TripSpotMapper {
 
     // 도메인 -> Simple Response DTO
     @Mapping(source = "id", target = "tripSpotId")
-    @Mapping(source = "firstImage2", target = "thumbnailImage")
+    @Mapping(source = "title", target = "tripSpotName")
+    @Mapping(source = "firstImage2", target = "thumbnailImageUrl")
     TripSpotSimpleResponse toSimpleResponseFromDomain(TripSpot domain);
 
     // 도메인 리스트 -> Simple Respons DTO 리스트
     List<TripSpotSimpleResponse> toSimpleResponseListFromDomainList(List<TripSpot> domains);
+
+    default TripSpotWithDetailViewResponse toDetailViewResponseFrom(
+        TripSpot tripSpot, String contentTypeName, TripSpotDetail tripSpotDetail) {
+
+        return TripSpotWithDetailViewResponse.builder()
+            .tripSpotId(tripSpot.id())
+            .tripSpotName(tripSpot.title())
+            .contentTypeName(contentTypeName)
+            .description(tripSpotDetail.overview())
+            .homepageUrl(tripSpotDetail.homepage())
+            .phoneNumber(tripSpot.tel())
+            .address(tripSpot.addr1())
+            .addressDetail(tripSpot.addr2())
+            .longitude(tripSpot.mapX())
+            .latitude(tripSpot.mapY())
+            .imageUrl(tripSpot.firstImage())
+            .thumbnailImageUrl(tripSpot.firstImage2())
+            .build();
+    }
 }
