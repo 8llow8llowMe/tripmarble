@@ -1,6 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.member.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
+import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
+import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import com.followfollowme.tripmarble.storage.bucket.MinioBucket;
 import com.followfollowme.tripmarble.storage.properties.MinioProperties;
 import io.minio.MinioClient;
@@ -17,7 +19,7 @@ public class ProfileImageUploader {
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
 
-    public MemberProfileUploadResponse upload(long memberId, MultipartFile imageFile) {
+    public MemberProfileUploadResponse upload(MultipartFile imageFile) {
         try {
             String originalName = imageFile.getOriginalFilename();
             String objectName = UUID.randomUUID() + "_" + originalName;
@@ -31,20 +33,20 @@ public class ProfileImageUploader {
             minioClient.putObject(
                 PutObjectArgs.builder()
                     .bucket(bucketName)
-                    .object(objectName)
+                    .object(objectPath) // temp/UUID_filename 형식으로 저장
                     .stream(imageFile.getInputStream(), imageFile.getSize(), -1)
                     .contentType(imageFile.getContentType())
                     .build()
             );
 
             // 접두사 포함 전체 URL
-            String url = minioProperties.url() + "/" + bucketName + "/" + objectName;
+            String url = minioProperties.url() + "/" + bucketName + "/" + objectPath;
 
             return MemberProfileUploadResponse.builder()
                 .tempImageUrl(url)
                 .build();
         } catch (Exception e) {
-            throw new RuntimeException("프로필 이미지 업로드 실패: " + imageFile.getOriginalFilename(), e);
+            throw new MemberException(MemberErrorCode.UPLOAD_PROFILE_IMAGE_FAILED);
         }
     }
 }

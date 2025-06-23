@@ -4,9 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record RepresentativeRegionResponse(
-    long id,
-    String name,
-    String imageUrl
+    long representativeRegionId,
+    String representativeRegionName,
+    String imageUrl,
+    Long regionId,
+    Long sigunguId
 ) {
 
 }

@@ -1,29 +1,26 @@
 package com.followfollowme.tripmarble.domainlayer.region.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionResponse;
+import com.followfollowme.tripmarble.domainlayer.region.application.mapper.RepresentativeRegionMapper;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.in.RepresentativeRegionWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RepresentativeRegionRepositoryPort;
-import jakarta.transaction.Transactional;
+import com.followfollowme.tripmarble.domainlayer.region.domain.model.RepresentativeRegion;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class RepresentativeRegionFacade implements RepresentativeRegionWebUseCase {
 
     private final RepresentativeRegionRepositoryPort representativeRegionRepositoryPort;
+    private final RepresentativeRegionMapper representativeRegionMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<RepresentativeRegionResponse> getAllRepresentativeRegions() {
-        return representativeRegionRepositoryPort.findAll().stream()
-            .map(representativeRegion -> RepresentativeRegionResponse.builder()
-                .id(representativeRegion.regionId())
-                .name(representativeRegion.name())
-                .imageUrl(representativeRegion.imageUrl())
-                .build())
-            .toList();
+        List<RepresentativeRegion> representativeRegions = representativeRegionRepositoryPort.findAll();
+        return representativeRegionMapper.toResponseListFromDomainList(representativeRegions);
     }
 }

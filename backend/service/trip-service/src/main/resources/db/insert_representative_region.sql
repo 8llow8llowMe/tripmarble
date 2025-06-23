@@ -1,0 +1,16 @@
+INSERT INTO representative_region (name, image_url, region_id, sigungu_id)
+VALUES ('서울', NULL, 1, NULL),
+       ('대전', NULL, 6, 69),
+       ('여수', NULL, 11, 160),
+       ('대구', NULL, 3, 47),
+       ('부산', NULL, 2, 34),
+       ('강릉', NULL, 15, 232),
+       ('양양', NULL, 15, 247),
+       ('경주', NULL, 12, 184),
+       ('전주', NULL, 16, 248),
+       ('제주', NULL, 14, 228),
+       ('목포', NULL, 11, 159),
+       ('속초', NULL, 15, 235),
+       ('춘천', NULL, 15, 230),
+       ('가평', NULL, 8, 125),
+       ('광주', NULL, 5, 64);

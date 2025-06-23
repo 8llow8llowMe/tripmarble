@@ -29,13 +29,12 @@ public class RegionEntity {
 
     @Id
     @Comment("시도 아이디 (지역 아이디)")
-    @Column(columnDefinition = "INT UNSIGNED")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Comment("시도 코드")
-    @Column(length = 5)
-    private String regionCode;
+    @Comment("TourAPI 시도 코드 (자연키)")
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer regionCode;
 
     @Comment("시도명")
     @Column(length = 30)

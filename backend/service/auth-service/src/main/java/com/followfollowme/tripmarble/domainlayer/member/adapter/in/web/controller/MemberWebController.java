@@ -43,8 +43,8 @@ public class MemberWebController {
     }
 
     @Operation(
-        summary = "나의 회원정보 가져오기",
-        description = "로그인한 나의 회원정보를 가져오는 기능입니다."
+        summary = "나의 회원정보 조회",
+        description = "로그인한 나의 회원정보를 조회 기능입니다."
     )
     @GetMapping("/me")
     @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
@@ -64,7 +64,7 @@ public class MemberWebController {
         @AuthenticationPrincipal MemberLoginActive loginActive,
         @RequestPart MultipartFile imageFile) {
         MemberProfileUploadResponse profileUploadResponse = memberWebUseCase.uploadProfileImage(
-            loginActive.id(), imageFile);
+            imageFile);
         return ResponseEntity.ok().body(Response.success(profileUploadResponse));
     }
 

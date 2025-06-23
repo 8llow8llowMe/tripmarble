@@ -31,7 +31,6 @@ public class MemberEntity extends BaseEntity {
 
     @Id
     @Comment("회원 아이디")
-    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     @Comment("이메일")

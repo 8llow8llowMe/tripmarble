@@ -26,7 +26,6 @@ public class RepresentativeRegionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "INT UNSIGNED")
     @Comment("대표 여행지 ID")
     private Long id;
 

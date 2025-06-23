@@ -34,8 +34,7 @@ public class AuthController {
         description = "이메일과 비밀번호를 입력하여 로그인을 하는 기능입니다."
     )
     @PostMapping("/login")
-    public ResponseEntity<Response<AuthLoginResponse>> login(
-        @RequestBody AuthLoginRequest request) {
+    public ResponseEntity<Response<AuthLoginResponse>> login(@RequestBody AuthLoginRequest request) {
         AuthLoginResponse loginResponse = authUseCase.login(AuthLoginCommand.from(request));
         return ResponseEntity.ok().body(Response.success(loginResponse));
     }
@@ -45,9 +44,8 @@ public class AuthController {
         description = "로그인 한 회원을 로그아웃 하는 기능입니다."
     )
     @PostMapping("/logout")
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
-    public ResponseEntity<Response<Void>> logout(
-        @AuthenticationPrincipal MemberLoginActive loginActive) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<Void>> logout(@AuthenticationPrincipal MemberLoginActive loginActive) {
         authUseCase.logout(loginActive.id());
         return ResponseEntity.ok().body(Response.success());
     }
@@ -58,8 +56,7 @@ public class AuthController {
             + "소셜 제공업체(EX. 카카오, 네이버 등)에 가입된 회원정보를 가져오는 기능입니다."
     )
     @GetMapping("/{provider}/authorize")
-    public ResponseEntity<Response<String>> generateOAuthAuthorizationUrl(
-        @PathVariable OAuthProvider provider) {
+    public ResponseEntity<Response<String>> generateOAuthAuthorizationUrl(@PathVariable OAuthProvider provider) {
         String redirectUrl = authUseCase.generateOAuthAuthorizationUrl(provider);
         return ResponseEntity.ok().body(Response.success(redirectUrl));
     }

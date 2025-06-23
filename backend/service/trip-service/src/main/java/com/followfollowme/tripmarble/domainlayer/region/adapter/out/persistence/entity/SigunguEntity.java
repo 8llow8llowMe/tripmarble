@@ -32,7 +32,6 @@ public class SigunguEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "INT UNSIGNED")
     @Comment("시군구 아이디")
     private Long id;
 
@@ -41,9 +40,9 @@ public class SigunguEntity {
     @Comment("시도 (region) 외래 키")
     private RegionEntity region;
 
-    @Comment("시군구 코드")
-    @Column(length = 30)
-    private String sigunguCode;
+    @Comment("TourAPI 시군구 코드 (자연키)")
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
+    private Integer sigunguCode;
 
     @Comment("시군구명")
     @Column(nullable = false, length = 30)
