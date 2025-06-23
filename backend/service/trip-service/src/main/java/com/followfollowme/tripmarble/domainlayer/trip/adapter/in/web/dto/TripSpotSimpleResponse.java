@@ -6,7 +6,7 @@ import lombok.Builder;
 public record TripSpotSimpleResponse(
     long tripSpotId,
     int contentId,
-    String title,
-    String thumbnailImage
+    String tripSpotName,
+    String thumbnailImageUrl
 ) {
 }
