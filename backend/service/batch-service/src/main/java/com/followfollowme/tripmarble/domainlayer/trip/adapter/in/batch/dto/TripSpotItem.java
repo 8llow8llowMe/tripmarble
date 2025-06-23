@@ -2,7 +2,7 @@ package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.batch.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record TourSpotItem(
+public record TripSpotItem(
     String addr1,
     String addr2,
 
