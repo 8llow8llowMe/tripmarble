@@ -11,6 +11,7 @@ import SpotsPage from "@/app/[category]/(spots)/SpotsPage";
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import LoginPage from "@/app/[category]/(user)/page";
 =======
 >>>>>>> ad9ee0b ([FE/web] feat: 여행지 목록 페이지 제작)
@@ -28,6 +29,8 @@ import ProfilePage from "@/app/[category]/(user)/(profile)/ProfilePage";
 >>>>>>> 0f97f65 ([FE/web] feat: profile 페이지 퍼블리싱)
 =======
 >>>>>>> 0a64ea1 ([FE/web] feat: 여행지 목록 페이지 제작)
+=======
+>>>>>>> 262b174 ([FE/web] feat: 로그인 화면 퍼블리싱)
 import LoginPage from "@/app/[category]/(user)/(login)/LoginPage";
 import ProfilePage from "@/app/[category]/(user)/(profile)/ProfilePage";
 =======
@@ -67,7 +70,18 @@ import LoginPage from "@/app/[category]/(user)/page";
 =======
 >>>>>>> ad9ee0b ([FE/web] feat: 여행지 목록 페이지 제작)
 >>>>>>> 6ab323b ([FE/web] feat: 여행지 목록 페이지 제작)
+<<<<<<< HEAD
 >>>>>>> 0a64ea1 ([FE/web] feat: 여행지 목록 페이지 제작)
+=======
+=======
+import LoginPage from "@/app/[category]/(user)/page";
+=======
+>>>>>>> ad9ee0b ([FE/web] feat: 여행지 목록 페이지 제작)
+=======
+import LoginPage from "@/app/[category]/(user)/page";
+>>>>>>> 93359cc ([FE/web] feat: 로그인 화면 퍼블리싱)
+>>>>>>> 4efa8eb ([FE/web] feat: 로그인 화면 퍼블리싱)
+>>>>>>> 262b174 ([FE/web] feat: 로그인 화면 퍼블리싱)
 
 const categoryComponentMap: Record<string, React.ComponentType> = {
   search: SearchPage,
@@ -78,6 +92,7 @@ const categoryComponentMap: Record<string, React.ComponentType> = {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   login: LoginPage,
 <<<<<<< HEAD
 =======
@@ -93,6 +108,8 @@ const categoryComponentMap: Record<string, React.ComponentType> = {
 >>>>>>> a23b2b7 ([FE/web] feat: 로그인 화면 퍼블리싱)
 =======
 >>>>>>> 0a64ea1 ([FE/web] feat: 여행지 목록 페이지 제작)
+=======
+>>>>>>> 262b174 ([FE/web] feat: 로그인 화면 퍼블리싱)
   login: LoginPage,
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -129,7 +146,18 @@ const categoryComponentMap: Record<string, React.ComponentType> = {
 =======
 >>>>>>> ad9ee0b ([FE/web] feat: 여행지 목록 페이지 제작)
 >>>>>>> 6ab323b ([FE/web] feat: 여행지 목록 페이지 제작)
+<<<<<<< HEAD
 >>>>>>> 0a64ea1 ([FE/web] feat: 여행지 목록 페이지 제작)
+=======
+=======
+  login: LoginPage,
+=======
+>>>>>>> ad9ee0b ([FE/web] feat: 여행지 목록 페이지 제작)
+=======
+  login: LoginPage,
+>>>>>>> 93359cc ([FE/web] feat: 로그인 화면 퍼블리싱)
+>>>>>>> 4efa8eb ([FE/web] feat: 로그인 화면 퍼블리싱)
+>>>>>>> 262b174 ([FE/web] feat: 로그인 화면 퍼블리싱)
 };
 
 export default function CategoryPage() {
