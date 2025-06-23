@@ -30,7 +30,10 @@ public record TourSpotItem(
     @JsonProperty("cpyrhtDivCd")
     String cpyrhtDivCd,
 
+    @JsonProperty("mapx")
     String mapX,
+
+    @JsonProperty("mapy")
     String mapY,
 
     @JsonProperty("mlevel")
