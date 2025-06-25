@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.followfollowme.tripmarble.global.util.ParsingUtils.extractPhone;
 import static com.followfollowme.tripmarble.global.util.ParsingUtils.toDouble;
 import static com.followfollowme.tripmarble.global.util.ParsingUtils.toInteger;
 import static com.followfollowme.tripmarble.global.util.ParsingUtils.toLocalDateTime;
@@ -45,7 +46,7 @@ public class TripSpotJdbcAdapter implements TripSpotJdbcPort {
                 ps.setInt(1, toInteger(item.contentTypeId()));
                 ps.setInt(2, toInteger(item.contentId()));
                 ps.setString(3, item.title());
-                ps.setString(4, item.tel());
+                ps.setString(4, extractPhone(item.tel()));
                 ps.setString(5, item.zipCode());
                 ps.setString(6, item.addr1());
                 ps.setString(7, item.addr2());
