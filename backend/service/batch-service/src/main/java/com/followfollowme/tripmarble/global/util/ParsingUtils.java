@@ -2,11 +2,17 @@ package com.followfollowme.tripmarble.global.util;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class ParsingUtils {
 
     private static final DateTimeFormatter DEFAULT_DATE_TIME_FORMATTER =
         DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
+    private static final Pattern PHONE_PATTERN = Pattern.compile("(\\d{2,4}-\\d{3,4}-\\d{4})");
 
     private ParsingUtils() {
     }
@@ -58,5 +64,15 @@ public final class ParsingUtils {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static String extractPhone(String rawTel) {
+        if (rawTel == null) return null;
+        Matcher matcher = PHONE_PATTERN.matcher(rawTel);
+        List<String> phones = new ArrayList<>();
+        while (matcher.find()) {
+            phones.add(matcher.group(1));
+        }
+        return phones.isEmpty() ? null : String.join(", ", phones);
     }
 }
