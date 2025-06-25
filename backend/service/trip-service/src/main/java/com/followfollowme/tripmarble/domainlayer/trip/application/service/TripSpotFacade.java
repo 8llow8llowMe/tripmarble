@@ -39,12 +39,12 @@ public class TripSpotFacade implements TripSpotWebUseCase, TripSpotInternalUseCa
 
         // 2. 시군구 코드 조회 (도메인 -> 시군구 코드 변환)
         List<Sigungu> sigungus = sigunguRepositoryPort.findAllByIdIn(sigunguIds);
-        List<Integer> sigunguCodes = sigungus.stream()
+        List<Integer> ldongSigunguCodes = sigungus.stream()
             .map(Sigungu::sigunguCode)
             .toList();
 
         // 3. 시군구 코드로 여행지 정보 목록 조회
-        List<TripSpot> tripSpots = tripSpotRepositoryPort.findAllBySigunguCodeIn(sigunguCodes);
+        List<TripSpot> tripSpots = tripSpotRepositoryPort.findAllByLdongSignguCdIn(ldongSigunguCodes);
         return tripSpotMapper.toSimpleResponseListFromDomainList(tripSpots);
     }
 
