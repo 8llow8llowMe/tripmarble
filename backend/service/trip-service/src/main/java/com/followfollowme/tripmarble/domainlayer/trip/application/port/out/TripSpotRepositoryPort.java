@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface TripSpotRepositoryPort {
 
-    List<TripSpot> findAllBySigunguCodeIn(List<Integer> sigunguCodes);
+    List<TripSpot> findAllByLdongSignguCdIn(List<Integer> ldongSignguCodes);
 
     Optional<TripSpot> findById(long tripSpotId);
 }
