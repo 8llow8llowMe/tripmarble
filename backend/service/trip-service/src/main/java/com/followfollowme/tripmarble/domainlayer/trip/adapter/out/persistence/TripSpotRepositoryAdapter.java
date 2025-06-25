@@ -19,8 +19,8 @@ public class TripSpotRepositoryAdapter implements TripSpotRepositoryPort {
     private final TripSpotMapper tripSpotMapper;
 
     @Override
-    public List<TripSpot> findAllBySigunguCodeIn(List<Integer> sigunguCodes) {
-        List<TripSpotEntity> entities = tripSpotRepository.findAllBySigunguCodeIn(sigunguCodes);
+    public List<TripSpot> findAllByLdongSignguCdIn(List<Integer> ldongSignguCodes) {
+        List<TripSpotEntity> entities = tripSpotRepository.findAllByLdongSignguCdIn(ldongSignguCodes);
         return tripSpotMapper.toDomainListFromEntityList(entities);
     }
 
