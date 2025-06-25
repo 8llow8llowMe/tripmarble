@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface TripSpotRepository extends JpaRepository<TripSpotEntity, Long> {
 
-    List<TripSpotEntity> findAllBySigunguCodeIn(List<Integer> sigunguCodes);
+    List<TripSpotEntity> findAllByLdongSignguCdIn(List<Integer> ldongSignguCodes);
 }
