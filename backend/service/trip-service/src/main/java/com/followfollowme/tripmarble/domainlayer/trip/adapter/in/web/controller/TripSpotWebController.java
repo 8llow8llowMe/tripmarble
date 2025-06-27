@@ -4,17 +4,16 @@ import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotSimpleResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotWithDetailViewResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripSpotWebUseCase;
+import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,15 +24,17 @@ public class TripSpotWebController {
     private final TripSpotWebUseCase tripSpotWebUseCase;
 
     @Operation(
-        summary = "대표 여행지에 따른 여행지 목록 조회",
-        description = "해당 대표 여행지에 속한 여행지 목록을 조회하는 기능입니다."
+        summary = "대표 여행지에 따른 여행지 목록 조회 (무한 스크롤 방식)",
+        description = "해당 대표 여행지에 속한 여행지 목록을 No-Offset 방식으로 조회하는 기능입니다."
     )
     @GetMapping("/by-representative-region/{representativeRegionId}")
-    public ResponseEntity<Response<List<TripSpotSimpleResponse>>> getTripSpotsByRepresentativeRegionId(
-        @PathVariable long representativeRegionId) {
-        List<TripSpotSimpleResponse> tripSpotSimpleResponses =
-            tripSpotWebUseCase.getTripSpotsByRepresentativeRegionId(representativeRegionId);
-        return ResponseEntity.ok().body(Response.success(tripSpotSimpleResponses));
+    public ResponseEntity<Response<SliceResponse<TripSpotSimpleResponse>>> getTripSpotsByRepresentativeRegionId(
+        @PathVariable long representativeRegionId, @RequestParam(defaultValue = "0") long lastTripSpotId,
+        @RequestParam(defaultValue = "10") int size) {
+
+        SliceResponse<TripSpotSimpleResponse> result = tripSpotWebUseCase.getTripSpotsByRepresentativeRegionId(
+            representativeRegionId, lastTripSpotId, size);
+        return ResponseEntity.ok(Response.success(result));
     }
 
     @Operation(
@@ -43,6 +44,7 @@ public class TripSpotWebController {
     @GetMapping("/{tripSpotId}")
     public ResponseEntity<Response<TripSpotWithDetailViewResponse>> getTripSpotWithDetail(
         @PathVariable long tripSpotId) {
+
         TripSpotWithDetailViewResponse response = tripSpotWebUseCase.getTripSpotWithDetail(tripSpotId);
         return ResponseEntity.ok().body(Response.success(response));
     }
