@@ -13,11 +13,12 @@ import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripS
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpotDetail;
+import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,20 +33,24 @@ public class TripSpotFacade implements TripSpotWebUseCase, TripSpotInternalUseCa
 
     @Override
     @Transactional(readOnly = true)
-    public List<TripSpotSimpleResponse> getTripSpotsByRepresentativeRegionId(long representativeRegionId) {
-        // 1. 매핑된 시군구 ID 조회
+    public SliceResponse<TripSpotSimpleResponse> getTripSpotsByRepresentativeRegionId(long representativeRegionId,
+        long lastTripSpotId, int size) {
+        // 1. 대표지역 -> 시군구 코드 목록
         List<Long> sigunguIds =
-            representativeRegionSigunguMappingRepositoryPort.findSigunguIdsByRepresentativeRegionId(representativeRegionId);
-
-        // 2. 시군구 코드 조회 (도메인 -> 시군구 코드 변환)
-        List<Sigungu> sigungus = sigunguRepositoryPort.findAllByIdIn(sigunguIds);
-        List<Integer> ldongSigunguCodes = sigungus.stream()
+            representativeRegionSigunguMappingRepositoryPort.findSigunguIdsByRepresentativeRegionId(
+                representativeRegionId);
+        List<Integer> sigunguCodes = sigunguRepositoryPort.findAllByIdIn(sigunguIds).stream()
             .map(Sigungu::sigunguCode)
             .toList();
 
-        // 3. 시군구 코드로 여행지 정보 목록 조회
-        List<TripSpot> tripSpots = tripSpotRepositoryPort.findAllByLdongSignguCdIn(ldongSigunguCodes);
-        return tripSpotMapper.toSimpleResponseListFromDomainList(tripSpots);
+        // 2. 시군구 코드 기반 여행지 Slice 조회 (No-Offset 방식 - 무한 스크롤)
+        Slice<TripSpot> tripSpots = tripSpotRepositoryPort.findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(
+            sigunguCodes, lastTripSpotId, size);
+
+        // 3. 도메인 -> Response 매핑
+        Slice<TripSpotSimpleResponse> responseSlice = tripSpots.map(tripSpotMapper::toSimpleResponseFromDomain);
+
+        return SliceResponse.of(responseSlice);
     }
 
     @Override
@@ -57,7 +62,8 @@ public class TripSpotFacade implements TripSpotWebUseCase, TripSpotInternalUseCa
 
         // 2. 해당 여행지 정보의 contentTypeId로 관광 티입 정보 조회 (자연키)
         String contentTypeName = tripContentTypeRepositoryPort.findNameByContentTypeId(tripSpot.contentTypeId())
-            .orElseThrow(() -> new IllegalArgumentException("해당 여행지 콘텐츠 타입 (관광 타입)을 찾을 수 없습니다: " + tripSpot.contentTypeId()));
+            .orElseThrow(
+                () -> new IllegalArgumentException("해당 여행지 콘텐츠 타입 (관광 타입)을 찾을 수 없습니다: " + tripSpot.contentTypeId()));
 
         // 3. 해당 여행지 정보의 contentId로 여행지 상세 정보 조회 (자연키)
         TripSpotDetail tripSpotDetail = tripSpotDetailRepositoryPort.findByContentId(tripSpot.contentId())
