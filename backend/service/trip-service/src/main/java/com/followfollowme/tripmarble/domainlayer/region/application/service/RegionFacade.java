@@ -32,6 +32,7 @@ public class RegionFacade implements RegionWebUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<SigunguResponse> getSigungusByRegionId(long regionId) {
         List<Sigungu> sigungus = sigunguRepositoryPort.findAllByRegionId(regionId);
         return sigunguMapper.toResponseListFromDomainList(sigungus);
