@@ -26,34 +26,37 @@ import java.util.stream.IntStream;
 public class TripSpotTasklet implements Tasklet {
 
     private static final int MAX_ATTEMPTS = 3;
+    private static final int PAGE_SIZE = 100;
+    private static final ParameterizedTypeReference<TourApiRoot<TripSpotItem>> RESPONSE_TYPE =
+        new ParameterizedTypeReference<>() {
+        };
     private final DynamicTourApiClient dynamicTourApiClient;
     private final TripSpotBatchUseCase tripSpotBatchUseCase;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        log.info("[Batch] 지역기반 관광정보 조회 Tasklet 실행 시작");
+        log.info("[Batch] 지역기반 관광정보 조회 (trip_spot) Tasklet 실행 시작");
 
+        // 1. Job 파라미터에서 정렬, 여행 콘텐츠 타입 추출
         var jobParameters = chunkContext.getStepContext().getStepExecution().getJobParameters();
         String arrange = jobParameters.getString("arrange"); // 예: A (제목순)
         String contentTypeId = jobParameters.getString("contentTypeId"); // 예: 12 (관광지)
 
-        // 공통 파라미터
+        // 2. 공통 query 파라미터 준비
         Map<String, String> baseParams = new HashMap<>();
         if (arrange != null) baseParams.put("arrange", arrange);
         if (contentTypeId != null) baseParams.put("contentTypeId", contentTypeId);
 
-        // 1. 첫 페이지에서 총 건수, 페이지 수 조회 (default pageNo = 1)
-        ParameterizedTypeReference<TourApiRoot<TripSpotItem>> responseType = new ParameterizedTypeReference<>() {
-        };
-        TourApiRoot<TripSpotItem> first = dynamicTourApiClient.fetch(TourApi.REGION_BASED_TRIP_SPOT_LIST, baseParams, responseType);
+        // 3. 첫 페이지에서 총 건수, 페이지 수 조회 (default pageNo = 1) 및 totalCount, totalPages 계산
+        TourApiRoot<TripSpotItem> first = dynamicTourApiClient.fetch(TourApi.REGION_BASED_TRIP_SPOT_LIST, baseParams, RESPONSE_TYPE);
         int totalCount = first.response().body().totalCount();
         int totalPages = (int) Math.ceil(totalCount / 100.0);
         log.info("[Batch] 전체 건수={}, 총 페이지={}", totalCount, totalPages);
 
-        // 2) 가상스레드 풀 + IntStream 으로 병렬 처리
+        // 4. 가상스레드 풀 + IntStream 으로 병렬 처리
         try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
             var futures = IntStream.rangeClosed(1, totalPages)
-                .mapToObj(page -> executor.submit(() -> fetchAndSavePage(page, baseParams, responseType)))
+                .mapToObj(page -> executor.submit(() -> fetchAndSavePage(page, baseParams)))
                 .toList();
 
             for (var f : futures) {
@@ -61,20 +64,18 @@ public class TripSpotTasklet implements Tasklet {
                     f.get();
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
-                    log.warn("[Batch] 스레드 인터럽트 발생", ie);
+                    log.warn("[Batch] 가상스레드 인터럽트 발생", ie);
                 } catch (ExecutionException ee) {
                     log.error("[Batch] 페이지 처리 실패", ee.getCause());
                 }
             }
         }
 
-        log.info("[Batch] 모든 페이지 병렬 처리 완료");
+        log.info("[Batch] TripSpotTasklet 모든 페이지 병렬 처리 완료");
         return RepeatStatus.FINISHED;
     }
 
-    private void fetchAndSavePage(int pageNo,
-                                  Map<String, String> baseParams,
-                                  ParameterizedTypeReference<TourApiRoot<TripSpotItem>> responseType) {
+    private void fetchAndSavePage(int pageNo, Map<String, String> baseParams) {
 
         // 매 호출마다 새로운 파라미터 맵
         var params = new HashMap<>(baseParams);
@@ -85,11 +86,7 @@ public class TripSpotTasklet implements Tasklet {
                 // 페이지당 지연 주기 (API 과부하 완화)
                 Thread.sleep(pageNo * 50L);
 
-                var root = dynamicTourApiClient.fetch(
-                    TourApi.REGION_BASED_TRIP_SPOT_LIST,
-                    params,
-                    responseType
-                );
+                var root = dynamicTourApiClient.fetch(TourApi.REGION_BASED_TRIP_SPOT_LIST, params, RESPONSE_TYPE);
                 var items = root.response().body().items().item();
 
                 if (items != null && !items.isEmpty()) {
