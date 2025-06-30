@@ -11,4 +11,9 @@ public class MemberException extends RuntimeException {
         super(errorCode.getErrorMessage());
         this.errorCode = errorCode;
     }
+
+    public MemberException(MemberErrorCode errorCode, Object... args) {
+        super(String.format(errorCode.getErrorMessage(), args));
+        this.errorCode = errorCode;
+    }
 }
