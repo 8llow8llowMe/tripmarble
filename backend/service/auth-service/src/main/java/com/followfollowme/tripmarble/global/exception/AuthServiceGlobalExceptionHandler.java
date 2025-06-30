@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class AuthServiceGlobalExceptionHandler {
 
     @ExceptionHandler(MemberException.class)
     public ResponseEntity<Response<Void>> memberException(MemberException e) {
