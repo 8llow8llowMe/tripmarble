@@ -7,4 +7,6 @@ import java.util.List;
 public interface TripSpotJdbcPort {
 
     void batchInsertTripSpots(List<TripSpotItem> tripSpotItems);
+
+    List<Integer> findAllContentIds();
 }
