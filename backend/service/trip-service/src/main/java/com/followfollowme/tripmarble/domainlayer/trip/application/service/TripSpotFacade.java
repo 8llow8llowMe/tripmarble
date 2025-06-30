@@ -65,8 +65,7 @@ public class TripSpotFacade implements TripSpotWebUseCase, TripSpotInternalUseCa
 
         // 2. 해당 여행지 정보의 contentTypeId로 관광 티입 정보 조회 (자연키)
         String contentTypeName = tripContentTypeRepositoryPort.findNameByContentTypeId(tripSpot.contentTypeId())
-            .orElseThrow(
-                () -> new TripException(TripErrorCode.TRIP_CONTENT_TYPE_NOT_FOUND));
+            .orElseThrow(() -> new TripException(TripErrorCode.TRIP_CONTENT_TYPE_NOT_FOUND));
 
         // 3. 해당 여행지 정보의 contentId로 여행지 상세 정보 조회 (자연키)
         TripSpotDetail tripSpotDetail = tripSpotDetailRepositoryPort.findByContentId(tripSpot.contentId())
