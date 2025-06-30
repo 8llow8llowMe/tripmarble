@@ -79,4 +79,12 @@ public class TripSpotJdbcAdapter implements TripSpotJdbcPort {
         int successCount = (int) Arrays.stream(results).filter(r -> r > 0).count();
         log.info("[Batch] TripSpot 저장 완료 - 요청: {}, 성공: {}", results.length, successCount);
     }
+
+    @Override
+    public List<Integer> findAllContentIds() {
+        return jdbcTemplate.query(
+            "SELECT content_id FROM trip_spot",
+            (rs, rowNum) -> rs.getInt("content_id")
+        );
+    }
 }
