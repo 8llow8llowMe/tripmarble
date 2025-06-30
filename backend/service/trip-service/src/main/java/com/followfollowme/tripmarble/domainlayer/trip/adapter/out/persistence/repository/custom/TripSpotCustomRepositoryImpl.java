@@ -3,12 +3,13 @@ package com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.r
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.QTripSpotEntity;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.TripSpotEntity;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -17,15 +18,17 @@ public class TripSpotCustomRepositoryImpl implements TripSpotCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Slice<TripSpotEntity> findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(List<Integer> ldongSignguCodes,
-        long lastTripSpotId, int size) {
+    public Slice<TripSpotEntity> findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(List<Integer> ldongSignguCodes, long lastTripSpotId, int size) {
 
         QTripSpotEntity t = QTripSpotEntity.tripSpotEntity;
 
         // limit + 1로 가져와서 hasNext 판단
         List<TripSpotEntity> results = queryFactory
             .selectFrom(t)
-            .where(t.ldongSignguCd.in(ldongSignguCodes))
+            .where(
+                t.ldongSignguCd.in(ldongSignguCodes),
+                lastTripSpotId > 0 ? t.id.lt(lastTripSpotId) : null
+            )
             .orderBy(t.id.desc())
             .limit(size + 1)
             .fetch();
