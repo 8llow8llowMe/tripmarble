@@ -32,7 +32,7 @@ public class MemberFacade implements MemberWebUseCase, MemberInternalUseCase {
     @Override
     public void signup(MemberSignupCommand command) {
         if (memberRepositoryPort.existByEmail(command.email())) {
-            throw new MemberException(MemberErrorCode.EXIST_MEMBER_EMAIL);
+            throw new MemberException(MemberErrorCode.EXIST_MEMBER_EMAIL, command.email());
         }
 
         Member member = Member.builder()
