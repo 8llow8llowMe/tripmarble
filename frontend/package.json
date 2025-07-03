@@ -2,7 +2,10 @@
   "name": "tripmarble",
   "private": true,
   "workspaces": {
-    "packages": ["web", "mobile"],
+    "packages": [
+      "web",
+      "mobile"
+    ],
     "nohoist": [
       "**/react",
       "**/react-dom",
