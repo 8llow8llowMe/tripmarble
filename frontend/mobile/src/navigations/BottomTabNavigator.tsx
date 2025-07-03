@@ -1,11 +1,11 @@
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 
-import HomeScreen from "../screens/Home/HomeScreen";
-import ExploreScreen from "../screens/Explore/ExploreScreen";
-import PlayScreen from "../screens/Play/PlayScreen";
-import MomentsScreen from "../screens/Moments/MomentsScreen";
-import ProfileScreen from "../screens/Profile/ProfileScreen";
+import HomeScreen from '../screens/Home/HomeScreen';
+import ExploreScreen from '../screens/Explore/ExploreScreen';
+import PlayScreen from '../screens/Play/PlayScreen';
+import MomentsScreen from '../screens/Moments/MomentsScreen';
+import ProfileScreen from '../screens/Profile/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -14,32 +14,30 @@ export default function BottomTabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName = "";
+          let iconName = '';
 
           switch (route.name) {
-            case "Home":
-              iconName = focused ? "home" : "home-outline";
+            case 'Home':
+              iconName = focused ? 'home' : 'home-outline';
               break;
-            case "Explore":
-              iconName = focused ? "search" : "search-outline";
+            case 'Explore':
+              iconName = focused ? 'search' : 'search-outline';
               break;
-            case "Play":
-              iconName = focused
-                ? "game-controller"
-                : "game-controller-outline";
+            case 'Play':
+              iconName = focused ? 'game-controller' : 'game-controller-outline';
               break;
-            case "Moments":
-              iconName = focused ? "book" : "book-outline";
+            case 'Moments':
+              iconName = focused ? 'book' : 'book-outline';
               break;
-            case "Profile":
-              iconName = focused ? "person" : "person-outline";
+            case 'Profile':
+              iconName = focused ? 'person' : 'person-outline';
               break;
           }
 
           return <Ionicons name={iconName as any} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "#36bffa",
-        tabBarInactiveTintColor: "gray",
+        tabBarActiveTintColor: '#36bffa',
+        tabBarInactiveTintColor: 'gray',
         headerShown: false,
       })}
     >
