@@ -1,0 +1,27 @@
+services:
+  auth-service-dev:
+    container_name: auth-service-dev
+    build:
+      context: .
+    ports:
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
+    environment:
+      - ${AUTH_SERVICE_PORT}=${AUTH_SERVICE_PORT}
+    networks:
+      - 8llow8llowme-net
+
+  auth-service-prod:
+    container_name: auth-service-prod
+    build:
+      context: .
+    ports:
+      - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
+    environment:
+      - ${AUTH_SERVICE_PORT}=${AUTH_SERVICE_PORT}
+    networks:
+      - 8llow8llowme-net
+
+networks:
+  8llow8llowme-net:
+    name: 8llow8llowme-net
+    driver: bridge
