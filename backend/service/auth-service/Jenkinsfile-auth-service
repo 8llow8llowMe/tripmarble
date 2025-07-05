@@ -7,18 +7,17 @@ pipeline {
         DOCKERFILE      = 'auth-service.Dockerfile'
         COMPOSE_FILE    = 'docker-compose-auth-service.yml'
 
-        // Submodule 경로 (백엔드 환경변수)
+        // Submodule 경로 (workspace 상대)
         ENV_SUBMODULE   = 'backend/env'
         DEV_ENV_FILE    = "${ENV_SUBMODULE}/.env-backend-dev"
         PROD_ENV_FILE   = "${ENV_SUBMODULE}/.env-backend-prod"
 
-        // 배포 서버 설정
+        // 원격 배포 설정
         REMOTE_DIR      = 'deploy/tripmarble/backend-app'
         SSH_CONFIG      = 'BackEnd Server SSH'
     }
 
     stages {
-
         stage('Init & Submodule Update') {
             steps {
                 checkout([
@@ -26,7 +25,6 @@ pipeline {
                     branches: scm.branches,
                     userRemoteConfigs: scm.userRemoteConfigs,
                     extensions: [[
-                        // parentCredentials로 private 서브모듈 인증 전달
                         $class: 'SubmoduleOption',
                         recursiveSubmodules: true,
                         parentCredentials: true
@@ -44,77 +42,80 @@ pipeline {
             }
             post {
                 success {
-                    archiveArtifacts artifacts: 'backend/service/auth-service/build/libs/*.jar',
-                    allowEmptyArchive: false
+                    archiveArtifacts artifacts: 'backend/service/auth-service/build/libs/*.jar'
                 }
             }
         }
 
-        /* ---------- DEV 배포 ---------- */
         stage('Deploy to Dev') {
             when { branch 'develop' }
             steps {
                 script {
-                    /* 1) 환경파일만 먼저 전송 (removePrefix 적용) */
-                    sshPublisher publishers: [sshPublisherDesc(
+                    // 1) .env 파일만 먼저 전송 (removePrefix으로 평탄화)
+                    sshPublisher publishers: [ sshPublisherDesc(
                         configName: SSH_CONFIG,
-                        transfers: [sshTransfer(
+                        transfers: [ sshTransfer(
                             sourceFiles: "${DEV_ENV_FILE}",
-                            removePrefix: 'backend/env',   // .env 파일만 root 에 복사
+                            removePrefix: 'backend/env',
                             remoteDirectory: REMOTE_DIR
-                        )]
-                    )]
+                        ) ],
+                        verbose: true
+                    ) ]
 
-                    /* 2) 서비스 파일 전송 + compose 실행 */
-                    sshPublisher publishers: [sshPublisherDesc(
+                    // 2) JAR + Dockerfile + compose 파일 전송 & 배포
+                    sshPublisher publishers: [ sshPublisherDesc(
                         configName: SSH_CONFIG,
-                        transfers: [sshTransfer(
+                        transfers: [ sshTransfer(
                             sourceFiles: """
                                 backend/service/${SERVICE_NAME}/build/libs/*.jar,
                                 backend/service/${SERVICE_NAME}/${DOCKERFILE},
                                 backend/service/${SERVICE_NAME}/${COMPOSE_FILE}
                             """.trim(),
+                            removePrefix: "backend/service/${SERVICE_NAME}",
                             remoteDirectory: REMOTE_DIR,
                             execCommand: """
                                 set -x
                                 cd ~/${REMOTE_DIR}
+                                # env 파일 이동
                                 mkdir -p env
                                 mv .env-backend-dev env/.env-backend-dev
+                                # compose 실행
                                 docker compose -f ${COMPOSE_FILE} \\
-                                   --env-file env/.env-backend-dev \\
-                                   up -d --build ${SERVICE_NAME}-dev
+                                  --env-file env/.env-backend-dev \\
+                                  up -d --build ${SERVICE_NAME}-dev
                             """.stripIndent()
-                        )],
+                        ) ],
                         verbose: true
-                    )]
+                    ) ]
                 }
             }
         }
 
-        /* ---------- PROD 배포 ---------- */
         stage('Deploy to Prod') {
             when { branch 'main' }
             steps {
                 script {
-                    /* 1) prod env 파일만 root 로 전송 */
-                    sshPublisher publishers: [sshPublisherDesc(
+                    // 1) prod .env 파일 전송
+                    sshPublisher publishers: [ sshPublisherDesc(
                         configName: SSH_CONFIG,
-                        transfers: [sshTransfer(
+                        transfers: [ sshTransfer(
                             sourceFiles: "${PROD_ENV_FILE}",
                             removePrefix: 'backend/env',
                             remoteDirectory: REMOTE_DIR
-                        )]
-                    )]
+                        ) ],
+                        verbose: true
+                    ) ]
 
-                    /* 2) 나머지 파일 + compose */
-                    sshPublisher publishers: [sshPublisherDesc(
+                    // 2) JAR + Dockerfile + compose 파일 전송 & 배포
+                    sshPublisher publishers: [ sshPublisherDesc(
                         configName: SSH_CONFIG,
-                        transfers: [sshTransfer(
+                        transfers: [ sshTransfer(
                             sourceFiles: """
                                 backend/service/${SERVICE_NAME}/build/libs/*.jar,
                                 backend/service/${SERVICE_NAME}/${DOCKERFILE},
                                 backend/service/${SERVICE_NAME}/${COMPOSE_FILE}
                             """.trim(),
+                            removePrefix: "backend/service/${SERVICE_NAME}",
                             remoteDirectory: REMOTE_DIR,
                             execCommand: """
                                 set -x
@@ -122,12 +123,12 @@ pipeline {
                                 mkdir -p env
                                 mv .env-backend-prod env/.env-backend-prod
                                 docker compose -f ${COMPOSE_FILE} \\
-                                   --env-file env/.env-backend-prod \\
-                                   up -d --build ${SERVICE_NAME}-prod
+                                  --env-file env/.env-backend-prod \\
+                                  up -d --build ${SERVICE_NAME}-prod
                             """.stripIndent()
-                        )],
+                        ) ],
                         verbose: true
-                    )]
+                    ) ]
                 }
             }
         }
