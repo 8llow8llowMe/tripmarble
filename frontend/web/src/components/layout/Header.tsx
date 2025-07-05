@@ -45,15 +45,11 @@ const Header = () => {
         <Link href="/search">검색</Link>
         <Link href="/spots">여행지 목록</Link>
         <Link href="/game">게임 목록</Link>
-        <Link href="/mypage">마이페이지</Link>
+        <Link href="/profile">마이페이지</Link>
         <Link href="/login">로그인</Link>
       </nav>
 
-      <div
-        className={styles.hamburger}
-        ref={hamburgerRef}
-        onClick={toggleMenu}
-      >
+      <div className={styles.hamburger} ref={hamburgerRef} onClick={toggleMenu}>
         ☰
       </div>
 
@@ -62,7 +58,7 @@ const Header = () => {
           <Link href="/search">검색</Link>
           <Link href="/spots">여행지 목록</Link>
           <Link href="/game">게임 목록</Link>
-          <Link href="/mypage">마이페이지</Link>
+          <Link href="/profile">마이페이지</Link>
           <Link href="/login">로그인</Link>
         </div>
       )}
