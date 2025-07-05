@@ -73,6 +73,7 @@ const Header = () => {
       </nav>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
       <div
         className={`${styles.hamburger} ${scrolled ? styles.scrolled : ""}`}
         ref={hamburgerRef}
@@ -81,6 +82,9 @@ const Header = () => {
 =======
       <div className={styles.hamburger} ref={hamburgerRef} onClick={toggleMenu}>
 >>>>>>> dfeb421 ([FE/web] feat: profile 페이지 퍼블리싱)
+=======
+      <div className={styles.hamburger} ref={hamburgerRef} onClick={toggleMenu}>
+>>>>>>> 6556e65 ([FE/web] feat: profile 페이지 퍼블리싱)
         ☰
       </div>
 
