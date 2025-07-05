@@ -1,5 +1,5 @@
 server:
-  port: ${SERVER_PORT}
+  port: ${AUTH_SERVICE_INTERNAL_PORT}
   shutdown: graceful
 
 spring:
