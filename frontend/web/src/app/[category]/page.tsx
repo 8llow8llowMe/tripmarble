@@ -9,6 +9,7 @@ import SpotsPage from "@/app/[category]/(spots)/SpotsPage";
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import LoginPage from "@/app/[category]/(user)/page";
 =======
 >>>>>>> ad9ee0b ([FE/web] feat: 여행지 목록 페이지 제작)
@@ -22,11 +23,15 @@ import ProfilePage from "@/app/[category]/(user)/(profile)/ProfilePage";
 =======
 =======
 >>>>>>> a23b2b7 ([FE/web] feat: 로그인 화면 퍼블리싱)
+=======
+>>>>>>> 0f97f65 ([FE/web] feat: profile 페이지 퍼블리싱)
 import LoginPage from "@/app/[category]/(user)/(login)/LoginPage";
 import ProfilePage from "@/app/[category]/(user)/(profile)/ProfilePage";
 =======
 =======
 >>>>>>> 940d655 ([FE/web] feat: 로그인 화면 퍼블리싱)
+=======
+>>>>>>> dfeb421 ([FE/web] feat: profile 페이지 퍼블리싱)
 <<<<<<< HEAD
 import LoginPage from "@/app/[category]/(user)/page";
 =======
@@ -40,8 +45,18 @@ import LoginPage from "@/app/[category]/(user)/page";
 =======
 import LoginPage from "@/app/[category]/(user)/page";
 >>>>>>> 93359cc ([FE/web] feat: 로그인 화면 퍼블리싱)
+<<<<<<< HEAD
 >>>>>>> 940d655 ([FE/web] feat: 로그인 화면 퍼블리싱)
+<<<<<<< HEAD
 >>>>>>> a23b2b7 ([FE/web] feat: 로그인 화면 퍼블리싱)
+=======
+=======
+=======
+import LoginPage from "@/app/[category]/(user)/(login)/LoginPage";
+import ProfilePage from "@/app/[category]/(user)/(profile)/ProfilePage";
+>>>>>>> a679a8f ([FE/web] feat: profile 페이지 퍼블리싱)
+>>>>>>> dfeb421 ([FE/web] feat: profile 페이지 퍼블리싱)
+>>>>>>> 0f97f65 ([FE/web] feat: profile 페이지 퍼블리싱)
 
 const categoryComponentMap: Record<string, React.ComponentType> = {
   search: SearchPage,
@@ -66,8 +81,11 @@ const categoryComponentMap: Record<string, React.ComponentType> = {
 >>>>>>> a23b2b7 ([FE/web] feat: 로그인 화면 퍼블리싱)
   login: LoginPage,
 <<<<<<< HEAD
+<<<<<<< HEAD
   profile: ProfilePage,
 =======
+=======
+>>>>>>> dfeb421 ([FE/web] feat: profile 페이지 퍼블리싱)
 =======
 >>>>>>> ad9ee0b ([FE/web] feat: 여행지 목록 페이지 제작)
 <<<<<<< HEAD
@@ -79,8 +97,17 @@ const categoryComponentMap: Record<string, React.ComponentType> = {
 =======
   login: LoginPage,
 >>>>>>> 93359cc ([FE/web] feat: 로그인 화면 퍼블리싱)
+<<<<<<< HEAD
 >>>>>>> 940d655 ([FE/web] feat: 로그인 화면 퍼블리싱)
+<<<<<<< HEAD
 >>>>>>> a23b2b7 ([FE/web] feat: 로그인 화면 퍼블리싱)
+=======
+=======
+=======
+  profile: ProfilePage,
+>>>>>>> a679a8f ([FE/web] feat: profile 페이지 퍼블리싱)
+>>>>>>> dfeb421 ([FE/web] feat: profile 페이지 퍼블리싱)
+>>>>>>> 0f97f65 ([FE/web] feat: profile 페이지 퍼블리싱)
 };
 
 export default function CategoryPage() {
