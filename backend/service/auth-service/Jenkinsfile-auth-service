@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     environment {
-        // 서비스 명 및 파일 이름
+        // 서비스명 및 파일 이름
         SERVICE_NAME    = 'auth-service'
         DOCKERFILE      = 'auth-service.Dockerfile'
         COMPOSE_FILE    = 'docker-compose-auth-service.yml'
 
-        // Submodule 경로 (워크스페이스 상대)
+        // Submodule 경로 (백엔드 환경변수)
         ENV_SUBMODULE   = 'backend/env'
         DEV_ENV_FILE    = "${ENV_SUBMODULE}/.env-backend-dev"
         PROD_ENV_FILE   = "${ENV_SUBMODULE}/.env-backend-prod"
@@ -18,19 +18,19 @@ pipeline {
     }
 
     stages {
+
         stage('Init & Submodule Update') {
             steps {
                 checkout([
                     $class: 'GitSCM',
                     branches: scm.branches,
                     userRemoteConfigs: scm.userRemoteConfigs,
-                    extensions: [
+                    extensions: [[
                         // parentCredentials로 private 서브모듈 인증 전달
-                        [$class: 'SubmoduleOption',
-                         recursiveSubmodules: true,
-                         parentCredentials: true,
-                         trackingSubmodules: false]
-                    ]
+                        $class: 'SubmoduleOption',
+                        recursiveSubmodules: true,
+                        parentCredentials: true
+                    ]]
                 ])
             }
         }
@@ -45,108 +45,95 @@ pipeline {
             post {
                 success {
                     archiveArtifacts artifacts: 'backend/service/auth-service/build/libs/*.jar',
-                                     allowEmptyArchive: false
+                    allowEmptyArchive: false
                 }
             }
         }
 
+        /* ---------- DEV 배포 ---------- */
         stage('Deploy to Dev') {
             when { branch 'develop' }
             steps {
                 script {
-                    // 로컬 파일 존재 여부 확인
-                    echo "=== LOCAL .env-backend-dev path ==="
-                    echo "DEV_ENV_FILE = ${DEV_ENV_FILE}"
-                    sh "ls -la ${ENV_SUBMODULE} || true"
+                    /* 1) 환경파일만 먼저 전송 (removePrefix 적용) */
+                    sshPublisher publishers: [sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [sshTransfer(
+                            sourceFiles: "${DEV_ENV_FILE}",
+                            removePrefix: 'backend/env',   // .env 파일만 root 에 복사
+                            remoteDirectory: REMOTE_DIR
+                        )]
+                    )]
 
-                    sshPublisher publishers: [
-                        sshPublisherDesc(
-                            configName: SSH_CONFIG,
-                            transfers: [
-                                sshTransfer(
-                                    // removePrefix를 쓰면 backend/env/를 제거하고 복사
-                                    sourceFiles: """
-                                        backend/service/${SERVICE_NAME}/build/libs/*.jar,
-                                        backend/service/${SERVICE_NAME}/${DOCKERFILE},
-                                        backend/service/${SERVICE_NAME}/${COMPOSE_FILE},
-                                        ${DEV_ENV_FILE}
-                                    """.trim(),
-                                    removePrefix: 'backend/env',
-                                    remoteDirectory: REMOTE_DIR,
-                                    execCommand: """
-                                        set -x
-                                        cd ~/${REMOTE_DIR}
-                                        echo '=== REMOTE BEFORE MV ==='
-                                        ls -la .
-                                        mkdir -p env
-                                        echo 'mv .env-backend-dev → env/.env-backend-dev'
-                                        mv .env-backend-dev env/.env-backend-dev
-                                        echo '=== REMOTE AFTER MV ==='
-                                        ls -la env
-                                        echo '=== START DOCKER COMPOSE ==='
-                                        docker compose -f ${COMPOSE_FILE} \\
-                                          --env-file env/.env-backend-dev \\
-                                          up -d --build ${SERVICE_NAME}-dev
-                                    """.stripIndent()
-                                )
-                            ],
-                            verbose: true
-                        )
-                    ]
+                    /* 2) 서비스 파일 전송 + compose 실행 */
+                    sshPublisher publishers: [sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [sshTransfer(
+                            sourceFiles: """
+                                backend/service/${SERVICE_NAME}/build/libs/*.jar,
+                                backend/service/${SERVICE_NAME}/${DOCKERFILE},
+                                backend/service/${SERVICE_NAME}/${COMPOSE_FILE}
+                            """.trim(),
+                            remoteDirectory: REMOTE_DIR,
+                            execCommand: """
+                                set -x
+                                cd ~/${REMOTE_DIR}
+                                mkdir -p env
+                                mv .env-backend-dev env/.env-backend-dev
+                                docker compose -f ${COMPOSE_FILE} \\
+                                   --env-file env/.env-backend-dev \\
+                                   up -d --build ${SERVICE_NAME}-dev
+                            """.stripIndent()
+                        )],
+                        verbose: true
+                    )]
                 }
             }
         }
 
+        /* ---------- PROD 배포 ---------- */
         stage('Deploy to Prod') {
             when { branch 'main' }
             steps {
                 script {
-                    // 로컬 파일 존재 여부 확인
-                    echo "=== LOCAL .env-backend-prod path ==="
-                    echo "PROD_ENV_FILE = ${PROD_ENV_FILE}"
-                    sh "ls -la ${ENV_SUBMODULE} || true"
+                    /* 1) prod env 파일만 root 로 전송 */
+                    sshPublisher publishers: [sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [sshTransfer(
+                            sourceFiles: "${PROD_ENV_FILE}",
+                            removePrefix: 'backend/env',
+                            remoteDirectory: REMOTE_DIR
+                        )]
+                    )]
 
-                    sshPublisher publishers: [
-                        sshPublisherDesc(
-                            configName: SSH_CONFIG,
-                            transfers: [
-                                sshTransfer(
-                                    sourceFiles: """
-                                        backend/service/${SERVICE_NAME}/build/libs/*.jar,
-                                        backend/service/${SERVICE_NAME}/${DOCKERFILE},
-                                        backend/service/${SERVICE_NAME}/${COMPOSE_FILE},
-                                        ${PROD_ENV_FILE}
-                                    """.trim(),
-                                    removePrefix: 'backend/env',
-                                    remoteDirectory: REMOTE_DIR,
-                                    execCommand: """
-                                        set -x
-                                        cd ~/${REMOTE_DIR}
-                                        echo '=== REMOTE BEFORE MV ==='
-                                        ls -la .
-                                        mkdir -p env
-                                        echo 'mv .env-backend-prod → env/.env-backend-prod'
-                                        mv .env-backend-prod env/.env-backend-prod
-                                        echo '=== REMOTE AFTER MV ==='
-                                        ls -la env
-                                        echo '=== START DOCKER COMPOSE ==='
-                                        docker compose -f ${COMPOSE_FILE} \\
-                                          --env-file env/.env-backend-prod \\
-                                          up -d --build ${SERVICE_NAME}-prod
-                                    """.stripIndent()
-                                )
-                            ],
-                            verbose: true
-                        )
-                    ]
+                    /* 2) 나머지 파일 + compose */
+                    sshPublisher publishers: [sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [sshTransfer(
+                            sourceFiles: """
+                                backend/service/${SERVICE_NAME}/build/libs/*.jar,
+                                backend/service/${SERVICE_NAME}/${DOCKERFILE},
+                                backend/service/${SERVICE_NAME}/${COMPOSE_FILE}
+                            """.trim(),
+                            remoteDirectory: REMOTE_DIR,
+                            execCommand: """
+                                set -x
+                                cd ~/${REMOTE_DIR}
+                                mkdir -p env
+                                mv .env-backend-prod env/.env-backend-prod
+                                docker compose -f ${COMPOSE_FILE} \\
+                                   --env-file env/.env-backend-prod \\
+                                   up -d --build ${SERVICE_NAME}-prod
+                            """.stripIndent()
+                        )],
+                        verbose: true
+                    )]
                 }
             }
         }
     }
 
     post {
-        always {
-            cleanWs()
-        }
+        always { cleanWs() }
     }
 }
