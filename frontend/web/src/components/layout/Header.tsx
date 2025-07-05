@@ -72,26 +72,18 @@ const Header = () => {
         <Link href="/login">로그인</Link>
       </nav>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> f975d6c ([FE/web] feat: profile 페이지 퍼블리싱)
       <div
         className={`${styles.hamburger} ${scrolled ? styles.scrolled : ""}`}
         ref={hamburgerRef}
         onClick={toggleMenu}
       >
-=======
-      <div className={styles.hamburger} ref={hamburgerRef} onClick={toggleMenu}>
->>>>>>> dfeb421 ([FE/web] feat: profile 페이지 퍼블리싱)
-<<<<<<< HEAD
-=======
-      <div className={styles.hamburger} ref={hamburgerRef} onClick={toggleMenu}>
->>>>>>> 6556e65 ([FE/web] feat: profile 페이지 퍼블리싱)
-=======
->>>>>>> f975d6c ([FE/web] feat: profile 페이지 퍼블리싱)
-        ☰
+        <div
+          className={styles.hamburger}
+          ref={hamburgerRef}
+          onClick={toggleMenu}
+        >
+          ☰
+        </div>
       </div>
 
       {isOpen && (
