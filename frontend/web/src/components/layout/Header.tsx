@@ -1,12 +1,15 @@
 "use client";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import styles from "./Header.module.scss";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   const toggleMenu = () => {
     setIsOpen((prev) => !prev);
@@ -35,13 +38,33 @@ const Header = () => {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (pathname !== "/") {
+      setScrolled(true);
+      return;
+    }
+
+    const handleScroll = () => {
+      if (window.scrollY > 0) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [pathname]);
+
   return (
-    <header className={styles.header}>
+    <header className={`${styles.header} ${scrolled ? styles.scrolled : ""}`}>
       <div className={styles.logo}>
         <Link href="/">TripMarble</Link>
       </div>
 
-      <nav className={styles.nav}>
+      <nav className={`${styles.nav} ${scrolled ? styles.scrolled : ""}`}>
         <Link href="/search">검색</Link>
         <Link href="/spots">여행지 목록</Link>
         <Link href="/game">게임 목록</Link>
@@ -49,7 +72,11 @@ const Header = () => {
         <Link href="/login">로그인</Link>
       </nav>
 
-      <div className={styles.hamburger} ref={hamburgerRef} onClick={toggleMenu}>
+      <div
+        className={`${styles.hamburger} ${scrolled ? styles.scrolled : ""}`}
+        ref={hamburgerRef}
+        onClick={toggleMenu}
+      >
         ☰
       </div>
 
