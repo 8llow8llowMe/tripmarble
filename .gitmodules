@@ -1,0 +1,4 @@
+[submodule "backend/env"]
+	path = backend/env
+	url = https://github.com/8llow8llowMe/TripMarble-env.git
+	branch = feature/be/env
