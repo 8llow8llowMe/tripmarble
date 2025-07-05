@@ -83,6 +83,23 @@
   margin-top: 2rem;
   gap: 1rem;
 }
+.socialWord {
+  display: flex;
+  justify-content: space-between;
+  gap: 2px;
+}
+
+@media (max-width: 540px) {
+  .loginWrapper {
+    padding: 2rem 1rem;
+  }
+  .card {
+    padding: 2rem 1.5rem;
+  }
+  .socialWord {
+    flex-direction: column;
+  }
+}
 
 .socialItem {
   flex: 1;

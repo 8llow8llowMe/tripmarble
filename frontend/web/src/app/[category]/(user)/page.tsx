@@ -34,15 +34,24 @@ export default function LoginPage() {
         <div className={styles.socialLogin}>
           <div className={styles.socialItem}>
             <Image src={naver} alt="naver" width={24} height={24} />
-            <span>네이버 로그인</span>
+            <div className={styles.socialWord}>
+              <a>네이버</a>
+              <a>로그인</a>
+            </div>
           </div>
           <div className={styles.socialItem}>
             <Image src={kakao} alt="kakao" width={50} height={24} />
-            <span>카카오 로그인</span>
+            <div className={styles.socialWord}>
+              <a>카카오</a>
+              <a>로그인</a>
+            </div>
           </div>
           <div className={styles.socialItem}>
             <Image src={google} alt="google" width={24} height={24} />
-            <span>구글 로그인</span>
+            <div className={styles.socialWord}>
+              <a>구글</a>
+              <a>로그인</a>
+            </div>
           </div>
         </div>
         <div className={styles.footer}>
