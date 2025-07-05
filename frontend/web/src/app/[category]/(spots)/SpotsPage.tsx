@@ -22,18 +22,21 @@ export default function SpotsPage() {
         <HorizontalList
           title="대한민국 여행지"
           items={spotsData}
+          baseHref="/spots"
           itemWidth={250}
           itemHeight={250}
         />
         <HorizontalList
           title="추천 여행지"
           items={spotsData}
+          baseHref="/spots"
           itemWidth={300}
           itemHeight={180}
         />
         <HorizontalList
           title="여기저기"
           items={spotsData}
+          baseHref="/spots"
           itemWidth={250}
           itemHeight={300}
         />

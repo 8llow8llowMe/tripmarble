@@ -1,10 +1,12 @@
 import { useRef } from "react";
+import Link from "next/link";
 import styles from "./HorizontalList.module.scss";
 import Image, { StaticImageData } from "next/image";
 
 type HorizontalListProps<T> = {
   title?: string;
   items: { id: number; name: string; imgUrl: StaticImageData }[];
+  baseHref: string;
   itemWidth?: number;
   itemHeight?: number;
   gap?: number;
@@ -13,6 +15,7 @@ type HorizontalListProps<T> = {
 export default function HorizontalList<T>({
   title,
   items,
+  baseHref,
   itemWidth = 160,
   itemHeight = 160,
   gap = 12,
@@ -83,22 +86,25 @@ export default function HorizontalList<T>({
         onDragStart={(e) => e.preventDefault()}
       >
         {visibleItems.map((item, index) => (
-          <div
-            key={index}
-            className={styles.itemWrapper}
-            style={{ minWidth: itemWidth, minHeight: itemHeight }}
-          >
-            <div>
-              <Image
-                src={item.imgUrl}
-                alt={item.name}
-                width={itemWidth}
-                height={itemHeight}
-                style={{ objectFit: "cover", borderRadius: 8 }}
-              />
-              <div style={{ textAlign: "left", marginTop: 4 }}>{item.name}</div>
+          <Link key={index} href={`${baseHref}/${item.id}`}>
+            <div
+              className={styles.itemWrapper}
+              style={{ minWidth: itemWidth, minHeight: itemHeight }}
+            >
+              <div>
+                <Image
+                  src={item.imgUrl}
+                  alt={item.name}
+                  width={itemWidth}
+                  height={itemHeight}
+                  style={{ objectFit: "cover", borderRadius: 8 }}
+                />
+                <div style={{ textAlign: "left", marginTop: 4 }}>
+                  {item.name}
+                </div>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

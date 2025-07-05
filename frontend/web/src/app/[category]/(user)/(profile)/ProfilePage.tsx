@@ -24,12 +24,14 @@ export default function ProfilePage() {
         <HorizontalList
           title="나의 게임 기록"
           items={spotsData}
+          baseHref="/spots"
           itemWidth={300}
           itemHeight={180}
         />
         <HorizontalList
           title="내가 쓴 리뷰"
           items={spotsData}
+          baseHref="/spots"
           itemWidth={300}
           itemHeight={180}
         />
