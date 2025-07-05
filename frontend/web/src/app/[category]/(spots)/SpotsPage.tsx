@@ -14,11 +14,14 @@ export const metadata: Metadata = {
 export default function SpotsPage() {
   return (
     <>
+      {/* <div className={styles.spotsWrapper}> */}
       <div className={styles.container}>
         <div className={styles.section}>
           <div className={styles.subTitle}>여행지 목록</div>
           <div>지금 떠나기 좋은 추천 여행지를 확인해보세요.</div>
         </div>
+      </div>
+      <div className={styles.lists}>
         <HorizontalList
           title="대한민국 여행지"
           items={spotsData}
@@ -41,6 +44,7 @@ export default function SpotsPage() {
           itemHeight={300}
         />
       </div>
+      {/* </div> */}
     </>
   );
 }
