@@ -2,17 +2,25 @@ pipeline {
     agent any
 
     environment {
-        SERVICE_NAME   = 'auth-service'
-        DOCKERFILE     = 'auth-service.Dockerfile'
-        COMPOSE_FILE   = 'docker-compose-auth-service.yml'
-        ENV_SUBMODULE  = "${WORKSPACE}/backend/env/${SERVICE_NAME}"
-        REMOTE_DIR     = 'deploy/tripmarble/backend-app'
-        SSH_CONFIG     = 'BackEnd Server SSH'
+        // 서비스 공통 설정
+        SERVICE_NAME    = 'auth-service'
+        DOCKERFILE      = 'auth-service.Dockerfile'
+        COMPOSE_FILE    = 'docker-compose-auth-service.yml'
+
+        // Submodule과 .env 파일 경로
+        SUBMODULE_DIR   = "backend/env/${SERVICE_NAME}"
+        DEV_ENV_FILE    = "${SUBMODULE_DIR}/.env-backend-dev"
+        PROD_ENV_FILE   = "${SUBMODULE_DIR}/.env-backend-prod"
+
+        // 원격 배포 디렉토리 및 SSH 설정
+        REMOTE_DIR      = 'deploy/tripmarble/backend-app'
+        SSH_CONFIG      = 'BackEnd Server SSH'
     }
 
     stages {
         stage('Init & Submodule Update') {
             steps {
+                // 메인 레포 + 서브모듈 체크아웃 (parentCredentials 로 서브모듈 인증 자동 전달)
                 checkout([
                     $class: 'GitSCM',
                     branches: scm.branches,
@@ -30,14 +38,16 @@ pipeline {
 
         stage('Build JAR') {
             steps {
+                // auth-service 모듈 경로로 이동
                 dir('backend/service/auth-service') {
-                    // gradlew 스크립트가 workspace/backend/gradlew 에 있기 때문에
+                    // workspace/backend/gradlew 호출
                     sh 'chmod +x ../../gradlew'
                     sh '../../gradlew :service:auth-service:bootJar'
                 }
             }
             post {
                 success {
+                    // 빌드 아티팩트 저장
                     archiveArtifacts artifacts: 'backend/service/auth-service/build/libs/*.jar',
                                      allowEmptyArchive: false
                 }
@@ -45,74 +55,65 @@ pipeline {
         }
 
         stage('Deploy to Dev') {
-            when { expression { env.BRANCH_NAME == 'develop' } }
+            when { branch 'develop' }  // develop 브랜치 서브-잡에서만 실행
             steps {
-                script {
-                    def envFile       = "${ENV_SUBMODULE}/.env-backend-dev"
-                    def targetService = "${SERVICE_NAME}-dev"
-
-                    sshPublisher publishers: [
-                        sshPublisherDesc(
-                            configName: SSH_CONFIG,
-                            transfers: [
-                                sshTransfer(
-                                    sourceFiles: """
-                                      backend/service/${SERVICE_NAME}/build/libs/*.jar,
-                                      backend/service/${SERVICE_NAME}/${DOCKERFILE},
-                                      backend/service/${SERVICE_NAME}/${COMPOSE_FILE},
-                                      ${envFile}
-                                    """,
-                                    remoteDirectory: REMOTE_DIR,
-                                    execCommand: """
-                                      cd ~/${REMOTE_DIR}
-                                      mkdir -p env
-                                      mv ${envFile.tokenize('/').last()} env/
-                                      docker compose -f ${COMPOSE_FILE} \
-                                        --env-file env/${envFile.tokenize('/').last()} \
-                                        up -d --build ${targetService}
-                                    """
-                                )
-                            ],
-                            verbose: true
-                        )
-                    ]
-                }
+                sshPublisher publishers: [
+                    sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [
+                            sshTransfer(
+                                // 워크스페이스 기준 상대경로만 사용
+                                sourceFiles: """
+                                    backend/service/${SERVICE_NAME}/build/libs/*.jar,
+                                    backend/service/${SERVICE_NAME}/${DOCKERFILE},
+                                    backend/service/${SERVICE_NAME}/${COMPOSE_FILE},
+                                    ${DEV_ENV_FILE}
+                                """.trim(),
+                                remoteDirectory: REMOTE_DIR,
+                                execCommand: """
+                                    cd ~/${REMOTE_DIR}
+                                    mkdir -p env
+                                    mv .env-backend-dev env/.env-backend-dev
+                                    docker compose -f ${COMPOSE_FILE} \
+                                      --env-file env/.env-backend-dev \
+                                      up -d --build ${SERVICE_NAME}-dev
+                                """.stripIndent()
+                            )
+                        ],
+                        verbose: true
+                    )
+                ]
             }
         }
 
         stage('Deploy to Prod') {
-            when { expression { env.BRANCH_NAME == 'main' } }
+            when { branch 'main' }  // main 브랜치 서브-잡에서만 실행
             steps {
-                script {
-                    def envFile       = "${ENV_SUBMODULE}/.env-backend-prod"
-                    def targetService = "${SERVICE_NAME}-prod"
-
-                    sshPublisher publishers: [
-                        sshPublisherDesc(
-                            configName: SSH_CONFIG,
-                            transfers: [
-                                sshTransfer(
-                                    sourceFiles: """
-                                      backend/service/${SERVICE_NAME}/build/libs/*.jar,
-                                      backend/service/${SERVICE_NAME}/${DOCKERFILE},
-                                      backend/service/${SERVICE_NAME}/${COMPOSE_FILE},
-                                      ${envFile}
-                                    """,
-                                    remoteDirectory: REMOTE_DIR,
-                                    execCommand: """
-                                      cd ~/${REMOTE_DIR}
-                                      mkdir -p env
-                                      mv ${envFile.tokenize('/').last()} env/
-                                      docker compose -f ${COMPOSE_FILE} \
-                                        --env-file env/${envFile.tokenize('/').last()} \
-                                        up -d --build ${targetService}
-                                    """
-                                )
-                            ],
-                            verbose: true
-                        )
-                    ]
-                }
+                sshPublisher publishers: [
+                    sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [
+                            sshTransfer(
+                                sourceFiles: """
+                                    backend/service/${SERVICE_NAME}/build/libs/*.jar,
+                                    backend/service/${SERVICE_NAME}/${DOCKERFILE},
+                                    backend/service/${SERVICE_NAME}/${COMPOSE_FILE},
+                                    ${PROD_ENV_FILE}
+                                """.trim(),
+                                remoteDirectory: REMOTE_DIR,
+                                execCommand: """
+                                    cd ~/${REMOTE_DIR}
+                                    mkdir -p env
+                                    mv .env-backend-prod env/.env-backend-prod
+                                    docker compose -f ${COMPOSE_FILE} \
+                                      --env-file env/.env-backend-prod \
+                                      up -d --build ${SERVICE_NAME}-prod
+                                """.stripIndent()
+                            )
+                        ],
+                        verbose: true
+                    )
+                ]
             }
         }
     }
@@ -121,10 +122,6 @@ pipeline {
         always {
             cleanWs()
         }
-        //failure {
-        //    mail to: 'dev-team@example.com',
-        //         subject: "빌드 실패: ${SERVICE_NAME} on ${env.BRANCH_NAME}",
-        //         body: "빌드가 실패했습니다. 콘솔 로그를 확인하세요: ${env.BUILD_URL}"
-        //}
+        // mail 단계는 생략
     }
 }
