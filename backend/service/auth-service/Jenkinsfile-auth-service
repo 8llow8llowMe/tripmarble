@@ -1,40 +1,18 @@
 pipeline {
     agent any
 
-    // GitHub PR Webhook으로부터 받은 환경변수
     environment {
-        USER_NAME      = '' // pull_request.user.login
-        IF_MERGED      = '' // pull_request.merged
-        BASE_BRANCH    = '' // pull_request.base.ref
-        LABEL          = '' // pull_request.labels[*].name
         SERVICE_NAME   = 'auth-service'
-        IMAGE_NAME     = "tripmarble-${SERVICE_NAME}"
         DOCKERFILE     = 'auth-service.Dockerfile'
         COMPOSE_FILE   = 'docker-compose-auth-service.yml'
-        ENV_SUBMODULE  = "${WORKSPACE}/backend/env/${SERVICE_NAME}" // submodule 경로
+        ENV_SUBMODULE  = "${WORKSPACE}/backend/env/${SERVICE_NAME}"
         REMOTE_DIR     = 'deploy/tripmarble/backend-app'
         SSH_CONFIG     = 'BackEnd Server SSH'
     }
 
-    // triggers {
-    //     GenericTrigger(
-    //         genericVariables: [
-    //             [key: 'USER_NAME',   value: '$.pull_request.user.login', expressionType: 'JSONPath'],
-    //             [key: 'IF_MERGED',   value: '$.pull_request.merged',       expressionType: 'JSONPath'],
-    //             [key: 'BASE_BRANCH', value: '$.pull_request.base.ref',     expressionType: 'JSONPath'],
-    //             [key: 'LABEL',       value: '$.pull_request.labels[*].name', expressionType: 'JSONPath']
-    //         ],
-    //         causeString: 'Triggered by PR merge from ${USER_NAME}',
-    //         token: 'jamjamnow-be-api-service',
-    //         regexpFilterText: '$IF_MERGED $BASE_BRANCH $LABEL',
-    //         regexpFilterExpression: '(?=.*true)(?=.*(develop|main))(?=.*backend-auth-service)'
-    //     )
-    // }
-
     stages {
         stage('Init & Submodule Update') {
             steps {
-                // checkout scm 대신 아래처럼 확장(extension) 옵션 추가
                 checkout([
                     $class: 'GitSCM',
                     branches: scm.branches,
@@ -53,23 +31,23 @@ pipeline {
         stage('Build JAR') {
             steps {
                 dir('backend/service/auth-service') {
-                    sh 'chmod +x ../gradlew'
-                    sh '../gradlew :service:auth-service:bootJar'
+                    // gradlew 스크립트가 workspace/backend/gradlew 에 있기 때문에
+                    sh 'chmod +x ../../gradlew'
+                    sh '../../gradlew :service:auth-service:bootJar'
                 }
             }
             post {
                 success {
-                    archiveArtifacts artifacts: 'backend/service/auth-service/build/libs/*.jar', allowEmptyArchive: false
+                    archiveArtifacts artifacts: 'backend/service/auth-service/build/libs/*.jar',
+                                     allowEmptyArchive: false
                 }
             }
         }
 
-        // develop 브랜치일 때만 실행
         stage('Deploy to Dev') {
-            when { expression { env.BASE_BRANCH == 'develop' } }
+            when { expression { env.BRANCH_NAME == 'develop' } }
             steps {
                 script {
-                    // dev 환경 파일 & 컨테이너 이름
                     def envFile       = "${ENV_SUBMODULE}/.env-backend-dev"
                     def targetService = "${SERVICE_NAME}-dev"
 
@@ -79,18 +57,19 @@ pipeline {
                             transfers: [
                                 sshTransfer(
                                     sourceFiles: """
-                                        backend/service/${SERVICE_NAME}/build/libs/*.jar,
-                                        backend/service/${SERVICE_NAME}/${DOCKERFILE},
-                                        backend/service/${SERVICE_NAME}/${COMPOSE_FILE},
-                                        ${envFile}
+                                      backend/service/${SERVICE_NAME}/build/libs/*.jar,
+                                      backend/service/${SERVICE_NAME}/${DOCKERFILE},
+                                      backend/service/${SERVICE_NAME}/${COMPOSE_FILE},
+                                      ${envFile}
                                     """,
                                     remoteDirectory: REMOTE_DIR,
                                     execCommand: """
-                                        cd ~/${REMOTE_DIR}
-                                        mkdir -p env
-                                        mv ${envFile.tokenize('/').last()} env/${envFile.tokenize('/').last()}
-                                        docker compose -f ${COMPOSE_FILE} --env-file env/${envFile.tokenize('/').last()} \
-                                           up -d --build ${targetService}
+                                      cd ~/${REMOTE_DIR}
+                                      mkdir -p env
+                                      mv ${envFile.tokenize('/').last()} env/
+                                      docker compose -f ${COMPOSE_FILE} \
+                                        --env-file env/${envFile.tokenize('/').last()} \
+                                        up -d --build ${targetService}
                                     """
                                 )
                             ],
@@ -101,12 +80,10 @@ pipeline {
             }
         }
 
-        // main 브랜치일 때만 실행
         stage('Deploy to Prod') {
-            when { expression { env.BASE_BRANCH == 'main' } }
+            when { expression { env.BRANCH_NAME == 'main' } }
             steps {
                 script {
-                    // prod 환경 파일 & 컨테이너 이름
                     def envFile       = "${ENV_SUBMODULE}/.env-backend-prod"
                     def targetService = "${SERVICE_NAME}-prod"
 
@@ -116,18 +93,19 @@ pipeline {
                             transfers: [
                                 sshTransfer(
                                     sourceFiles: """
-                                        backend/service/${SERVICE_NAME}/build/libs/*.jar,
-                                        backend/service/${SERVICE_NAME}/${DOCKERFILE},
-                                        backend/service/${SERVICE_NAME}/${COMPOSE_FILE},
-                                        ${envFile}
+                                      backend/service/${SERVICE_NAME}/build/libs/*.jar,
+                                      backend/service/${SERVICE_NAME}/${DOCKERFILE},
+                                      backend/service/${SERVICE_NAME}/${COMPOSE_FILE},
+                                      ${envFile}
                                     """,
                                     remoteDirectory: REMOTE_DIR,
                                     execCommand: """
-                                        cd ~/${REMOTE_DIR}
-                                        mkdir -p env
-                                        mv ${envFile.tokenize('/').last()} env/${envFile.tokenize('/').last()}
-                                        docker compose -f ${COMPOSE_FILE} --env-file env/${envFile.tokenize('/').last()} \
-                                           up -d --build ${targetService}
+                                      cd ~/${REMOTE_DIR}
+                                      mkdir -p env
+                                      mv ${envFile.tokenize('/').last()} env/
+                                      docker compose -f ${COMPOSE_FILE} \
+                                        --env-file env/${envFile.tokenize('/').last()} \
+                                        up -d --build ${targetService}
                                     """
                                 )
                             ],
@@ -143,10 +121,10 @@ pipeline {
         always {
             cleanWs()
         }
-        failure {
-            mail to: 'dev-team@example.com',
-                 subject: "빌드 실패: ${SERVICE_NAME} on ${env.BASE_BRANCH}",
-                 body: "빌드가 실패했습니다. 콘솔 로그를 확인하세요: ${env.BUILD_URL}"
-        }
+        //failure {
+        //    mail to: 'dev-team@example.com',
+        //         subject: "빌드 실패: ${SERVICE_NAME} on ${env.BRANCH_NAME}",
+        //         body: "빌드가 실패했습니다. 콘솔 로그를 확인하세요: ${env.BUILD_URL}"
+        //}
     }
 }
