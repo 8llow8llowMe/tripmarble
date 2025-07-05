@@ -11,7 +11,7 @@ export default function ProfilePage() {
     <div className={styles.profileWrapper}>
       <div className={styles.profileHeader}>
         <div className={styles.avatar}>
-          <Image src={Logo} alt="User Avatar" width={200} height={200} />
+          <Image src={Logo} alt="User Avatar" width={150} height={150} />
         </div>
         <div className={styles.profileInfo}>
           <h2 className={styles.username}>트립마블</h2>
