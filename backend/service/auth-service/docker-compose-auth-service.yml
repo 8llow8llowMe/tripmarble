@@ -1,3 +1,23 @@
+x-auth-service-environment: &auth_service_environment
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+  AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+  DB_URL: ${DB_URL}
+  DB_USER_NAME: ${DB_USERNAME}
+  DB_PASSWORD: ${DB_PASSWORD}
+  REDIS_HOST: ${REDIS_HOST}
+  REDIS_PORT: ${REDIS_PORT}
+  EUREKA_SERVER_URL: ${EUREKA_SERVER_URL}
+  JWT_ACCESS_KEY: ${JWT_ACCESS_KEY}
+  JWT_REFRESH_KEY: ${JWT_REFRESH_KEY}
+  JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
+  JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+  MINIO_URL: ${MINIO_URL}
+  MINIO_BUCKET_PREFIX: ${MINIO_BUCKET_PREFIX}
+  MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+  MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+  SNOWFLAKE_DATACENTER_ID: ${SNOWFLAKE_DATACENTER_ID}
+  SNOWFLAKE_WORKER_ID: ${SNOWFLAKE_WORKER_ID}
+
 services:
   auth-service-dev:
     container_name: auth-service-dev
@@ -6,7 +26,7 @@ services:
     ports:
       - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
     environment:
-      - ${AUTH_SERVICE_PORT}=${AUTH_SERVICE_PORT}
+      <<: *auth_service_environment
     networks:
       - 8llow8llowme-net
 
@@ -17,7 +37,7 @@ services:
     ports:
       - "${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}"
     environment:
-      - ${AUTH_SERVICE_PORT}=${AUTH_SERVICE_PORT}
+      <<: *auth_service_environment
     networks:
       - 8llow8llowme-net
 
