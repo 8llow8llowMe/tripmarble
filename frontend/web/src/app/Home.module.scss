@@ -7,7 +7,13 @@
   min-height: calc(100vh - 200px);
   text-align: center;
   padding: 2rem;
-  background: linear-gradient(to right, #fdfbfb, #ebedee);
+  background: linear-gradient(
+      rgba(255, 255, 255, 0.15),
+      rgba(255, 255, 255, 0.15)
+    ),
+    url("/images/MainGangneung.png");
+  background-size: cover;
+  background-position: center;
 }
 
 .title {
