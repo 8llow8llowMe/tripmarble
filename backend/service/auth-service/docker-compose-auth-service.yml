@@ -2,7 +2,6 @@ x-auth-service-environment: &auth_service_environment
   SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
   AUTH_SERVICE_EXTERNAL_PORT: ${AUTH_SERVICE_EXTERNAL_PORT}
   AUTH_SERVICE_INTERNAL_PORT: ${AUTH_SERVICE_INTERNAL_PORT}
-  AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
   DB_URL: ${DB_URL}
   DB_USER_NAME: ${DB_USERNAME}
   DB_PASSWORD: ${DB_PASSWORD}
@@ -25,6 +24,7 @@ services:
     container_name: auth-service-dev
     build:
       context: .
+      dockerfile: auth-service.Dockerfile
     ports:
       - "${AUTH_SERVICE_EXTERNAL_PORT}:${AUTH_SERVICE_INTERNAL_PORT}" # host:container
     environment:
@@ -36,6 +36,7 @@ services:
     container_name: auth-service-prod
     build:
       context: .
+      dockerfile: auth-service.Dockerfile
     ports:
       - "${AUTH_SERVICE_EXTERNAL_PORT}:${AUTH_SERVICE_INTERNAL_PORT}" # host:container
     environment:
