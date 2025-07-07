@@ -1,5 +1,5 @@
 spring:
   application:
-    name: trip-service
+    name: ${SPRING_APPLICATION_NAME:trip-service}
   profiles:
     active: local
