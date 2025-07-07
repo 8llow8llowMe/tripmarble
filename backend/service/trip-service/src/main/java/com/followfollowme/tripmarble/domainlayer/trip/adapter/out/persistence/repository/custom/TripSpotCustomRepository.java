@@ -7,5 +7,5 @@ import org.springframework.data.domain.Slice;
 public interface TripSpotCustomRepository {
 
     Slice<TripSpotEntity> findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(List<Integer> ldongSignguCodes,
-        long lastTripSpotId, int size);
+        long lastTripSpotId, int size, Integer contentTypeId);
 }
