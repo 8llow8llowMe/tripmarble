@@ -26,10 +26,10 @@ public class TripSpotRepositoryAdapter implements TripSpotRepositoryPort {
 
     @Override
     public Slice<TripSpot> findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(List<Integer> ldongSignguCodes,
-        long lastTripSpotId, int size) {
+        long lastTripSpotId, int size, Integer contentTypeId) {
 
         Slice<TripSpotEntity> entitySlice = tripSpotRepository.findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(
-            ldongSignguCodes, lastTripSpotId, size);
+            ldongSignguCodes, lastTripSpotId, size, contentTypeId);
 
         return entitySlice.map(tripSpotMapper::toDomainFromEntity);
     }

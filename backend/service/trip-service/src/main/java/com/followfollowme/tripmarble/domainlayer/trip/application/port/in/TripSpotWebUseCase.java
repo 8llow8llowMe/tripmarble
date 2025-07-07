@@ -7,8 +7,7 @@ import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 public interface TripSpotWebUseCase {
 
     SliceResponse<TripSpotSimpleResponse> getTripSpotsByRepresentativeRegionId(long representativeRegionId,
-        long lastTripSpotId,
-        int size);
+        long lastTripSpotId, int size, Integer contentTypeId);
 
     TripSpotWithDetailViewResponse getTripSpotWithDetail(long tripSpotId);
 }
