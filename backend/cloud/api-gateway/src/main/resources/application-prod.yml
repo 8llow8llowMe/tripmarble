@@ -1,0 +1,22 @@
+server:
+  port: ${API_GATEWAY_PORT}
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: trip-service
+          uri: lb://TRIP-SERVICE
+          predicates:
+            - Path=/api/v1/regions/**, /api/v1/trip-spots/**, /api/v1/trip-content-types
+
+eureka:
+  instance:
+    hostname: ${spring.application.name}
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL}
+
+jwt:
+  access-key: ${JWT_ACCESS_KEY}
