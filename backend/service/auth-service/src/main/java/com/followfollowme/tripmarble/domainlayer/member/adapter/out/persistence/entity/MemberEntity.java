@@ -57,7 +57,6 @@ public class MemberEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private SecurityRole role;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Comment("소셜 로그인 제공업체")
     private OAuthProvider provider;
