@@ -1,7 +1,6 @@
 x-api-gateway-environment: &api_gateway_environment
   SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-  API_GATEWAY_PORT_DEV: ${API_GATEWAY_PORT_DEV}
-  API_GATEWAY_PORT_PROD: ${API_GATEWAY_PORT_PROD}
+  API_GATEWAY_PORT: ${API_GATEWAY_PORT}
   EUREKA_SERVER_URL: ${EUREKA_SERVER_URL}
 
 services:
@@ -11,7 +10,7 @@ services:
       context: .
       dockerfile: api-gateway.Dockerfile
     ports:
-      - "${API_GATEWAY_PORT_DEV}:${API_GATEWAY_PORT_DEV}" # host:container
+      - "${API_GATEWAY_PORT_DEV}:${API_GATEWAY_PORT}" # host:container
     environment:
       <<: *api_gateway_environment
     networks:
@@ -23,7 +22,7 @@ services:
       context: .
       dockerfile: api-gateway.Dockerfile
     ports:
-      - "${API_GATEWAY_PORT_PROD}:${API_GATEWAY_PORT_PROD}" # host:container
+      - "${API_GATEWAY_PORT_PROD}:${API_GATEWAY_PORT}" # host:container
     environment:
       <<: *api_gateway_environment
     networks:
