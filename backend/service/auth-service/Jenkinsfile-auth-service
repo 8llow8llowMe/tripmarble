@@ -3,18 +3,18 @@ pipeline {
 
     environment {
         // 서비스명 및 파일 이름
-        SERVICE_NAME    = 'auth-service'
-        DOCKERFILE      = 'auth-service.Dockerfile'
-        COMPOSE_FILE    = 'docker-compose-auth-service.yml'
+        SERVICE_NAME = 'auth-service'
+        DOCKERFILE = 'auth-service.Dockerfile'
+        COMPOSE_FILE = 'docker-compose-auth-service.yml'
 
         // Submodule 경로 (workspace 상대)
-        ENV_SUBMODULE   = 'backend/env'
-        DEV_ENV_FILE    = "${ENV_SUBMODULE}/.env-backend-dev"
-        PROD_ENV_FILE   = "${ENV_SUBMODULE}/.env-backend-prod"
+        ENV_SUBMODULE = 'backend/env'
+        DEV_ENV_FILE = "${ENV_SUBMODULE}/.env-backend-dev"
+        PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-backend-prod"
 
         // 원격 배포 설정
-        REMOTE_DIR      = 'deploy/tripmarble/backend-app'
-        SSH_CONFIG      = 'BackEnd Server SSH'
+        REMOTE_DIR = 'deploy/tripmarble/backend-app'
+        SSH_CONFIG = 'BackEnd Server SSH'
     }
 
     stages {
