@@ -1,0 +1,38 @@
+x-trip-service-environment: &trip_service_environment
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+  TRIP_SERVICE_PORT_DEV: ${TRIP_SERVICE_PORT_DEV}
+  TRIP_SERVICE_PORT_PROD: ${TRIP_SERVICE_PORT_PROD}
+  DB_URL: ${DB_URL}
+  DB_USERNAME: ${DB_USERNAME}
+  DB_PASSWORD: ${DB_PASSWORD}
+  EUREKA_SERVER_URL: ${EUREKA_SERVER_URL}
+
+services:
+  trip-service-dev:
+    container_name: trip-service-dev
+    build:
+      context: .
+      dockerfile: trip-service.Dockerfile
+    ports:
+      - "${TRIP_SERVICE_PORT_DEV}:${TRIP_SERVICE_PORT_DEV}" # host:container
+    environment:
+      <<: *trip_service_environment
+    networks:
+      - 8llow8llowme-net
+
+  trip-service-prod:
+    container_name: trip-service-prod
+    build:
+      context: .
+      dockerfile: trip-service.Dockerfile
+    ports:
+      - "${TRIP_SERVICE_PORT_PROD}:${TRIP_SERVICE_PORT_PROD}" # host:container
+    environment:
+      <<: *trip_service_environment
+    networks:
+      - 8llow8llowme-net
+
+networks:
+  8llow8llowme-net:
+    name: 8llow8llowme-net
+    driver: bridge
