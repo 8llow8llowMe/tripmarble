@@ -1,5 +1,5 @@
 server:
-  port: ${AUTH_SERVICE_PORT_DEV}
+  port: ${AUTH_SERVICE_PORT}
   shutdown: graceful
 
 spring:
@@ -43,7 +43,7 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_SERVER_URL}
-      
+
 # snowflake
 snowflake:
   datacenter-id: ${SNOWFLAKE_DATACENTER_ID}
