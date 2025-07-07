@@ -15,7 +15,7 @@ public class AuthServiceGlobalExceptionHandler {
     public ResponseEntity<Response<Void>> memberException(MemberException e) {
         log.error("회원 관련 오류: {}", e.getMessage());
         return ResponseEntity.status(e.getErrorCode().getHttpStatus())
-            .body(Response.fail(e.getErrorCode().getCode(), e.getErrorCode().getErrorMessage()));
+            .body(Response.fail(e.getErrorCode().getCode(), e.getMessage()));
     }
 
 }
