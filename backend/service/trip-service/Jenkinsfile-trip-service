@@ -1,0 +1,140 @@
+pipeline {
+    agent any
+
+    environment {
+        // 서비스명 및 파일 이름
+        SERVICE_NAME = 'trip-service'
+        DOCKERFILE = 'trip-service.Dockerfile'
+        COMPOSE_FILE = 'docker-compose-trip-service.yml'
+
+        // Submodule 경로 (workspace 상대)
+        ENV_SUBMODULE = 'backend/env'
+        DEV_ENV_FILE = "${ENV_SUBMODULE}/.env-backend-dev"
+        PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-backend-prod"
+
+        // 원격 배포 설정
+        REMOTE_DIR = 'deploy/tripmarble/backend-app'
+        SSH_CONFIG = 'BackEnd Server SSH'
+    }
+
+    stages {
+        stage('Init & Submodule Update') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: scm.branches,
+                    userRemoteConfigs: scm.userRemoteConfigs,
+                    extensions: [[
+                        $class: 'SubmoduleOption',
+                        recursiveSubmodules: true,
+                        parentCredentials: true
+                    ]]
+                ])
+            }
+        }
+
+        stage('Build JAR') {
+            steps {
+                dir('backend/service/trip-service') {
+                    sh 'chmod +x ../../gradlew'
+                    sh '../../gradlew :service:trip-service:bootJar'
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'backend/service/trip-service/build/libs/*.jar'
+                }
+            }
+        }
+
+        stage('Deploy to Dev') {
+            when { branch 'develop' }
+            steps {
+                script {
+                    // 1) .env 파일만 먼저 전송 (removePrefix으로 평탄화)
+                    sshPublisher publishers: [ sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [ sshTransfer(
+                            sourceFiles: "${DEV_ENV_FILE}",
+                            removePrefix: 'backend/env',
+                            remoteDirectory: REMOTE_DIR
+                        ) ],
+                        verbose: true
+                    ) ]
+
+                    // 2) JAR + Dockerfile + compose 파일 전송 & 배포
+                    sshPublisher publishers: [ sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [ sshTransfer(
+                            sourceFiles: """
+                                backend/service/${SERVICE_NAME}/build/libs/*.jar,
+                                backend/service/${SERVICE_NAME}/${DOCKERFILE},
+                                backend/service/${SERVICE_NAME}/${COMPOSE_FILE}
+                            """.trim(),
+                            removePrefix: "backend/service/${SERVICE_NAME}",
+                            remoteDirectory: REMOTE_DIR,
+                            execCommand: """
+                                set -x
+                                cd ~/${REMOTE_DIR}
+                                # env 파일 이동
+                                mkdir -p env
+                                mv .env-backend-dev env/.env-backend-dev
+                                # compose 실행
+                                docker compose -f ${COMPOSE_FILE} \\
+                                  --env-file env/.env-backend-dev \\
+                                  up -d --build ${SERVICE_NAME}-dev
+                            """.stripIndent()
+                        ) ],
+                        verbose: true
+                    ) ]
+                }
+            }
+        }
+
+        stage('Deploy to Prod') {
+            when { branch 'main' }
+            steps {
+                script {
+                    // 1) prod .env 파일 전송
+                    sshPublisher publishers: [ sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [ sshTransfer(
+                            sourceFiles: "${PROD_ENV_FILE}",
+                            removePrefix: 'backend/env',
+                            remoteDirectory: REMOTE_DIR
+                        ) ],
+                        verbose: true
+                    ) ]
+
+                    // 2) JAR + Dockerfile + compose 파일 전송 & 배포
+                    sshPublisher publishers: [ sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [ sshTransfer(
+                            sourceFiles: """
+                                backend/service/${SERVICE_NAME}/build/libs/*.jar,
+                                backend/service/${SERVICE_NAME}/${DOCKERFILE},
+                                backend/service/${SERVICE_NAME}/${COMPOSE_FILE}
+                            """.trim(),
+                            removePrefix: "backend/service/${SERVICE_NAME}",
+                            remoteDirectory: REMOTE_DIR,
+                            execCommand: """
+                                set -x
+                                cd ~/${REMOTE_DIR}
+                                mkdir -p env
+                                mv .env-backend-prod env/.env-backend-prod
+                                docker compose -f ${COMPOSE_FILE} \\
+                                  --env-file env/.env-backend-prod \\
+                                  up -d --build ${SERVICE_NAME}-prod
+                            """.stripIndent()
+                        ) ],
+                        verbose: true
+                    ) ]
+                }
+            }
+        }
+    }
+
+    post {
+        always { cleanWs() }
+    }
+}
