@@ -1,5 +1,5 @@
 server:
-  port: ${TRIP_SERVICE_PORT_DEV}
+  port: ${TRIP_SERVICE_PORT}
   shutdown: graceful
 
 spring:
