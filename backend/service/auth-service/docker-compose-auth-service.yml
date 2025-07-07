@@ -1,7 +1,6 @@
 x-auth-service-environment: &auth_service_environment
   SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-  AUTH_SERVICE_PORT_DEV: ${AUTH_SERVICE_PORT_DEV}
-  AUTH_SERVICE_PORT_PROD: ${AUTH_SERVICE_PORT_PROD}
+  AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
   DB_URL: ${DB_URL}
   DB_USERNAME: ${DB_USERNAME}
   DB_PASSWORD: ${DB_PASSWORD}
@@ -26,7 +25,7 @@ services:
       context: .
       dockerfile: auth-service.Dockerfile
     ports:
-      - "${AUTH_SERVICE_PORT_DEV}:${AUTH_SERVICE_PORT_DEV}" # host:container
+      - "${AUTH_SERVICE_PORT_DEV}:${AUTH_SERVICE_PORT}" # host:container
     environment:
       <<: *auth_service_environment
     networks:
@@ -38,7 +37,7 @@ services:
       context: .
       dockerfile: auth-service.Dockerfile
     ports:
-      - "${AUTH_SERVICE_PORT_PROD}:${AUTH_SERVICE_PORT_PROD}" # host:container
+      - "${AUTH_SERVICE_PORT_PROD}:${AUTH_SERVICE_PORT}" # host:container
     environment:
       <<: *auth_service_environment
     networks:
