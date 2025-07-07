@@ -10,5 +10,5 @@ public interface TripSpotRepositoryPort {
     Optional<TripSpot> findById(long tripSpotId);
 
     Slice<TripSpot> findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(List<Integer> ldongSignguCodes,
-        long lastTripSpotId, int size);
+        long lastTripSpotId, int size, Integer contentTypeId);
 }

@@ -16,12 +16,11 @@ import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripS
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpotDetail;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +36,7 @@ public class TripSpotFacade implements TripSpotWebUseCase, TripSpotInternalUseCa
     @Override
     @Transactional(readOnly = true)
     public SliceResponse<TripSpotSimpleResponse> getTripSpotsByRepresentativeRegionId(long representativeRegionId,
-                                                                                      long lastTripSpotId, int size) {
+        long lastTripSpotId, int size, Integer contentTypeId) {
         // 1. 대표지역 -> 시군구 코드 목록
         List<Long> sigunguIds =
             representativeRegionSigunguMappingRepositoryPort.findSigunguIdsByRepresentativeRegionId(
@@ -48,7 +47,7 @@ public class TripSpotFacade implements TripSpotWebUseCase, TripSpotInternalUseCa
 
         // 2. 시군구 코드 기반 여행지 Slice 조회 (No-Offset 방식 - 무한 스크롤)
         Slice<TripSpot> tripSpots = tripSpotRepositoryPort.findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(
-            sigunguCodes, lastTripSpotId, size);
+            sigunguCodes, lastTripSpotId, size, contentTypeId);
 
         // 3. 도메인 -> Response 매핑
         Slice<TripSpotSimpleResponse> responseSlice = tripSpots.map(tripSpotMapper::toSimpleResponseFromDomain);
