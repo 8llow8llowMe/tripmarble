@@ -1,0 +1,35 @@
+x-api-gateway-environment: &api_gateway_environment
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+  API_GATEWAY_PORT_DEV: ${API_GATEWAY_PORT_DEV}
+  API_GATEWAY_PORT_PROD: ${API_GATEWAY_PORT_PROD}
+  EUREKA_SERVER_URL: ${EUREKA_SERVER_URL}
+
+services:
+  api-gateway-dev:
+    container_name: api-gateway-dev
+    build:
+      context: .
+      dockerfile: api-gateway.Dockerfile
+    ports:
+      - "${API_GATEWAY_PORT_DEV}:${API_GATEWAY_PORT_DEV}" # host:container
+    environment:
+      <<: *api_gateway_environment
+    networks:
+      - 8llow8llowme-net
+
+  trip-service-prod:
+    container_name: trip-service-prod
+    build:
+      context: .
+      dockerfile: api-gateway.Dockerfile
+    ports:
+      - "${API_GATEWAY_PORT_PROD}:${API_GATEWAY_PORT_PROD}" # host:container
+    environment:
+      <<: *api_gateway_environment
+    networks:
+      - 8llow8llowme-net
+
+networks:
+  8llow8llowme-net:
+    name: 8llow8llowme-net
+    driver: bridge
