@@ -1,5 +1,5 @@
 server:
-  port: ${API_GATEWAY_PORT_DEV}
+  port: ${API_GATEWAY_PORT}
 
 spring:
   cloud:
