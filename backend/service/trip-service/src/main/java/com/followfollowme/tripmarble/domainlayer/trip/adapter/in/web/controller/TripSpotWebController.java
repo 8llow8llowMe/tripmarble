@@ -25,15 +25,16 @@ public class TripSpotWebController {
 
     @Operation(
         summary = "대표 여행지에 따른 여행지 목록 조회 (무한 스크롤 방식)",
-        description = "해당 대표 여행지에 속한 여행지 목록을 No-Offset 방식으로 조회하는 기능입니다."
+        description = "선택한 대표 지역에 속한 여행지 목록을 No-Offset 방식으로 조회합니다."
+            + " 해당 콘텐츠 타입(예: 관광지, 문화시설, 숙박 등)이 선택되면 해당하는 여행지만 필터링하여 조회합니다."
     )
     @GetMapping("/by-representative-region/{representativeRegionId}")
     public ResponseEntity<Response<SliceResponse<TripSpotSimpleResponse>>> getTripSpotsByRepresentativeRegionId(
         @PathVariable long representativeRegionId, @RequestParam(defaultValue = "0") long lastTripSpotId,
-        @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) Integer contentTypeId) {
 
         SliceResponse<TripSpotSimpleResponse> result = tripSpotWebUseCase.getTripSpotsByRepresentativeRegionId(
-            representativeRegionId, lastTripSpotId, size);
+            representativeRegionId, lastTripSpotId, size, contentTypeId);
         return ResponseEntity.ok(Response.success(result));
     }
 
