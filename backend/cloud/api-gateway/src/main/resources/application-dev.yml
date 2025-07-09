@@ -16,7 +16,7 @@ eureka:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL}
+      defaultZone: http://${SERVICE_DISCOVERY_HOSTNAME}:${SERVICE_DISCOVERY_PORT}/eureka/
 
 jwt:
   access-key: ${JWT_ACCESS_KEY}
