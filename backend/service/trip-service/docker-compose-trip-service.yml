@@ -4,7 +4,8 @@ x-trip-service-environment: &trip_service_environment
   DB_URL: ${DB_URL}
   DB_USERNAME: ${DB_USERNAME}
   DB_PASSWORD: ${DB_PASSWORD}
-  EUREKA_SERVER_URL: ${EUREKA_SERVER_URL}
+  SERVICE_DISCOVERY_HOST_NAME: ${SERVICE_DISCOVERY_HOSTNAME}
+  SERVICE_DISCOVERY_PORT: ${SERVICE_DISCOVERY_PORT}
 
 services:
   trip-service-dev:
