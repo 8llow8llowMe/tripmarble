@@ -29,20 +29,13 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
-# log 관리
-logging:
-  level:
-    org.hibernate:
-      type.descriptor.sql: trace
-      org.hibernate.SQLQuery: debug
-
 eureka:
   instance:
     hostname: ${spring.application.name}
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
   client:
     service-url:
-      defaultZone: ${EUREKA_SERVER_URL}
+      defaultZone: http://${SERVICE_DISCOVERY_HOSTNAME}:${SERVICE_DISCOVERY_PORT}/eureka/
 
 # snowflake
 snowflake:
