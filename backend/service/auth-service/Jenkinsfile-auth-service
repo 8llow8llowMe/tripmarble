@@ -14,10 +14,24 @@ pipeline {
 
         // 원격 배포 설정
         REMOTE_DIR = 'deploy/tripmarble/backend-app'
-        SSH_CONFIG = 'BackEnd Server SSH'
+        SSH_CONFIG = 'backend-1 server ssh'
     }
 
     stages {
+        stage('Branch Check') {
+            steps {
+                scrip {
+                    def allowedBranches = ['develop', 'main']
+                    if (!allowedBranches.contains(env.BRANCH_NAME)) {
+                        echo "브랜치 '${env.BRANCH_NAME}' 는 파이프라인 대상이 아니므로 종료합니다."
+                        currentBuild.result = 'SUCCESS'
+                        error("스킵됨: 지원되지 않는 브랜치입니다.")
+                    }
+                }
+            }
+        }
+
+
         stage('Init & Submodule Update') {
             steps {
                 checkout([
