@@ -1,18 +1,19 @@
 pipeline {
     agent any
 
-    environment {
-        // 서비스명 및 파일 이름
-        SERVICE_NAME = 'auth-service'
-        DOCKERFILE = 'auth-service.Dockerfile'
-        COMPOSE_FILE = 'docker-compose-auth-service.yml'
+    parameters {
+        string(name: 'SERVICE_NAME', defaultValue: 'auth-service', description: '서비스 디렉토리명 및 식별자')
+        string(name: 'SERVICE_LABEL', defaultValue: 'backend-auth-service', description: 'GitHub PR 라벨명')
+    }
 
-        // Submodule 경로 (workspace 상대)
+    environment {
+        DOCKERFILE = "${params.SERVICE_NAME}.Dockerfile"
+        COMPOSE_FILE = "docker-compose-${params.SERVICE_NAME}.yml"
+
         ENV_SUBMODULE = 'backend/env'
         DEV_ENV_FILE = "${ENV_SUBMODULE}/.env-backend-dev"
         PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-backend-prod"
 
-        // 원격 배포 설정
         REMOTE_DIR = 'deploy/tripmarble/backend-app'
         SSH_CONFIG = 'backend-1 server ssh'
     }
@@ -20,17 +21,49 @@ pipeline {
     stages {
         stage('Branch Check') {
             steps {
-                scrip {
+                script {
                     def allowedBranches = ['develop', 'main']
                     if (!allowedBranches.contains(env.BRANCH_NAME)) {
-                        echo "브랜치 '${env.BRANCH_NAME}' 는 파이프라인 대상이 아니므로 종료합니다."
+                        echo "브랜치 '${env.BRANCH_NAME}' 는 대상 아님. 종료."
                         currentBuild.result = 'SUCCESS'
-                        error("스킵됨: 지원되지 않는 브랜치입니다.")
+                        error("스킵됨: 브랜치 조건 불만족")
+                    }
+
+                    if (env.CHANGE_ID) {
+                        echo "PR 라벨 검사 시작"
+
+                        def gitUrl = env.GIT_URL ?: ''
+                        def repoPath = ''
+                        if (gitUrl.contains('github.com')) {
+                            repoPath = gitUrl.replaceAll(/^.*github.com[/:]/, '').replaceAll(/\.git$/, '')
+                        } else {
+                            error("GitHub 저장소가 아님: ${gitUrl}")
+                        }
+
+                        withCredentials([usernamePassword(credentialsId: 'deploy', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')]) {
+                            def labelsJson = sh(
+                                script: """
+                                    curl -s -H "Authorization: token ${GITHUB_TOKEN}" \\
+                                        https://api.github.com/repos/${repoPath}/issues/${env.CHANGE_ID}/labels
+                                """,
+                                returnStdout: true
+                            ).trim()
+
+                            def requiredLabel = "\"name\": \"${params.SERVICE_LABEL}\""
+                            if (!labelsJson.contains(requiredLabel)) {
+                                echo "PR에 '${params.SERVICE_LABEL}' 라벨 없음. 종료"
+                                currentBuild.result = 'SUCCESS'
+                                error("스킵됨: 라벨 조건 불만족")
+                            } else {
+                                echo "라벨 조건 통과: ${params.SERVICE_LABEL}"
+                            }
+                        }
+                    } else {
+                        echo "PR 아님 (develop/main 머지 시 등), 라벨 체크 생략"
                     }
                 }
             }
         }
-
 
         stage('Init & Submodule Update') {
             steps {
@@ -49,14 +82,14 @@ pipeline {
 
         stage('Build JAR') {
             steps {
-                dir('backend/service/auth-service') {
+                dir("backend/service/${params.SERVICE_NAME}") {
                     sh 'chmod +x ../../gradlew'
-                    sh '../../gradlew :service:auth-service:bootJar'
+                    sh "../../gradlew :service:${params.SERVICE_NAME}:bootJar"
                 }
             }
             post {
                 success {
-                    archiveArtifacts artifacts: 'backend/service/auth-service/build/libs/*.jar'
+                    archiveArtifacts artifacts: "backend/service/${params.SERVICE_NAME}/build/libs/*.jar"
                 }
             }
         }
@@ -65,7 +98,6 @@ pipeline {
             when { branch 'develop' }
             steps {
                 script {
-                    // 1) .env 파일만 먼저 전송 (removePrefix으로 평탄화)
                     sshPublisher publishers: [ sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [ sshTransfer(
@@ -76,27 +108,24 @@ pipeline {
                         verbose: true
                     ) ]
 
-                    // 2) JAR + Dockerfile + compose 파일 전송 & 배포
                     sshPublisher publishers: [ sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [ sshTransfer(
                             sourceFiles: """
-                                backend/service/${SERVICE_NAME}/build/libs/*.jar,
-                                backend/service/${SERVICE_NAME}/${DOCKERFILE},
-                                backend/service/${SERVICE_NAME}/${COMPOSE_FILE}
+                                backend/service/${params.SERVICE_NAME}/build/libs/*.jar,
+                                backend/service/${params.SERVICE_NAME}/${DOCKERFILE},
+                                backend/service/${params.SERVICE_NAME}/${COMPOSE_FILE}
                             """.trim(),
-                            removePrefix: "backend/service/${SERVICE_NAME}",
+                            removePrefix: "backend/service/${params.SERVICE_NAME}",
                             remoteDirectory: REMOTE_DIR,
                             execCommand: """
                                 set -x
                                 cd ~/${REMOTE_DIR}
-                                # env 파일 이동
                                 mkdir -p env
                                 mv .env-backend-dev env/.env-backend-dev
-                                # compose 실행
                                 docker compose -f ${COMPOSE_FILE} \\
                                   --env-file env/.env-backend-dev \\
-                                  up -d --build ${SERVICE_NAME}-dev
+                                  up -d --build ${params.SERVICE_NAME}-dev
                             """.stripIndent()
                         ) ],
                         verbose: true
@@ -109,7 +138,6 @@ pipeline {
             when { branch 'main' }
             steps {
                 script {
-                    // 1) prod .env 파일 전송
                     sshPublisher publishers: [ sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [ sshTransfer(
@@ -120,16 +148,15 @@ pipeline {
                         verbose: true
                     ) ]
 
-                    // 2) JAR + Dockerfile + compose 파일 전송 & 배포
                     sshPublisher publishers: [ sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [ sshTransfer(
                             sourceFiles: """
-                                backend/service/${SERVICE_NAME}/build/libs/*.jar,
-                                backend/service/${SERVICE_NAME}/${DOCKERFILE},
-                                backend/service/${SERVICE_NAME}/${COMPOSE_FILE}
+                                backend/service/${params.SERVICE_NAME}/build/libs/*.jar,
+                                backend/service/${params.SERVICE_NAME}/${DOCKERFILE},
+                                backend/service/${params.SERVICE_NAME}/${COMPOSE_FILE}
                             """.trim(),
-                            removePrefix: "backend/service/${SERVICE_NAME}",
+                            removePrefix: "backend/service/${params.SERVICE_NAME}",
                             remoteDirectory: REMOTE_DIR,
                             execCommand: """
                                 set -x
@@ -138,7 +165,7 @@ pipeline {
                                 mv .env-backend-prod env/.env-backend-prod
                                 docker compose -f ${COMPOSE_FILE} \\
                                   --env-file env/.env-backend-prod \\
-                                  up -d --build ${SERVICE_NAME}-prod
+                                  up -d --build ${params.SERVICE_NAME}-prod
                             """.stripIndent()
                         ) ],
                         verbose: true
@@ -149,6 +176,8 @@ pipeline {
     }
 
     post {
-        always { cleanWs() }
+        always {
+            cleanWs()
+        }
     }
 }
