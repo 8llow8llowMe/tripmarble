@@ -71,7 +71,8 @@ subprojects.findAll {
                 'api-gateway',
                 'service-discovery',
                 'trip-service',
-                'batch-service']
+                'batch-service',
+                'trip-game-service']
 }.each { project ->
     project.ext.set('springCloudVersion', '2024.0.0')
 

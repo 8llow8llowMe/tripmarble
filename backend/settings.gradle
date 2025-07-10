@@ -11,6 +11,7 @@ include 'core:storage-core'
 include 'service:auth-service'
 include 'service:trip-service'
 include 'service:batch-service'
+include 'service:trip-game-service'
 
 // Spring Cloud
 include 'cloud:api-gateway'
