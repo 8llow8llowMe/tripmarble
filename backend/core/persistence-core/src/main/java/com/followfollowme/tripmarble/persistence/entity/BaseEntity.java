@@ -17,12 +17,12 @@ public class BaseEntity {
 
     @CreatedDate
     @Comment("생성 날짜")
-    @Column(updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime creatTime;
 
 
     @LastModifiedDate
     @Comment("수정 날짜")
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime updateTime;
 }
