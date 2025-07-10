@@ -35,7 +35,7 @@ pipeline {
                         def gitUrl = env.GIT_URL ?: ''
                         def repoPath = ''
                         if (gitUrl.contains('github.com')) {
-                            repoPath = gitUrl.replaceAll(/^.*github.com[/:]/, '').replaceAll(/\.git$/, '')
+                            repoPath = gitUrl.replaceFirst(/^.*github\.com[:\/]/, '').replaceFirst(/\.git$/, '')
                         } else {
                             error("GitHub 저장소가 아님: ${gitUrl}")
                         }
