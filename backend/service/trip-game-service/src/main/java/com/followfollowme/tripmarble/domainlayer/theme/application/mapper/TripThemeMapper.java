@@ -9,6 +9,9 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface TripThemeMapper {
 
+    // 엔티티 -> 도메인
+    TripTheme toDomainFromEntity(TripThemeEntity entity);
+
     // 엔티티 리스트 -> 도메인 리스트
     List<TripTheme> toDomainListFromEntityList(List<TripThemeEntity> entities);
 
