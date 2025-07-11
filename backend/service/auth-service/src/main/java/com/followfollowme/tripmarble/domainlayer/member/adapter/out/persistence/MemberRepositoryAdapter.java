@@ -5,10 +5,9 @@ import com.followfollowme.tripmarble.domainlayer.member.adapter.out.persistence.
 import com.followfollowme.tripmarble.domainlayer.member.application.mapper.MemberMapper;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -18,8 +17,8 @@ public class MemberRepositoryAdapter implements MemberRepositoryPort {
     private final MemberMapper memberMapper;
 
     @Override
-    public Member save(Member domainMember) {
-        MemberEntity entity = memberMapper.toEntityFromDomain(domainMember);
+    public Member save(Member domain) {
+        MemberEntity entity = memberMapper.toEntityFromDomain(domain);
         MemberEntity savedEntity = memberRepository.save(entity);
         return memberMapper.toDomainFromEntity(savedEntity);
     }
