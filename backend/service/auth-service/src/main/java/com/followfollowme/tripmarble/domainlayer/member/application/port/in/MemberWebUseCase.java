@@ -12,6 +12,4 @@ public interface MemberWebUseCase {
     MemberMyInfoResponse getMyInfo(long memberId);
 
     MemberProfileUploadResponse uploadProfileImage(MultipartFile imageFile);
-
-
 }
