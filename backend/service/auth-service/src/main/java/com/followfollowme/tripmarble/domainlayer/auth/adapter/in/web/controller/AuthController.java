@@ -3,7 +3,7 @@ package com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.controller
 import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginRequest;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginResponse;
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.enums.OAuthProvider;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.AuthLoginCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.in.AuthUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
-@Tag(name = "인증/인가", description = "인증/인가 관련 API 입니다.")
+@Tag(name = "인증/인가", description = "인증/인가 관련 클라이언트에 제공하는 API 입니다.")
 public class AuthController {
 
     private final AuthUseCase authUseCase;
