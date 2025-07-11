@@ -1,8 +1,8 @@
-package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao.dto;
+package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.enums.OAuthProvider;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
 import com.followfollowme.tripmarble.security.common.enums.SecurityRole;
 import java.time.LocalDateTime;

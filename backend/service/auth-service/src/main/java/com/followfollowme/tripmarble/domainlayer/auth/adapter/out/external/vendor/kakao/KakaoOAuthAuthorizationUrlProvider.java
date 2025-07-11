@@ -1,7 +1,7 @@
-package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao;
+package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao;
 
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.enums.OAuthProvider;
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao.properties.KakaoOAuthProperties;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.properties.KakaoOAuthProperties;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.OAuthAuthorizationUrlProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

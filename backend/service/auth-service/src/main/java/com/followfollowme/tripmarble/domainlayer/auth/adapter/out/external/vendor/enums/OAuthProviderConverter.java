@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.enums;
+package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums;
 
 import org.springframework.core.convert.converter.Converter;
 

@@ -1,10 +1,10 @@
-package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao;
+package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
 
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao.dto.KakaoMemberResponse;
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao.dto.KakaoToken;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.dto.KakaoMemberResponse;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.dto.KakaoToken;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;

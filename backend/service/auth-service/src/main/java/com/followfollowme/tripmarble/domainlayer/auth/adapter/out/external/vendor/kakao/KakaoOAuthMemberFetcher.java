@@ -1,9 +1,9 @@
-package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao;
+package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao;
 
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.enums.OAuthProvider;
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao.dto.KakaoMemberResponse;
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao.dto.KakaoToken;
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao.properties.KakaoOAuthProperties;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.dto.KakaoMemberResponse;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.dto.KakaoToken;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.properties.KakaoOAuthProperties;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.OAuthMemberFetcher;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
 import lombok.RequiredArgsConstructor;
