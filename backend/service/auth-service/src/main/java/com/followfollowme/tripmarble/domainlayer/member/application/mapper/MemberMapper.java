@@ -4,6 +4,7 @@ import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.Membe
 import com.followfollowme.tripmarble.domainlayer.member.adapter.out.persistence.entity.MemberEntity;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface MemberMapper {
@@ -15,5 +16,6 @@ public interface MemberMapper {
     MemberEntity toEntityFromDomain(Member domain);
 
     // 도메인 -> DTO
+    @Mapping(source = "id", target = "memberId")
     MemberMyInfoResponse toMyInfoResponseFromDomain(Member domain);
 }
