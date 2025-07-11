@@ -9,11 +9,11 @@ import org.mapstruct.Mapper;
 public interface MemberMapper {
 
     // 엔티티 -> 도메인
-    Member toDomainFromEntity(MemberEntity memberEntity);
+    Member toDomainFromEntity(MemberEntity entity);
 
     // 도메인 -> 엔티티
-    MemberEntity toEntityFromDomain(Member domainMember);
+    MemberEntity toEntityFromDomain(Member domain);
 
     // 도메인 -> DTO
-    MemberMyInfoResponse toMyInfoResponseFromDomain(Member domainMember);
+    MemberMyInfoResponse toMyInfoResponseFromDomain(Member domain);
 }
