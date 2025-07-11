@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.kakao.properties;
+package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

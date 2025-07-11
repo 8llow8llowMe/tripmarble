@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.naver;
+package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.naver;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
