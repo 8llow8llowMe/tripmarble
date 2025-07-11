@@ -6,6 +6,7 @@ import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGa
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.theme.application.port.out.TripThemeRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,15 +35,18 @@ public class TripGameFacade implements TripGameWebUseCase {
 
         TripGame saved = tripGameRepositoryPort.save(tripGame);
 
-        // TODO: 내부 서비스 통신에 의해 대표 여행지 이름 조회
+        TripTheme tripTheme = tripThemeRepositoryPort.findById(saved.tripThemeId())
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행 테마입니다."));
 
-        // TODO: 여행 테마쪽 조회
+        // TODO: 내부 서비스 통신에 의해 대표 여행지 이름 조회
 
         return TripGameCreateResponse.builder()
             .tripGameId(saved.tripThemeId())
             .difficulty(saved.difficulty())
             .startedAt(saved.startedAt())
             .endedAt(saved.endedAt())
+            .tripThemeName(tripTheme.name())
+            .representativeRegionName(null) // 추후 내부 통신 추가
             .build();
     }
 }
