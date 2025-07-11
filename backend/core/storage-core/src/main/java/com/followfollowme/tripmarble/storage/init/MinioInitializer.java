@@ -5,9 +5,10 @@ import com.followfollowme.tripmarble.storage.properties.MinioProperties;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -18,7 +19,7 @@ public class MinioInitializer {
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void initBuckets() {
         for (MinioBucket bucket : MinioBucket.values()) {
             String bucketName = bucket.fullName(minioProperties.bucketPrefix());
@@ -40,8 +41,7 @@ public class MinioInitializer {
                 }
 
             } catch (Exception e) {
-                log.error("버킷 초기화 실패: {}", bucketName, e);
-                throw new IllegalStateException("MinIO 버킷 초기화 실패", e);
+                log.error("MinIO 버킷 초기화 실패 (서비스는 계속 실행): {}", bucketName, e);
             }
         }
     }
