@@ -6,7 +6,6 @@ import com.followfollowme.tripmarble.domainlayer.member.application.command.Memb
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import com.followfollowme.tripmarble.domainlayer.member.application.mapper.MemberMapper;
-import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberInternalUseCase;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
@@ -19,9 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
-public class MemberFacade implements MemberWebUseCase, MemberInternalUseCase {
+public class MemberFacade implements MemberWebUseCase {
 
     private final MemberRepositoryPort memberRepositoryPort;
     private final PasswordEncoder passwordEncoder;
@@ -30,6 +28,7 @@ public class MemberFacade implements MemberWebUseCase, MemberInternalUseCase {
     private final MemberMapper memberMapper;
 
     @Override
+    @Transactional
     public void signup(MemberSignupCommand command) {
         if (memberRepositoryPort.existByEmail(command.email())) {
             throw new MemberException(MemberErrorCode.EXIST_MEMBER_EMAIL, command.email());
@@ -50,6 +49,7 @@ public class MemberFacade implements MemberWebUseCase, MemberInternalUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MemberMyInfoResponse getMyInfo(long memberId) {
         Member member = memberRepositoryPort.findById(memberId)
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
