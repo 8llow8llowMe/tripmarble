@@ -29,8 +29,8 @@ public class RepresentativeRegionEntity {
     @Comment("대표 여행지 ID")
     private Long id;
 
-    @Column(nullable = false, length = 30)
     @Comment("대표 여행지 이름 (ex. 서울, 부산)")
+    @Column(nullable = false, length = 30)
     private String name;
 
     @Comment("썸네일 이미지 URL")
