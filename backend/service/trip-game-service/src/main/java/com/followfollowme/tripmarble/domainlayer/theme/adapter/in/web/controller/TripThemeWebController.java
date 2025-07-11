@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/trip-themes")
 @Tag(name = "여행 테마", description = "여행 테마 관련 클라이언트에 제공하는 API 입니다.")
-public class TripThemeController {
+public class TripThemeWebController {
 
     private final TripThemeWebUseCase tripThemeWebUseCase;
 
