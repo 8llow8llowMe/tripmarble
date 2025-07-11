@@ -6,6 +6,7 @@ import com.followfollowme.tripmarble.domainlayer.theme.application.mapper.TripTh
 import com.followfollowme.tripmarble.domainlayer.theme.application.port.out.TripThemeRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -20,5 +21,11 @@ public class TripThemeRepositoryAdapter implements TripThemeRepositoryPort {
     public List<TripTheme> findAll() {
         List<TripThemeEntity> entities = tripThemeRepository.findAll();
         return tripThemeMapper.toDomainListFromEntityList(entities);
+    }
+
+    @Override
+    public Optional<TripTheme> findById(Long tripThemeId) {
+        return tripThemeRepository.findById(tripThemeId)
+            .map(tripThemeMapper::toDomainFromEntity);
     }
 }
