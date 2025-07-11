@@ -5,7 +5,7 @@ import java.util.Optional;
 
 public interface MemberRepositoryPort {
 
-    Member save(Member domainMember);
+    Member save(Member domain);
 
     boolean existByEmail(String email);
 
