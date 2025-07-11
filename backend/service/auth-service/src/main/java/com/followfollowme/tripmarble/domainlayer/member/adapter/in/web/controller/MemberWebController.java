@@ -61,7 +61,6 @@ public class MemberWebController {
     @PostMapping(value = "/profile-image/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<MemberProfileUploadResponse>> uploadProfileImage(
-        @AuthenticationPrincipal MemberLoginActive loginActive,
         @RequestPart MultipartFile imageFile) {
         MemberProfileUploadResponse profileUploadResponse = memberWebUseCase.uploadProfileImage(
             imageFile);
