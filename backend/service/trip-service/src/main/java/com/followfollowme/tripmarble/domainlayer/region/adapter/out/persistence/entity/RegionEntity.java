@@ -28,8 +28,8 @@ import org.hibernate.annotations.Comment;
 public class RegionEntity {
 
     @Id
-    @Comment("시도 아이디 (지역 아이디)")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Comment("시도 아이디 (지역 아이디)")
     private Long id;
 
     @Comment("TourAPI 시도 코드 (자연키)")
