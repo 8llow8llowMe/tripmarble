@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto;
 
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.enums.OAuthProvider;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.security.common.enums.SecurityRole;
 import lombok.Builder;
 

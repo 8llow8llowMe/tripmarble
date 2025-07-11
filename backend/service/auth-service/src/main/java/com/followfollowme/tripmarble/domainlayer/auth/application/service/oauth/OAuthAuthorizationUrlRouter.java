@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.auth.application.service.oauth;
 
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence.external.oauth.vendor.enums.OAuthProvider;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.OAuthAuthorizationUrlProvider;
 import java.util.Map;
 import java.util.Optional;
