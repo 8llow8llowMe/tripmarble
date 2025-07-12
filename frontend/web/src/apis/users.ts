@@ -11,3 +11,13 @@ export const login = (credentials: { email: string; password: string }) =>
   apiClient.post("/auth/login", credentials);
 
 export const logout = () => apiClient.post("/auth/logout");
+
+export const signUp = (data: {
+  email: string;
+  password: string;
+  name: string;
+  nickname: string;
+}) => {
+  console.log(apiClient.defaults.baseURL);
+  return apiClient.post("/members/signup", data);
+};
