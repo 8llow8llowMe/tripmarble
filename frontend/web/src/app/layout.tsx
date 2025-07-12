@@ -1,5 +1,7 @@
 import "@/app/globals.scss";
+import QueryProvider from "@/app/providers/QueryProvider";
 import ClientLayout from "@/components/layout/ClientLayout";
+import StoreProvider from "@/store/StoreProvider";
 import { Metadata } from "next";
 import type { ReactNode } from "react";
 
@@ -33,7 +35,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko">
       <body>
-        <ClientLayout>{children}</ClientLayout>
+        <QueryProvider>
+          <StoreProvider>
+            <ClientLayout>{children}</ClientLayout>
+          </StoreProvider>
+        </QueryProvider>
       </body>
     </html>
   );
