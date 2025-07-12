@@ -5,6 +5,7 @@ import {
   deleteUserAccount,
   login,
   logout,
+  signUp,
 } from "@/apis/users";
 
 export const useUserProfile = () =>
@@ -31,4 +32,9 @@ export const useLogin = () =>
 export const useLogout = () =>
   useMutation({
     mutationFn: logout,
+  });
+
+export const useSignUp = () =>
+  useMutation({
+    mutationFn: signUp,
   });
