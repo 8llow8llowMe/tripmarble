@@ -1,5 +1,6 @@
 import "@/app/globals.scss";
 import QueryProvider from "@/app/providers/QueryProvider";
+import CategoryLayoutClient from "@/components/layout/CategoryLayoutClient";
 import ClientLayout from "@/components/layout/ClientLayout";
 import StoreProvider from "@/store/StoreProvider";
 import { Metadata } from "next";
@@ -37,7 +38,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <QueryProvider>
           <StoreProvider>
-            <ClientLayout>{children}</ClientLayout>
+            <ClientLayout>
+              <CategoryLayoutClient>{children}</CategoryLayoutClient>
+            </ClientLayout>
           </StoreProvider>
         </QueryProvider>
       </body>

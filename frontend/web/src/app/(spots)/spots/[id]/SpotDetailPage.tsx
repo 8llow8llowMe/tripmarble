@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { seoul2 } from "@/assets/images/places";
 // style
 import styles from "./Spot.module.scss";
@@ -7,7 +8,10 @@ import styles from "./Spot.module.scss";
 // import { useEffect, useRef } from "react";
 // import { useTripSpotsByRepresentativeRegion } from "@/hooks/queries/useTrips";
 
-const SpotDetailPage = () => {
+type Props = {
+  spotId: string;
+};
+const SpotDetailPage = ({ spotId }: Props) => {
   // const { id: spotId } = useParams();
   const dummyData = [
     {
@@ -127,19 +131,21 @@ const SpotDetailPage = () => {
         {/* {data?.pages.flatMap((page) =>
           page.data.dataBody.contents.map((spot) => ( */}
         {dummyData.map((spot) => (
-          <div key={spot.tripSpotId} className={styles.contentCard}>
-            <div className={styles.cardImage}>
-              <Image
-                src={spot.thumbnailImageUrl || "/images/no-image.png"}
-                alt={spot.tripSpotName}
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, 250px"
-                style={{ objectFit: "cover" }}
-              />
+          <Link key={spot.tripSpotId} href={`/trip-spots/${spot.tripSpotId}`}>
+            <div className={styles.contentCard}>
+              <div className={styles.cardImage}>
+                <Image
+                  src={spot.thumbnailImageUrl || "/images/no-image.png"}
+                  alt={spot.tripSpotName}
+                  fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 250px"
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
+              <p className={styles.cardTitle}>{spot.tripSpotName}</p>
             </div>
-            <p className={styles.cardTitle}>{spot.tripSpotName}</p>
-          </div>
+          </Link>
         ))}
         {/* <div ref={observerRef} />
         {isFetchingNextPage && <p>불러오는 중...</p>} */}
