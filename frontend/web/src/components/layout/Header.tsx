@@ -5,11 +5,11 @@ import { usePathname } from "next/navigation";
 import styles from "./Header.module.scss";
 
 const Header = () => {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled] = useState(pathname !== "/");
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLDivElement>(null);
-  const pathname = usePathname();
 
   const toggleMenu = () => {
     setIsOpen((prev) => !prev);
@@ -58,6 +58,8 @@ const Header = () => {
     };
   }, [pathname]);
 
+  const isActive = (path: string) => (pathname === path ? styles.active : "");
+
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ""}`}>
       <div className={styles.logo}>
@@ -65,11 +67,21 @@ const Header = () => {
       </div>
 
       <nav className={`${styles.nav} ${scrolled ? styles.scrolled : ""}`}>
-        <Link href="/search">검색</Link>
-        <Link href="/spots">여행지 목록</Link>
-        <Link href="/game">게임 목록</Link>
-        <Link href="/profile">마이페이지</Link>
-        <Link href="/login">로그인</Link>
+        <Link href="/search" className={isActive("/search")}>
+          검색
+        </Link>
+        <Link href="/spots" className={isActive("/spots")}>
+          여행지 목록
+        </Link>
+        <Link href="/game" className={isActive("/game")}>
+          게임 목록
+        </Link>
+        <Link href="/profile" className={isActive("/profile")}>
+          마이페이지
+        </Link>
+        <Link href="/login" className={isActive("/login")}>
+          로그인
+        </Link>
       </nav>
 
       <div
@@ -77,22 +89,26 @@ const Header = () => {
         ref={hamburgerRef}
         onClick={toggleMenu}
       >
-        <div
-          className={styles.hamburger}
-          ref={hamburgerRef}
-          onClick={toggleMenu}
-        >
-          ☰
-        </div>
+        ☰
       </div>
 
       {isOpen && (
         <div className={styles.mobileMenu} ref={menuRef}>
-          <Link href="/search">검색</Link>
-          <Link href="/spots">여행지 목록</Link>
-          <Link href="/game">게임 목록</Link>
-          <Link href="/profile">마이페이지</Link>
-          <Link href="/login">로그인</Link>
+          <Link href="/search" className={isActive("/search")}>
+            검색
+          </Link>
+          <Link href="/spots" className={isActive("/spots")}>
+            여행지 목록
+          </Link>
+          <Link href="/game" className={isActive("/game")}>
+            게임 목록
+          </Link>
+          <Link href="/profile" className={isActive("/profile")}>
+            마이페이지
+          </Link>
+          <Link href="/login" className={isActive("/login")}>
+            로그인
+          </Link>
         </div>
       )}
     </header>
