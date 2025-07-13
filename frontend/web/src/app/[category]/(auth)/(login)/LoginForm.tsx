@@ -1,24 +1,91 @@
 "use client";
+import { useEffect, useState } from "react";
+import { Cookies } from "react-cookie";
 import Image from "next/image";
-import styles from "./Login.module.scss";
-import { google, kakao, naver } from "@/assets/images/social-logo";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+// style
+import styles from "./Login.module.scss";
+// icon
+import { google, kakao, naver } from "@/assets/images/social-logo";
+import { useLogin } from "@/hooks/queries/useUsers";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [saveEmail, setSaveEmail] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("saveEmail") === "true";
+    const storedEmail = localStorage.getItem("email") || "";
+    setSaveEmail(saved);
+    setEmail(saved ? storedEmail : "");
+  }, []);
+
+  const { mutate: loginMutate } = useLogin();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    loginMutate(
+      { email, password },
+      {
+        onSuccess: (res: any) => {
+          const { accessToken } = res.data.dataBody;
+
+          // 쿠키에 accessToken 저장
+          const cookies = new Cookies();
+          cookies.set("accessToken", accessToken, {
+            path: "/",
+            maxAge: 60 * 60 * 2, // 2시간
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+          });
+
+          if (saveEmail) {
+            localStorage.setItem("saveEmail", "true");
+            localStorage.setItem("email", email);
+          } else {
+            localStorage.removeItem("saveEmail");
+            localStorage.removeItem("email");
+          }
+          router.push("/");
+        },
+        onError: (err: any) => {
+          console.error("로그인 실패", err);
+          alert("로그인에 실패했습니다.");
+        },
+      }
+    );
+  };
+
   return (
     <>
-      <form className={styles.form}>
+      <form className={styles.form} onSubmit={handleSubmit}>
         <label className={styles.label}>로그인</label>
-        <input type="text" placeholder="아이디" className={styles.input} />
+        <input
+          type="text"
+          placeholder="이메일"
+          className={styles.input}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
         <input
           type="password"
           placeholder="비밀번호 (영문, 숫자, 특수문자 조합 8~30자)"
           className={styles.input}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
         <div className={styles.options}>
           <label>
-            <input type="checkbox" />
-            아이디 저장
+            <input
+              type="checkbox"
+              checked={saveEmail}
+              onChange={(e) => setSaveEmail(e.target.checked)}
+            />
+            이메일 저장
           </label>
           {/* <div className={styles.links}>
               <a href="#">아이디 찾기</a>
