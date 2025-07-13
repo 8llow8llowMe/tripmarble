@@ -1,4 +1,6 @@
+import { TripSpotsResponse } from "@/types/tripsType";
 import apiClient from "./client";
+import { AxiosResponse } from "axios";
 
 // 시도 목록 조회
 export const getRegions = () => apiClient.get("/regions");
@@ -16,11 +18,21 @@ export const getRepresentativeRegions = () =>
 
 // 대표 여행지에 따른 여행지 목록 조회 (무한 스크롤)
 export const getTripSpotsByRepresentativeRegion = (
-  representativeRegionId: string
-) =>
-  apiClient.get(
-    `/trip-spots/by-representative-region/${representativeRegionId}`
+  representativeRegionId: string,
+  lastTripSpotId: number | null = null,
+  size: number = 10
+): Promise<AxiosResponse<TripSpotsResponse>> => {
+  const params = new URLSearchParams();
+  if (lastTripSpotId !== null) {
+    params.append("lastTripSpotId", lastTripSpotId.toString());
+  }
+  if (size) {
+    params.append("size", size.toString());
+  }
+  return apiClient.get(
+    `/trip-spots/by-representative-region/${representativeRegionId}?${params.toString()}`
   );
+};
 
 // 여행지 상세 정보 조회
 export const getTripSpotById = (tripSpotId: string) =>
