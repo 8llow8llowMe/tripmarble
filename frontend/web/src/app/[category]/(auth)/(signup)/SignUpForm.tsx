@@ -1,8 +1,12 @@
 "use client";
 import { useState, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
+// query
 import { useSignUp } from "@/hooks/queries/useUsers";
+// store
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { resetForm, updateField } from "@/store/form/formSlice";
+// style
 import styles from "./SignUp.module.scss";
 
 const steps = [
@@ -22,6 +26,7 @@ const steps = [
 ];
 
 export default function SignUpPage() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const form = useAppSelector((state) => state.form);
   const [step, setStep] = useState(0);
@@ -81,10 +86,12 @@ export default function SignUpPage() {
         {
           onSuccess: () => {
             dispatch(resetForm());
-            alert("회원가입 완료!");
+            router.push("/login");
+            alert("회원가입 완료! 로그인 해주세요.");
           },
           onError: (error) => {
             console.error("회원가입 실패:", error);
+            router.push("/login");
           },
         }
       );
