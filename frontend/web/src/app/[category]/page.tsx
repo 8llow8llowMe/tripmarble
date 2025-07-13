@@ -3,7 +3,6 @@
 import { notFound, useParams } from "next/navigation";
 import { convertingToString } from "@/utils/common";
 import SearchPage from "@/app/[category]/(search)/SearchPage";
-import SpotsPage from "@/app/[category]/(spots)/SpotsPage";
 import ProfilePage from "@/app/[category]/(user)/(profile)/ProfilePage";
 import AuthLayout from "@/app/[category]/(auth)/layout";
 import LoginForm from "@/app/[category]/(auth)/(login)/LoginForm";
@@ -12,7 +11,6 @@ import SignUpForm from "@/app/[category]/(auth)/(signup)/SignUpForm";
 const categoryComponentMap: Record<string, React.ComponentType> = {
   search: SearchPage,
   // plan: PlanPage,
-  spots: SpotsPage,
   profile: ProfilePage,
   login: () => (
     <AuthLayout>

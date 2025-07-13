@@ -3,8 +3,6 @@ import type { Metadata } from "next";
 // styles
 import styles from "@/app/Home.module.scss";
 // components
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import Button from "@/components/common/Button/Button";
 import Image from "next/image";
 import { jeju2, seoul2 } from "@/assets/images/places";
@@ -17,7 +15,6 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      <Header />
       <div className={styles.parallaxWrapper}>
         <section className={styles.parallaxSection}>
           <div className={styles.content}>
@@ -82,7 +79,6 @@ export default function HomePage() {
           </div>
         </section>
       </div>
-      <Footer />
     </>
   );
 }
