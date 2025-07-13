@@ -15,6 +15,9 @@ const nextConfig = {
       env[key] = process.env[key];
       return env;
     }, {}),
+  images: {
+    domains: ["tong.visitkorea.or.kr"],
+  },
 };
 
 export default nextConfig;
