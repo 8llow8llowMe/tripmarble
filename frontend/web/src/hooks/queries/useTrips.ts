@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import {
   getRegions,
   getSigungusByRegion,
@@ -7,6 +7,8 @@ import {
   getTripSpotsByRepresentativeRegion,
   getTripSpotById,
 } from "@/apis/trips";
+import { AxiosResponse } from "axios";
+import { TripSpotsResponse } from "@/types/tripsType";
 
 export const useRegions = () =>
   useQuery({
@@ -35,9 +37,20 @@ export const useRepresentativeRegions = () =>
 export const useTripSpotsByRepresentativeRegion = (
   representativeRegionId: string
 ) =>
-  useQuery({
+  useInfiniteQuery<AxiosResponse<TripSpotsResponse>, Error>({
     queryKey: ["tripSpotsByRepresentativeRegion", representativeRegionId],
-    queryFn: () => getTripSpotsByRepresentativeRegion(representativeRegionId),
+    queryFn: ({ pageParam }) =>
+      getTripSpotsByRepresentativeRegion(
+        representativeRegionId,
+        pageParam as number | null
+      ),
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => {
+      const contents = lastPage.data.dataBody.contents;
+      const hasNext = lastPage.data.dataBody.hasNext;
+      if (!hasNext || contents.length === 0) return undefined;
+      return contents[contents.length - 1].tripSpotId;
+    },
   });
 
 export const useTripSpotById = (tripSpotId: string) =>
