@@ -9,9 +9,12 @@ import styles from "./Login.module.scss";
 // icon
 import { google, kakao, naver } from "@/assets/images/social-logo";
 import { useLogin } from "@/hooks/queries/useUsers";
+import { fetchMe } from "@/store/user/userSlice";
+import { useAppDispatch } from "@/store/hooks";
 
 export default function LoginPage() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [saveEmail, setSaveEmail] = useState(false);
@@ -31,7 +34,7 @@ export default function LoginPage() {
     loginMutate(
       { email, password },
       {
-        onSuccess: (res: any) => {
+        onSuccess: async (res: any) => {
           const { accessToken } = res.data.dataBody;
 
           // 쿠키에 accessToken 저장
@@ -42,6 +45,7 @@ export default function LoginPage() {
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
           });
+          await dispatch(fetchMe());
 
           if (saveEmail) {
             localStorage.setItem("saveEmail", "true");
