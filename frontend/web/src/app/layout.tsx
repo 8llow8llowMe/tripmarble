@@ -2,6 +2,7 @@ import "@/app/globals.scss";
 import QueryProvider from "@/app/providers/QueryProvider";
 import CategoryLayoutClient from "@/components/layout/CategoryLayoutClient";
 import ClientLayout from "@/components/layout/ClientLayout";
+import CookieProvider from "@/store/CookieProvider";
 import StoreProvider from "@/store/StoreProvider";
 import { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -38,9 +39,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <QueryProvider>
           <StoreProvider>
-            <ClientLayout>
-              <CategoryLayoutClient>{children}</CategoryLayoutClient>
-            </ClientLayout>
+            <CookieProvider>
+              <ClientLayout>
+                <CategoryLayoutClient>{children}</CategoryLayoutClient>
+              </ClientLayout>
+            </CookieProvider>
           </StoreProvider>
         </QueryProvider>
       </body>
