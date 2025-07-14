@@ -5,6 +5,20 @@ spring:
   cloud:
     gateway:
       routes:
+        # Swagger 문서용 라우트
+        - id: auth-service-docs
+          uri: http://localhost:8081
+          predicates:
+            - Path=/auth-service/** # /auth-service/v3/api-docs 로 들어오면
+          filters:
+            - StripPrefix=1  # /v3/api-docs 로 잘라서 전달
+        - id: trip-service-docs
+          uri: http://localhost:8082
+          predicates:
+            - Path=/trip-service/**
+          filters:
+            - StripPrefix=1
+          # 기존 API 라우트
         - id: trip-service
           uri: http://localhost:8082
           predicates:
@@ -17,3 +31,20 @@ eureka:
 
 jwt:
   access-key: ENC(YDO9DGO7lP8iCqeTNW/SXWCv0697ep+bbGvMnjoJfMDEtWy1Zq/yfZDsovoggEcmLLOtZfHSpLYoRO0YEUlrOl3CvD5KWXo55haCMx7cZMg=)
+
+springdoc:
+  swagger-ui:
+    # Swagger UI 활성화 여부
+    enabled: true
+    # Swagger UI 접근 경로
+    path: /swagger-ui.html
+    # Swagger UI 구성에 대한 URL
+    config-url: /v3/api-docs/swagger-config
+    # 각 서비스의 OpenAPI 문서 URL 목록
+    urls:
+      - name: 회원 서비스 및 인증/인가 관련 API
+        url: /auth-service/v3/api-docs
+      - name: 지역 및 여행 서비스 관련 API
+        url: /trip-service/v3/api-docs
+    operationsSorter: none # API 정렬 기준 없음
+    displayRequestDuration: true # 각 API 요청의 응답시간(ms) 표시
