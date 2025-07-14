@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto;
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -13,8 +14,17 @@ public record TripGameCreateResponse(
     @Schema(description = "생성된 여행 게임 ID", example = "202507110001")
     long tripGameId,
 
+    @Schema(description = "게임 상태", example = "WAITING")
+    Status status,
+
+    @Schema(description = "게임 상태 메시지", example = "시작 전")
+    String statusMessage,
+
     @Schema(description = "게임 난이도", example = "NORMAL")
     Difficulty difficulty,
+
+    @Schema(description = "게임 난이도 메시지", example = "보통")
+    String difficultyMessage,
 
     @Schema(description = "여행 시작일", example = "2025-07-15")
     LocalDate startedAt,
@@ -33,7 +43,7 @@ public record TripGameCreateResponse(
 
     @Schema(description = "준비 여부", example = "false")
     boolean isReady
-    
+
 ) {
 
 }
