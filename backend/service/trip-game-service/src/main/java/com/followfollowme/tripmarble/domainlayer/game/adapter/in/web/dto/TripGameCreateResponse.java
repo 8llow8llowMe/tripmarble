@@ -2,8 +2,9 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto;
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDate;
 import lombok.Builder;
+
+import java.time.LocalDate;
 
 @Builder
 @Schema(description = "여행 게임 생성 응답 DTO")
@@ -25,8 +26,14 @@ public record TripGameCreateResponse(
     String representativeRegionName,
 
     @Schema(description = "여행 테마 이름", example = "맛집 투어")
-    String tripThemeName
+    String tripThemeName,
 
+    @Schema(description = "방장 여부", example = "true")
+    boolean isHost,
+
+    @Schema(description = "준비 여부", example = "false")
+    boolean isReady
+    
 ) {
 
 }
