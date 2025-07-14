@@ -3,16 +3,19 @@ pipeline {
 
     // 파라미터
     parameters {
+        // 서비스가 속한 그룹 (폴더명)
         choice(
             name: 'SERVICE_GROUP',
             choices: ['service', 'cloud'],
             description: '상위 모듈 디렉터리 (service / cloud)'
         )
+        // 실제 서비스 이름
         string(
             name: 'SERVICE_NAME',
             defaultValue: 'auth-service',
             description: '하위 모듈(서비스) 디렉터리 이름'
         )
+        // 이 파이프라인이 처리할 PR 라벨
         string(
             name: 'SERVICE_LABEL',
             defaultValue: 'backend-auth-service',
@@ -22,8 +25,10 @@ pipeline {
 
     // 공통 환경 변수
     environment {
-        MODULE_PATH = "${params.SERVICE_GROUP}:${params.SERVICE_NAME}" // service:auth-service
-        FS_PATH = "backend/${params.SERVICE_GROUP}/${params.SERVICE_NAME}" // backend/service/auth-service
+        // Gradle 호출 시 사용하는 모듈 경로 ( service:auth-service )
+        MODULE_PATH = "${params.SERVICE_GROUP}:${params.SERVICE_NAME}"
+        // 실제 파일시스템 경로 ( backend/service/auth-service )
+        FS_PATH = "backend/${params.SERVICE_GROUP}/${params.SERVICE_NAME}"
 
         DOCKERFILE = "${params.SERVICE_NAME}.Dockerfile"
         COMPOSE_FILE = "docker-compose-${params.SERVICE_NAME}.yml"
