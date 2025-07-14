@@ -12,10 +12,11 @@ public record TripGameCreateCommand(
     LocalDate startedAt,
     LocalDate endedAt,
     long representativeRegionId,
-    long tripThemeId
+    long tripThemeId,
+    long memberId
 ) {
 
-    public static TripGameCreateCommand from(TripGameCreateRequest request) {
+    public static TripGameCreateCommand from(TripGameCreateRequest request, long memberId) {
         return TripGameCreateCommand.builder()
             .title(request.title())
             .difficulty(request.difficulty())
@@ -23,6 +24,7 @@ public record TripGameCreateCommand(
             .endedAt(request.endedAt())
             .representativeRegionId(request.representativeRegionId())
             .tripThemeId(request.tripThemeId())
+            .memberId(memberId)
             .build();
     }
 }
