@@ -5,11 +5,14 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameWebUseCase;
+import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,8 +31,9 @@ public class TripGameWebController {
         description = "여행 게임(계획)을 생성하는 기능입니다."
     )
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<TripGameCreateResponse>> crateTripGame(
-        @Valid @RequestBody TripGameCreateRequest request) {
+        @Valid @RequestBody TripGameCreateRequest request, @AuthenticationPrincipal MemberLoginActive loginActive) {
         TripGameCreateResponse response = tripGameWebUseCase.crateTripGame(TripGameCreateCommand.from(request));
         return ResponseEntity.ok().body(Response.success(response));
     }
