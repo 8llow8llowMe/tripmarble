@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity;
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import com.followfollowme.tripmarble.domainlayer.theme.adapter.out.persistence.entity.TripThemeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,13 +12,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -35,6 +37,11 @@ public class TripGameEntity {
 
     @Comment("여행 게임(계획) 제목")
     private String title;
+
+    @Comment("게임 상태 여부 (시작 전/진행 중/종료")
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @Comment("난이도")
     @Column(nullable = false)
