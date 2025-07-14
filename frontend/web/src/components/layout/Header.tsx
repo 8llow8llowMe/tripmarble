@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import styles from "./Header.module.scss";
+import { useAppSelector } from "@/store/hooks";
 
 const Header = () => {
   const pathname = usePathname();
@@ -10,6 +11,7 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(pathname !== "/");
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLDivElement>(null);
+  const user = useAppSelector((state) => state.user.user);
 
   const toggleMenu = () => {
     setIsOpen((prev) => !prev);
@@ -76,12 +78,15 @@ const Header = () => {
         <Link href="/game" className={isActive("/game")}>
           게임 목록
         </Link>
-        <Link href="/profile" className={isActive("/profile")}>
-          마이페이지
-        </Link>
-        <Link href="/login" className={isActive("/login")}>
-          로그인
-        </Link>
+        {user ? (
+          <Link href="/profile" className={isActive("/profile")}>
+            마이페이지
+          </Link>
+        ) : (
+          <Link href="/login" className={isActive("/login")}>
+            로그인
+          </Link>
+        )}
       </nav>
 
       <div
@@ -103,12 +108,15 @@ const Header = () => {
           <Link href="/game" className={isActive("/game")}>
             게임 목록
           </Link>
-          <Link href="/profile" className={isActive("/profile")}>
-            마이페이지
-          </Link>
-          <Link href="/login" className={isActive("/login")}>
-            로그인
-          </Link>
+          {user ? (
+            <Link href="/profile" className={isActive("/profile")}>
+              마이페이지
+            </Link>
+          ) : (
+            <Link href="/login" className={isActive("/login")}>
+              로그인
+            </Link>
+          )}
         </div>
       )}
     </header>
