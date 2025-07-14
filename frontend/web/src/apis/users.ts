@@ -18,6 +18,5 @@ export const signUp = (data: {
   name: string;
   nickname: string;
 }) => {
-  console.log(apiClient.defaults.baseURL);
   return apiClient.post("/members/signup", data);
 };
