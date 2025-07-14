@@ -34,7 +34,8 @@ public class TripGameWebController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<TripGameCreateResponse>> crateTripGame(
         @Valid @RequestBody TripGameCreateRequest request, @AuthenticationPrincipal MemberLoginActive loginActive) {
-        TripGameCreateResponse response = tripGameWebUseCase.crateTripGame(TripGameCreateCommand.from(request));
+        TripGameCreateResponse response = tripGameWebUseCase.crateTripGame(
+            TripGameCreateCommand.from(request, loginActive.id()));
         return ResponseEntity.ok().body(Response.success(response));
     }
 }
