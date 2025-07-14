@@ -101,8 +101,10 @@ public class AuthSecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.setAllowedOriginPatterns(List.of(
-            "http://localhost:5173",
-            "https://www.tripmarble.com"
+            "http://localhost:5173", // 프론트엔드 개발자가 로컬에서 실행한 Vite(Next.js) 앱에서 백엔드로 API 요청할 수 있도록 허용
+            // 로컬에서 API Gateway 실행 시, Swagger UI 통한 요청 등 CORS 허용 (Aggregation된 API 호출용) -> 하이브리드 인증/인가 패턴 때문에
+            "http://localhost:8000",
+            "https://www.tripmarble.com" // 운영 배포된 프론트가 실제 API 서버로 요청할 때 CORS 허용
         ));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
