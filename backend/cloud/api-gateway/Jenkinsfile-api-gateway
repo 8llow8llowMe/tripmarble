@@ -105,8 +105,13 @@ pipeline {
 
                     // 3. 라벨 검사 (REST API 단일 호출)
                     echo "PR #${prNum} 라벨 검사"
-                    def repoPath = (env.GIT_URL ?: '').replaceFirst(/^.*github.com[:\\/]/,'')
-                                                      .replaceFirst(/\\.git$/, '')
+                    def repoPath = (env.GIT_URL ?: '')
+                                        .replaceFirst(/(^https?:\/\/|git@)github\.com[:\/]/,'')
+                                        .replaceFirst(/\.git$/,'')
+                                        
+                    def labelUrl = "https://api.github.com/repos/${repoPath}/issues/${prNum}/labels"
+                    echo "DEBUG   ▶  label API URL  =  ${labelUrl}"
+
                     boolean labelOk = false
                     
                     withCredentials([usernamePassword(credentialsId: 'deploy',
@@ -121,7 +126,7 @@ pipeline {
                             returnStdout: true
                         ).trim()
 
-                        echo "응답 라벨 목록: ${labelsJson}"
+                        echo "DEBUG   ▶  API 응답    =  ${labelsJson}"
                         labelOk = labelsJson.contains("\"name\": \"${params.SERVICE_LABEL}\"")
                     }
 
