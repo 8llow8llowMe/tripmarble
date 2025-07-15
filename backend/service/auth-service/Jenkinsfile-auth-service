@@ -137,7 +137,7 @@ pipeline {
             steps {
                 dir("${env.FS_PATH}") {
                     sh 'chmod +x ../../gradlew'
-                    sh "../../gradlew :${env.MODULE_PATH}:bootJar"
+                    sh "../../gradlew clean :${env.MODULE_PATH}:bootJar"
                 }
             }
             post {
@@ -179,7 +179,7 @@ pipeline {
                                 mv .env-backend-dev env/.env-backend-dev
                                 docker compose -f ${COMPOSE_FILE} \\
                                     --env-file env/.env-backend-dev \\
-                                    up -d --build --no-cache ${params.SERVICE_NAME}-dev
+                                    up -d --build ${params.SERVICE_NAME}-dev
                             """.stripIndent()
                         )],
                         verbose: true
