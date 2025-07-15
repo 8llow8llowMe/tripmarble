@@ -34,8 +34,8 @@ export default function TripSpotDetailPage({
           src={spot.imageUrl || "/images/no-image.png"}
           alt="여행지 대표 이미지"
           width={600}
-          height={300}
-          style={{ objectFit: "cover", width: "100%", height: "auto" }}
+          height={400}
+          style={{ objectFit: "cover", width: "100%" }}
           priority
         />
       </div>
