@@ -138,7 +138,13 @@ pipeline {
                 dir("${env.FS_PATH}") {
                     sh 'chmod +x ../../gradlew'
                     sh "../../gradlew clean :${env.MODULE_PATH}:bootJar"
-                    sh "unzip -p ${env.FS_PATH}/build/libs/*.jar BOOT-INF/classes/application-dev.yml | grep port"
+                    script {
+                        def ymlLines = sh(
+                            script: "unzip -p build/libs/*.jar BOOT-INF/classes/application-dev.yml | grep port",
+                            returnStdout: true
+                        ).trim()
+                        echo "✅ JAR 내부 application-dev.yml 포트 설정:\n${ymlLines}"
+                    }
                 }
             }
             post {
