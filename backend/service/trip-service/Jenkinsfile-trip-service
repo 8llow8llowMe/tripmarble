@@ -4,10 +4,10 @@ pipeline {
     // 파라미터
     parameters {
         // 서비스가 속한 그룹 (폴더명)
-        choice(
+        string(
             name: 'SERVICE_GROUP',
-            choices: ['service', 'cloud'],
-            description: '상위 모듈 디렉터리 (service / cloud)'
+            defaultValue: 'service',
+            description: '상위 모듈 디렉터리 (service)'
         )
         // 실제 서비스 이름
         string(
