@@ -99,8 +99,8 @@ pipeline {
                     }
 
                     if (!prNum) {
-                        echo "PR 번호를 찾지 못했지만 develop/main 브랜치 빌드이므로 통과."
-                        return
+                        echo "PR 번호를 찾지 못했으므로 빌드 중단."
+                        error('skip: PR Number not found')
                     }
 
                     // 3. 라벨 검사
