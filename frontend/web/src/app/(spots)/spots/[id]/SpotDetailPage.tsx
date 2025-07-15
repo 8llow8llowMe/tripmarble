@@ -116,7 +116,7 @@ const SpotDetailPage = ({ spotId }: Props) => {
             alt="spot-main-image"
             fill
             priority
-            sizes="(max-width: 768px) 100vw, 250px"
+            sizes="(max-width: 768px) 100vw, 10rem"
             className={styles.mainImage}
             style={{ objectFit: "cover" }}
           />
@@ -139,7 +139,7 @@ const SpotDetailPage = ({ spotId }: Props) => {
                   alt={spot.tripSpotName}
                   fill
                   priority
-                  sizes="(max-width: 768px) 100vw, 250px"
+                  sizes="(max-width: 768px) 100vw, 10rem"
                   style={{ objectFit: "cover" }}
                 />
               </div>
