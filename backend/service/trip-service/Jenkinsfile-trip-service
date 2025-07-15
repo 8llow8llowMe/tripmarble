@@ -103,21 +103,39 @@ pipeline {
                         error('skip: PR Number not found')
                     }
 
-                    // 3. 라벨 검사
+                    // 3. 라벨 검사 (재시도 로직 포함)
                     echo "PR #${prNum} 라벨 검사"
-                    def repoPath = (env.GIT_URL ?: '').replaceFirst(/^.*github.com[:\\/]/,'').replaceFirst(/\\.git$/,'')
+                    def repoPath = (env.GIT_URL ?: '').replaceFirst(/^.*github.com[:\\/]/,'').replaceFirst(/\\.git$/, '')
                     boolean labelOk = false
+                    
                     withCredentials([usernamePassword(credentialsId: 'deploy',
-                                                      usernameVariable: 'GH_USER',
-                                                      passwordVariable: 'GH_TOKEN')]) {
-                        def labelsJson = sh(
-                             script: """
-                                curl -s -H "Authorization: token ${GH_TOKEN}" \\
-                                     https://api.github.com/repos/${repoPath}/issues/${prNum}/labels
-                             """,
-                             returnStdout: true).trim()
-                        labelOk = labelsJson.contains("\"name\": \"${params.SERVICE_LABEL}\"")
+                                              usernameVariable: 'GH_USER',
+                                              passwordVariable: 'GH_TOKEN')]) {
+
+                        int maxRetries = 3
+                        int attempt = 0
+                        while (attempt < maxRetries && !labelOk) {
+                            def labelsJson = sh(
+                                script: """
+                                    curl -s -H "Authorization: token ${GH_TOKEN}" \\
+                                        https://api.github.com/repos/${repoPath}/issues/${prNum}/labels
+                                """,
+                                returnStdout: true
+                            ).trim()
+
+                            echo "GitHub 라벨 응답: ${labelsJson}"
+                            labelOk = labelsJson.contains("\"name\": \"${params.SERVICE_LABEL}\"")
+
+                            if (!labelOk) {
+                                attempt++
+                                if (attempt < maxRetries) {
+                                    echo "라벨 미일치. ${attempt}초 후 재시도 (${attempt}/${maxRetries})..."
+                                    sleep time: 3, unit: 'SECONDS'
+                                }
+                            }
+                        }
                     }
+
                     if (!labelOk) {
                         echo "'${params.SERVICE_LABEL}' 라벨 없음. 빌드 중단."
                         error('skip: label mismatch')
