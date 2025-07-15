@@ -61,10 +61,16 @@ pipeline {
                     String prNum = env.CHANGE_ID
                     if (!prNum) {
                         // Merge-commit 패턴
-                        def msg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
-                        def m = (msg =~ /Merge pull request #(\\d+)/)
-                        if (m.find()) {
-                            prNum = m[0][1]
+                        String msg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                        String foundPrNum = null
+                        def matcher1 = (msg =~ /Merge pull request #(\\d+)/)
+                        if (matcher1.find()) {
+                            foundPrNum = matcher1[0][1]
+                        }
+                        matcher1 = null // 명시적으로 제거
+
+                        if (!prNum && foundPrNum) {
+                            prNum = foundPrNum
                         }
 
                         // rebase-merge 패턴
@@ -74,17 +80,20 @@ pipeline {
                             withCredentials([usernamePassword(credentialsId: 'deploy',
                                                               usernameVariable: 'GH_USER',
                                                               passwordVariable: 'GH_TOKEN')]) {
-                                def prsJson = sh(
-                                      script: """
-                                         curl -s -H "Authorization: token ${GH_TOKEN}" \\
-                                              -H "Accept: application/vnd.github.groot-preview+json" \\
-                                              https://api.github.com/repos/${repo}/commits/${sha}/pulls
-                                      """,
-                                      returnStdout: true).trim()
-                                def m2 = (prsJson =~ /"number":\\s*(\\d+)/)
-                                if (m2.find()) {
-                                    prNum = m2[0][1]
+                                String prsJson = sh(
+                                    script: """
+                                        curl -s -H "Authorization: token ${GH_TOKEN}" \\
+                                             -H "Accept: application/vnd.github.groot-preview+json" \\
+                                             https://api.github.com/repos/${repo}/commits/${sha}/pulls
+                                    """,
+                                    returnStdout: true
+                                ).trim()
+
+                                def matcher2 = (prsJson =~ /"number":\\s*(\\d+)/)
+                                if (matcher2.find()) {
+                                    prNum = matcher2[0][1]
                                 }
+                                matcher2 = null // 역시 명시적으로 제거
                             }
                         }
                     }
