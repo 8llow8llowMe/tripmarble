@@ -103,37 +103,26 @@ pipeline {
                         error('skip: PR Number not found')
                     }
 
-                    // 3. 라벨 검사 (재시도 로직 포함)
+                    // 3. 라벨 검사 (REST API 단일 호출)
                     echo "PR #${prNum} 라벨 검사"
-                    def repoPath = (env.GIT_URL ?: '').replaceFirst(/^.*github.com[:\\/]/,'').replaceFirst(/\\.git$/, '')
+                    def repoPath = (env.GIT_URL ?: '').replaceFirst(/^.*github.com[:\\/]/,'')
+                                                      .replaceFirst(/\\.git$/, '')
                     boolean labelOk = false
                     
                     withCredentials([usernamePassword(credentialsId: 'deploy',
-                                              usernameVariable: 'GH_USER',
-                                              passwordVariable: 'GH_TOKEN')]) {
+                                  usernameVariable: 'GH_USER',
+                                  passwordVariable: 'GH_TOKEN')]) {
+                        def labelsJson = sh(
+                            script: """
+                                curl -s -H "Authorization: token ${GH_TOKEN}" \\
+                                     -H "Accept: application/vnd.github+json" \\
+                                     https://api.github.com/repos/${repoPath}/issues/${prNum}/labels
+                            """,
+                            returnStdout: true
+                        ).trim()
 
-                        int maxRetries = 3
-                        int attempt = 0
-                        while (attempt < maxRetries && !labelOk) {
-                            def labelsJson = sh(
-                                script: """
-                                    curl -s -H "Authorization: token ${GH_TOKEN}" \\
-                                        https://api.github.com/repos/${repoPath}/issues/${prNum}/labels
-                                """,
-                                returnStdout: true
-                            ).trim()
-
-                            echo "GitHub 라벨 응답: ${labelsJson}"
-                            labelOk = labelsJson.contains("\"name\": \"${params.SERVICE_LABEL}\"")
-
-                            if (!labelOk) {
-                                attempt++
-                                if (attempt < maxRetries) {
-                                    echo "라벨 미일치. ${attempt}초 후 재시도 (${attempt}/${maxRetries})..."
-                                    sleep time: 3, unit: 'SECONDS'
-                                }
-                            }
-                        }
+                        echo "응답 라벨 목록: ${labelsJson}"
+                        labelOk = labelsJson.contains("\"name\": \"${params.SERVICE_LABEL}\"")
                     }
 
                     if (!labelOk) {
