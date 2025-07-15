@@ -62,12 +62,9 @@ pipeline {
                     if (!prNum) {
                         // Merge-commit 패턴
                         def msg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
-                        {
-                            def m = (msg =~ /Merge pull request #(\\d+)/)
-                            if (m.find()) {
-                                prNum = m[0][1]
-                            }
-                            // m 객체는 스코프 안에서만 존재
+                        def m = (msg =~ /Merge pull request #(\\d+)/)
+                        if (m.find()) {
+                            prNum = m[0][1]
                         }
 
                         // rebase-merge 패턴
@@ -84,11 +81,9 @@ pipeline {
                                               https://api.github.com/repos/${repo}/commits/${sha}/pulls
                                       """,
                                       returnStdout: true).trim()
-                                {
-                                    def m2 = (prsJson =~ /"number":\\s*(\\d+)/)
-                                    if (m2.find()) {
-                                        prNum = m2[0][1]
-                                    }
+                                def m2 = (prsJson =~ /"number":\\s*(\\d+)/)
+                                if (m2.find()) {
+                                    prNum = m2[0][1]
                                 }
                             }
                         }
