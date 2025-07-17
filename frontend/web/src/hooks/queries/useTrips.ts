@@ -43,7 +43,11 @@ export const useTripSpotsByRepresentativeRegion = (
   selectedFilter: string[]
 ) =>
   useInfiniteQuery<AxiosResponse<TripSpotsResponse>, Error>({
-    queryKey: ["tripSpotsByRepresentativeRegion", representativeRegionId],
+    queryKey: [
+      "tripSpotsByRepresentativeRegion",
+      representativeRegionId,
+      selectedFilter,
+    ],
     queryFn: ({ pageParam }) =>
       getTripSpotsByRepresentativeRegion(
         representativeRegionId,

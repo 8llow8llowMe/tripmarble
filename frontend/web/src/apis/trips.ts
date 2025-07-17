@@ -19,7 +19,7 @@ export const getRepresentativeRegions = () =>
 // 대표 여행지에 따른 여행지 목록 조회 (무한 스크롤)
 export const getTripSpotsByRepresentativeRegion = (
   representativeRegionId: string,
-  contentTypeIds: string[],
+  contentTypeId: string[],
   lastTripSpotId: number | null = null,
   size: number = 10
 ): Promise<AxiosResponse<TripSpotsResponse>> => {
@@ -27,8 +27,8 @@ export const getTripSpotsByRepresentativeRegion = (
   if (lastTripSpotId !== null) {
     params.append("lastTripSpotId", lastTripSpotId.toString());
   }
-  if (contentTypeIds.length) {
-    params.append("contentTypeIds", contentTypeIds.join(","));
+  if (contentTypeId.length) {
+    params.append("contentTypeId", contentTypeId.join(","));
   }
   if (size) {
     params.append("size", size.toString());
