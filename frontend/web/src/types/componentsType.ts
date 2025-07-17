@@ -12,3 +12,8 @@ export type HorizontalListProps<T> = {
   itemHeight?: number;
   gap?: number;
 };
+
+export type FilterOption = {
+  contentTypeId: string;
+  contentTypeName: string;
+};
