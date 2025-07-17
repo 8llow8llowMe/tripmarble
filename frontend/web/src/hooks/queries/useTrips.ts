@@ -8,7 +8,11 @@ import {
   getTripSpotById,
 } from "@/apis/trips";
 import { AxiosResponse } from "axios";
-import { TripSpotsResponse } from "@/types/tripsType";
+import {
+  ApiResponse,
+  RegionsRepresentativeResponse,
+  TripSpotsResponse,
+} from "@/types/tripsType";
 
 export const useRegions = () =>
   useQuery({
@@ -29,7 +33,7 @@ export const useTripContentTypes = () =>
   });
 
 export const useRepresentativeRegions = () =>
-  useQuery({
+  useQuery<AxiosResponse<ApiResponse<RegionsRepresentativeResponse[]>, Error>>({
     queryKey: ["representativeRegions"],
     queryFn: getRepresentativeRegions,
   });
@@ -42,7 +46,7 @@ export const useTripSpotsByRepresentativeRegion = (
     queryFn: ({ pageParam }) =>
       getTripSpotsByRepresentativeRegion(
         representativeRegionId,
-        pageParam as number | null
+        (pageParam ?? null) as number | null
       ),
     initialPageParam: null,
     getNextPageParam: (lastPage) => {
@@ -55,6 +59,6 @@ export const useTripSpotsByRepresentativeRegion = (
 
 export const useTripSpotById = (tripSpotId: string) =>
   useQuery({
-    queryKey: ["tripSpot", tripSpotId],
+    queryKey: ["tripSpotId", tripSpotId],
     queryFn: () => getTripSpotById(tripSpotId),
   });
