@@ -11,11 +11,12 @@ type FilterProps = {
 
 const Filter: React.FC<FilterProps> = ({ options, selected, onChange }) => {
   const handleToggle = (id: string) => {
-    if (selected.includes(id)) {
-      onChange(selected.filter((item) => item !== id));
-    } else {
-      onChange([...selected, id]);
-    }
+    // if (selected.includes(id)) {
+    //   onChange(selected.filter((item) => item !== id));
+    // } else {
+    //   onChange([...selected, id]);
+    // }
+    onChange([id]);
   };
 
   return (
@@ -29,10 +30,10 @@ const Filter: React.FC<FilterProps> = ({ options, selected, onChange }) => {
           type="button"
           onClick={() => handleToggle(option.contentTypeId)}
         >
-          <span className={styles.checkCircle}>
+          <div className={styles.checkCircle}>
             {selected.includes(option.contentTypeId) && <CheckIcon />}
-          </span>
-          <span className={styles.label}>{option.contentTypeName}</span>
+          </div>
+          <div className={styles.label}>{option.contentTypeName}</div>
         </button>
       ))}
     </div>

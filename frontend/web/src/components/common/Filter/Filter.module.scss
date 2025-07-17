@@ -7,6 +7,7 @@
 .filterBtn {
   display: flex;
   align-items: center;
+  justify-content: center;
   border: 1.5px solid #ddd;
   border-radius: 1.5rem;
   background: #fff;
@@ -66,5 +67,7 @@
 .label {
   color: #444;
   font-weight: 500;
-  letter-spacing: -0.01em;
+  margin-top: 0.2rem;
+  display: flex;
+  align-items: center;
 }
