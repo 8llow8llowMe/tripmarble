@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 // import { useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,7 +7,12 @@ import { seoul2 } from "@/assets/images/places";
 // style
 import styles from "./Spot.module.scss";
 // api
-import { useTripSpotsByRepresentativeRegion } from "@/hooks/queries/useTrips";
+import {
+  useTripContentTypes,
+  useTripSpotsByRepresentativeRegion,
+} from "@/hooks/queries/useTrips";
+// component
+import Filter from "@/components/common/Filter/Filter";
 
 type Props = {
   spotId: string;
@@ -83,10 +88,14 @@ const SpotDetailPage = ({ spotId }: Props) => {
   //       "http://tong.visitkorea.or.kr/cms/resource/12/2609812_image2_1.jpg",
   //   },
   // ];
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useTripSpotsByRepresentativeRegion(String(spotId));
 
   const observerRef = useRef<HTMLDivElement>(null);
+  const [selectedFilter, setSelectedFilter] = useState<string[]>([""]);
+
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useTripSpotsByRepresentativeRegion(String(spotId), selectedFilter);
+  // filter
+  const { data: filterData } = useTripContentTypes();
 
   useEffect(() => {
     if (
@@ -126,6 +135,16 @@ const SpotDetailPage = ({ spotId }: Props) => {
           <h2>대한민국 지역</h2>
           <p>해당 지역에 대한 설명을 여기에 표시</p>
         </div>
+      </section>
+
+      <section className={styles.spotHeader}>
+        {filterData?.data.dataBody && (
+          <Filter
+            options={filterData?.data.dataBody}
+            selected={selectedFilter}
+            onChange={setSelectedFilter}
+          />
+        )}
       </section>
 
       <section className={styles.contentGrid}>
