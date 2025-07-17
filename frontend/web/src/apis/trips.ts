@@ -1,6 +1,6 @@
-import { TripSpotsResponse } from "@/types/tripsType";
-import apiClient from "./client";
 import { AxiosResponse } from "axios";
+import { TripSpotsResponse } from "@/types/tripsType";
+import { apiClient } from "@/apis/client";
 
 // 시도 목록 조회
 export const getRegions = () => apiClient.get("/regions");

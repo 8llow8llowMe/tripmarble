@@ -1,4 +1,4 @@
-import apiClient from "@/apis/client";
+import { authApiClient } from "@/apis/client";
 import { UserState } from "@/types/userType";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
@@ -14,7 +14,7 @@ export const fetchMe = createAsyncThunk(
   "user/fetchMe",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await apiClient.get("/members/me");
+      const res = await authApiClient.get("/members/me");
       return res.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.message ?? "Error");

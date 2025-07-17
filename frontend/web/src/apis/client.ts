@@ -3,7 +3,7 @@ import { Cookies } from "react-cookie";
 
 const cookies = new Cookies();
 
-const apiClient: AxiosInstance = axios.create({
+export const authApiClient: AxiosInstance = axios.create({
   baseURL: `${
     process.env.NEXT_PUBLIC_AUTH_SERVICE || "https://api.tripmarble.com"
   }/api/v1`,
@@ -13,8 +13,18 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
+export const apiClient: AxiosInstance = axios.create({
+  baseURL: `${
+    process.env.NEXT_PUBLIC_API_GATEWAY || "https://api.tripmarble.com"
+  }/api/v1`,
+  withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 // 요청 인터셉터 설정 - 쿠키에서 accessToken을 읽어 Authorization 헤더에 추가
-apiClient.interceptors.request.use(
+authApiClient.interceptors.request.use(
   (config) => {
     const accessToken = cookies.get("accessToken");
     if (accessToken) {
@@ -26,19 +36,17 @@ apiClient.interceptors.request.use(
 );
 
 // 응답 인터셉터 설정 - 401 발생 시 토큰 재발급 및 재시도
-apiClient.interceptors.response.use(
+authApiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      return reissueTokenAndRetryRequest(originalRequest, apiClient);
+      return reissueTokenAndRetryRequest(originalRequest, authApiClient);
     }
     return Promise.reject(error);
   }
 );
-
-export default apiClient;
 
 async function reissueTokenAndRetryRequest(
   originalRequest: InternalAxiosRequestConfig,
