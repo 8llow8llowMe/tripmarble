@@ -29,7 +29,7 @@ export const getTripSpotsByRepresentativeRegion = (
   if (size) {
     params.append("size", size.toString());
   }
-  return apiClient.get(
+  return apiClient.get<TripSpotsResponse>(
     `/trip-spots/by-representative-region/${representativeRegionId}?${params.toString()}`
   );
 };
