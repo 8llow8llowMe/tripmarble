@@ -45,8 +45,7 @@ pipeline {
                     // 1. 반드시 PR 빌드여야 함
                     if (!env.CHANGE_ID) {
                         echo "PR 빌드가 아닙니다. 종료."
-                        currentBuild.result = 'SUCCESS'
-                        return
+                        error "stop: PR 빌드가 아니므로 파이프라인 중단"
                     }
 
                     // 2. PR 번호 확보 (env.CHANGE_ID 우선, 없으면 커밋 메시지/Commit -> PR 조회)
