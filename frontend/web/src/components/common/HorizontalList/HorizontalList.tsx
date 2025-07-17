@@ -2,17 +2,11 @@
 
 import { useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
+// style
 import styles from "./HorizontalList.module.scss";
-import Image, { StaticImageData } from "next/image";
-
-type HorizontalListProps<T> = {
-  title?: string;
-  items: { id: number; name: string; imgUrl: StaticImageData }[];
-  baseHref: string;
-  itemWidth?: number;
-  itemHeight?: number;
-  gap?: number;
-};
+// type
+import { HorizontalListProps } from "@/types/componentsType";
 
 export default function HorizontalList<T>({
   title,
@@ -99,7 +93,11 @@ export default function HorizontalList<T>({
                   alt={item.name}
                   width={itemWidth}
                   height={itemHeight}
-                  style={{ objectFit: "cover", borderRadius: 8 }}
+                  style={{
+                    objectFit: "cover",
+                    borderRadius: 8,
+                    border: "2px solid #eeeeee",
+                  }}
                 />
                 <div style={{ textAlign: "left", marginTop: 4 }}>
                   {item.name}
