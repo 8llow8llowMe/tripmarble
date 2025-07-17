@@ -19,4 +19,6 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     // Spring Security Resource Server
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    // Feign Client
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 }
