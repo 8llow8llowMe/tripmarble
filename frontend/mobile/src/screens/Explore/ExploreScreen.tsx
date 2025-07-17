@@ -11,6 +11,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
+import jejuImage from '../../../assets/place/jeju.png';
 
 const bgHeight = Dimensions.get('window').height * 0.5;
 const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 가능)
@@ -23,10 +24,7 @@ export default function ExploreScreen() {
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={{ position: 'relative' }}>
-          <Image
-            source={require('../../../assets/place/jeju.png')}
-            style={styles.backgroundImage}
-          />
+          <Image source={jejuImage} style={styles.backgroundImage} />
           <View style={styles.overlay} />
         </View>
 
