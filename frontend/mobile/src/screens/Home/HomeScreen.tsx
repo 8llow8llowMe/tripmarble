@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, View, Text, TextInput, StyleSheet, Image } from 'react-native';
+import { SafeAreaView, ScrollView, View, Text, TextInput, StyleSheet } from 'react-native';
 
 export default function HomeScreen() {
   return (
