@@ -90,7 +90,7 @@ const SpotDetailPage = ({ spotId }: Props) => {
   // ];
 
   const observerRef = useRef<HTMLDivElement>(null);
-  const [selectedFilter, setSelectedFilter] = useState<string[]>([""]);
+  const [selectedFilter, setSelectedFilter] = useState<string[]>([]);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useTripSpotsByRepresentativeRegion(String(spotId), selectedFilter);
@@ -119,58 +119,63 @@ const SpotDetailPage = ({ spotId }: Props) => {
 
   return (
     <>
-      <section className={styles.spotHeader}>
-        <div className={styles.mainImageWrapper}>
-          <Image
-            src={seoul2}
-            alt="spot-main-image"
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 10rem"
-            className={styles.mainImage}
-            style={{ objectFit: "cover" }}
-          />
-        </div>
-        <div className={styles.regionContent}>
-          <h2>대한민국 지역</h2>
-          <p>해당 지역에 대한 설명을 여기에 표시</p>
-        </div>
-      </section>
+      <div className={styles.spotContainer}>
+        <section className={styles.spotHeader}>
+          <div className={styles.mainImageWrapper}>
+            <Image
+              src={seoul2}
+              alt="spot-main-image"
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 8rem"
+              className={styles.mainImage}
+              style={{ objectFit: "cover" }}
+            />
+          </div>
+          <div className={styles.regionContent}>
+            <h2>대한민국 지역</h2>
+            <p>해당 지역에 대한 설명을 여기에 표시</p>
+          </div>
+        </section>
 
-      <section className={styles.spotHeader}>
-        {filterData?.data.dataBody && (
-          <Filter
-            options={filterData?.data.dataBody}
-            selected={selectedFilter}
-            onChange={setSelectedFilter}
-          />
-        )}
-      </section>
+        <section className={styles.spotFilter}>
+          {filterData?.data.dataBody && (
+            <Filter
+              options={filterData?.data.dataBody}
+              selected={selectedFilter}
+              onChange={setSelectedFilter}
+            />
+          )}
+        </section>
 
-      <section className={styles.contentGrid}>
-        {/* {dummyData.map((spot) => ( */}
-        {data?.pages.flatMap((page) =>
-          page.data.dataBody.contents.map((spot) => (
-            <Link key={spot.tripSpotId} href={`/trip-spots/${spot.tripSpotId}`}>
-              <div className={styles.contentCard}>
-                <div className={styles.cardImage}>
-                  <Image
-                    src={spot.thumbnailImageUrl || "/images/no-image.png"}
-                    alt={spot.tripSpotName}
-                    fill
-                    priority
-                    sizes="(max-width: 768px) 100vw, 10rem"
-                    style={{ objectFit: "cover" }}
-                  />
+        <section className={styles.contentGrid}>
+          {/* {dummyData.map((spot) => ( */}
+          {data?.pages.flatMap((page) =>
+            page.data.dataBody.contents.map((spot) => (
+              <Link
+                key={spot.tripSpotId}
+                href={`/trip-spots/${spot.tripSpotId}`}
+              >
+                <div className={styles.contentCard}>
+                  <div className={styles.cardImage}>
+                    <Image
+                      src={spot.thumbnailImageUrl || "/images/no-image.png"}
+                      alt={spot.tripSpotName}
+                      fill
+                      priority
+                      sizes="(max-width: 768px) 100vw, 15rem"
+                      style={{ objectFit: "cover" }}
+                    />
+                  </div>
+                  <p className={styles.cardTitle}>{spot.tripSpotName}</p>
                 </div>
-                <p className={styles.cardTitle}>{spot.tripSpotName}</p>
-              </div>
-            </Link>
-          ))
-        )}
-        <div ref={observerRef} />
-        {isFetchingNextPage && <p>불러오는 중...</p>}
-      </section>
+              </Link>
+            ))
+          )}
+          <div ref={observerRef} />
+          {isFetchingNextPage && <p>불러오는 중...</p>}
+        </section>
+      </div>
     </>
   );
 };
