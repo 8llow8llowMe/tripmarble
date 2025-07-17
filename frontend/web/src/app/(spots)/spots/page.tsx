@@ -1,17 +1,42 @@
-import type { Metadata } from "next";
+"use client";
+
 // styles
 import styles from "./Spots.module.scss";
+import noImage from "/public/images/no-image.png";
 // components
 import HorizontalList from "@/components/common/HorizontalList/HorizontalList";
 // data
 import { spotsData } from "@/constants/spots";
+// api
+import { useRepresentativeRegions } from "@/hooks/queries/useTrips";
+import { useMemo } from "react";
+import { StaticImageData } from "next/image";
 
-export const metadata: Metadata = {
-  title: "여행지 목록",
-  description:
-    "대한민국의 다양한 여행지를 둘러보세요. 인기 지역부터 숨겨진 명소까지!",
-};
+// import type { Metadata } from "next";
+
+// export const metadata: Metadata = {
+//   title: "여행지 목록",
+//   description:
+//     "대한민국의 다양한 여행지를 둘러보세요. 인기 지역부터 숨겨진 명소까지!",
+// };
+
 export default function SpotsPage() {
+  const { data } = useRepresentativeRegions();
+  const representativeRegions = useMemo(() => {
+    if (!data?.data?.dataBody) return [];
+    return data.data.dataBody.map(
+      (region: {
+        representativeRegionId: number;
+        representativeRegionName: string;
+        imageUrl: string | StaticImageData | null;
+      }) => ({
+        id: region.representativeRegionId,
+        name: region.representativeRegionName,
+        imgUrl: region.imageUrl || noImage,
+      })
+    );
+  }, [data]);
+
   return (
     <>
       {/* <div className={styles.spotsWrapper}> */}
@@ -24,7 +49,7 @@ export default function SpotsPage() {
       <div className={styles.lists}>
         <HorizontalList
           title="대한민국 여행지"
-          items={spotsData}
+          items={representativeRegions}
           baseHref="/spots"
           itemWidth={250}
           itemHeight={250}
