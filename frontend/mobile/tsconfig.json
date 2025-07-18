@@ -17,7 +17,10 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@icons/*": ["./assets/icons/*"],
+      "@images/*": ["./assets/images/*"],
+      "@fonts/*": ["./assets/fonts/*"]
     },
     "types": ["react", "react-native"]
   },
