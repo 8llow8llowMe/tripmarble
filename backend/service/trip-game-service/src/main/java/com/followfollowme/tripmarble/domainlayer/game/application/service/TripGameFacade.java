@@ -1,8 +1,10 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.RepresentativeRegionInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameWebUseCase;
+import com.followfollowme.tripmarble.domainlayer.game.application.port.out.RepresentativeRegionClientPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
@@ -23,6 +25,8 @@ public class TripGameFacade implements TripGameWebUseCase {
     private final TripThemeRepositoryPort tripThemeRepositoryPort;
     private final TripGameMemberRepositoryPort tripGameMemberRepositoryPort;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final RepresentativeRegionClientPort representativeRegionClientPort;
+
 
     @Override
     @Transactional
@@ -56,7 +60,9 @@ public class TripGameFacade implements TripGameWebUseCase {
         TripTheme tripTheme = tripThemeRepositoryPort.findById(savedTripGame.tripThemeId())
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행 테마입니다."));
 
-        // TODO: 내부 서비스 통신에 의해 대표 여행지 이름 조회
+        // 4. 내부 서비스 통신에 의해 대표 여행지 이름 조회
+        RepresentativeRegionInfoResponse representativeRegionInfoResponse =
+            representativeRegionClientPort.getRepresentativeRegionInfo(command.representativeRegionId());
 
         return TripGameCreateResponse.builder()
             .tripGameId(savedTripGame.tripThemeId())
@@ -67,7 +73,7 @@ public class TripGameFacade implements TripGameWebUseCase {
             .startedAt(savedTripGame.startedAt())
             .endedAt(savedTripGame.endedAt())
             .tripThemeName(tripTheme.name())
-            .representativeRegionName(null) // 추후 내부 통신 추가
+            .representativeRegionName(representativeRegionInfoResponse.representativeRegionName()) // 추후 내부 통신 추가
             .isHost(savedTripGameMember.isHost())
             .isReady(savedTripGameMember.isReady())
             .build();
