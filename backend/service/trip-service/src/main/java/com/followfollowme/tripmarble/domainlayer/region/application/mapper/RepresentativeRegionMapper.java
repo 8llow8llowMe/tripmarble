@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.region.application.mapper;
 
+import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.dto.RepresentativeRegionInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionDetailResponse;
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionSummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.region.adapter.out.persistence.entity.RepresentativeRegionEntity;
@@ -28,4 +29,10 @@ public interface RepresentativeRegionMapper {
 
     // 도메인 리스트 -> DTO 리스트
     List<RepresentativeRegionSummaryResponse> toSummaryResponseListFromDomainList(List<RepresentativeRegion> domains);
+
+    // 내부 서비스 통신 전용
+    // 도메인 -> DTO
+    @Mapping(source = "id", target = "representativeRegionId")
+    @Mapping(source = "name", target = "representativeRegionName")
+    RepresentativeRegionInfoResponse toInfoResponseFromDomain(RepresentativeRegion domain);
 }
