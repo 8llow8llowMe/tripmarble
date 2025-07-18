@@ -9,11 +9,10 @@ import com.followfollowme.tripmarble.domainlayer.region.application.port.out.Reg
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.SigunguRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.Region;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.Sigungu;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
