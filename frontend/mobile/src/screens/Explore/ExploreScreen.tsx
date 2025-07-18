@@ -11,7 +11,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import jejuImage from '../../../assets/place/jeju.png';
+import jejuImage from '@images/place/jeju.png';
 
 const bgHeight = Dimensions.get('window').height * 0.5;
 const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 가능)
