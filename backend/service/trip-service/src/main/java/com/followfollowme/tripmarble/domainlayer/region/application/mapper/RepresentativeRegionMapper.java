@@ -3,10 +3,9 @@ package com.followfollowme.tripmarble.domainlayer.region.application.mapper;
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionResponse;
 import com.followfollowme.tripmarble.domainlayer.region.adapter.out.persistence.entity.RepresentativeRegionEntity;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.RepresentativeRegion;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface RepresentativeRegionMapper {
