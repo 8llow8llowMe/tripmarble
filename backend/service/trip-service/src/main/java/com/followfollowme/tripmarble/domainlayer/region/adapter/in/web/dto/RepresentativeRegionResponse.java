@@ -7,8 +7,7 @@ public record RepresentativeRegionResponse(
     long representativeRegionId,
     String representativeRegionName,
     String imageUrl,
-    Long regionId,
-    Long sigunguId
+    String description
 ) {
 
 }
