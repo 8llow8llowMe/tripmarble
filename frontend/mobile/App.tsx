@@ -1,3 +1,4 @@
+import { Providers, ReactQueryProvider } from '@/store/provider';
 import RootNavigation from './src/navigations';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -8,7 +9,11 @@ enableScreens();
 export default function App() {
   return (
     <SafeAreaProvider>
-      <RootNavigation />
+      <ReactQueryProvider>
+        <Providers>
+          <RootNavigation />
+        </Providers>
+      </ReactQueryProvider>
     </SafeAreaProvider>
   );
 }
