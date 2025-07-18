@@ -29,14 +29,11 @@ pipeline {
         MODULE_PATH = "${params.SERVICE_GROUP}:${params.SERVICE_NAME}"
         // 실제 파일시스템 경로 ( backend/cloud/api-gateway )
         FS_PATH = "backend/${params.SERVICE_GROUP}/${params.SERVICE_NAME}"
-
         DOCKERFILE = "${params.SERVICE_NAME}.Dockerfile"
         COMPOSE_FILE = "docker-compose-${params.SERVICE_NAME}.yml"
-
         ENV_SUBMODULE = 'backend/env'
         DEV_ENV_FILE = "${ENV_SUBMODULE}/.env-backend-dev"
         PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-backend-prod"
-
         REMOTE_DIR = 'deploy/tripmarble/backend-app'
         SSH_CONFIG = 'backend-1 server ssh'
     }
@@ -45,38 +42,27 @@ pipeline {
         stage('Branch & Label Check') {
             steps {
                 script {
-                    boolean isPR = env.CHANGE_ID ? true : false
-
-                    // 1. 브랜치 제한 (develop / main 또는 PR)
-                    if (!isPR) { // PR 빌드가 아니면
-                        def allowed = ['develop', 'main']
-                        if (!allowed.contains(env.BRANCH_NAME)) {
-                            echo "대상 브랜치 아님(${env.BRANCH_NAME}). 작업 건너뜀."
-                            currentBuild.result = 'SUCCESS'  // 조용히 성공 종료
-                            return // 파이프라인 종료
-                        }
+                    // 1. 반드시 PR 빌드여야 함
+                    if (!env.CHANGE_ID) {
+                        echo "PR 빌드가 아닙니다. 종료."
+                        currentBuild.result = 'SUCCESS'
+                        return
                     }
 
-                    // 2. PR 번호 확보
+                    // 2. PR 번호 확보 (env.CHANGE_ID 우선, 없으면 커밋 메시지/Commit -> PR 조회)
                     String prNum = env.CHANGE_ID
                     if (!prNum) {
-                        // Merge-commit 패턴
+                        // 2-1. Merge-commit 패턴
                         String msg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
-                        String foundPrNum = null
-                        def matcher1 = (msg =~ /Merge pull request #(\\d+)/)
-                        if (matcher1.find()) {
-                            foundPrNum = matcher1[0][1]
-                        }
-                        matcher1 = null // 명시적으로 제거
+                        def m = (msg =~ /Merge pull request #(\d+)/)
+                        if (m.find()) { prNum = m[0][1] }
 
-                        if (!prNum && foundPrNum) {
-                            prNum = foundPrNum
-                        }
-
-                        // rebase-merge 패턴
+                        // 2-2. Commit -> PR API
                         if (!prNum) {
-                            String sha = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
-                            def repo = (env.GIT_URL ?: '').replaceFirst(/^.*github.com[:\\/]/,'').replaceFirst(/\\.git$/,'')
+                            String sha  = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+                            String repo = (env.GIT_URL ?: '')
+                                            .replaceFirst(/(^https?:\/\/|git@)github\.com[:\/]/, '')
+                                            .replaceFirst(/\.git$/, '')
                             withCredentials([usernamePassword(credentialsId: 'deploy',
                                                               usernameVariable: 'GH_USER',
                                                               passwordVariable: 'GH_TOKEN')]) {
@@ -88,51 +74,46 @@ pipeline {
                                     """,
                                     returnStdout: true
                                 ).trim()
-
-                                def matcher2 = (prsJson =~ /"number":\\s*(\\d+)/)
-                                if (matcher2.find()) {
-                                    prNum = matcher2[0][1]
-                                }
-                                matcher2 = null // 역시 명시적으로 제거
+                                def m2 = (prsJson =~ /"number":\\s*(\\d+)/)
+                                if (m2.find()) { prNum = m2[0][1] }
                             }
                         }
                     }
-
                     if (!prNum) {
-                        echo "PR 번호를 찾지 못했으므로 빌드 중단."
-                        error('skip: PR Number not found')
+                        error "skip: PR 번호를 찾지 못해 빌드 중단"
                     }
 
-                    // 3. 라벨 검사 (REST API 단일 호출)
-                    echo "PR #${prNum} 라벨 검사"
-                    def repoPath = (env.GIT_URL ?: '')
-                                        .replaceFirst(/(^https?:\/\/|git@)github\.com[:\/]/,'')
-                                        .replaceFirst(/\.git$/,'')
-                                        
+                    // 3. 라벨 검사
+                    echo "PR #${prNum} -> 라벨 검사"
+                    String repoPath = (env.GIT_URL ?: '')
+                                          .replaceFirst(/(^https?:\/\/|git@)github\.com[:\/]/, '')
+                                          .replaceFirst(/\.git$/, '')
                     boolean labelOk = false
-                    
                     withCredentials([usernamePassword(credentialsId: 'deploy',
-                                  usernameVariable: 'GH_USER',
-                                  passwordVariable: 'GH_TOKEN')]) {
-                        def labelsJson = sh(
+                                                      usernameVariable: 'GH_USER',
+                                                      passwordVariable: 'GH_TOKEN')]) {
+                        String labelsJson = sh(
                             script: """
-                                curl -s -H "Authorization: token ${GH_TOKEN}" \\
-                                     -H "Accept: application/vnd.github+json" \\
+                                curl -s -H "Accept: application/vnd.github+json" \\
+                                     -H "Authorization: token ${GH_TOKEN}" \\
                                      https://api.github.com/repos/${repoPath}/issues/${prNum}/labels
                             """,
                             returnStdout: true
                         ).trim()
-
                         echo "응답 라벨 목록: ${labelsJson}"
                         labelOk = labelsJson.contains("\"name\": \"${params.SERVICE_LABEL}\"")
                     }
-
                     if (!labelOk) {
-                        echo "'${params.SERVICE_LABEL}' 라벨 없음. 빌드 중단."
-                        error('skip: label mismatch')
+                        error "skip: 라벨 '${params.SERVICE_LABEL}'이(가) 없음"
                     }
 
-                    echo "라벨 일치. 파이프라인 계속 진행."
+                    // 4. PR의 타겟 브랜치 검증
+                    def targetBranch = env.CHANGE_TARGET
+                    if (!['develop','main'].contains(targetBranch)) {
+                        error "skip: PR의 타겟 브랜치 '${targetBranch}'는 허용되지 않음"
+                    }
+
+                    echo "Branch·PR·Label·TargetBranch 조건 모두 통과"
                 }
             }
         }
@@ -143,11 +124,11 @@ pipeline {
                     $class: 'GitSCM',
                     branches: scm.branches,
                     userRemoteConfigs: scm.userRemoteConfigs,
-                    extensions: [[
-                        $class: 'SubmoduleOption',
-                        recursiveSubmodules: true,
-                        parentCredentials: true
-                    ]]
+                    extensions: [
+                        [$class: 'SubmoduleOption',
+                         recursiveSubmodules: true,
+                         parentCredentials: true]
+                    ]
                 ])
             }
         }
@@ -159,11 +140,17 @@ pipeline {
                     sh "../../gradlew :${env.MODULE_PATH}:bootJar"
                 }
             }
-            post { success { archiveArtifacts "${env.FS_PATH}/build/libs/*.jar" } }
+            post {
+                success {
+                    archiveArtifacts "${env.FS_PATH}/build/libs/*.jar"
+                }
+            }
         }
 
         stage('Deploy to Dev') {
-            when { branch 'develop' }
+            when {
+                expression { env.CHANGE_TARGET == 'develop' }
+            }
             steps {
                 script {
                     sshPublisher publishers: [sshPublisherDesc(
@@ -173,35 +160,38 @@ pipeline {
                             removePrefix: 'backend/env',
                             remoteDirectory: REMOTE_DIR
                         )],
-                        verbose: true)]
-
+                        verbose: true
+                    )]
                     sshPublisher publishers: [sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [sshTransfer(
                             sourceFiles: """
-                               ${env.FS_PATH}/build/libs/*.jar,
-                               ${env.FS_PATH}/${DOCKERFILE},
-                               ${env.FS_PATH}/${COMPOSE_FILE}
+                                ${env.FS_PATH}/build/libs/*.jar,
+                                ${env.FS_PATH}/${DOCKERFILE},
+                                ${env.FS_PATH}/${COMPOSE_FILE}
                             """.trim(),
                             removePrefix: "${env.FS_PATH}",
                             remoteDirectory: REMOTE_DIR,
                             execCommand: """
-                               set -x
-                               cd ~/${REMOTE_DIR}
-                               mkdir -p env
-                               mv .env-backend-dev env/.env-backend-dev
-                               docker compose -f ${COMPOSE_FILE} \\
-                                  --env-file env/.env-backend-dev \\
-                                  up -d --build ${params.SERVICE_NAME}-dev
+                                set -x
+                                cd ~/${REMOTE_DIR}
+                                mkdir -p env
+                                mv .env-backend-dev env/.env-backend-dev
+                                docker compose -f ${COMPOSE_FILE} \\
+                                    --env-file env/.env-backend-dev \\
+                                    up -d --build ${params.SERVICE_NAME}-dev
                             """.stripIndent()
                         )],
-                        verbose: true)]
+                        verbose: true
+                    )]
                 }
             }
         }
 
         stage('Deploy to Prod') {
-            when { branch 'main' }
+            when {
+                expression { env.CHANGE_TARGET == 'main' }
+            }
             steps {
                 script {
                     sshPublisher publishers: [sshPublisherDesc(
@@ -211,33 +201,38 @@ pipeline {
                             removePrefix: 'backend/env',
                             remoteDirectory: REMOTE_DIR
                         )],
-                        verbose: true)]
-
+                        verbose: true
+                    )]
                     sshPublisher publishers: [sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [sshTransfer(
                             sourceFiles: """
-                               ${env.FS_PATH}/build/libs/*.jar,
-                               ${env.FS_PATH}/${DOCKERFILE},
-                               ${env.FS_PATH}/${COMPOSE_FILE}
+                                ${env.FS_PATH}/build/libs/*.jar,
+                                ${env.FS_PATH}/${DOCKERFILE},
+                                ${env.FS_PATH}/${COMPOSE_FILE}
                             """.trim(),
                             removePrefix: "${env.FS_PATH}",
                             remoteDirectory: REMOTE_DIR,
                             execCommand: """
-                               set -x
-                               cd ~/${REMOTE_DIR}
-                               mkdir -p env
-                               mv .env-backend-prod env/.env-backend-prod
-                               docker compose -f ${COMPOSE_FILE} \\
-                                  --env-file env/.env-backend-prod \\
-                                  up -d --build ${params.SERVICE_NAME}-prod
+                                set -x
+                                cd ~/${REMOTE_DIR}
+                                mkdir -p env
+                                mv .env-backend-prod env/.env-backend-prod
+                                docker compose -f ${COMPOSE_FILE} \\
+                                    --env-file env/.env-backend-prod \\
+                                    up -d --build ${params.SERVICE_NAME}-prod
                             """.stripIndent()
                         )],
-                        verbose: true)]
+                        verbose: true
+                    )]
                 }
             }
         }
     }
 
-    post { always { cleanWs() } }
+    post {
+        always {
+            cleanWs()
+        }
+    }
 }

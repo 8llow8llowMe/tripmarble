@@ -1,8 +1,18 @@
+.spotContainer {
+  padding: 32px;
+}
+
 .spotHeader {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   gap: 2rem;
-  padding: 3rem 2rem;
+  padding: 0 0 32px 0;
+}
+.spotFilter {
+  display: flex;
+  gap: 2rem;
+  padding: 0 0 32px 0;
 }
 
 .mainImageWrapper {
@@ -12,6 +22,15 @@
   aspect-ratio: 3 / 2; // 예: 600x400이면 3:2
   border-radius: 12px;
   overflow: hidden;
+}
+
+@media (max-width: 684px) {
+  .spotHeader {
+    flex-direction: column;
+  }
+  .mainImageWrapper {
+    width: 100%;
+  }
 }
 
 .mainImage {
@@ -29,14 +48,13 @@
 
 .contentGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   gap: 1.5rem;
-  padding: 2rem;
 }
 
 .contentCard {
-  width: 10rem;
-  height: 10rem;
+  width: 100%;
+  height: 15rem;
   background-color: #f7f7f7;
   border-radius: 12px;
   border: 2px solid #eeeeee;

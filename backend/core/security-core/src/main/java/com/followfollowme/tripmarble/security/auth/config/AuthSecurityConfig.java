@@ -2,6 +2,7 @@ package com.followfollowme.tripmarble.security.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.followfollowme.tripmarble.security.auth.jwt.JwtAuthFilter;
+import com.followfollowme.tripmarble.security.auth.jwt.JwtAuthProperties;
 import com.followfollowme.tripmarble.security.auth.jwt.JwtAuthProvider;
 import com.followfollowme.tripmarble.security.common.handler.CustomAccessDeniedHandler;
 import com.followfollowme.tripmarble.security.common.handler.CustomAuthenticationEntryPoint;
@@ -29,11 +30,12 @@ import org.springframework.web.filter.CorsFilter;
 @EnableMethodSecurity(securedEnabled = true)
 public class AuthSecurityConfig {
 
-    private final JwtAuthProvider jwtAuthProvider;
     private final ObjectMapper objectMapper;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthProvider jwtAuthProvider)
+        throws Exception {
+
         http
             // CORS(Cross-Origin Resource Sharing) 설정을 적용합니다.
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -57,7 +59,8 @@ public class AuthSecurityConfig {
             // Spring Security 기본 로그인/로그아웃 기능 비활성화
             .formLogin(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
-            .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new JwtAuthFilter(jwtAuthProvider, objectMapper),
+                UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(ex -> ex
                 // Auth‐Service 에서도 권한 체크(@PreAuthorize) 시 403 을 JSON으로 내려줌
                 // (인증 실패는 JwtAuthFilter 안에서 처리 -> 커스텀 응답)
@@ -93,7 +96,12 @@ public class AuthSecurityConfig {
     }
 
     @Bean
-    public JwtAuthFilter jwtAuthFilter() {
+    public JwtAuthProvider jwtAuthProvider(JwtAuthProperties jwtAuthProperties) {
+        return new JwtAuthProvider(jwtAuthProperties);
+    }
+
+    @Bean
+    public JwtAuthFilter jwtAuthFilter(JwtAuthProvider jwtAuthProvider) {
         return new JwtAuthFilter(jwtAuthProvider, objectMapper);
     }
 
