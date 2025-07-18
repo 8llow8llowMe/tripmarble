@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/regions/representative")
-@Tag(name = "대표 여행지", description = "대표 여행지 관련 API 입니다.")
+@Tag(name = "대표 여행지", description = "대표 여행지 관련 클라이언트 전용 API 입니다.")
 public class RepresentativeRegionWebController {
 
     private final RepresentativeRegionWebUseCase representativeRegionWebUseCase;
