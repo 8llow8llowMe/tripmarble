@@ -5,10 +5,10 @@ import com.followfollowme.tripmarble.domainlayer.region.adapter.out.persistence.
 import com.followfollowme.tripmarble.domainlayer.region.application.mapper.RepresentativeRegionMapper;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RepresentativeRegionRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.RepresentativeRegion;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -21,5 +21,11 @@ public class RepresentativeRepositoryAdapter implements RepresentativeRegionRepo
     public List<RepresentativeRegion> findAll() {
         List<RepresentativeRegionEntity> entities = representativeRegionRepository.findAll();
         return representativeRegionMapper.toDomainListFromEntityList(entities);
+    }
+
+    @Override
+    public Optional<RepresentativeRegion> findById(long representativeRegionId) {
+        return representativeRegionRepository.findById(representativeRegionId)
+            .map(representativeRegionMapper::toDomainFromEntity);
     }
 }
