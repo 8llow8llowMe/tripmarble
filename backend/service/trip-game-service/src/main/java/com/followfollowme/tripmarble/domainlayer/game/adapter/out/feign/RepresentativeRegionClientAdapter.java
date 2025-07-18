@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RepresentativeRegionFeignAdapter implements RepresentativeRegionClientPort {
+public class RepresentativeRegionClientAdapter implements RepresentativeRegionClientPort {
 
     private final RepresentativeRegionClient representativeRegionClient;
 
