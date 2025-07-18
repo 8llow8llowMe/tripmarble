@@ -1,0 +1,23 @@
+package com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
+
+@Builder
+@Schema(description = "대표 여행지 상세 조회 응답 DTO")
+public record RepresentativeRegionDetailResponse(
+
+    @Schema(description = "대표 여행지 아이디", example = "1")
+    long representativeRegionId,
+
+    @Schema(description = "대표 여행지 이름", example = "서울")
+    String representativeRegionName,
+
+    @Schema(description = "대표 여행지 썸네일 이미지 URL", example = "https://cdn.tripmarble.com/seoul.jpg")
+    String imageUrl,
+
+    @Schema(description = "대표 여행지 설명", example = "서울은 대한민국의 수도 ~~~")
+    String description
+) {
+
+}
