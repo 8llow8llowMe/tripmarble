@@ -2,12 +2,9 @@ package com.followfollowme.tripmarble.domainlayer.region.adapter.out.persistence
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -36,13 +33,7 @@ public class RepresentativeRegionEntity {
     @Comment("썸네일 이미지 URL")
     private String imageUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "region_id")
-    @Comment("시도 연관 외래키 (nullable 가능)")
-    private RegionEntity region;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sigungu_id")
-    @Comment("시군구 연관 외래키 (nullable 가능)")
-    private SigunguEntity sigungu;
+    @Comment("대표 여행지 설명")
+    @Column(columnDefinition = "TEXT")
+    private String description;
 }
