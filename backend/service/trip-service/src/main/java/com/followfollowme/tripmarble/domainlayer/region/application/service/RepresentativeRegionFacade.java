@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.region.application.service;
 
-import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionResponse;
+import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionDetailResponse;
+import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionSummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.region.application.mapper.RepresentativeRegionMapper;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.in.RepresentativeRegionWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RepresentativeRegionRepositoryPort;
@@ -19,8 +20,16 @@ public class RepresentativeRegionFacade implements RepresentativeRegionWebUseCas
 
     @Override
     @Transactional(readOnly = true)
-    public List<RepresentativeRegionResponse> getAllRepresentativeRegions() {
+    public List<RepresentativeRegionSummaryResponse> getAllRepresentativeRegions() {
         List<RepresentativeRegion> representativeRegions = representativeRegionRepositoryPort.findAll();
-        return representativeRegionMapper.toResponseListFromDomainList(representativeRegions);
+        return representativeRegionMapper.toSummaryResponseListFromDomainList(representativeRegions);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public RepresentativeRegionDetailResponse getRepresentativeRegionDetail(long representativeId) {
+        RepresentativeRegion representativeRegion = representativeRegionRepositoryPort.findById(representativeId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 대표 여행지가 존재하지 않습니다."));
+        return representativeRegionMapper.toDetailResponseFromDomain(representativeRegion);
     }
 }
