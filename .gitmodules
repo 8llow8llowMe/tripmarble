@@ -6,3 +6,7 @@
 	path = frontend/web/env
 	url = https://github.com/8llow8llowMe/TripMarble-env.git
 	branch = feature/fe/env
+[submodule "frontend/mobile/env"]
+	path = frontend/mobile/env
+	url = https://github.com/8llow8llowMe/TripMarble-env.git
+	branch = feature/fe/mobile/env
