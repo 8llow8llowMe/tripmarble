@@ -18,11 +18,21 @@ spring:
             - Path=/trip-service/**
           filters:
             - StripPrefix=1
+        - id: trip-game-service-docs
+          uri: http://localhost:8083
+          predicates:
+            - Path=/trip-game-service/**
+          filters:
+            - StripPrefix=1
           # 기존 API 라우트
         - id: trip-service
           uri: http://localhost:8082
           predicates:
             - Path=/api/v1/regions/**, /api/v1/trip-spots/**, /api/v1/trip-content-types
+        - id: trip-game-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/v1/trip-games/**
 
 eureka:
   client:
@@ -46,5 +56,7 @@ springdoc:
         url: /auth-service/v3/api-docs
       - name: 지역 및 여행 서비스 관련 API
         url: /trip-service/v3/api-docs
+      - name: 여행 게임(계획) 서비스 관련 API
+        url: /trip-game-service/v3/api-docs
     operationsSorter: none # API 정렬 기준 없음
     displayRequestDuration: true # 각 API 요청의 응답시간(ms) 표시
