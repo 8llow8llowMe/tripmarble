@@ -2,15 +2,11 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.e
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
-import com.followfollowme.tripmarble.domainlayer.theme.adapter.out.persistence.entity.TripThemeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -59,9 +55,4 @@ public class TripGameEntity {
     @Comment("대표 여행지 연관 외래키")
     @Column(nullable = false)
     private Long representativeRegionId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trip_theme_id", nullable = false)
-    @Comment("여행 테마 연관 외래키")
-    private TripThemeEntity tripTheme;
 }
