@@ -1,6 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.region.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.dto.RepresentativeRegionInfoResponse;
+import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionErrorCode;
+import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionException;
 import com.followfollowme.tripmarble.domainlayer.region.application.mapper.RepresentativeRegionMapper;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.in.RepresentativeRegionInternalUseCase;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RepresentativeRegionRepositoryPort;
@@ -20,7 +22,7 @@ public class RepresentativeRegionInternalFacade implements RepresentativeRegionI
     @Transactional(readOnly = true)
     public RepresentativeRegionInfoResponse getRepresentativeRegionInfo(long representativeRegionId) {
         RepresentativeRegion representativeRegion = representativeRegionRepositoryPort.findById(representativeRegionId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 대표 여행지가 존재하지 않습니다."));
+            .orElseThrow(() -> new RegionException(RegionErrorCode.REPRESENTATIVE_REGION_NOT_FOUND));
         return representativeRegionMapper.toInfoResponseFromDomain(representativeRegion);
     }
 }
