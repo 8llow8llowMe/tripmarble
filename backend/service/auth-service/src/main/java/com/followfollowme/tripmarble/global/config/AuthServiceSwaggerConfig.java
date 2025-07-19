@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Import;
 @Import(SwaggerSecurityCommon.class)
 @OpenAPIDefinition(
     info = @Info(
-        title = "트립마블(TripMarble) 여행 관련 API 명세서",
-        description = "Trip Service 전용",
+        title = "트립마블(TripMarble) 회원 및 인증/인가 서비스 관련 API 명세서",
+        description = "Auth Service 전용",
         version = "v1"
     )
 )
-public class TripSwaggerConfig {
+public class AuthServiceSwaggerConfig {
 
 }
