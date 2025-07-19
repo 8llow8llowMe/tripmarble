@@ -36,7 +36,7 @@ public record TripGameCreateResponse(
     @Schema(description = "대표 여행지 이름", example = "제주")
     String representativeRegionName,
 
-    @Schema(description = "여행 테마 이름들", example = "맛집 투어, 액티비티, 관광")
+    @Schema(description = "여행 테마 이름들", example = "[\"관광\", \"전시\", \"축제/공연\"]")
     List<String> tripThemeNames,
 
     @Schema(description = "방장 여부", example = "true")
