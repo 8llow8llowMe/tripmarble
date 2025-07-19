@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Builder
 @Schema(description = "여행 게임 생성 응답 DTO")
@@ -32,11 +33,11 @@ public record TripGameCreateResponse(
     @Schema(description = "여행 종료일", example = "2025-07-20")
     LocalDate endedAt,
 
-    @Schema(description = "대표 여행지 이름", example = "제주도 서귀포시")
+    @Schema(description = "대표 여행지 이름", example = "제주")
     String representativeRegionName,
 
-    @Schema(description = "여행 테마 이름", example = "맛집 투어")
-    String tripThemeName,
+    @Schema(description = "여행 테마 이름들", example = "맛집 투어, 액티비티, 관광")
+    List<String> tripThemeNames,
 
     @Schema(description = "방장 여부", example = "true")
     boolean isHost,
