@@ -10,6 +10,8 @@ import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripG
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
+import com.followfollowme.tripmarble.domainlayer.theme.application.exception.TripThemeErrorCode;
+import com.followfollowme.tripmarble.domainlayer.theme.application.exception.TripThemeException;
 import com.followfollowme.tripmarble.domainlayer.theme.application.port.out.TripThemeRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
@@ -31,7 +33,11 @@ public class TripGameFacade implements TripGameWebUseCase {
     @Override
     @Transactional
     public TripGameCreateResponse crateTripGame(TripGameCreateCommand command) {
-        // 1. 여행 게임(계획) 생성
+        // 1. 여행 테마 조회
+        TripTheme tripTheme = tripThemeRepositoryPort.findById(command.tripThemeId())
+            .orElseThrow(() -> new TripThemeException(TripThemeErrorCode.TRIP_THEME_NOT_FOUND));
+
+        // 1. 여행 게임(계획) 도메인 생성
         TripGame tripGame = TripGame.builder()
             .id(snowflakeIdGenerator.generateId())
             .title(command.title())
@@ -43,9 +49,10 @@ public class TripGameFacade implements TripGameWebUseCase {
             .tripThemeId(command.tripThemeId())
             .build();
 
-        TripGame savedTripGame = tripGameRepositoryPort.save(tripGame);
+        // 3. 여행 게임 (계획) 저장 (tripTheme도 같이 전달)
+        TripGame savedTripGame = tripGameRepositoryPort.save(tripGame, tripTheme);
 
-        // 2. 방장(자기 자신)을 게임 참여자로 등록
+        // 4. 방장(자기 자신)을 게임 참여자로 등록
         TripGameMember tripGameMember = TripGameMember.builder()
             .id(snowflakeIdGenerator.generateId())
             .tripGameId(savedTripGame.id())
@@ -56,11 +63,7 @@ public class TripGameFacade implements TripGameWebUseCase {
 
         TripGameMember savedTripGameMember = tripGameMemberRepositoryPort.save(tripGameMember);
 
-        // 3. 테마 정보 조회
-        TripTheme tripTheme = tripThemeRepositoryPort.findById(savedTripGame.tripThemeId())
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 여행 테마입니다."));
-
-        // 4. 내부 서비스 통신에 의해 대표 여행지 이름 조회
+        // 5. 내부 서비스 통신에 의해 대표 여행지 이름 조회
         RepresentativeRegionInfoResponse representativeRegionInfoResponse =
             representativeRegionClientPort.getRepresentativeRegionInfo(command.representativeRegionId());
 
@@ -73,7 +76,7 @@ public class TripGameFacade implements TripGameWebUseCase {
             .startedAt(savedTripGame.startedAt())
             .endedAt(savedTripGame.endedAt())
             .tripThemeName(tripTheme.name())
-            .representativeRegionName(representativeRegionInfoResponse.representativeRegionName()) // 추후 내부 통신 추가
+            .representativeRegionName(representativeRegionInfoResponse.representativeRegionName())
             .isHost(savedTripGameMember.isHost())
             .isReady(savedTripGameMember.isReady())
             .build();
