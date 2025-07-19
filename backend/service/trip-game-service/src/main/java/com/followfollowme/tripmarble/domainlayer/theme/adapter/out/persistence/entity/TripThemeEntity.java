@@ -2,6 +2,8 @@ package com.followfollowme.tripmarble.domainlayer.theme.adapter.out.persistence.
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -22,6 +24,7 @@ import org.hibernate.annotations.Comment;
 public class TripThemeEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("여행 테마 아이디")
     private Long id;
 
