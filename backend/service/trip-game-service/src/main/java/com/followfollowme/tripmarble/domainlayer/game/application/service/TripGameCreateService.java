@@ -1,0 +1,78 @@
+package com.followfollowme.tripmarble.domainlayer.game.application.service;
+
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.RepresentativeRegionInfoResponse;
+import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.port.out.RepresentativeRegionClientPort;
+import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMemberRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameThemeMappingRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameThemeMapping;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
+import com.followfollowme.tripmarble.domainlayer.theme.application.port.out.TripThemeRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
+import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class TripGameCreateService {
+
+    private final TripGameRepositoryPort tripGameRepositoryPort;
+    private final TripThemeRepositoryPort tripThemeRepositoryPort;
+    private final TripGameMemberRepositoryPort tripGameMemberRepositoryPort;
+    private final TripGameThemeMappingRepositoryPort tripGameThemeMappingRepositoryPort;
+    private final RepresentativeRegionClientPort representativeRegionClientPort;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
+
+    public TripGameCreateInfo createTripGame(TripGameCreateCommand command) {
+        // 1. 선택된 테마 조회
+        List<TripTheme> tripThemes = tripThemeRepositoryPort.findByIdIn(command.tripThemeIds());
+
+        // 2. TripGame 생성 및 저장
+        TripGame tripGame = TripGame.builder()
+            .id(snowflakeIdGenerator.generateId())
+            .title(command.title())
+            .status(Status.WAITING)
+            .difficulty(command.difficulty())
+            .startedAt(command.startedAt())
+            .endedAt(command.endedAt())
+            .representativeRegionId(command.representativeRegionId())
+            .build();
+
+        TripGame savedTripGame = tripGameRepositoryPort.save(tripGame);
+
+        // 3. 테마 매핑 저장
+        List<TripGameThemeMapping> mappings = command.tripThemeIds().stream()
+            .map(themeId -> TripGameThemeMapping.builder()
+                .id(snowflakeIdGenerator.generateId())
+                .tripGameId(savedTripGame.id())
+                .tripThemeId(themeId)
+                .build())
+            .toList();
+
+        tripGameThemeMappingRepositoryPort.saveAll(mappings, savedTripGame, tripThemes);
+
+        // 4. 방장(자기 자신) 등록
+        TripGameMember tripGameMember = TripGameMember.builder()
+            .id(snowflakeIdGenerator.generateId())
+            .tripGameId(savedTripGame.id())
+            .memberId(command.memberId())
+            .isReady(false)
+            .isHost(true)
+            .build();
+
+        TripGameMember savedMember = tripGameMemberRepositoryPort.save(tripGameMember, savedTripGame);
+
+        // 5. 대표 지역 정보 조회
+        RepresentativeRegionInfoResponse regionInfo = representativeRegionClientPort.getRepresentativeRegionInfo(command.representativeRegionId());
+
+        // 결과 DTO 반환
+        return TripGameCreateInfo.of(savedTripGame, savedMember, tripThemes, regionInfo);
+    }
+}
