@@ -5,12 +5,14 @@ import com.followfollowme.tripmarble.domainlayer.theme.adapter.in.web.dto.TripTh
 import com.followfollowme.tripmarble.domainlayer.theme.application.port.in.TripThemeWebUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class TripThemeWebController {
         description = "여행 테마 목록을 조회하는 기능입니다."
     )
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<List<TripThemeResponse>>> getAllTripThemes() {
         List<TripThemeResponse> tripThemeResponses = tripThemeWebUseCase.getAllTripThemes();
         return ResponseEntity.ok().body(Response.success(tripThemeResponses));
