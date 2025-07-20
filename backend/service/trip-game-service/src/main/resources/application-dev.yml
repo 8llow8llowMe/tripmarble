@@ -1,0 +1,49 @@
+server:
+  port: ${TRIP_GAME_SERVICE_PORT}
+  shutdown: graceful
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    open-in-view: true
+    defer-datasource-initialization: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        show_sql: true
+        jdbc:
+          batch_size: 100
+        default_batch_fetch_size: 100
+
+eureka:
+  instance:
+    hostname: ${spring.application.name}
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    service-url:
+      defaultZone: http://${SERVICE_DISCOVERY_HOSTNAME}:${SERVICE_DISCOVERY_PORT}/eureka/
+
+# Snowflake
+snowflake:
+  datacenter-id: ${SNOWFLAKE_DATACENTER_ID}
+  worker-id: ${SNOWFLAKE_WORKER_ID}
+
+# Security Resource Server
+security:
+  oauth2:
+    resource-server:
+      jwt:
+        access-key: ${JWT_ACCESS_KEY}
+
+# Swagger
+swagger:
+  server-url: http://${TRIP_MARBLE_DOMAIN}:${API_GATEWAY_PORT}/trip-game-service
