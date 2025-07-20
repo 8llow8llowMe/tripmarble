@@ -5,12 +5,14 @@ import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.security.common.exception.SecurityErrorCode;
 import com.followfollowme.tripmarble.security.resourceserver.resolver.SecurityAuthenticationErrorResolver;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
+
+import java.io.IOException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -19,8 +21,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     private final ObjectMapper objectMapper;
 
     @Override
-    public void commence(jakarta.servlet.http.HttpServletRequest request,
-        jakarta.servlet.http.HttpServletResponse response, AuthenticationException authException)
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
         throws IOException, ServletException {
         log.warn("[인증 실패] 인증되지 않은 요청 - {}", authException.getMessage());
 
