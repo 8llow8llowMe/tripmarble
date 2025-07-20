@@ -4,6 +4,7 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.en
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.repository.TripGameMemberRepository;
 import com.followfollowme.tripmarble.domainlayer.game.application.mapper.TripGameMemberMapper;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMemberRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -16,8 +17,8 @@ public class TripGameMemberRepositoryAdapter implements TripGameMemberRepository
     private final TripGameMemberMapper tripGameMemberMapper;
 
     @Override
-    public TripGameMember save(TripGameMember domain) {
-        TripGameMemberEntity entity = tripGameMemberMapper.toEntityFromDomain(domain);
+    public TripGameMember save(TripGameMember tripGameMember, TripGame tripGame) {
+        TripGameMemberEntity entity = tripGameMemberMapper.toEntityFromDomain(tripGameMember, tripGame);
         TripGameMemberEntity savedEntity = tripGameMemberRepository.save(entity);
         return tripGameMemberMapper.toDomainFromEntity(savedEntity);
     }
