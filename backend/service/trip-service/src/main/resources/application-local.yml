@@ -35,3 +35,7 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+# Swagger
+swagger:
+  server-url: http://localhost:8000/trip-service
