@@ -2,8 +2,10 @@ package com.followfollowme.tripmarble.domainlayer.game.application.command;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateRequest;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
-import java.time.LocalDate;
 import lombok.Builder;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Builder
 public record TripGameCreateCommand(
@@ -12,7 +14,7 @@ public record TripGameCreateCommand(
     LocalDate startedAt,
     LocalDate endedAt,
     long representativeRegionId,
-    long tripThemeId,
+    List<Long> tripThemeIds,
     long memberId
 ) {
 
@@ -23,7 +25,7 @@ public record TripGameCreateCommand(
             .startedAt(request.startedAt())
             .endedAt(request.endedAt())
             .representativeRegionId(request.representativeRegionId())
-            .tripThemeId(request.tripThemeId())
+            .tripThemeIds(request.tripThemeIds())
             .memberId(memberId)
             .build();
     }
