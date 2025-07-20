@@ -14,8 +14,7 @@ public record TripGame(
     Difficulty difficulty,
     LocalDate startedAt,
     LocalDate endedAt,
-    long representativeRegionId,
-    long tripThemeId
+    long representativeRegionId
 ) {
 
 }
