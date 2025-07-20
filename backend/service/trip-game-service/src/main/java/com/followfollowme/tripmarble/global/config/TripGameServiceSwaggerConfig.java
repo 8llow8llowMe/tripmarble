@@ -11,10 +11,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 
 import java.util.List;
 
 @Configuration
+@Profile("!prod")
 @RequiredArgsConstructor
 @Import(SwaggerSecurityCommon.class)
 public class TripGameServiceSwaggerConfig {
