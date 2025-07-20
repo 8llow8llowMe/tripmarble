@@ -1,0 +1,30 @@
+package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence;
+
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity.TripGameThemeMappingEntity;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.repository.TripGameThemeMappingRepository;
+import com.followfollowme.tripmarble.domainlayer.game.application.mapper.TripGameThemeMappingMapper;
+import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameThemeMappingRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameThemeMapping;
+import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+public class TripGameThemeMappingRepositoryAdapter implements TripGameThemeMappingRepositoryPort {
+
+    private final TripGameThemeMappingRepository tripGameThemeMappingRepository;
+    private final TripGameThemeMappingMapper tripGameThemeMappingMapper;
+
+    @Override
+    public List<TripGameThemeMapping> saveAll(List<TripGameThemeMapping> mappings, TripGame tripGame, List<TripTheme> tripThemes) {
+        List<TripGameThemeMappingEntity> entities = tripGameThemeMappingMapper.toEntitiesFromDomainList(mappings, tripGame, tripThemes);
+        List<TripGameThemeMappingEntity> savedEntities = tripGameThemeMappingRepository.saveAll(entities);
+        return savedEntities.stream()
+            .map(tripGameThemeMappingMapper::toDomainFromEntity)
+            .toList();
+    }
+}
