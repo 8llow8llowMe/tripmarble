@@ -32,7 +32,7 @@ spring:
         - id: trip-game-service
           uri: http://localhost:8083
           predicates:
-            - Path=/api/v1/trip-games/**
+            - Path=/api/v1/trip-themes/**, /api/v1/trip-games/**
 
 eureka:
   client:
