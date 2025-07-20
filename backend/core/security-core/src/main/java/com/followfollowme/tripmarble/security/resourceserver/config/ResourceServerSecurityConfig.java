@@ -47,8 +47,6 @@ public class ResourceServerSecurityConfig {
             // 리소스 서버 설정
             .oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtToMemberConverter()))
-            )
-            .exceptionHandling(ex -> ex
                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper))
                 .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))
             );
