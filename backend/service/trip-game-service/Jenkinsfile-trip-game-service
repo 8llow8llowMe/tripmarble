@@ -12,20 +12,20 @@ pipeline {
         // 실제 서비스 이름
         string(
             name: 'SERVICE_NAME',
-            defaultValue: 'trip-service',
+            defaultValue: 'trip-game-service',
             description: '하위 모듈(서비스) 디렉터리 이름'
         )
         // 이 파이프라인이 처리할 PR 라벨
         string(
             name: 'SERVICE_LABEL',
-            defaultValue: 'backend-trip-service',
+            defaultValue: 'backend-trip-game-service',
             description: '이 서비스 전용 PR 라벨'
         )
     }
 
     // 공통 환경 변수
     environment {
-        // Gradle 호출 시 사용하는 모듈 경로 ( service:trip-service )
+        // Gradle 호출 시 사용하는 모듈 경로 ( service:trip-game-service )
         MODULE_PATH = "${params.SERVICE_GROUP}:${params.SERVICE_NAME}"
         // 실제 파일시스템 경로 ( backend/service/trip-game-service )
         FS_PATH = "backend/${params.SERVICE_GROUP}/${params.SERVICE_NAME}"
