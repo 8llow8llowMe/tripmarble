@@ -59,3 +59,7 @@ minio:
   bucket-prefix: tripmarble
   access-key: ENC(fkrxtIidUHN1LoxCucgcFpBXqSh22NiO)
   secret-key: ENC(gyy+d4BkG2lphHopsii2hNLjUHutcbZNZcev8D90M08=)
+
+# Swagger
+swagger:
+  server-url: http://localhost:8081
