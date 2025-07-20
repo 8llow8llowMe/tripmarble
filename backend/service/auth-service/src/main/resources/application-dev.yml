@@ -55,3 +55,7 @@ minio:
   bucket-prefix: ${MINIO_BUCKET_PREFIX}
   access-key: ${MINIO_ACCESS_KEY}
   secret-key: ${MINIO_SECRET_KEY}
+
+# Swagger
+swagger:
+  server-url: http://${TRIP_MARBLE_DOMAIN}:${AUTH_SERVICE_PORT_DEV}
