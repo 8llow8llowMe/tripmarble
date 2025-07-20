@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.controller;
 
 import com.followfollowme.tripmarble.common.dto.Response;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.DifficultyResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateRequest;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
@@ -13,10 +14,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +29,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class TripGameWebController {
 
     private final TripGameWebUseCase tripGameWebUseCase;
+
+    @Operation(
+        summary = "여행 게임(계획) 난이도 목록 조회",
+        description = "여행 게임(계획) 난이도 목록을 조회하는 기능입니다."
+    )
+    @GetMapping("/difficulties")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<List<DifficultyResponse>>> getAllDifficulties() {
+        List<DifficultyResponse> responses = tripGameWebUseCase.getAllDifficulties();
+        return ResponseEntity.ok().body(Response.success(responses));
+    }
 
     @Operation(
         summary = "여행 게임(게획) 생성",
