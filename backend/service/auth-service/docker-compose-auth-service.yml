@@ -30,6 +30,8 @@ services:
       - "${AUTH_SERVICE_PORT_DEV}:${AUTH_SERVICE_PORT}" # host:container
     environment:
       <<: *auth_service_environment
+      TRIP_MARBLE_DOMAIN: ${TRIP_MARBLE_DOMAIN_DEV}
+      AUTH_SERVICE_PORT_DEV: ${AUTH_SERVICE_PORT_DEV}
     networks:
       - 8llow8llowme-net
 
