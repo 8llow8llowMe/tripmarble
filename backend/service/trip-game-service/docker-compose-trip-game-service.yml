@@ -5,10 +5,11 @@ x-trip-game-service-environment: &trip_game_service_environment
   DB_URL: ${DB_URL}
   DB_USERNAME: ${DB_USERNAME}
   DB_PASSWORD: ${DB_PASSWORD}
-  SNOWFLAKE_DATACENTER_ID: ${SNOWFLAKE_DATACENTER_ID}
-  SNOWFLAKE_WORKER_ID: ${SNOWFLAKE_WORKER_ID}
   SERVICE_DISCOVERY_HOSTNAME: ${SERVICE_DISCOVERY_HOSTNAME}
   SERVICE_DISCOVERY_PORT: ${SERVICE_DISCOVERY_PORT}
+  SNOWFLAKE_DATACENTER_ID: ${SNOWFLAKE_DATACENTER_ID}
+  SNOWFLAKE_WORKER_ID: ${SNOWFLAKE_WORKER_ID}
+  JWT_ACCESS_KEY: ${JWT_ACCESS_KEY}
 
 services:
   trip-game-service-dev:
@@ -20,6 +21,8 @@ services:
       - "${TRIP_GAME_SERVICE_PORT_DEV}:${TRIP_GAME_SERVICE_PORT}" # host:container
     environment:
       <<: *trip_game_service_environment
+      TRIP_MARBLE_DOMAIN: ${TRIP_MARBLE_DOMAIN_DEV}
+      API_GATEWAY_PORT: ${API_GATEWAY_PORT_DEV}
     networks:
       - 8llow8llowme-net
 
