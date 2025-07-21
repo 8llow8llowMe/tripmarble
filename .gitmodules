@@ -5,7 +5,7 @@
 [submodule "frontend/web/env"]
 	path = frontend/web/env
 	url = https://github.com/8llow8llowMe/TripMarble-env.git
-	branch = feature/fe/env
+	branch = feature/fe/web/env
 [submodule "frontend/mobile/env"]
 	path = frontend/mobile/env
 	url = https://github.com/8llow8llowMe/TripMarble-env.git
