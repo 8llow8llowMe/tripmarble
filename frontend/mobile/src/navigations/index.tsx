@@ -19,7 +19,7 @@ export default function RootNavigation() {
 
   return (
     <NavigationContainer>
-      {!isLoggedIn ? <BottomTabNavigator /> : <AuthNavigator />}
+      {isLoggedIn ? <BottomTabNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }
