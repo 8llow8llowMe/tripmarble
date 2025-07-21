@@ -51,7 +51,7 @@ const TextBox: React.FC<TextBoxProps> = ({
 const styles = StyleSheet.create({
   text: {
     fontSize: 14, // 기본 폰트 크기 설정
-    fontFamily: 'Pretendard-Regular', // 기본 폰트 패밀리 설정
+    fontFamily: fonts['Pretendard400'], // 기본 폰트 패밀리 설정
     color: palette.Neutral800, // 기본 색상 설정
   },
 });
