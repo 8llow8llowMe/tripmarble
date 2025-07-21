@@ -2,12 +2,12 @@ export const palette = {
   black: '#000',
   white: '#fff', // primaryWhite
   error: 'red', // errorText
-  Neutral300: '#A8B1BD', // dateColor, countColor, disabledText
-  Neutral800: '#0F1B2A', // regularText
-  orange100: '#FDEAD7', // recentListBackground
-  orange300: '#F7B27A', // mainInput, focusInputShadow
-  orange400: '#F38744', // mainButton, orangeText
-  orange500: '#EF6820', // mainColor
+  Neutral300: '#A8B1BD',
+  Neutral800: '#0F1B2A',
+  orange100: '#FDEAD7',
+  orange300: '#F7B27A',
+  orange400: '#F38744',
+  orange500: '#EF6820',
   rose200: '#FECCD6',
   rose500: '#F63D68', // removeText, countNumber
   gray50: '#F8F9FB', // placeholderBack
@@ -20,8 +20,11 @@ export const palette = {
   gray550: '#5F6B7A', // countColor
   gray600: '#414D5C', // subText, labelText, receivedMessageText
   gray800: '#0F1B2A', // recentListBackground
-  blue300: '#5984FF', // searchText, linkText, readCount
-  blue400: '#36BFFA', // mentionText
+  blue100: '#9ED4FF',
+  blue300: '#5984FF',
+  blue400: '#36BFFA',
+  blue500: '#0076FB',
+  mainColor: '#4BA1FD',
 
   bottomSheetBackground: '#F3F4F8',
   receivedMessageBackground: '#F3F4F8',
@@ -47,33 +50,4 @@ export const palette = {
   blueLight300: '#7CD4FD',
   blue200: '#89A8FF',
   red300: '#FDA29B',
-};
-
-// 자주 사용하는 color 지정
-export const colors = {
-  primaryWhite: '#FFFFFF',
-  mainColor: '#EF6820',
-
-  regularText: palette.Neutral800,
-  subText: '#414D5C',
-  grayText: '#8D99A8',
-  orangeText: '#F38744',
-  errorText: 'red',
-  searchText: palette.blue300,
-  labelText: '#414D5C',
-  placeholderText: '#8D99A8',
-  completeText: '#12B76A',
-  removeText: '#F63D68',
-  linkText: palette.blue300,
-  mentionText: palette.blue400,
-
-  recentListBackground: '#0F1B2A',
-  placeholderBack: palette.gray50,
-  dateColor: '#A8B1BD',
-  countColor: '#A8B1BD',
-  transparent: 'transparent',
-
-  textGray: '#7D8998',
-  countNumber: '#F63D68',
-  inputBorder: '#CDD3DD',
 };
