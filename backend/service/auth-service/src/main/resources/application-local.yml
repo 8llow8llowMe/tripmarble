@@ -63,3 +63,13 @@ minio:
 # Swagger
 swagger:
   server-url: http://localhost:8081
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info" # 해당 actuator endpoint 노출
+  endpoint:
+    health:
+      show-details: ALWAYS # SBA에서 상세 health 정보까지 보기 위함
