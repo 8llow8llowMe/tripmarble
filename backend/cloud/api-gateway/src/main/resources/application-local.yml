@@ -42,6 +42,7 @@ eureka:
 jwt:
   access-key: ENC(YDO9DGO7lP8iCqeTNW/SXWCv0697ep+bbGvMnjoJfMDEtWy1Zq/yfZDsovoggEcmLLOtZfHSpLYoRO0YEUlrOl3CvD5KWXo55haCMx7cZMg=)
 
+# SpringDoc (Swagger) Aggregation
 springdoc:
   swagger-ui:
     # Swagger UI 활성화 여부
@@ -60,3 +61,13 @@ springdoc:
         url: /trip-game-service/v3/api-docs
     operationsSorter: none # API 정렬 기준 없음
     displayRequestDuration: true # 각 API 요청의 응답시간(ms) 표시
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info" # 해당 actuator endpoint 노출
+  endpoint:
+    health:
+      show-details: ALWAYS # SBA에서 상세 health 정보까지 보기 위함
