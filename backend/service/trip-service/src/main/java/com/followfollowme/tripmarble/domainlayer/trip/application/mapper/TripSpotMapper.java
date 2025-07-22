@@ -22,12 +22,9 @@ public interface TripSpotMapper {
     // 도메인 -> Simple Response DTO
     @Mapping(source = "id", target = "tripSpotId")
     @Mapping(source = "title", target = "tripSpotName")
-    @Mapping(source = "firstImage2", target = "thumbnailImageUrl")
+    @Mapping(source = "firstImage", target = "originalImageUrl")
     TripSpotSimpleResponse toSimpleResponseFromDomain(TripSpot domain);
-
-    // 도메인 리스트 -> Simple Respons DTO 리스트
-    List<TripSpotSimpleResponse> toSimpleResponseListFromDomainList(List<TripSpot> domains);
-
+    
     default TripSpotWithDetailViewResponse toDetailViewResponseFrom(
         TripSpot tripSpot, String contentTypeName, TripSpotDetail tripSpotDetail) {
 
@@ -42,8 +39,7 @@ public interface TripSpotMapper {
             .addressDetail(tripSpot.addr2())
             .longitude(tripSpot.mapX())
             .latitude(tripSpot.mapY())
-            .imageUrl(tripSpot.firstImage())
-            .thumbnailImageUrl(tripSpot.firstImage2())
+            .originalImageUrl(tripSpot.firstImage())
             .build();
     }
 }
