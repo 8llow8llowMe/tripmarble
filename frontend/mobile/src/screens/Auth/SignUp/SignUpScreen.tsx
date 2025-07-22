@@ -53,7 +53,7 @@ export default function SignUpScreen({ navigation }: any) {
           {step === 1 && <StepEmail onNext={goNext} />}
           {step === 2 && <StepName onNext={goNext} />}
           {step === 3 && <StepNickname onNext={goNext} />}
-          {step === 4 && <StepPassword onPrev={goPrev} onNext={goNext} />}
+          {step === 4 && <StepPassword onNext={goNext} />}
           {step === 5 && <SignUpComplete onGoLogin={goToLogin} />}
         </View>
       </FormProvider>
