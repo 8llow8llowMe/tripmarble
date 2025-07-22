@@ -10,14 +10,9 @@ import {
 import { useFormContext } from 'react-hook-form';
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
+import useSignUpMutaion from '@/hooks/auth/useSignUp';
 
-export default function StepPassword({
-  onPrev,
-  onNext,
-}: {
-  onPrev: () => void;
-  onNext: () => void;
-}) {
+export default function StepPassword({ onNext }: { onNext: () => void }) {
   const {
     setValue,
     watch,
@@ -27,8 +22,11 @@ export default function StepPassword({
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { email, name, nickname } = getValues();
   const password = watch('password');
   const passwordConfirm = watch('passwordConfirm');
+
+  const { signUp } = useSignUpMutaion();
 
   const handleSubmit = async () => {
     setError('');
@@ -40,22 +38,19 @@ export default function StepPassword({
       setError('비밀번호가 일치하지 않습니다.');
       return;
     }
+
     setIsSubmitting(true);
-    try {
-      // react-hook-form 전체값 가져오기
-      //   const { email, name, nickname } = getValues();
-      //   await signUpMutation.mutateAsync({
-      //     email,
-      //     name,
-      //     nickname,
-      //     password,
-      //   });
-      onNext();
-    } catch (e: any) {
-      setError(e.message || '회원가입에 실패했습니다.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    signUp(
+      { email, password, name, nickname },
+      {
+        onSuccess: (data) => {
+          if (data.dataHeader.success) {
+            onNext();
+            setIsSubmitting(false);
+          }
+        },
+      },
+    );
   };
 
   return (
