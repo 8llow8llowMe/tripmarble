@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Import;
     JwtAuthPropertiesConfig.class,
     SnowflakePropertiesConfig.class,
     RedisPropertiesConfig.class,
-    OAuthPropertiesConfig.class,
     MinioPropertiesConfig.class
 })
 public class AuthServicePropertiesConfig {
