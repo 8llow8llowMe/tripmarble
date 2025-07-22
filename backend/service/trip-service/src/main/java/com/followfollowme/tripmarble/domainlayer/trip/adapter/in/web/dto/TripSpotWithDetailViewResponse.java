@@ -1,20 +1,43 @@
 package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
+@Schema(description = "여행지 상세 정보 조회 응답 DTO")
 public record TripSpotWithDetailViewResponse(
+
+    @Schema(description = "여행지 정보 아이디", example = "1")
     long tripSpotId,
-    String tripSpotName, // 여행지 이름 (title -> tripSpotName)
-    String contentTypeName, // 관광 타입 이름 (contentTypeName)
-    String description, // 상세 설명 (overview -> description)
-    String homepageUrl, // 홈페이지 URL
-    String phoneNumber, // 전화 번호 (tel -> phoneNumber)
+
+    @Schema(description = "여행지 정보 이름 (제목)", example = "가림상회")
+    String tripSpotName,
+
+    @Schema(description = "콘텐츠 타입 (관광 타입) 이름", example = "관광지")
+    String contentTypeName,
+
+    @Schema(description = "상세 설명", example = "가람 상회는 ~~~~")
+    String description,
+
+    @Schema(description = "홈페이지 URL", example = "http://~~~~")
+    String homepageUrl,
+
+    @Schema(description = "전화 번호", example = "010-xxxx-xxxx")
+    String phoneNumber,
+
+    @Schema(description = "전체 주소", example = "강원특별자치도 삼척시 가곡면 탕곡리")
     String address, // 전체 주소 (addr1)
-    String addressDetail, // 상세 주소 (addr2 -> addressDetail)
-    Double longitude, // 경도 (mapX -> longitude)
-    Double latitude, // 위도 (mapY -> latitude)
-    String imageUrl, // 대표 이미지 원본 (firstImage)
-    String thumbnailImageUrl // 대표 이미지 썸네일 (firstImage2)
+
+    @Schema(description = "상세 주소", example = "506-5")
+    String addressDetail,
+
+    @Schema(description = "경도", example = "126.8928691464")
+    Double longitude,
+
+    @Schema(description = "위도", example = "36.1899003585")
+    Double latitude,
+
+    @Schema(description = "여행지 대표 이미지 원본 URL", example = "http://tong.visitkorea.or.kr/~~~.jpg")
+    String originalImageUrl
 ) {
 }
