@@ -9,7 +9,7 @@ public record TripSpot(
     int contentId,
     String title,
     String tel,
-    String zipCode,
+    String zipcode,
     String addr1,
     String addr2,
     double mapX,
