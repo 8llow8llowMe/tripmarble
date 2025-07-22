@@ -12,6 +12,7 @@ include 'service:auth-service'
 include 'service:trip-service'
 include 'service:batch-service'
 include 'service:trip-game-service'
+include 'service:monitoring-service'
 
 // Spring Cloud
 include 'cloud:api-gateway'
