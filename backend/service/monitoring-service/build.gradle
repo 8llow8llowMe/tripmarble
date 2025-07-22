@@ -1,0 +1,8 @@
+dependencies {
+    // Spring Boot Admin Server
+    implementation 'de.codecentric:spring-boot-admin-starter-server:3.5.1'
+    // Spring Boot Actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // Eureka Client for Service Discovery (Eureka 클라이언트)
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+}
