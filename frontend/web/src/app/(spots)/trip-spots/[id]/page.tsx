@@ -1,11 +1,11 @@
-"use client";
+import TripSpotDetailPage from "@/pages/spots/trip-spot-detail/TripSpotDetail";
 
-import TripSpotDetailPage from "@/app/(spots)/trip-spots/[id]/TripSpotDetail";
+type Props = {
+  params: {
+    id: string;
+  };
+};
 
-export default function SpotDetailWrapper({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function TripSpotDetail({ params }: Props) {
   return <TripSpotDetailPage spotId={params.id} />;
 }
