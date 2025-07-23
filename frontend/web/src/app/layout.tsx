@@ -1,9 +1,9 @@
-import "@/app/globals.scss";
+import "@/shared/styles/globals.scss";
 import QueryProvider from "@/app/providers/QueryProvider";
-import CategoryLayoutClient from "@/components/layout/CategoryLayoutClient";
-import ClientLayout from "@/components/layout/ClientLayout";
-import CookieProvider from "@/store/CookieProvider";
-import StoreProvider from "@/store/StoreProvider";
+import CategoryLayoutClient from "@/widgets/layout/CategoryLayoutClient";
+import ClientLayout from "@/widgets/layout/ClientLayout";
+import CookieProvider from "@/app/providers/CookieProvider";
+import StoreProvider from "@/app/providers/StoreProvider";
 import { Metadata } from "next";
 import type { ReactNode } from "react";
 

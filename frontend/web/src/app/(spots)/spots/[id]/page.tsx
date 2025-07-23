@@ -1,6 +1,11 @@
-"use client";
-import SpotDetailPage from "./SpotDetailPage";
+import SpotDetailPage from "@/pages/spots/spot-detail/SpotDetailPage";
 
-export default function SpotDetailWrapper({ params }: { params: { id: string } }) {
+type Props = {
+  params: {
+    id: string;
+  };
+};
+
+export default function SpotDetail({ params }: Props) {
   return <SpotDetailPage spotId={params.id} />;
 }
