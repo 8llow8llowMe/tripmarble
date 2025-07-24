@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,44 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Controller, useForm } from 'react-hook-form';
 
 import logo from '../../../assets/icon.png';
+import { palette } from '@/constants/colors';
+import useLoginMutaion from '@/hooks/auth/useLogin';
+
+type LoginFormType = {
+  email: string;
+  password: string;
+};
 
 export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const {
+    control,
+    watch,
+    formState: { errors, isValid, isSubmitting },
+  } = useForm<LoginFormType>({
+    mode: 'onChange',
+    defaultValues: { email: '', password: '' },
+  });
+
+  const email = watch('email');
+  const password = watch('password');
+
+  const { login } = useLoginMutaion();
+
+  const handleSubmit = () => {
+    login(
+      { email, password },
+      {
+        onSuccess: (data) => {
+          if (data.dataHeader.success) {
+            console.log(data);
+          }
+        },
+      },
+    );
+  };
 
   return (
     <KeyboardAvoidingView
@@ -25,25 +57,54 @@ export default function LoginScreen({ navigation }: any) {
         <Image source={logo} style={styles.logo} />
         <Text style={styles.title}>로그인</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="이메일"
-          placeholderTextColor="#B0B0B0"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="비밀번호"
-          placeholderTextColor="#B0B0B0"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
+        <Controller
+          control={control}
+          name="email"
+          rules={{
+            required: '이메일을 입력해주세요.',
+            pattern: {
+              value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+              message: '이메일 형식이 올바르지 않습니다.',
+            },
+          }}
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <>
+              <TextInput
+                style={[styles.input, error && { borderColor: '#e74c3c', color: '#e74c3c' }]}
+                placeholder="이메일"
+                placeholderTextColor="#B0B0B0"
+                autoCapitalize="none"
+                keyboardType="email-address"
+                value={value}
+                onChangeText={onChange}
+                returnKeyType="next"
+              />
+              {error && <Text style={styles.error}>{error.message}</Text>}
+            </>
+          )}
         />
 
-        <TouchableOpacity style={styles.button}>
+        <Controller
+          control={control}
+          name="password"
+          rules={{ required: '비밀번호를 입력해주세요.' }}
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <>
+              <TextInput
+                style={[styles.input, error && { borderColor: '#e74c3c', color: '#e74c3c' }]}
+                placeholder="비밀번호"
+                placeholderTextColor="#B0B0B0"
+                secureTextEntry
+                value={value}
+                onChangeText={onChange}
+                returnKeyType="done"
+              />
+              {error && <Text style={styles.error}>{error.message}</Text>}
+            </>
+          )}
+        />
+
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>로그인</Text>
         </TouchableOpacity>
 
@@ -57,8 +118,6 @@ export default function LoginScreen({ navigation }: any) {
     </KeyboardAvoidingView>
   );
 }
-
-const POINT_COLOR = '#4BA1FD';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
@@ -76,7 +135,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    color: POINT_COLOR,
+    color: palette.mainColor,
     fontWeight: 'bold',
     marginBottom: 28,
   },
@@ -94,7 +153,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: '100%',
-    backgroundColor: POINT_COLOR,
+    backgroundColor: palette.mainColor,
     borderRadius: 10,
     paddingVertical: 15,
     alignItems: 'center',
@@ -115,7 +174,14 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   footerButton: {
-    color: POINT_COLOR,
+    color: palette.mainColor,
     fontWeight: 'bold',
+  },
+  error: {
+    fontSize: 14,
+    color: '#e74c3c',
+    marginBottom: 4,
+    marginLeft: 2,
+    alignSelf: 'flex-start',
   },
 });
