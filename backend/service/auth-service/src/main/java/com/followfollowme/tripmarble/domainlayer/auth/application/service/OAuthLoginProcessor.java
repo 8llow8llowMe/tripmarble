@@ -2,6 +2,8 @@ package com.followfollowme.tripmarble.domainlayer.auth.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginResponse;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
+import com.followfollowme.tripmarble.domainlayer.auth.application.exception.AuthErrorCode;
+import com.followfollowme.tripmarble.domainlayer.auth.application.exception.AuthException;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.OAuthMemberFetcher;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
@@ -30,9 +32,7 @@ public class OAuthLoginProcessor {
 
     private Member validateExistingProvider(Member existing, OAuthProvider provider) {
         if (!existing.provider().equals(provider)) {
-            throw new IllegalArgumentException(
-                "다른 방식으로 이미 가입된 계정입니다: " + existing.provider()
-            );
+            throw new AuthException(AuthErrorCode.UNMATCHED_OAUTH_PROVIDER, existing.provider().name());
         }
         return existing;
     }
