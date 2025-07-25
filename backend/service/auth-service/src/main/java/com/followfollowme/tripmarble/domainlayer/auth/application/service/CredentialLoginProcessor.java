@@ -2,6 +2,8 @@ package com.followfollowme.tripmarble.domainlayer.auth.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginResponse;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.AuthLoginCommand;
+import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
+import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +20,10 @@ public class CredentialLoginProcessor {
 
     public AuthLoginResponse login(AuthLoginCommand command) {
         Member member = memberRepositoryPort.findByEmail(command.email())
-            .orElseThrow(() -> new IllegalArgumentException("회원정보가 존재하지 않습니다."));
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         if (!passwordEncoder.matches(command.password(), member.password())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new MemberException(MemberErrorCode.NOT_MATCH_PASSWORD);
         }
 
         return jwtTokenProcessor.issueTokens(member.id(), member.role());
