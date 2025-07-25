@@ -14,12 +14,12 @@ public class OAuthLoginProcessor {
 
     private final OAuthMemberFetcher oAuthMemberFetcher;
     private final MemberRepositoryPort memberRepositoryPort;
-    private final TokenService tokenService;
+    private final JwtTokenProcessor jwtTokenProcessor;
 
     public AuthLoginResponse login(OAuthProvider provider, String authCode) {
         Member oAuthMember = oAuthMemberFetcher.fetchMember(provider, authCode);
         Member member = findOrCreateMember(provider, oAuthMember);
-        return tokenService.issueTokens(member.id(), member.role());
+        return jwtTokenProcessor.issueTokens(member.id(), member.role());
     }
 
     private Member findOrCreateMember(OAuthProvider provider, Member oAuthMember) {
