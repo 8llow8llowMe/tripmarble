@@ -45,7 +45,11 @@ const Header = () => {
       setScrolled(true);
       return;
     }
-
+    if (window.scrollY === 0) {
+      setScrolled(false);
+    } else {
+      setScrolled(true);
+    }
     const handleScroll = () => {
       if (window.scrollY > 0) {
         setScrolled(true);
