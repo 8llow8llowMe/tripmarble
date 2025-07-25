@@ -14,7 +14,7 @@ public class CredentialLoginProcessor {
 
     private final MemberRepositoryPort memberRepositoryPort;
     private final PasswordEncoder passwordEncoder;
-    private final TokenService tokenService;
+    private final JwtTokenProcessor jwtTokenProcessor;
 
     public AuthLoginResponse login(AuthLoginCommand command) {
         Member member = memberRepositoryPort.findByEmail(command.email())
@@ -24,6 +24,6 @@ public class CredentialLoginProcessor {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        return tokenService.issueTokens(member.id(), member.role());
+        return jwtTokenProcessor.issueTokens(member.id(), member.role());
     }
 }
