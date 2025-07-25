@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence;
 
-import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.TokenStorePort;
+import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.JwtTokenStorePort;
 import com.followfollowme.tripmarble.security.auth.jwt.JwtAuthProperties;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RedisTokenStoreAdapter implements TokenStorePort {
+public class RedisJwtTokenStoreAdapter implements JwtTokenStorePort {
 
-    private static final String KEY_PREFIX = "refreshToken::";
+    private static final String KEY_PREFIX = "refreshToken:";
     private final RedisTemplate<String, String> redisTemplate;
     private final JwtAuthProperties jwtAuthProperties;
 
