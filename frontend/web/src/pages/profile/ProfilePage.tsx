@@ -1,6 +1,5 @@
 "use client";
 
-import { Cookies } from "react-cookie";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 // style
@@ -26,8 +25,7 @@ export default function ProfilePage() {
   const handleLogout = () => {
     logoutMutate(undefined, {
       onSuccess: () => {
-        const cookies = new Cookies();
-        cookies.remove("accessToken", { path: "/" });
+        localStorage.removeItem("accessToken");
         dispatch(logout());
         router.push("/");
         toast.success("로그아웃되었습니다.", {

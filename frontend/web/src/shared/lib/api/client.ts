@@ -1,7 +1,4 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
-import { Cookies } from "react-cookie";
-
-const cookies = new Cookies();
 
 export const authApiClient: AxiosInstance = axios.create({
   baseURL: `${
@@ -26,7 +23,7 @@ export const apiClient: AxiosInstance = axios.create({
 // 요청 인터셉터 설정 - 쿠키에서 accessToken을 읽어 Authorization 헤더에 추가
 authApiClient.interceptors.request.use(
   (config) => {
-    const accessToken = cookies.get("accessToken");
+    const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -56,7 +53,6 @@ async function reissueTokenAndRetryRequest(
     const session = sessionStorage.getItem("email");
     if (!session) return;
 
-    const cookies = new Cookies();
     const memberEmail = JSON.parse(session).state.email;
 
     const res = await axios.post(
@@ -64,12 +60,13 @@ async function reissueTokenAndRetryRequest(
     );
 
     if (res.data.dataHeader.successCode === 0) {
-      cookies.set("accessToken", res.data.dataBody);
+      const { accessToken } = res.data.dataBody;
+      localStorage.setItem("accessToken", accessToken);
     } else {
       return;
     }
 
-    const accessToken = cookies.get("accessToken");
+    const accessToken = localStorage.getItem("accessToken");
     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
     return await instance.request(originalRequest);
   } catch (error) {
