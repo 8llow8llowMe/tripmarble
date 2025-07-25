@@ -4,6 +4,7 @@ import CategoryLayoutClient from "@/widgets/layout/CategoryLayoutClient";
 import ClientLayout from "@/widgets/layout/ClientLayout";
 import CookieProvider from "@/app/providers/CookieProvider";
 import StoreProvider from "@/app/providers/StoreProvider";
+import { ToastContainer } from "react-toastify";
 import { Metadata } from "next";
 import type { ReactNode } from "react";
 
@@ -41,6 +42,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <StoreProvider>
             <CookieProvider>
               <ClientLayout>
+                <ToastContainer
+                  position="top-right"
+                  autoClose={1200}
+                  hideProgressBar
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss={false}
+                  draggable={false}
+                  pauseOnHover={false}
+                  theme="light"
+                />
                 <CategoryLayoutClient>{children}</CategoryLayoutClient>
               </ClientLayout>
             </CookieProvider>

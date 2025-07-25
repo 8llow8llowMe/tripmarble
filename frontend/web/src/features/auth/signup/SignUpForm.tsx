@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo, useCallback } from "react";
+import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 // query
 import { useSignUp } from "@/entities/users/hooks/useUsers";
@@ -87,10 +88,19 @@ export default function SignUpPage() {
           onSuccess: () => {
             dispatch(resetForm());
             router.push("/login");
-            alert("회원가입 완료! 로그인 해주세요.");
+            toast.success(
+              <>
+                가입이 완료되었습니다!
+                <br />
+                로그인 후 여행의 재미를 경험하세요.
+              </>
+            );
           },
           onError: (error) => {
             console.error("회원가입 실패:", error);
+            toast.error(
+              "회원가입에 실패했습니다. 입력하신 정보를 다시 확인해주세요."
+            );
             router.push("/login");
           },
         }
