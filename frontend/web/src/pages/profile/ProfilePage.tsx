@@ -2,6 +2,7 @@
 
 import { Cookies } from "react-cookie";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 // style
 import styles from "./Profile.module.scss";
 // component
@@ -29,6 +30,15 @@ export default function ProfilePage() {
         cookies.remove("accessToken", { path: "/" });
         dispatch(logout());
         router.push("/");
+        toast.success("로그아웃되었습니다.", {
+          position: "top-right",
+          autoClose: 1200,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined,
+        });
       },
     });
   };
