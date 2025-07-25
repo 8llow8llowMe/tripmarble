@@ -1,5 +1,10 @@
-import LoginPage from "@/pages/auth/login/LoginPage";
+"use client";
+import LoginForm from "@/features/auth/login/LoginForm";
 
 export default function Login() {
-  return <LoginPage />;
+  return (
+    <>
+      <LoginForm />
+    </>
+  );
 }

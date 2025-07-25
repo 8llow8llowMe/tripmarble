@@ -1,6 +1,6 @@
 "use client";
 
-import CategoryErrorPage from "@/pages/error/ErrorPage";
+import CategoryErrorPage from "@/shared/ui/ErrorView/ErrorView";
 
 export default function Error({
   error,
