@@ -4,14 +4,12 @@ import { ReactNode, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/entities/users/model";
 import { fetchMe } from "@/entities/users/model/user/userSlice";
-import { useCookies } from "react-cookie";
 
 export default function ClientLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const hasHeader = pathname !== "/";
 
-  const [cookies] = useCookies(["accessToken"]);
-  const accessToken = cookies.accessToken;
+  const accessToken = localStorage.getItem("accessToken");
   // user 값 store에서 읽기
   const user = useAppSelector((state) => state.user.user);
   const dispatch = useAppDispatch();

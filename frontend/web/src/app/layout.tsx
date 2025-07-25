@@ -2,7 +2,6 @@ import "@/shared/styles/globals.scss";
 import QueryProvider from "@/app/providers/QueryProvider";
 import CategoryLayoutClient from "@/widgets/layout/CategoryLayoutClient";
 import ClientLayout from "@/widgets/layout/ClientLayout";
-import CookieProvider from "@/app/providers/CookieProvider";
 import StoreProvider from "@/app/providers/StoreProvider";
 import { ToastContainer } from "react-toastify";
 import { Metadata } from "next";
@@ -40,23 +39,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <QueryProvider>
           <StoreProvider>
-            <CookieProvider>
-              <ClientLayout>
-                <ToastContainer
-                  position="top-right"
-                  autoClose={1200}
-                  hideProgressBar
-                  newestOnTop={false}
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss={false}
-                  draggable={false}
-                  pauseOnHover={false}
-                  theme="light"
-                />
-                <CategoryLayoutClient>{children}</CategoryLayoutClient>
-              </ClientLayout>
-            </CookieProvider>
+            <ClientLayout>
+              <ToastContainer
+                position="top-right"
+                autoClose={1200}
+                hideProgressBar
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss={false}
+                draggable={false}
+                pauseOnHover={false}
+                theme="light"
+              />
+              <CategoryLayoutClient>{children}</CategoryLayoutClient>
+            </ClientLayout>
           </StoreProvider>
         </QueryProvider>
       </body>

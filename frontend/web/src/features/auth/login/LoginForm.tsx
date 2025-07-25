@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Cookies } from "react-cookie";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -39,14 +38,7 @@ export default function LoginPage() {
         onSuccess: async (res: any) => {
           const { accessToken } = res.data.dataBody;
 
-          // 쿠키에 accessToken 저장
-          const cookies = new Cookies();
-          cookies.set("accessToken", accessToken, {
-            path: "/",
-            maxAge: 60 * 60 * 2, // 2시간
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-          });
+          localStorage.setItem("accessToken", accessToken);
           await dispatch(fetchMe());
 
           if (saveEmail) {
