@@ -2,6 +2,7 @@ package com.followfollowme.tripmarble.global.exception;
 
 import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.common.exception.ValidationErrorCode;
+import com.followfollowme.tripmarble.domainlayer.auth.application.exception.AuthException;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,7 @@ public class AuthServiceGlobalExceptionHandler {
 
     @ExceptionHandler(MemberException.class)
     public ResponseEntity<Response<Void>> memberException(MemberException e) {
-        log.error("회원 관련 오류: {}", e.getMessage());
+        log.error("member 도메인 관련 오류: {}", e.getMessage());
         return ResponseEntity.status(e.getErrorCode().getHttpStatus())
             .body(Response.fail(e.getErrorCode().getCode(), e.getMessage()));
     }
@@ -37,5 +38,12 @@ public class AuthServiceGlobalExceptionHandler {
 
         return ResponseEntity.status(errorCode.getHttpStatus())
             .body(Response.fail(errorCode.getCode(), errors));
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<Response<Void>> authException(AuthException e) {
+        log.error("auth 도메인 관련 오류: {}", e.getMessage());
+        return ResponseEntity.status(e.getErrorCode().getHttpStatus())
+            .body(Response.fail(e.getErrorCode().getCode(), e.getMessage()));
     }
 }
