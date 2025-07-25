@@ -6,6 +6,7 @@ import {
   login,
   logout,
   signUp,
+  uploadTempProfileImage,
 } from "@/entities/users/api/users";
 
 export const useUserProfile = () =>
@@ -37,4 +38,9 @@ export const useLogout = () =>
 export const useSignUp = () =>
   useMutation({
     mutationFn: signUp,
+  });
+
+export const useUploadTempProfileImage = () =>
+  useMutation({
+    mutationFn: uploadTempProfileImage,
   });

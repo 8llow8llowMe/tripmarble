@@ -20,3 +20,14 @@ export const signUp = (data: {
 }) => {
   return authApiClient.post("/members/signup", data);
 };
+
+export const uploadTempProfileImage = (imageFile: File) => {
+  const formData = new FormData();
+  formData.append("imageFile", imageFile);
+
+  return authApiClient.post("/members/profile-image/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
