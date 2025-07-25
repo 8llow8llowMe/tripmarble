@@ -1,6 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.auth.application.service.oauth;
 
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
+import com.followfollowme.tripmarble.domainlayer.auth.application.exception.AuthErrorCode;
+import com.followfollowme.tripmarble.domainlayer.auth.application.exception.AuthException;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.OAuthAuthorizationUrlProvider;
 import java.util.Map;
 import java.util.Optional;
@@ -34,7 +36,6 @@ public class OAuthAuthorizationUrlRouter implements OAuthAuthorizationUrlProvide
 
     private OAuthAuthorizationUrlProvider getProvider(OAuthProvider oAuthProvider) {
         return Optional.ofNullable(urlProviderMap.get(oAuthProvider))
-            .orElseThrow(
-                () -> new IllegalArgumentException(oAuthProvider + "는 지원하지 않는 OAuthProvider입니다."));
+            .orElseThrow(() -> new AuthException(AuthErrorCode.UNSUPPORTED_OAUTH_PROVIDER, oAuthProvider.name()));
     }
 }
