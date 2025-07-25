@@ -1,5 +1,5 @@
 "use client";
-import ErrorPage from "@/pages/error/ErrorPage";
+import ErrorPage from "@/shared/ui/ErrorView/ErrorView";
 
 export default function GlobalError({
   error,
