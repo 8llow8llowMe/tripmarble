@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>이메일 인증</title>
+</head>
+<body>
+<div style="font-family: Arial, sans-serif;">
+  <h2>TripMarble 이메일 인증 코드</h2>
+  <p>아래 코드를 입력하여 인증을 완료해주세요:</p>
+  <div style="font-size: 20px; font-weight: bold; color: blue;">
+    <span th:text="${code}">인증코드</span>
+  </div>
+  <p>유효 시간: <span th:text="${ttlMinutes}">5</span>분</p>
+</div>
+</body>
+</html>

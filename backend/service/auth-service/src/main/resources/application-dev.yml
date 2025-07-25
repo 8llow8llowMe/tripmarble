@@ -59,3 +59,22 @@ minio:
 # Swagger
 swagger:
   server-url: http://${TRIP_MARBLE_DOMAIN}:${AUTH_SERVICE_PORT_DEV}
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info" # 해당 actuator endpoint 노출
+  endpoint:
+    health:
+      show-details: ALWAYS # SBA에서 상세 health 정보까지 보기 위함
+
+# Mail
+mail:
+  host: ${MAIL_HOST}
+  port: ${MAIL_PORT}
+  username: ${MAIL_USERNAME}
+  password: ${MAIL_PASSWORD}
+  smtp-auth: ${MAIL_SMTP_AUTH}
+  starttls-enable: ${MAIL_STARTTLS_ENABLE}
