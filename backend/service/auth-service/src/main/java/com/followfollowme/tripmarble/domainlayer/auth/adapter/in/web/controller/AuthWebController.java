@@ -3,12 +3,17 @@ package com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.controller
 import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginRequest;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginResponse;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.EmailVerificationRequest;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.SendEmailCodeRequest;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.AuthLoginCommand;
+import com.followfollowme.tripmarble.domainlayer.auth.application.command.EmailVerificationCommand;
+import com.followfollowme.tripmarble.domainlayer.auth.application.command.SendEmailCodeCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.in.AuthUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auth")
 @Tag(name = "인증/인가", description = "인증/인가 관련 클라이언트에 제공하는 API 입니다.")
-public class AuthController {
+public class AuthWebController {
 
     private final AuthUseCase authUseCase;
 
@@ -66,10 +71,30 @@ public class AuthController {
         description = "인증코드를 통해 소셜 로그인을 하는 기능입니다. "
             + "해당 서비스에 회원 정보가 없는 경우 회원가입 후 로그인을 하는 기능입니다."
     )
-    @PostMapping("/{provider}/login")
+    @GetMapping("/{provider}/login")
     public ResponseEntity<Response<AuthLoginResponse>> loginWithOAuthCode(
         @PathVariable OAuthProvider provider, @RequestParam("code") String authCode) {
         AuthLoginResponse loginResponse = authUseCase.loginWithOAuthCode(provider, authCode);
         return ResponseEntity.ok().body(Response.success(loginResponse));
+    }
+
+    @Operation(
+        summary = "이메일 인증코드 전송",
+        description = "입력한 이메일 주소로 인증 코드를 전송하는 기능입니다. 이미 가입된 이메일이라면 예외를 발생시킵니다."
+    )
+    @PostMapping("/mail/send-code")
+    public ResponseEntity<Response<Void>> sendVerificationCode(@Valid SendEmailCodeRequest request) {
+        authUseCase.sendEmailVerificationCode(SendEmailCodeCommand.from(request));
+        return ResponseEntity.ok().body(Response.success());
+    }
+
+    @Operation(
+        summary = "이메일 인증코드 검증",
+        description = "사용자가 입력한 인증코드가 해당 이메일 주소에 대해 유효한지 검증하는 기능입니다."
+    )
+    @PostMapping("/mail/verify-code")
+    public ResponseEntity<Response<Void>> verifyEmailCode(@RequestBody EmailVerificationRequest request) {
+        authUseCase.verifyEmailCode(EmailVerificationCommand.from(request));
+        return ResponseEntity.ok().body(Response.success());
     }
 }
