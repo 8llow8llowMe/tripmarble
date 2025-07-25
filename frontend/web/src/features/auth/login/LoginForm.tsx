@@ -4,6 +4,8 @@ import { Cookies } from "react-cookie";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
+
 // style
 import styles from "./LoginForm.module.scss";
 // icon
@@ -54,11 +56,31 @@ export default function LoginPage() {
             localStorage.removeItem("saveEmail");
             localStorage.removeItem("email");
           }
+
           router.push("/");
+          toast.success("환영합니다! 로그인되었습니다.", {
+            position: "top-right",
+            autoClose: 1200,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+            progress: undefined,
+          });
         },
         onError: (err: any) => {
-          console.error("로그인 실패", err);
-          alert("로그인에 실패했습니다.");
+          toast.error(
+            "이메일 또는 비밀번호가 올바르지 않아요. 다시 시도해주세요.",
+            {
+              position: "top-right",
+              autoClose: 2000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: false,
+              progress: undefined,
+            }
+          );
         },
       }
     );
