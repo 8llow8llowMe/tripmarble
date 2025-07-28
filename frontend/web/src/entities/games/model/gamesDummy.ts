@@ -1,10 +1,4 @@
-"use client";
-import styles from "@/widgets/game-list/Games.module.scss";
-import { GameList } from "@/widgets/game-list/GameList";
-import { MyGame, MyGamesHorizontal } from "@/widgets/my-games-horizontal/MyGamesHorizontal";
-
-// 더미 데이터
-const games = [
+export const gamesDummy = [
   {
     id: "1",
     title: "부산 광안리 투어 게임",
@@ -46,41 +40,3 @@ const games = [
     date: "2024-07-08 · 17명 참여",
   },
 ];
-
-const myGames: MyGame[] = [
-  {
-    id: "mg1",
-    title: "경주 골목길 탐험",
-    status: "playing",
-    imageUrl: "",
-    date: "2024-07-14 시작",
-  },
-  {
-    id: "mg2",
-    title: "제주 자연 속 방탈출",
-    status: "ended",
-    imageUrl: "/images/no-image.png",
-    date: "2024-07-10 종료",
-  },
-  {
-    id: "mg3",
-    title: "서울 고궁 탐방",
-    status: "playing",
-    imageUrl: "/images/no-image.png",
-    date: "2024-07-09 시작",
-  },
-];
-
-export default function GamesPage() {
-  return (
-    <div className={styles.mainContainer}>
-      <div className={styles.sectionTitle}>다른 사람들이 한 게임 목록</div>
-      <div className={styles.flexRow}>
-        <GameList games={games} />
-      </div>
-
-      <MyGamesHorizontal games={myGames} status="playing" />
-      <MyGamesHorizontal games={myGames} status="ended" />
-    </div>
-  );
-}
