@@ -17,7 +17,7 @@ import { useAppDispatch } from "@/entities/users/model";
 import { useLogout } from "@/entities/users/hooks/useUsers";
 import { logout } from "@/entities/users/model/user/userSlice";
 
-export default function ProfilePage() {
+export const ProfilePage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { mutate: logoutMutate } = useLogout();
@@ -75,4 +75,18 @@ export default function ProfilePage() {
       </div>
     </div>
   );
-}
+};
+// import ProfileInfo from "@/features/profile/ProfileInfo";
+// import MyGamesHorizontal from "@/entities/games/ui/MyGamesHorizontal";
+// import ReviewHorizontalList from "@/entities/review/ui/ReviewHorizontalList";
+// import styles from "./ProfileWidget.module.scss";
+
+// export const ProfilePage = () => (
+//   <div className={styles.profileWrapper}>
+//     <ProfileInfo />
+//     <div className={styles.lists}>
+//       <MyGamesHorizontal />
+//       <ReviewHorizontalList />
+//     </div>
+//   </div>
+// );
