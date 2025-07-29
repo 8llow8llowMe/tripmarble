@@ -6,53 +6,6 @@
   gap: 3rem;
 }
 
-.profileHeader {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-}
-
-.avatar {
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.profileInfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.username {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-top: 1rem;
-}
-
-.socialInfo {
-  font-size: 0.9rem;
-  color: #666;
-  margin: 0.5rem 0;
-}
-
-.editButton {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  background: #fff;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.logoutButton {
-  align-items: center;
-  padding: 12px 0px;
-  &:hover {
-    text-decoration: underline;
-    cursor: pointer;
-  }
-}
-
 .lists {
   width: 100%;
   max-width: 1024px;

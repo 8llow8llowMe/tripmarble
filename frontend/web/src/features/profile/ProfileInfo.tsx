@@ -3,14 +3,7 @@
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 // style
-import styles from "./Profile.module.scss";
-// component
-import HorizontalList from "@/shared/ui/common/HorizontalList/HorizontalList";
-// data
-import { spotsData } from "@/shared/constants/spots";
-// image
-import Image from "next/image";
-import { Logo } from "@/shared/assets/images";
+import styles from "./ProfileInfo.module.scss";
 // store
 import { useAppDispatch } from "@/entities/users/model";
 import { logout } from "@/entities/users/model/user/userSlice";
@@ -44,9 +37,18 @@ export const ProfileInfo = () => {
   };
 
   return (
-    <div>
-      <UserAvatar />
-      <UserInfo />
+    <div className={styles.profileWrapper}>
+      <div className={styles.profileHeader}>
+        <UserAvatar />
+
+        <div className={styles.profileInfo}>
+          <UserInfo />
+          <button className={styles.editButton}>프로필 수정</button>
+          <div onClick={handleLogout} className={styles.logoutButton}>
+            로그아웃
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
