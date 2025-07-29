@@ -1,8 +1,7 @@
-// src/entities/user/ui/UserAvatar.tsx
-
 import Image from "next/image";
 import { useAppSelector } from "@/entities/users/model";
-import { Logo } from "@/shared/assets/images"; // 기본 아바타
+import { Logo } from "@/shared/assets/images";
+import styles from "./UserAvatar.module.scss";
 
 const UserAvatar = () => {
   const user = useAppSelector((state) => state.user.user);
@@ -10,21 +9,8 @@ const UserAvatar = () => {
   const profileImage = user?.profileImage || Logo;
 
   return (
-    <div
-      style={{
-        width: 120,
-        height: 120,
-        borderRadius: "50%",
-        overflow: "hidden",
-      }}
-    >
-      <Image
-        src={profileImage}
-        alt="User Avatar"
-        width={120}
-        height={120}
-        style={{ objectFit: "cover" }}
-      />
+    <div className={styles.avatar}>
+      <Image src={profileImage} alt="User Avatar" width={200} height={200} />
     </div>
   );
 };
