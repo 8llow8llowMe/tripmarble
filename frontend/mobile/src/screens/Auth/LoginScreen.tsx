@@ -14,6 +14,11 @@ import { Controller, useForm } from 'react-hook-form';
 import logo from '../../../assets/icon.png';
 import { palette } from '@/constants/colors';
 import useLoginMutaion from '@/hooks/auth/useLogin';
+import { useAppDispatch } from '@/store/store';
+import { authorize } from '@/store/redux/auth/auth';
+import { setAsyncStorageItem } from '@/utils/asyncStorage';
+import { STORAGE_KEY } from '@/constants/keys';
+import { setUser } from '@/store/redux/user/user';
 
 type LoginFormType = {
   email: string;
@@ -33,6 +38,7 @@ export default function LoginScreen({ navigation }: any) {
   const email = watch('email');
   const password = watch('password');
 
+  const dispatch = useAppDispatch();
   const { login } = useLoginMutaion();
 
   const handleSubmit = () => {
@@ -40,12 +46,26 @@ export default function LoginScreen({ navigation }: any) {
       { email, password },
       {
         onSuccess: (data) => {
+          console.log(data);
+          // TODO: 로그인 에러 처리
           if (data.dataHeader.success) {
-            console.log(data);
+            setAsyncStorageItem(STORAGE_KEY.ACCESS_TOKEN, data.dataBody.accessToken);
+
+            dispatch(
+              authorize({
+                accessToken: data.dataBody.accessToken,
+                memberId: data.dataBody.memberId,
+              }),
+            );
+            dispatch(setUser({ memberId: data.dataBody.memberId }));
           }
         },
       },
     );
+  };
+
+  const goToSignUpScreen = () => {
+    navigation.navigate('SignUp');
   };
 
   return (
@@ -91,7 +111,7 @@ export default function LoginScreen({ navigation }: any) {
           render={({ field: { onChange, value }, fieldState: { error } }) => (
             <>
               <TextInput
-                style={[styles.input, error && { borderColor: '#e74c3c', color: '#e74c3c' }]}
+                style={[styles.input, error && { borderColor: palette.error }]}
                 placeholder="비밀번호"
                 placeholderTextColor="#B0B0B0"
                 secureTextEntry
@@ -110,7 +130,7 @@ export default function LoginScreen({ navigation }: any) {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>계정이 없으신가요?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+          <TouchableOpacity onPress={goToSignUpScreen}>
             <Text style={styles.footerButton}>회원가입</Text>
           </TouchableOpacity>
         </View>
@@ -120,7 +140,7 @@ export default function LoginScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: palette.white },
   inner: {
     flex: 1,
     justifyContent: 'center',
@@ -179,7 +199,7 @@ const styles = StyleSheet.create({
   },
   error: {
     fontSize: 14,
-    color: '#e74c3c',
+    color: palette.error,
     marginBottom: 4,
     marginLeft: 2,
     alignSelf: 'flex-start',
