@@ -1,0 +1,213 @@
+pipeline {
+    agent any
+
+    // 파라미터
+    parameters {
+        // 서비스가 속한 그룹 (폴더명)
+        string(
+            name: 'SERVICE_GROUP',
+            defaultValue: 'web',
+            description: '상위 모듈 디렉터리 (web)'
+        )
+        // 실제 서비스 이름
+        string(
+            name: 'SERVICE_NAME',
+            defaultValue: 'frontend',
+            description: '하위 모듈(서비스) 디렉터리 이름'
+        )
+        // 이 파이프라인이 처리할 PR 라벨
+        string(
+            name: 'SERVICE_LABEL',
+            defaultValue: 'frontend/web',
+            description: '이 서비스 전용 PR 라벨'
+        )
+    }
+
+    // 공통 환경 변수
+    environment {
+        // 실제 파일시스템 경로 ( frontend/web )
+        FS_PATH = "frontend/${params.SERVICE_GROUP}"
+        // MinIO 설정 (Jenkins 환경변수에서 가져옴, 기본값 fallback)
+        MINIO_ENDPOINT = "${env.MINIO_ENDPOINT ?: 'http://192.168.0.71:9000'}"
+        MINIO_BUCKET = "${env.MINIO_BUCKET ?: 'tripmarble'}"
+        MINIO_PATH = 'frontend/web'
+        // SSH 설정 (MinIO 접근용)
+        SSH_CONFIG = 'storage server ssh'
+    }
+
+    stages {
+        stage('Branch & Label Check') {
+            steps {
+                script {
+                    // 1. 반드시 PR 빌드여야 함
+                    if (!env.CHANGE_ID) {
+                        echo "PR 빌드가 아닙니다. 종료."
+                        error "stop: PR 빌드가 아니므로 파이프라인 중단"
+                    }
+
+                    // 2. PR 번호 확보 (env.CHANGE_ID 우선, 없으면 커밋 메시지/Commit -> PR 조회)
+                    String prNum = env.CHANGE_ID
+                    if (!prNum) {
+                        // 2-1. Merge-commit 패턴
+                        String msg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                        def m = (msg =~ /Merge pull request #(\d+)/)
+                        if (m.find()) { prNum = m[0][1] }
+
+                        // 2-2. Commit -> PR API
+                        if (!prNum) {
+                            String sha  = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
+                            String repo = (env.GIT_URL ?: '')
+                                            .replaceFirst(/(^https?:\/\/|git@)github\.com[:\/]/, '')
+                                            .replaceFirst(/\.git$/, '')
+                            withCredentials([usernamePassword(credentialsId: 'deploy',
+                                                              usernameVariable: 'GH_USER',
+                                                              passwordVariable: 'GH_TOKEN')]) {
+                                String prsJson = sh(
+                                    script: """
+                                        curl -s -H "Authorization: token ${GH_TOKEN}" \\
+                                             -H "Accept: application/vnd.github.groot-preview+json" \\
+                                             https://api.github.com/repos/${repo}/commits/${sha}/pulls
+                                    """,
+                                    returnStdout: true
+                                ).trim()
+                                def m2 = (prsJson =~ /"number":\\s*(\\d+)/)
+                                if (m2.find()) { prNum = m2[0][1] }
+                            }
+                        }
+                    }
+                    if (!prNum) {
+                        error "skip: PR 번호를 찾지 못해 빌드 중단"
+                    }
+
+                    // 3. 라벨 검사
+                    echo "PR #${prNum} -> 라벨 검사"
+                    String repoPath = (env.GIT_URL ?: '')
+                                          .replaceFirst(/(^https?:\/\/|git@)github\.com[:\/]/, '')
+                                          .replaceFirst(/\.git$/, '')
+                    boolean labelOk = false
+                    withCredentials([usernamePassword(credentialsId: 'deploy',
+                                                      usernameVariable: 'GH_USER',
+                                                      passwordVariable: 'GH_TOKEN')]) {
+                        String labelsJson = sh(
+                            script: """
+                                curl -s -H "Accept: application/vnd.github+json" \\
+                                     -H "Authorization: token ${GH_TOKEN}" \\
+                                     https://api.github.com/repos/${repoPath}/issues/${prNum}/labels
+                            """,
+                            returnStdout: true
+                        ).trim()
+                        echo "응답 라벨 목록: ${labelsJson}"
+                        labelOk = labelsJson.contains("\"name\": \"${params.SERVICE_LABEL}\"")
+                    }
+                    if (!labelOk) {
+                        error "skip: 라벨 '${params.SERVICE_LABEL}'이(가) 없음"
+                    }
+
+                    // 4. PR의 타겟 브랜치 검증
+                    def targetBranch = env.CHANGE_TARGET
+                    if (!['develop','main'].contains(targetBranch)) {
+                        error "skip: PR의 타겟 브랜치 '${targetBranch}'는 허용되지 않음"
+                    }
+
+                    echo "Branch·PR·Label·TargetBranch 조건 모두 통과"
+                }
+            }
+        }
+
+        stage('Init & Submodule Update') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: scm.branches,
+                    userRemoteConfigs: scm.userRemoteConfigs,
+                    extensions: [
+                        [$class: 'SubmoduleOption',
+                         recursiveSubmodules: true,
+                         parentCredentials: true]
+                    ]
+                ])
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir("${env.FS_PATH}") {
+                    sh 'npm ci'
+                }
+            }
+        }
+
+        stage('Build Next.js') {
+            steps {
+                dir("${env.FS_PATH}") {
+                    sh 'npm run build'
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts "${env.FS_PATH}/out/**/*"
+                }
+            }
+        }
+
+        stage('Deploy to Dev') {
+            when {
+                expression { env.CHANGE_TARGET == 'develop' }
+            }
+            steps {
+                script {
+                    // MinIO에 배포
+                    withCredentials([usernamePassword(credentialsId: 'minio-credentials',
+                                                      usernameVariable: 'MINIO_ACCESS_KEY',
+                                                      passwordVariable: 'MINIO_SECRET_KEY')]) {
+                        sh """
+                            # MinIO Client 설정
+                            mc alias set minio ${MINIO_ENDPOINT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
+                            
+                            # 기존 파일 삭제 (버킷 경로 전체)
+                            mc rm --recursive --force minio/${MINIO_BUCKET}/${MINIO_PATH} || true
+                            
+                            # 새 빌드 파일 업로드
+                            mc cp --recursive ${env.FS_PATH}/out/ minio/${MINIO_BUCKET}/${MINIO_PATH}/
+                            
+                            echo "개발 환경 배포 완료: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${MINIO_PATH}"
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Prod') {
+            when {
+                expression { env.CHANGE_TARGET == 'main' }
+            }
+            steps {
+                script {
+                    // MinIO에 배포
+                    withCredentials([usernamePassword(credentialsId: 'minio-credentials',
+                                                      usernameVariable: 'MINIO_ACCESS_KEY',
+                                                      passwordVariable: 'MINIO_SECRET_KEY')]) {
+                        sh """
+                            # MinIO Client 설정
+                            mc alias set minio ${MINIO_ENDPOINT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
+                            
+                            # 기존 파일 삭제 (버킷 경로 전체)
+                            mc rm --recursive --force minio/${MINIO_BUCKET}/${MINIO_PATH} || true
+                            
+                            # 새 빌드 파일 업로드
+                            mc cp --recursive ${env.FS_PATH}/out/ minio/${MINIO_BUCKET}/${MINIO_PATH}/
+                            
+                            echo "프로덕션 환경 배포 완료: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${MINIO_PATH}"
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+} 
