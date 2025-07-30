@@ -1,18 +1,33 @@
+"use client";
 import Link from "next/link";
-import type { Metadata } from "next";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 // styles
 import styles from "./Home.module.scss";
 // components
 import Button from "@/shared/ui/common/Button/Button";
+import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
+// assets
 import Image from "next/image";
 import { jeju2, seoul2 } from "@/shared/assets/images/places";
-
-export const metadata: Metadata = {
-  title: "Home",
-  description: "여행을 색다르게 즐겨보세요",
-};
+// stores
+import { useAppSelector } from "@/entities/users/model";
 
 export default function HomePage() {
+  const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+  const router = useRouter();
+  const user = useAppSelector((state) => state.user.user);
+
+  const handleCreateClick = () => {
+    if (!user) {
+      toast.info("로그인 후 게임을 만들 수 있습니다.");
+      router.push("/login");
+      return;
+    }
+    setCreateModalOpen(true);
+  };
+
   return (
     <>
       <div className={styles.parallaxWrapper}>
@@ -23,11 +38,21 @@ export default function HomePage() {
               <p className={styles.subtitle}>
                 &quot;보드판 위 여행지를 돌며 새로운 추억을 만들어보세요.&quot;
               </p>
-              <Link href="/recommend">
-                <Button radius="md" bgColor="accent" paddingSize="lg">
-                  랜덤 여행지 추천받기
+              <div className={styles.buttonContainer}>
+                <Link href="/recommend">
+                  <Button radius="md" bgColor="accent" paddingSize="lg">
+                    랜덤 여행지 추천받기
+                  </Button>
+                </Link>
+                <Button
+                  radius="md"
+                  bgColor="primary"
+                  paddingSize="lg"
+                  onClick={handleCreateClick}
+                >
+                  게임 만들기
                 </Button>
-              </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -78,6 +103,10 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        <CreateGameModal
+          isOpen={isCreateModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+        />
       </div>
     </>
   );
