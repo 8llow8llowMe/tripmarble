@@ -5,7 +5,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   paddingSize?: "sm" | "md" | "lg";
   radius?: "sm" | "md" | "lg";
   bgColor?: "primary" | "secondary" | "accent";
-  width?: "auto" | "100px";
+  width?: "auto" | "100px" | "200px";
+  height?: "auto" | "50px";
 }
 
 const Button = ({
@@ -14,15 +15,20 @@ const Button = ({
   radius,
   bgColor,
   width,
+  height,
   ...props
 }: ButtonProps) => {
+  const style: React.CSSProperties = {};
+  if (width) style.width = width;
+  if (height) style.height = height;
+
   return (
     <button
-      className={`${styles.button} ${radius && styles[`rounded-${radius}`]} ${
-        paddingSize && styles[`padding-${paddingSize}`]
-      } ${bgColor && styles[`bg-${bgColor}`]}`}
+      className={`${styles.button} ${radius && styles[`rounded-${radius}`]} 
+      ${paddingSize && styles[`padding-${paddingSize}`]} 
+      ${bgColor && styles[`bg-${bgColor}`]}`}
       {...props}
-      style={width ? { width } : undefined}
+      style={Object.keys(style).length > 0 ? style : undefined}
     >
       {children}
     </button>
