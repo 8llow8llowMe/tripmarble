@@ -5,10 +5,13 @@ import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLog
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginResponse;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.EmailVerificationRequest;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.SendEmailCodeRequest;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.TokenReissueRequest;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.TokenReissueResponse;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.AuthLoginCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.EmailVerificationCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.SendEmailCodeCommand;
+import com.followfollowme.tripmarble.domainlayer.auth.application.command.TokenReissueCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.in.AuthUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,8 +43,8 @@ public class AuthWebController {
     )
     @PostMapping("/login")
     public ResponseEntity<Response<AuthLoginResponse>> login(@RequestBody AuthLoginRequest request) {
-        AuthLoginResponse loginResponse = authUseCase.login(AuthLoginCommand.from(request));
-        return ResponseEntity.ok().body(Response.success(loginResponse));
+        AuthLoginResponse response = authUseCase.login(AuthLoginCommand.from(request));
+        return ResponseEntity.ok().body(Response.success(response));
     }
 
     @Operation(
@@ -74,8 +77,8 @@ public class AuthWebController {
     @GetMapping("/{provider}/login")
     public ResponseEntity<Response<AuthLoginResponse>> loginWithOAuthCode(
         @PathVariable OAuthProvider provider, @RequestParam("code") String authCode) {
-        AuthLoginResponse loginResponse = authUseCase.loginWithOAuthCode(provider, authCode);
-        return ResponseEntity.ok().body(Response.success(loginResponse));
+        AuthLoginResponse response = authUseCase.loginWithOAuthCode(provider, authCode);
+        return ResponseEntity.ok().body(Response.success(response));
     }
 
     @Operation(
@@ -96,5 +99,15 @@ public class AuthWebController {
     public ResponseEntity<Response<Void>> verifyEmailCode(@RequestBody EmailVerificationRequest request) {
         authUseCase.verifyEmailCode(EmailVerificationCommand.from(request));
         return ResponseEntity.ok().body(Response.success());
+    }
+
+    @Operation(
+        summary = "토큰 재발급",
+        description = "Refresh Token을 통해 Access Token을 재발급 받는 기능입니다."
+    )
+    @PostMapping("/token/reissue")
+    public ResponseEntity<Response<TokenReissueResponse>> reissueToken(@RequestBody TokenReissueRequest request) {
+        TokenReissueResponse response = authUseCase.reissueToken(TokenReissueCommand.from(request));
+        return ResponseEntity.ok().body(Response.success(response));
     }
 }
