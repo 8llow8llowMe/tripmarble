@@ -1,0 +1,144 @@
+name: Conditional Jenkins Trigger
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [develop, main]
+
+jobs:
+  analyze-labels:
+    runs-on: ubuntu-latest
+    outputs:
+      auth-service: ${{ steps.label-check.outputs.auth-service }}
+      trip-service: ${{ steps.label-check.outputs.trip-service }}
+      trip-game-service: ${{ steps.label-check.outputs.trip-game-service }}
+      api-gateway: ${{ steps.label-check.outputs.api-gateway }}
+      service-discovery: ${{ steps.label-check.outputs.service-discovery }}
+      target-branch: ${{ steps.branch-check.outputs.target-branch }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check labels for auth-service
+        id: label-check
+        run: |
+          if [[ "${{ github.event.pull_request.labels.*.name }}" == *"backend-auth-service"* ]]; then
+            echo "auth-service=true" >> $GITHUB_OUTPUT
+          else
+            echo "auth-service=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [[ "${{ github.event.pull_request.labels.*.name }}" == *"backend-trip-service"* ]]; then
+            echo "trip-service=true" >> $GITHUB_OUTPUT
+          else
+            echo "trip-service=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [[ "${{ github.event.pull_request.labels.*.name }}" == *"backend-trip-game-service"* ]]; then
+            echo "trip-game-service=true" >> $GITHUB_OUTPUT
+          else
+            echo "trip-game-service=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [[ "${{ github.event.pull_request.labels.*.name }}" == *"backend-api-gateway"* ]]; then
+            echo "api-gateway=true" >> $GITHUB_OUTPUT
+          else
+            echo "api-gateway=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if [[ "${{ github.event.pull_request.labels.*.name }}" == *"backend-service-discovery"* ]]; then
+            echo "service-discovery=true" >> $GITHUB_OUTPUT
+          else
+            echo "service-discovery=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check target branch
+        id: branch-check
+        run: |
+          if [[ "${{ github.event.pull_request.base.ref }}" == "develop" ]] || [[ "${{ github.event.pull_request.base.ref }}" == "main" ]]; then
+            echo "target-branch=${{ github.event.pull_request.base.ref }}" >> $GITHUB_OUTPUT
+          else
+            echo "target-branch=none" >> $GITHUB_OUTPUT
+          fi
+
+  trigger-jenkins:
+    needs: analyze-labels
+    runs-on: ubuntu-latest
+    if: |
+      needs.analyze-labels.outputs.target-branch != 'none' && 
+      (needs.analyze-labels.outputs.auth-service == 'true' || 
+       needs.analyze-labels.outputs.trip-service == 'true' || 
+       needs.analyze-labels.outputs.trip-game-service == 'true' || 
+       needs.analyze-labels.outputs.api-gateway == 'true' || 
+       needs.analyze-labels.outputs.service-discovery == 'true')
+    steps:
+      - name: Trigger auth-service pipeline
+        if: needs.analyze-labels.outputs.auth-service == 'true'
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.JENKINS_URL }}/job/auth-service/job/develop/buildWithParameters" \
+            -d '{
+              "SERVICE_GROUP": "service",
+              "SERVICE_NAME": "auth-service",
+              "SERVICE_LABEL": "backend-auth-service",
+              "SKIP_LABEL_CHECK": "true"
+            }'
+
+      - name: Trigger trip-service pipeline
+        if: needs.analyze-labels.outputs.trip-service == 'true'
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.JENKINS_URL }}/job/trip-service/job/develop/buildWithParameters" \
+            -d '{
+              "SERVICE_GROUP": "service",
+              "SERVICE_NAME": "trip-service",
+              "SERVICE_LABEL": "backend-trip-service",
+              "SKIP_LABEL_CHECK": "true"
+            }'
+
+      - name: Trigger trip-game-service pipeline
+        if: needs.analyze-labels.outputs.trip-game-service == 'true'
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.JENKINS_URL }}/job/trip-game-service/job/develop/buildWithParameters" \
+            -d '{
+              "SERVICE_GROUP": "service",
+              "SERVICE_NAME": "trip-game-service",
+              "SERVICE_LABEL": "backend-trip-game-service",
+              "SKIP_LABEL_CHECK": "true"
+            }'
+
+      - name: Trigger api-gateway pipeline
+        if: needs.analyze-labels.outputs.api-gateway == 'true'
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.JENKINS_URL }}/job/api-gateway/job/develop/buildWithParameters" \
+            -d '{
+              "SERVICE_GROUP": "cloud",
+              "SERVICE_NAME": "api-gateway",
+              "SERVICE_LABEL": "backend-api-gateway",
+              "SKIP_LABEL_CHECK": "true"
+            }'
+
+      - name: Trigger service-discovery pipeline
+        if: needs.analyze-labels.outputs.service-discovery == 'true'
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.JENKINS_URL }}/job/service-discovery/job/develop/buildWithParameters" \
+            -d '{
+              "SERVICE_GROUP": "cloud",
+              "SERVICE_NAME": "service-discovery",
+              "SERVICE_LABEL": "backend-service-discovery",
+              "SKIP_LABEL_CHECK": "true"
+            }' 
