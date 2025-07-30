@@ -61,18 +61,15 @@ export default function LoginPage() {
           });
         },
         onError: (err: any) => {
-          toast.error(
-            "이메일 또는 비밀번호가 올바르지 않아요. 다시 시도해주세요.",
-            {
-              position: "top-right",
-              autoClose: 2000,
-              hideProgressBar: true,
-              closeOnClick: true,
-              pauseOnHover: true,
-              draggable: false,
-              progress: undefined,
-            }
-          );
+          toast.error(err.response.data.dataHeader.resultMessage, {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: false,
+            progress: undefined,
+          });
         },
       }
     );
