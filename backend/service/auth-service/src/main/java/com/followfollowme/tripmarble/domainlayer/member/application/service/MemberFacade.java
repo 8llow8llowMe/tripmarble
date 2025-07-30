@@ -3,6 +3,7 @@ package com.followfollowme.tripmarble.domainlayer.member.application.service;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberMyInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
+import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberUpdateCommand;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import com.followfollowme.tripmarble.domainlayer.member.application.mapper.MemberMapper;
@@ -62,4 +63,23 @@ public class MemberFacade implements MemberWebUseCase {
         return profileImageUploader.upload(imageFile);
     }
 
+    @Override
+    @Transactional
+    public void updateMyInfo(MemberUpdateCommand command) {
+        Member member = memberRepositoryPort.findById(command.memberId())
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+
+        Member updated = Member.builder()
+            .id(member.id())
+            .email(member.email())
+            .password(member.password())
+            .name(member.name())
+            .nickname(member.nickname())
+            .profileImage(member.profileImage())
+            .role(member.role())
+            .provider(member.provider())
+            .build();
+
+        memberRepositoryPort.save(updated); // ID가 있으므로 merge() 호출
+    }
 }
