@@ -1,13 +1,16 @@
-
-import React, { PropsWithChildren } from 'react';
-import styles from './Modal.module.scss';
+import React, { PropsWithChildren } from "react";
+import styles from "./Modal.module.scss";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const Modal = ({ isOpen, onClose, children }: PropsWithChildren<ModalProps>) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  children,
+}: PropsWithChildren<ModalProps>) => {
   if (!isOpen) {
     return null;
   }
