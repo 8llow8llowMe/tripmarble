@@ -1,0 +1,43 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.imageUploader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  label {
+    display: block;
+    width: 150px;
+    height: 150px;
+    border: 1px dashed #ccc;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+}
+
+.submitButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  background: #f9f9f9;
+  cursor: pointer;
+  border-radius: 4px;
+}
