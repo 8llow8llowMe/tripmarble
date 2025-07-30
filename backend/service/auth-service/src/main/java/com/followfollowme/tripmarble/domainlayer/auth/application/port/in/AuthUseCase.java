@@ -1,10 +1,12 @@
 package com.followfollowme.tripmarble.domainlayer.auth.application.port.in;
 
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginResponse;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.TokenReissueResponse;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.AuthLoginCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.EmailVerificationCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.SendEmailCodeCommand;
+import com.followfollowme.tripmarble.domainlayer.auth.application.command.TokenReissueCommand;
 
 public interface AuthUseCase {
 
@@ -23,4 +25,6 @@ public interface AuthUseCase {
     void sendEmailVerificationCode(SendEmailCodeCommand command);
 
     void verifyEmailCode(EmailVerificationCommand command);
+
+    TokenReissueResponse reissueToken(TokenReissueCommand command);
 }
