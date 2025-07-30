@@ -3,13 +3,13 @@ import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from '../screens/Home/HomeScreen';
 import ExploreScreen from '../screens/Explore/ExploreScreen';
-import PlayScreen from '../screens/Play/PlayScreen';
 import MomentsScreen from '../screens/Moments/MomentsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import useUserInfoQuery from '@/hooks/user/useUserInfo';
 import { useAppDispatch, useAppSelector } from '@/store/store';
 import { useEffect } from 'react';
 import { setUser } from '@/store/redux/user/user';
+import PlayStackNavigator from '@/navigations/PlayStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -64,7 +64,7 @@ export default function BottomTabNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Explore" component={ExploreScreen} />
-      <Tab.Screen name="Play" component={PlayScreen} />
+      <Tab.Screen name="Play" component={PlayStackNavigator} />
       <Tab.Screen name="Moments" component={MomentsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
