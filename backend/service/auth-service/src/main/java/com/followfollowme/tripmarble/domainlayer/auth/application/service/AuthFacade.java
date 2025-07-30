@@ -1,10 +1,12 @@
 package com.followfollowme.tripmarble.domainlayer.auth.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginResponse;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.TokenReissueResponse;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.AuthLoginCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.EmailVerificationCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.SendEmailCodeCommand;
+import com.followfollowme.tripmarble.domainlayer.auth.application.command.TokenReissueCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.in.AuthUseCase;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.OAuthAuthorizationUrlProvider;
 import lombok.RequiredArgsConstructor;
@@ -51,5 +53,11 @@ public class AuthFacade implements AuthUseCase {
     @Override
     public void verifyEmailCode(EmailVerificationCommand command) {
         mailVerificationProcessor.verifyCode(command.email(), command.code());
+    }
+
+    @Override
+    @Transactional
+    public TokenReissueResponse reissueToken(TokenReissueCommand command) {
+        return jwtTokenProcessor.reissueTokens(command.memberId());
     }
 }
