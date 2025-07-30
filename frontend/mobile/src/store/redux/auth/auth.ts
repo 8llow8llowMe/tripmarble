@@ -2,16 +2,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
   accessToken: string;
-  refreshToken: string;
-  userId?: string;
-  rememberId?: boolean;
+  memberId: number;
 }
 
 const initialState: AuthState = {
   accessToken: '',
-  refreshToken: '',
-  userId: '',
-  rememberId: false,
+  memberId: 0,
 };
 
 export const authSlice = createSlice({
@@ -20,21 +16,15 @@ export const authSlice = createSlice({
   reducers: {
     authorize(state, action: PayloadAction<AuthState>) {
       state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken;
-      state.userId = action.payload.userId ?? state.userId;
-      state.rememberId = action.payload.rememberId ?? state.rememberId;
+      state.memberId = action.payload.memberId;
     },
     logout(state) {
       state.accessToken = '';
-      state.refreshToken = '';
-      if (!state.rememberId) state.userId = '';
-    },
-    setRememberId(state, action: PayloadAction<boolean>) {
-      state.rememberId = action.payload;
+      state.memberId = 0;
     },
   },
 });
 
-export const { authorize, logout, setRememberId } = authSlice.actions;
+export const { authorize, logout } = authSlice.actions;
 
 export default authSlice.reducer;
