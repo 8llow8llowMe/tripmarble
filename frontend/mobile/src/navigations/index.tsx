@@ -3,15 +3,15 @@ import BottomTabNavigator from './BottomTabNavigator';
 import React, { useEffect, useState } from 'react';
 import SplashScreen from '@/screens/Auth/SplashScreen';
 import AuthNavigator from '@/navigations/AuthNavigator';
+import { useAppSelector } from '@/store/store';
 
 export default function RootNavigation() {
-  const [isLoading, setIsLoading] = useState(true); // 스플래시/로딩
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 여부
+  const [isLoading, setIsLoading] = useState(true);
+  const accessToken = useAppSelector((state) => state.authReducer.accessToken);
 
   useEffect(() => {
     setTimeout(() => {
       setIsLoading(false);
-      // TODO: 로그인 여부 확인
     }, 1500);
   }, []);
 
@@ -19,7 +19,7 @@ export default function RootNavigation() {
 
   return (
     <NavigationContainer>
-      {isLoggedIn ? <BottomTabNavigator /> : <AuthNavigator />}
+      {accessToken ? <BottomTabNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }
