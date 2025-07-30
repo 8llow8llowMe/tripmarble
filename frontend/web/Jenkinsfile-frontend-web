@@ -28,8 +28,8 @@ pipeline {
         // 실제 파일시스템 경로 ( frontend/web )
         FS_PATH = "frontend/${params.SERVICE_GROUP}"
         // MinIO 설정 (Jenkins 환경변수에서 가져옴, 기본값 fallback)
-        MINIO_ENDPOINT = "${env.MINIO_ENDPOINT ?: 'http://192.168.0.71:9000'}"
-        MINIO_BUCKET = "${env.MINIO_BUCKET ?: 'tripmarble'}"
+        MINIO_ENDPOINT = "${env.MINIO_ENDPOINT}"
+        MINIO_BUCKET = "${env.MINIO_BUCKET}"
         MINIO_PATH = 'frontend/web'
         // SSH 설정 (MinIO 접근용)
         SSH_CONFIG = 'storage server ssh'
@@ -137,52 +137,45 @@ pipeline {
             }
         }
 
-        stage('Build Next.js') {
-            steps {
-                dir("${env.FS_PATH}") {
-                    sh 'npm run build'
-                }
-            }
-            post {
-                success {
-                    archiveArtifacts "${env.FS_PATH}/out/**/*"
-                }
-            }
-        }
-
-        stage('Deploy to Dev') {
+        stage('Build Test (Dev)') {
             when {
                 expression { env.CHANGE_TARGET == 'develop' }
             }
             steps {
-                script {
-                    // MinIO에 배포
-                    withCredentials([usernamePassword(credentialsId: 'minio-credentials',
-                                                      usernameVariable: 'MINIO_ACCESS_KEY',
-                                                      passwordVariable: 'MINIO_SECRET_KEY')]) {
-                        sh """
-                            # MinIO Client 설정
-                            mc alias set minio ${MINIO_ENDPOINT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
-                            
-                            # 기존 파일 삭제 (버킷 경로 전체)
-                            mc rm --recursive --force minio/${MINIO_BUCKET}/${MINIO_PATH} || true
-                            
-                            # 새 빌드 파일 업로드
-                            mc cp --recursive ${env.FS_PATH}/out/ minio/${MINIO_BUCKET}/${MINIO_PATH}/
-                            
-                            echo "개발 환경 배포 완료: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${MINIO_PATH}"
-                        """
-                    }
+                dir("${env.FS_PATH}") {
+                    // 개발용 환경변수로 빌드 테스트
+                    sh """
+                        # 개발용 환경변수 설정
+                        export NODE_ENV=development
+                        
+                        # Next.js 빌드 테스트 (실제 배포는 하지 않음)
+                        npm run build
+                        
+                        echo "개발 환경 빌드 테스트 완료 - 실제 배포는 하지 않음"
+                    """
                 }
             }
         }
 
-        stage('Deploy to Prod') {
+        stage('Build & Deploy to Prod') {
             when {
                 expression { env.CHANGE_TARGET == 'main' }
             }
             steps {
                 script {
+                    dir("${env.FS_PATH}") {
+                        // 운영용 환경변수로 빌드
+                        sh """
+                            # 운영용 환경변수 설정
+                            export NODE_ENV=production
+                            
+                            # Next.js 빌드
+                            npm run build
+                            
+                            echo "운영 환경 빌드 완료"
+                        """
+                    }
+                    
                     // MinIO에 배포
                     withCredentials([usernamePassword(credentialsId: 'minio-credentials',
                                                       usernameVariable: 'MINIO_ACCESS_KEY',
@@ -197,9 +190,14 @@ pipeline {
                             # 새 빌드 파일 업로드
                             mc cp --recursive ${env.FS_PATH}/out/ minio/${MINIO_BUCKET}/${MINIO_PATH}/
                             
-                            echo "프로덕션 환경 배포 완료: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${MINIO_PATH}"
+                            echo "운영 환경 배포 완료: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${MINIO_PATH}"
                         """
                     }
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts "${env.FS_PATH}/out/**/*"
                 }
             }
         }
