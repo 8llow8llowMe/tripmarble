@@ -6,10 +6,31 @@ import ExploreScreen from '../screens/Explore/ExploreScreen';
 import PlayScreen from '../screens/Play/PlayScreen';
 import MomentsScreen from '../screens/Moments/MomentsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
+import useUserInfoQuery from '@/hooks/user/useUserInfo';
+import { useAppDispatch, useAppSelector } from '@/store/store';
+import { useEffect } from 'react';
+import { setUser } from '@/store/redux/user/user';
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabNavigator() {
+  const dispatch = useAppDispatch();
+  const memberId = useAppSelector((state) => state.authReducer.memberId);
+  const { name, email, nickname } = useAppSelector((state) => state.userReducer);
+
+  // 유저 정보 조회
+  const { data, isSuccess } = useUserInfoQuery({
+    memberId,
+    enableApiCall: !!memberId,
+  });
+
+  // 유저정보 저장
+  useEffect(() => {
+    if (isSuccess && data) {
+      dispatch(setUser(data.dataBody));
+    }
+  }, [isSuccess, data, dispatch]);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
