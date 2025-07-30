@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/entities/users/model";
 import { fetchMe } from "@/entities/users/model/user/userSlice";
@@ -9,10 +9,16 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const hasHeader = pathname !== "/";
 
-  const accessToken = localStorage.getItem("accessToken");
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+
   // user 값 store에서 읽기
   const user = useAppSelector((state) => state.user.user);
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    setAccessToken(token);
+  }, []);
 
   useEffect(() => {
     // user가 없고, 에러도 아닐 때만 fetchMe 실행
