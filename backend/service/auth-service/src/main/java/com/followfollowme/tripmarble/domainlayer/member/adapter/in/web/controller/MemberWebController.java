@@ -4,7 +4,9 @@ import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberMyInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberSignupRequest;
+import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberUpdateRequest;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
+import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberUpdateCommand;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberWebUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +50,7 @@ public class MemberWebController {
         description = "로그인한 나의 회원 정보를 조회 기능입니다."
     )
     @GetMapping("/me")
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<MemberMyInfoResponse>> getMyInfo(
         @AuthenticationPrincipal MemberLoginActive loginActive) {
         MemberMyInfoResponse myInfoResponse = memberWebUseCase.getMyInfo(loginActive.id());
@@ -67,4 +70,15 @@ public class MemberWebController {
         return ResponseEntity.ok().body(Response.success(profileUploadResponse));
     }
 
+    @Operation(
+        summary = "회원정보 수정",
+        description = "닉네임 또는 프로필 이미지를 수정하는 기능입니다."
+    )
+    @PatchMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<Void>> updateMyInfo(
+        @AuthenticationPrincipal MemberLoginActive loginActive, @Valid @RequestBody MemberUpdateRequest request) {
+        memberWebUseCase.updateMyInfo(MemberUpdateCommand.from(loginActive.id(), request));
+        return ResponseEntity.ok().body(Response.success());
+    }
 }
