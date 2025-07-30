@@ -10,7 +10,7 @@ import lombok.Builder;
 public record MemberMyInfoResponse(
 
     @Schema(description = "회원 아이디", example = "202507110001")
-    Long memberId,
+    long memberId,
 
     @Schema(description = "이메일 주소", example = "user@example.com")
     String email,
