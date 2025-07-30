@@ -13,14 +13,17 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import authReducer from '@/store/redux/auth/auth';
+import userReducer from '@/store/redux/user/user';
+
 const rootReducer = combineReducers({
   authReducer,
+  userReducer,
 });
 
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['authReducer'],
+  whitelist: ['authReducer', 'userReducer'],
   blacklist: [],
 };
 
