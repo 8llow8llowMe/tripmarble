@@ -1,0 +1,25 @@
+.mainContainer {
+  padding: 0 32px;
+  background: #fafbfc;
+}
+
+.titleAndButton {
+  display: flex;
+  flex-direction: row;
+  // justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-block: 32px;
+  letter-spacing: -0.01em;
+}
+
+.flexRow {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}

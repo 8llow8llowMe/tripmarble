@@ -1,5 +1,5 @@
 import Image from "next/image";
-import styles from "../game-list/Games.module.scss";
+import styles from "./MyGamesHorizontal.module.scss";
 
 export type MyGame = {
   id: string;
@@ -29,8 +29,8 @@ export function MyGamesHorizontal({
               <Image
                 src={game.imageUrl || "/images/no-image.png"}
                 alt="게임 이미지"
-                width={210}
-                height={110}
+                width={220}
+                height={200}
                 style={{ borderRadius: "8px" }}
               />
               <div className={styles.hCardTitle}>{game.title}</div>
