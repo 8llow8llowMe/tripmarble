@@ -5,13 +5,12 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameThemeMapping;
 import com.followfollowme.tripmarble.domainlayer.theme.application.mapper.TripThemeMapper;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = {TripGameMapper.class, TripThemeMapper.class})
 public interface TripGameThemeMappingMapper {
@@ -21,13 +20,17 @@ public interface TripGameThemeMappingMapper {
     @Mapping(target = "tripThemeId", source = "tripTheme.id")
     TripGameThemeMapping toDomainFromEntity(TripGameThemeMappingEntity entity);
 
+    // 엔티티 리스트 -> 도메인 리스트
+    List<TripGameThemeMapping> toDomainListFromEntityList(List<TripGameThemeMappingEntity> entities);
+
     // 도메인 -> 엔티티
     @Mapping(target = "id", source = "domain.id")
     @Mapping(target = "tripGame", source = "tripGame")
     @Mapping(target = "tripTheme", source = "tripTheme")
     TripGameThemeMappingEntity toEntityFromDomain(TripGameThemeMapping domain, TripGame tripGame, TripTheme tripTheme);
 
-    default List<TripGameThemeMappingEntity> toEntitiesFromDomainList(
+    // 도메인 리스트 -> 엔티티 리스트
+    default List<TripGameThemeMappingEntity> toEntityListFromDomainList(
         List<TripGameThemeMapping> domains, TripGame tripGame, List<TripTheme> tripThemes
     ) {
         Map<Long, TripTheme> themeMap = tripThemes.stream()

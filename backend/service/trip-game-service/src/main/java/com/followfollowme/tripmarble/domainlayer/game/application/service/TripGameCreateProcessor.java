@@ -14,14 +14,13 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import com.followfollowme.tripmarble.domainlayer.theme.application.port.out.TripThemeRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
-public class TripGameCreateService {
+public class TripGameCreateProcessor {
 
     private final TripGameRepositoryPort tripGameRepositoryPort;
     private final TripThemeRepositoryPort tripThemeRepositoryPort;
@@ -70,7 +69,8 @@ public class TripGameCreateService {
         TripGameMember savedMember = tripGameMemberRepositoryPort.save(tripGameMember, savedTripGame);
 
         // 5. 대표 지역 정보 조회
-        RepresentativeRegionInfoResponse regionInfo = representativeRegionClientPort.getRepresentativeRegionInfo(command.representativeRegionId());
+        RepresentativeRegionInfoResponse regionInfo = representativeRegionClientPort.getRepresentativeRegionInfo(
+            command.representativeRegionId());
 
         // 결과 DTO 반환
         return TripGameCreateInfo.of(savedTripGame, savedMember, tripThemes, regionInfo);

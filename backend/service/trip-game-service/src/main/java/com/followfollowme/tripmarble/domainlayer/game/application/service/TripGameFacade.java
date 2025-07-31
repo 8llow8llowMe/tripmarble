@@ -6,19 +6,18 @@ import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGa
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
-import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
+import java.util.Arrays;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TripGameFacade implements TripGameWebUseCase {
 
-    private final TripGameCreateService tripGameCreateService;
+    private final TripGameCreateProcessor tripGameCreateProcessor;
+    private final TripGameTileCreateProcessor tripGameTileCreateProcessor;
 
     @Override
     public List<DifficultyResponse> getAllDifficulties() {
@@ -33,22 +32,9 @@ public class TripGameFacade implements TripGameWebUseCase {
     @Override
     @Transactional
     public TripGameCreateResponse crateTripGame(TripGameCreateCommand command) {
-        TripGameCreateInfo info = tripGameCreateService.createTripGame(command);
+        TripGameCreateInfo tripGameCreateInfo = tripGameCreateProcessor.createTripGame(command);
 
-        return TripGameCreateResponse.builder()
-            .tripGameId(info.tripGame().id())
-            .status(info.tripGame().status())
-            .statusMessage(info.tripGame().status().getDescription())
-            .difficulty(info.tripGame().difficulty())
-            .difficultyMessage(info.tripGame().difficulty().getDescription())
-            .startedAt(info.tripGame().startedAt())
-            .endedAt(info.tripGame().endedAt())
-            .tripThemeNames(info.tripThemes().stream()
-                .map(TripTheme::name)
-                .toList())
-            .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
-            .isHost(info.tripGameMember().isHost())
-            .isReady(info.tripGameMember().isReady())
-            .build();
+        // TODO: 게임 내 말판 생성 관련 로직 추가
+        return null;
     }
 }
