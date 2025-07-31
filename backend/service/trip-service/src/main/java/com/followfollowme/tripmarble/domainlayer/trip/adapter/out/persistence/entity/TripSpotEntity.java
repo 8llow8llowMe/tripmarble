@@ -8,14 +8,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -28,7 +27,7 @@ import java.time.LocalDateTime;
         @UniqueConstraint(name = "uk_tripspot_content_id", columnNames = "content_id")
     },
     indexes = {
-        @Index(name = "idx_tripspot_ldong", columnList = "ldong_regn_cd, ldong_signgu_cd")
+        @Index(name = "idx_tripspot_sigungu_content", columnList = "ldong_signgu_cd, contentTypeId")
     }
 )
 public class TripSpotEntity {
