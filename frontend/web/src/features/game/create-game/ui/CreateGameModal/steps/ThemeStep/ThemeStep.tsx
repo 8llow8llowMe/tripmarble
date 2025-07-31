@@ -10,12 +10,12 @@ interface ThemeStepProps {
 export default function ThemeStep({ value, onChange }: ThemeStepProps) {
   const { data } = useTripThemes();
   const dummyData = [
-    { tripThemeId: 1, tripThemeName: "여행위주" },
-    { tripThemeId: 2, tripThemeName: "맛집위주" },
-    { tripThemeId: 3, tripThemeName: "관광지위주" },
-    { tripThemeId: 4, tripThemeName: "힐링위주" },
+    { tripThemeId: 1, tripThemeName: "여행" },
+    { tripThemeId: 2, tripThemeName: "맛집" },
+    { tripThemeId: 3, tripThemeName: "관광지" },
+    { tripThemeId: 4, tripThemeName: "힐링" },
   ];
-  const themes: TripThemesResponse[] = data?.data.data || dummyData;
+  const themes: TripThemesResponse[] = data?.data?.dataBody || dummyData;
 
   const toggleTheme = (id: number) => {
     if (Array.isArray(value) && value.includes(id)) {
