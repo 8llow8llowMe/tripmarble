@@ -127,8 +127,14 @@ export default function CreateGameModal({
     [dispatch]
   );
 
+  const handleClose = () => {
+    dispatch(resetGameForm());
+    setStep(0);
+    onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={handleClose}>
       <div className={styles.container}>
         {/* 진행바/타이틀 */}
         <div className={styles.progress}>
