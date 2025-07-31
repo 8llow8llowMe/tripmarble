@@ -1,0 +1,24 @@
+.themeList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.themeButton {
+  background: #eee;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  &:hover {
+    background-color: #d9d9d9;
+  }
+}
+
+.themeButton.selected {
+  background: #08f;
+  color: #fff;
+  border: 1px solid rgb(0, 118, 221);
+}
