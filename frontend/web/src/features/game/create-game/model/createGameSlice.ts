@@ -26,7 +26,7 @@ const createGameSlice = createSlice({
       state,
       action: PayloadAction<{
         key: keyof GameFormState;
-        value: string | number | number[] | null;
+        value: string | number | number[] | [string, string] | null;
       }>
     ) => {
       const { key, value } = action.payload;
