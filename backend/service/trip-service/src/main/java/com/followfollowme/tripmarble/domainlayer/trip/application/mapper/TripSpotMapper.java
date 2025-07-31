@@ -1,14 +1,14 @@
 package com.followfollowme.tripmarble.domainlayer.trip.application.mapper;
 
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripSpotRandomResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotSimpleResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotWithDetailViewResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.TripSpotEntity;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpotDetail;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface TripSpotMapper {
@@ -24,7 +24,7 @@ public interface TripSpotMapper {
     @Mapping(source = "title", target = "tripSpotName")
     @Mapping(source = "firstImage", target = "originalImageUrl")
     TripSpotSimpleResponse toSimpleResponseFromDomain(TripSpot domain);
-    
+
     default TripSpotWithDetailViewResponse toDetailViewResponseFrom(
         TripSpot tripSpot, String contentTypeName, TripSpotDetail tripSpotDetail) {
 
@@ -42,4 +42,13 @@ public interface TripSpotMapper {
             .originalImageUrl(tripSpot.firstImage())
             .build();
     }
+
+    // 내부 서비스 통신용
+    // 도메인 -> Random Response DTO
+    @Mapping(source = "id", target = "tripSpotId")
+    @Mapping(source = "title", target = "tripSpotName")
+    TripSpotRandomResponse toRandomResponseFromDomain(TripSpot domain);
+
+    // 도메인 리스트 -> Random Response DTO 리스트
+    List<TripSpotRandomResponse> toRandomResponseListFromDomainList(List<TripSpot> domains);
 }
