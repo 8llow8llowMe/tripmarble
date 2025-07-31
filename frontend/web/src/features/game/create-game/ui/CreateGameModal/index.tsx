@@ -35,6 +35,7 @@ type StepValueTypeMap = {
 interface StepConfig<K extends StepKey = StepKey> {
   key: K;
   label: string;
+  content: string;
   Component: React.ComponentType<any>;
 }
 interface CreateGameModalProps {
@@ -44,11 +45,36 @@ interface CreateGameModalProps {
 
 // step config
 const steps: StepConfig[] = [
-  { key: "title", label: "게임 제목", Component: TitleStep },
-  { key: "difficulty", label: "난이도", Component: DifficultyStep },
-  { key: "tripPeriod", label: "여행 기간", Component: DateStep },
-  { key: "representativeRegionId", label: "대표 지역", Component: RegionStep },
-  { key: "tripThemeIds", label: "여행 테마", Component: ThemeStep },
+  {
+    key: "title",
+    label: "게임 제목",
+    content: "게임 제목을 입력해주세요.",
+    Component: TitleStep,
+  },
+  {
+    key: "representativeRegionId",
+    label: "여행지",
+    content: "방문 예정인 여행지가 있으신가요?",
+    Component: RegionStep,
+  },
+  {
+    key: "tripThemeIds",
+    label: "여행 테마",
+    content: "이번 여행의 테마는 무엇인가요?",
+    Component: ThemeStep,
+  },
+  {
+    key: "tripPeriod",
+    label: "여행 기간",
+    content: "어느 날짜로 계획 중 이신가요?",
+    Component: DateStep,
+  },
+  {
+    key: "difficulty",
+    label: "난이도",
+    content: "일정에 알맞는 난이도를 선택하세요!",
+    Component: DifficultyStep,
+  },
 ];
 
 export default function CreateGameModal({
@@ -114,10 +140,12 @@ export default function CreateGameModal({
           </div>
         </div>
         <div className={styles.titleDiv}>
-          <div className={styles.info}>{currentStep.label} 입력하기</div>
+          <div className={styles.info}>{currentStep.label} 선택</div>
           {step + 1} / {steps.length}
         </div>
         <div className={styles.contentContainer}>
+          {/* content */}
+          <div className={styles.contentInfo}>{currentStep.content}</div>
           {/* STEP별 컴포넌트 */}
           <StepComponent
             value={value}

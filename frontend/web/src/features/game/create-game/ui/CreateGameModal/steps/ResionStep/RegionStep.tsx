@@ -13,7 +13,6 @@ export default function RegionStep({ value, onChange }: RegionStepProps) {
 
   return (
     <div className={styles.regionStepWrapper}>
-      <div className={styles.title}>인기있는 여행지로 떠나보세요!</div>
       <div className={styles.regionGrid}>
         {regions.map((region) => (
           <button
