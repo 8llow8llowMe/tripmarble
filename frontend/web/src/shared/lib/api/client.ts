@@ -20,7 +20,18 @@ export const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// 요청 인터셉터 설정 - 쿠키에서 accessToken을 읽어 Authorization 헤더에 추가
+// 요청 인터셉터 설정 - localStorage에서 accessToken을 읽어 Authorization 헤더에 추가
+apiClient.interceptors.request.use(
+  (config) => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 authApiClient.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem("accessToken");
