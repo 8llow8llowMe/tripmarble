@@ -8,7 +8,6 @@ import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpo
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripErrorCode;
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripException;
 import com.followfollowme.tripmarble.domainlayer.trip.application.mapper.TripSpotMapper;
-import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripSpotInternalUseCase;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripSpotWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripContentTypeRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotDetailRepositoryPort;
@@ -24,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class TripSpotFacade implements TripSpotWebUseCase, TripSpotInternalUseCase {
+public class TripSpotFacade implements TripSpotWebUseCase {
 
     private final RepresentativeRegionSigunguMappingRepositoryPort representativeRegionSigunguMappingRepositoryPort;
     private final SigunguRepositoryPort sigunguRepositoryPort;
@@ -37,19 +36,21 @@ public class TripSpotFacade implements TripSpotWebUseCase, TripSpotInternalUseCa
     @Transactional(readOnly = true)
     public SliceResponse<TripSpotSimpleResponse> getTripSpotsByRepresentativeRegionId(long representativeRegionId,
         long lastTripSpotId, int size, Integer contentTypeId) {
-        // 1. 대표지역 -> 시군구 코드 목록
+        // 1. 대표지역 -> 시군구 ID 목록
         List<Long> sigunguIds =
             representativeRegionSigunguMappingRepositoryPort.findSigunguIdsByRepresentativeRegionId(
                 representativeRegionId);
+
+        // 2. 시군구 ID -> 시군구 코드 변환
         List<Integer> sigunguCodes = sigunguRepositoryPort.findAllByIdIn(sigunguIds).stream()
             .map(Sigungu::sigunguCode)
             .toList();
 
-        // 2. 시군구 코드 기반 여행지 Slice 조회 (No-Offset 방식 - 무한 스크롤)
+        // 3. 시군구 코드 기반 여행지 Slice 조회 (No-Offset 방식 - 무한 스크롤)
         Slice<TripSpot> tripSpots = tripSpotRepositoryPort.findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(
             sigunguCodes, lastTripSpotId, size, contentTypeId);
 
-        // 3. 도메인 -> Response 매핑
+        // 4. 도메인 -> Response 매핑
         Slice<TripSpotSimpleResponse> responseSlice = tripSpots.map(tripSpotMapper::toSimpleResponseFromDomain);
 
         return SliceResponse.of(responseSlice);
