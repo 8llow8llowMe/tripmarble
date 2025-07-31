@@ -8,4 +8,7 @@ public interface TripSpotCustomRepository {
 
     Slice<TripSpotEntity> findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(List<Integer> ldongSignguCodes,
         long lastTripSpotId, int size, Integer contentTypeId);
+
+    List<TripSpotEntity> findRandomTripSpotsBySigunguCodesAndContentTypeIds(List<Integer> ldongSignguCodes,
+        List<Integer> contentTypeIds, int limit);
 }
