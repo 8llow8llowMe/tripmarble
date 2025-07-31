@@ -33,4 +33,12 @@ public class TripSpotRepositoryAdapter implements TripSpotRepositoryPort {
 
         return entitySlice.map(tripSpotMapper::toDomainFromEntity);
     }
+
+    @Override
+    public List<TripSpot> findRandomTripSpotsBySigunguCodesAndContentTypeIds(List<Integer> ldongSignguCodes,
+        List<Integer> contentTypeIds, int limit) {
+        List<TripSpotEntity> entities = tripSpotRepository.findRandomTripSpotsBySigunguCodesAndContentTypeIds(
+            ldongSignguCodes, contentTypeIds, limit);
+        return tripSpotMapper.toDomainListFromEntityList(entities);
+    }
 }
