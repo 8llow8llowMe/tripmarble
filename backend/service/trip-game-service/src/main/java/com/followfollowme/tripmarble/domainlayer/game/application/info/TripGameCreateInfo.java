@@ -4,9 +4,8 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.Repr
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
-import lombok.Builder;
-
 import java.util.List;
+import lombok.Builder;
 
 @Builder
 public record TripGameCreateInfo(
@@ -15,6 +14,7 @@ public record TripGameCreateInfo(
     List<TripTheme> tripThemes,
     RepresentativeRegionInfoResponse representativeRegionInfo
 ) {
+
     public static TripGameCreateInfo of(
         TripGame game, TripGameMember member, List<TripTheme> themes, RepresentativeRegionInfoResponse info
     ) {
