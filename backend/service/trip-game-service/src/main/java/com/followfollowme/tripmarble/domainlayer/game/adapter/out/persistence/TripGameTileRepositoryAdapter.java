@@ -1,0 +1,26 @@
+package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence;
+
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity.TripGameTileEntity;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.repository.TripGameTileRepository;
+import com.followfollowme.tripmarble.domainlayer.game.application.mapper.TripGameTileMapper;
+import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameTileRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@RequiredArgsConstructor
+public class TripGameTileRepositoryAdapter implements TripGameTileRepositoryPort {
+
+    private final TripGameTileRepository tripGameTileRepository;
+    private final TripGameTileMapper tripGameTileMapper;
+
+    @Override
+    public List<TripGameTile> saveAll(List<TripGameTile> tripGameTiles, TripGame tripGame) {
+        List<TripGameTileEntity> entities = tripGameTileMapper.toEntityListFromDomainList(tripGameTiles, tripGame);
+        List<TripGameTileEntity> saved = tripGameTileRepository.saveAll(entities);
+        return tripGameTileMapper.toDomainListFromEntityList(saved);
+    }
+}
