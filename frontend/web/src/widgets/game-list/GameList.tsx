@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./Games.module.scss";
 
@@ -11,12 +12,17 @@ type Game = {
 };
 
 export function GameList({ games }: { games: Game[] }) {
+  const router = useRouter();
   const mainGame = games[0];
   const listGames = games.slice(1);
 
   return (
     <div className={styles.gamesContainer}>
-      <div className={styles.leftBigImage}>
+      <div
+        className={styles.leftBigImage}
+        onClick={() => mainGame && router.push(`/game/${mainGame.id}`)}
+        style={{ cursor: "pointer" }}
+      >
         <Image
           src={mainGame?.imageUrl || "/images/no-image.png"}
           alt="대표 게임 이미지"
@@ -35,7 +41,12 @@ export function GameList({ games }: { games: Game[] }) {
       </div>
       <div className={styles.listColumn}>
         {listGames.map((game) => (
-          <div className={styles.card} key={game.id}>
+          <div
+            className={styles.card}
+            key={game.id}
+            onClick={() => router.push(`/game/${game.id}`)}
+            style={{ cursor: "pointer" }}
+          >
             <Image
               className={styles.cardImage}
               src={game.imageUrl || "/images/no-image.png"}
