@@ -34,6 +34,13 @@ apiClient.interceptors.request.use(
 
 authApiClient.interceptors.request.use(
   (config) => {
+    if (
+      config.url?.includes("/auth/login") ||
+      config.url?.includes("/members/signup")
+    ) {
+      // 아무것도 하지 않고 config를 바로 반환
+      return config;
+    }
     const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
