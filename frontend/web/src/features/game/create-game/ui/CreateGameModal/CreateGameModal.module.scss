@@ -36,7 +36,7 @@
 .contentContainer {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 
   .label {
     font-size: 1.25rem;
@@ -47,6 +47,11 @@
     padding: 1rem;
     border: 1px solid #e0e0e0;
     border-radius: 0.25rem;
+  }
+
+  .contentInfo {
+    font-size: 1.125rem;
+    font-weight: 500;
   }
 
   .ButtonDiv {
