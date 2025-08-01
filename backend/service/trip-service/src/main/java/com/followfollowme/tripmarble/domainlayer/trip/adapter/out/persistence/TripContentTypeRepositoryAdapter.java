@@ -5,11 +5,10 @@ import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.re
 import com.followfollowme.tripmarble.domainlayer.trip.application.mapper.TripContentTypeMapper;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripContentTypeRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripContentType;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -27,5 +26,11 @@ public class TripContentTypeRepositoryAdapter implements TripContentTypeReposito
     @Override
     public Optional<String> findNameByContentTypeId(int contentTypeId) {
         return tripContentTypeRepository.findNameByContentTypeId(contentTypeId);
+    }
+
+    @Override
+    public List<TripContentType> findAllById(List<Long> tripContentTypeIds) {
+        List<TripContentTypeEntity> entities = tripContentTypeRepository.findAllById(tripContentTypeIds);
+        return tripContentTypeMapper.toDomainListFromEntityList(entities);
     }
 }
