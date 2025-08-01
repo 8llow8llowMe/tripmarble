@@ -1,7 +1,7 @@
 import { ApiResponseBase } from '@/apis/base';
 import { END_POINTS } from '@/constants/apis';
 import { useQuery } from '@tanstack/react-query';
-import { apiClient, authApiClient } from '@/apis/axiosClient';
+import { authApiClient } from '@/apis/axiosClient';
 import { UserType } from '@/types/user/user';
 import { QUERY_KEY } from '@/constants/keys';
 
@@ -15,8 +15,8 @@ export interface UserInfoResponse extends ApiResponseBase {
 }
 
 export const getUserInfo = async () => {
-  const { data } = await apiClient.get<UserInfoResponse>(END_POINTS.USER.INFO);
-  console.log(data);
+  const { data } = await authApiClient.get<UserInfoResponse>(END_POINTS.USER.INFO);
+
   return data;
 };
 
