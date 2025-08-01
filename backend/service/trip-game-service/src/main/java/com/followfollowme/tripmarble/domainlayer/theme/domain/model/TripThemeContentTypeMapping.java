@@ -6,6 +6,8 @@ import lombok.Builder;
 public record TripThemeContentTypeMapping(
     long id,
     long tripThemeId,
-    long tripContentTypeId
+    long tripContentTypeId,
+    double weight
 ) {
+
 }
