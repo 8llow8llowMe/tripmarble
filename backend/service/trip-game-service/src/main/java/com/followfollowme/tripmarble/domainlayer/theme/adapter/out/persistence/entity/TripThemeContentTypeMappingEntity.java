@@ -39,4 +39,8 @@ public class TripThemeContentTypeMappingEntity {
     @Comment("여행 콘텐츠 타입 ID (외래키)")
     @Column(nullable = false)
     private Long tripContentTypeId;
+
+    @Comment("콘텐츠 타입 가중치 (0.0 ~ 1.0)")
+    @Column(nullable = false)
+    private Double weight;
 }
