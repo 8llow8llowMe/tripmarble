@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-@Schema(hidden = true, description = "내부 서비스 통신 전용 ~~~ 응답 DTO")
+@Schema(hidden = true, description = "내부 서비스 통신 전용 랜덤 여행지 응답 DTO")
 public record TripSpotRandomResponse(
 
     @Schema(description = "여행지 정보 아이디", example = "1")
