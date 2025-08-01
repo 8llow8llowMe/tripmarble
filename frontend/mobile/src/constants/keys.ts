@@ -1,7 +1,7 @@
 const STORAGE_KEY = {
   //AUTH
   ACCESS_TOKEN: 'accessToken',
-  USER_ID: 'userId',
+  MEMBER_ID: 'memberId',
 };
 
 const QUERY_KEY = {
