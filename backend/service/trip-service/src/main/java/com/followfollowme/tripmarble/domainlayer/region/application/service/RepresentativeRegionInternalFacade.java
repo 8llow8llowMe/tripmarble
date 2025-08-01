@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.region.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.dto.RepresentativeRegionInfoResponse;
+import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.presenter.RepresentativeRegionInternalPresenter;
 import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionErrorCode;
 import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionException;
 import com.followfollowme.tripmarble.domainlayer.region.application.mapper.RepresentativeRegionMapper;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class RepresentativeRegionInternalFacade implements RepresentativeRegionInternalUseCase {
 
     private final RepresentativeRegionRepositoryPort representativeRegionRepositoryPort;
+    private final RepresentativeRegionInternalPresenter representativeRegionInternalPresenter;
     private final RepresentativeRegionMapper representativeRegionMapper;
 
     @Override
@@ -23,6 +25,6 @@ public class RepresentativeRegionInternalFacade implements RepresentativeRegionI
     public RepresentativeRegionInfoResponse getRepresentativeRegionInfo(long representativeRegionId) {
         RepresentativeRegion representativeRegion = representativeRegionRepositoryPort.findById(representativeRegionId)
             .orElseThrow(() -> new RegionException(RegionErrorCode.REPRESENTATIVE_REGION_NOT_FOUND));
-        return representativeRegionMapper.toInfoResponseFromDomain(representativeRegion);
+        return representativeRegionInternalPresenter.toInfoResponse(representativeRegion);
     }
 }
