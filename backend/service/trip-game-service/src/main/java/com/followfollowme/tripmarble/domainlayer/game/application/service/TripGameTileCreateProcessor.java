@@ -1,7 +1,9 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service;
 
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripContentTypeInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripSpotRandomResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameTileCreateInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripContentTypeClientPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameTileRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripSpotClientPort;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
@@ -14,8 +16,10 @@ import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
 import java.util.List;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TripGameTileCreateProcessor {
@@ -23,6 +27,7 @@ public class TripGameTileCreateProcessor {
     private final TripThemeContentTypeMappingRepositoryPort tripThemeContentTypeMappingRepositoryPort;
     private final TripGameTileRepositoryPort tripGameTileRepositoryPort;
     private final TripSpotClientPort tripSpotClientPort;
+    private final TripContentTypeClientPort tripContentTypeClientPort;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     public TripGameTileCreateInfo createTilesForGame(TripGame tripGame, List<Long> tripThemeIds,
@@ -30,16 +35,27 @@ public class TripGameTileCreateProcessor {
         // 1. 난이도에 따른 말판 개수 결정
         int tileCount = determineTileCount(difficulty);
 
-        // 2. tripTheme -> tripContentTypeId -> contentTypeId 조회
-        List<Long> tripContentTypeIds = tripThemeContentTypeMappingRepositoryPort.findByTripThemeIds(tripThemeIds)
-            .stream()
+        // 2. tripTheme -> tripContentTypeId -> contentTypeId 조회 (Tour API 전용 여행 콘텐츠 타입 코드)
+        List<TripThemeContentTypeMapping> mappings =
+            tripThemeContentTypeMappingRepositoryPort.findByTripThemeIds(tripThemeIds);
+
+        // 2-1. Tour API 전용 여행 콘텐츠 타입 코드로 변환하기 위한 작업 (tripContentTypeId -> contentTypeId)
+        List<Long> tripContentTypeIds = mappings.stream()
             .map(TripThemeContentTypeMapping::tripContentTypeId)
             .distinct()
             .toList();
 
+        // 2-2. 내부 서비스 호출을 통해 여행 콘텐츠 타입 목록 조회 (매핑 관련)
+        List<TripContentTypeInternalResponse> mappingResponses =
+            tripContentTypeClientPort.getTripContentTypes(tripContentTypeIds);
+
+        // TODO: 여행 테마_콘텐츠 타입_매핑 테이블에서 가중치를 이용해서 가중치 고려한 여행지 조회해야함
+
         // 3. 랜덤 여행지 조회 (내부 서비스 통신)
         List<TripSpotRandomResponse> randomTripSpots = tripSpotClientPort.getRandomTripSpots(
-            tripGame.representativeRegionId(), tripContentTypeIds.stream().map(Long::intValue).toList(), tileCount
+            tripGame.representativeRegionId(),
+            mappingResponses.stream().map(TripContentTypeInternalResponse::contentTypeId).toList(),
+            tileCount
         );
 
         // 4. TripGameTile 엔티티 생성
