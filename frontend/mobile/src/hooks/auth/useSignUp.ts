@@ -1,6 +1,6 @@
 import { ApiResponseBase } from '@/apis/base';
 import { END_POINTS } from '@/constants/apis';
-import { apiClient } from '@/apis/axiosClient';
+import { authApiClient } from '@/apis/axiosClient';
 import { useMutation } from '@tanstack/react-query';
 
 export interface SignUpRequest {
@@ -15,7 +15,7 @@ export interface SignUpResponse extends ApiResponseBase {
 }
 
 export const postSignUp = async ({ email, password, name, nickname }: SignUpRequest) => {
-  const { data } = await apiClient.post<SignUpResponse>(END_POINTS.SIGN_UP, {
+  const { data } = await authApiClient.post<SignUpResponse>(END_POINTS.SIGN_UP, {
     email,
     password,
     name,

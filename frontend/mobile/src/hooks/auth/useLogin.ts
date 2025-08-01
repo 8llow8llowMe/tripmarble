@@ -1,6 +1,6 @@
 import { ApiResponseBase } from '@/apis/base';
 import { END_POINTS } from '@/constants/apis';
-import { apiClient } from '@/apis/axiosClient';
+import { authApiClient } from '@/apis/axiosClient';
 import { useMutation } from '@tanstack/react-query';
 
 export interface LoginRequest {
@@ -16,7 +16,7 @@ export interface LoginResponse extends ApiResponseBase {
 }
 
 export const postLogin = async ({ email, password }: LoginRequest) => {
-  const { data } = await apiClient.post<LoginResponse>(END_POINTS.LOGIN, {
+  const { data } = await authApiClient.post<LoginResponse>(END_POINTS.LOGIN, {
     email,
     password,
   });

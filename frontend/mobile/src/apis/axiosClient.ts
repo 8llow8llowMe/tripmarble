@@ -8,17 +8,9 @@ import {
 import { STORAGE_KEY } from '@/constants/keys';
 import { store } from '@/store/store';
 import { logout } from '@/store/redux/auth/auth';
+import { Alert } from 'react-native';
 
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: `${process.env.EXPO_PUBLIC_AUTH_SERVICE || 'https://api.tripmarble.com'}/api/v1`,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000,
-});
-
-export const authApiClient: AxiosInstance = axios.create({
   baseURL: `${process.env.EXPO_PUBLIC_API_SERVICE || 'https://api.tripmarble.com'}/api/v1`,
   withCredentials: true,
   headers: {
@@ -27,10 +19,19 @@ export const authApiClient: AxiosInstance = axios.create({
   timeout: 10000,
 });
 
+export const authApiClient: AxiosInstance = axios.create({
+  baseURL: `${process.env.EXPO_PUBLIC_AUTH_SERVICE || 'https://api.tripmarble.com'}/api/v1`,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000,
+});
+
 // 요청 인터셉터: 토큰 자동 주입
-apiClient.interceptors.request.use(
+authApiClient.interceptors.request.use(
   async (config) => {
-    const accessToken = await AsyncStorage.getItem('ACCESS_TOKEN');
+    const accessToken = await getAsyncStorageItem(STORAGE_KEY.ACCESS_TOKEN);
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
@@ -40,7 +41,7 @@ apiClient.interceptors.request.use(
 );
 
 // 응답 인터셉터: 401 → 토큰 재발급 후 재요청
-apiClient.interceptors.response.use(
+authApiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
@@ -63,22 +64,18 @@ async function reissueTokenAndRetryRequest(
   instance: AxiosInstance,
 ) {
   try {
-    // TODO: 토큰 재발급 API 호출
-
-    // AsyncStorage에 저장된 유저 email 정보 불러오기
-    // const session = await AsyncStorage.getItem('USER_SESSION'); // USER_SESSION 등 실제 사용 값으로!
-    // if (!session) throw new Error('세션 없음');
-
-    // const memberEmail = JSON.parse(session).email; // { email: "..." } 구조로 저장했다고 가정
-
-    const memberEmail = 'lsh1751@naver.com';
+    const memberIdString = await getAsyncStorageItem(STORAGE_KEY.MEMBER_ID);
+    const memberId = memberIdString ? Number(memberIdString) : 0;
 
     const res = await axios.post(
-      `${process.env.EXPO_PUBLIC_AUTH_SERVICE}/member/reissue/accessToken/${memberEmail}`,
+      `${process.env.EXPO_PUBLIC_AUTH_SERVICE}/api/v1/auth/token/reissue`,
+      {
+        memberId,
+      },
     );
 
-    if (res.data.dataHeader.successCode === 0) {
-      const newToken = res.data.dataBody;
+    if (res.data.dataHeader.success) {
+      const newToken = res.data.dataBody.accessToken;
       await setAsyncStorageItem(STORAGE_KEY.ACCESS_TOKEN, newToken);
     } else {
       throw new Error('토큰 재발급 실패');
@@ -93,10 +90,17 @@ async function reissueTokenAndRetryRequest(
     // 원래 요청 재시도
     return await instance.request(originalRequest);
   } catch (error) {
-    // TODO: 재발급 실패 처리
-    console.error('Token reissue failed:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('Token reissue failed:', error, error.response);
+    } else {
+      console.error('Token reissue failed:', error);
+    }
+
+    // 로그아웃 및 AsyncStorage 초기화
     removeAsyncStorageItem(STORAGE_KEY.ACCESS_TOKEN);
+    removeAsyncStorageItem(STORAGE_KEY.MEMBER_ID);
     store.dispatch(logout());
+    Alert.alert('알림', '로그인 정보가 만료되었습니다. 다시 로그인 해주세요.');
 
     throw error;
   }
