@@ -16,15 +16,14 @@ const Tab = createBottomTabNavigator();
 export default function BottomTabNavigator() {
   const dispatch = useAppDispatch();
   const memberId = useAppSelector((state) => state.authReducer.memberId);
-  const { name, email, nickname } = useAppSelector((state) => state.userReducer);
 
-  // 유저 정보 조회
+  // user 정보 조회
   const { data, isSuccess } = useUserInfoQuery({
     memberId,
     enableApiCall: !!memberId,
   });
 
-  // 유저정보 저장
+  // user 정보 저장
   useEffect(() => {
     if (isSuccess && data) {
       dispatch(setUser(data.dataBody));
