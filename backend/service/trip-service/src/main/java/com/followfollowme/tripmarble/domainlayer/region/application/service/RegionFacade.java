@@ -2,8 +2,8 @@ package com.followfollowme.tripmarble.domainlayer.region.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RegionResponse;
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.SigunguResponse;
-import com.followfollowme.tripmarble.domainlayer.region.application.mapper.RegionMapper;
-import com.followfollowme.tripmarble.domainlayer.region.application.mapper.SigunguMapper;
+import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.presenter.RegionPresenter;
+import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.presenter.SigunguPresenter;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.in.RegionWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RegionRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.SigunguRepositoryPort;
@@ -20,20 +20,20 @@ public class RegionFacade implements RegionWebUseCase {
 
     private final RegionRepositoryPort regionRepositoryPort;
     private final SigunguRepositoryPort sigunguRepositoryPort;
-    private final RegionMapper regionMapper;
-    private final SigunguMapper sigunguMapper;
+    private final RegionPresenter regionPresenter;
+    private final SigunguPresenter sigunguPresenter;
 
     @Override
     @Transactional(readOnly = true)
     public List<RegionResponse> getAllRegions() {
         List<Region> regions = regionRepositoryPort.findAll();
-        return regionMapper.toResponseListFromDomainList(regions);
+        return regionPresenter.toResponseList(regions);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<SigunguResponse> getSigungusByRegionId(long regionId) {
         List<Sigungu> sigungus = sigunguRepositoryPort.findAllByRegionId(regionId);
-        return sigunguMapper.toResponseListFromDomainList(sigungus);
+        return sigunguPresenter.toResponseList(sigungus);
     }
 }
