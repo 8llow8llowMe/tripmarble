@@ -1,6 +1,5 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto;
 
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.TileType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -16,8 +15,11 @@ public record TripGameTileInfo(
     @Schema(description = "해당 타일의 순서 (1부터 시작)", example = "1")
     int stepNo,
 
-    @Schema(description = "타일 타입", example = "SPOT")
-    TileType tileType,
+    @Schema(description = "타일 타입", example = "START")
+    String tileTypeCode,
+
+    @Schema(description = "타일 타입 설명", example = "출발점")
+    String tileTypeDescription,
 
     @Schema(description = "여행지 이름", example = "제주도민속촌")
     String tripSpotName
