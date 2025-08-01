@@ -49,8 +49,11 @@ export default function LoginScreen({ navigation }: any) {
           console.log(data);
           // TODO: 로그인 에러 처리
           if (data.dataHeader.success) {
+            // AsyncStorage auth 정보 저장
             setAsyncStorageItem(STORAGE_KEY.ACCESS_TOKEN, data.dataBody.accessToken);
+            setAsyncStorageItem(STORAGE_KEY.MEMBER_ID, String(data.dataBody.memberId));
 
+            // store auth 정보 저장
             dispatch(
               authorize({
                 accessToken: data.dataBody.accessToken,
