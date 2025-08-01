@@ -1,7 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.theme.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.theme.adapter.in.web.dto.TripThemeResponse;
-import com.followfollowme.tripmarble.domainlayer.theme.application.mapper.TripThemeMapper;
+import com.followfollowme.tripmarble.domainlayer.theme.adapter.in.web.presenter.TripThemePresenter;
 import com.followfollowme.tripmarble.domainlayer.theme.application.port.in.TripThemeWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.theme.application.port.out.TripThemeRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
@@ -15,12 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class TripThemeFacade implements TripThemeWebUseCase {
 
     private final TripThemeRepositoryPort tripThemeRepositoryPort;
-    private final TripThemeMapper tripThemeMapper;
+    private final TripThemePresenter tripThemePresenter;
 
     @Override
     @Transactional(readOnly = true)
     public List<TripThemeResponse> getAllTripThemes() {
         List<TripTheme> tripThemes = tripThemeRepositoryPort.findAll();
-        return tripThemeMapper.toResponseListFromDomainList(tripThemes);
+        return tripThemePresenter.toResponseList(tripThemes);
     }
 }
