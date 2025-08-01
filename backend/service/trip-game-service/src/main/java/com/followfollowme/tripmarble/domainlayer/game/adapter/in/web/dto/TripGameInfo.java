@@ -1,7 +1,5 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto;
 
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
@@ -14,16 +12,16 @@ public record TripGameInfo(
     long tripGameId,
 
     @Schema(description = "게임 상태", example = "WAITING")
-    Status status,
+    String gameStatus,
 
-    @Schema(description = "게임 상태 메시지", example = "시작 전")
-    String statusMessage,
+    @Schema(description = "게임 상태 설명", example = "시작 전")
+    String gameStatusDescription,
 
     @Schema(description = "게임 난이도", example = "NORMAL")
-    Difficulty difficulty,
+    String difficultyCode,
 
-    @Schema(description = "게임 난이도 메시지", example = "보통")
-    String difficultyMessage,
+    @Schema(description = "게임 난이도 설명", example = "보통")
+    String difficultyDescription,
 
     @Schema(description = "여행 시작일", example = "2025-07-15")
     LocalDate startedAt,
