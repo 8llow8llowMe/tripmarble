@@ -8,7 +8,8 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum RegionErrorCode {
 
-    REPRESENTATIVE_REGION_NOT_FOUND("REGION_001", "해당 대표 여행지가 존재하지 않습니다.", HttpStatus.NOT_FOUND);
+    REPRESENTATIVE_REGION_NOT_FOUND("REGION_001", "해당 대표 여행지가 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    REGION_NOT_FOUND("REGION_001", "해당 지역이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
 
     private final String code;
     private final String errorMessage;
