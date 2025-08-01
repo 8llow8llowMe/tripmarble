@@ -19,13 +19,15 @@ public class TripSpotCustomRepositoryImpl implements TripSpotCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Slice<TripSpotEntity> findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(List<Integer> ldongSignguCodes,
-        long lastTripSpotId, int size, Integer contentTypeId) {
-
+    public Slice<TripSpotEntity> findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(
+        int ldongRegnCd, List<Integer> ldongSignguCodes, long lastTripSpotId, int size, Integer contentTypeId) {
         QTripSpotEntity t = QTripSpotEntity.tripSpotEntity;
 
-        // 1. 동적 조건 빌더
+        // 1. 동적 조건 빌더 구성
         BooleanBuilder where = new BooleanBuilder();
+        // 1-1. 법정동 시도 코드 (ex: 서울시: 11, 부산시: 26)
+        where.and(t.ldongRegnCd.eq(ldongRegnCd));
+        // 1-2. 법정동 시군구 코드 리스트 (ex: 강남구: 680, 송파구: 740)
         where.and(t.ldongSignguCd.in(ldongSignguCodes));
 
         if (lastTripSpotId > 0) {
@@ -55,20 +57,24 @@ public class TripSpotCustomRepositoryImpl implements TripSpotCustomRepository {
     }
 
     @Override
-    public List<TripSpotEntity> findRandomTripSpotsBySigunguCodesAndContentTypeIds(List<Integer> ldongSignguCodes,
-        List<Integer> contentTypeIds, int limit) {
+    public List<TripSpotEntity> findRandomTripSpotsBySigunguCodesAndContentTypeIds(
+        int ldongRegnCd, List<Integer> ldongSignguCodes, List<Integer> contentTypeIds, int limit) {
         QTripSpotEntity t = QTripSpotEntity.tripSpotEntity;
 
-        // 1. 동적 조건 빌더 (시군구 코드 기준 및 TourAPI 콘텐츠 타입 ID 기준으로 필터링)
+        // 1. 동적 조건 빌더 구성
         BooleanBuilder where = new BooleanBuilder();
+        // 1-1. 법정동 시도 코드 (ex: 서울시: 11, 부산시: 26)
+        where.and(t.ldongRegnCd.eq(ldongRegnCd));
+        // 1-2. 법정동 시군구 코드 리스트 (ex: 강남구: 680, 송파구: 740)
         where.and(t.ldongSignguCd.in(ldongSignguCodes));
+        // 1-3. TourAPI 콘텐츠 타입 ID 리스트 (ex: 관광지, 음식점 등)
         where.and(t.contentTypeId.in(contentTypeIds));
 
-        // 2. 무작위 정렬 쿼리 (RAND() ASC) + LIMIT 지정
+        // 2. 무작위 정렬 + 최대 개수 제한
         return queryFactory
             .selectFrom(t)
             .where(where)
-            .orderBy(Expressions.numberTemplate(Double.class, "RAND()").asc())
+            .orderBy(Expressions.numberTemplate(Double.class, "RAND()").asc()) // MySQL 기준 RAND()
             .limit(limit)
             .fetch();
     }

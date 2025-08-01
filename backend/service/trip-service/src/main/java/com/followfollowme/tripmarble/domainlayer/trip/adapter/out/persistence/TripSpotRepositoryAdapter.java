@@ -25,20 +25,19 @@ public class TripSpotRepositoryAdapter implements TripSpotRepositoryPort {
     }
 
     @Override
-    public Slice<TripSpot> findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(List<Integer> ldongSignguCodes,
-        long lastTripSpotId, int size, Integer contentTypeId) {
-
+    public Slice<TripSpot> findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(
+        int ldongRegnCd, List<Integer> ldongSignguCodes, long lastTripSpotId, int size, Integer contentTypeId) {
         Slice<TripSpotEntity> entitySlice = tripSpotRepository.findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(
-            ldongSignguCodes, lastTripSpotId, size, contentTypeId);
+            ldongRegnCd, ldongSignguCodes, lastTripSpotId, size, contentTypeId);
 
         return entitySlice.map(tripSpotMapper::toDomainFromEntity);
     }
 
     @Override
-    public List<TripSpot> findRandomTripSpotsBySigunguCodesAndContentTypeIds(List<Integer> ldongSignguCodes,
-        List<Integer> contentTypeIds, int limit) {
+    public List<TripSpot> findRandomTripSpotsBySigunguCodesAndContentTypeIds(
+        int ldongRegnCd, List<Integer> ldongSignguCodes, List<Integer> contentTypeIds, int limit) {
         List<TripSpotEntity> entities = tripSpotRepository.findRandomTripSpotsBySigunguCodesAndContentTypeIds(
-            ldongSignguCodes, contentTypeIds, limit);
+            ldongRegnCd, ldongSignguCodes, contentTypeIds, limit);
         return tripSpotMapper.toDomainListFromEntityList(entities);
     }
 }
