@@ -1,13 +1,16 @@
 package com.followfollowme.tripmarble.domainlayer.trip.application.service;
 
+import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionErrorCode;
+import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionException;
+import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RegionRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RepresentativeRegionSigunguMappingRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.SigunguRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.Sigungu;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotSimpleResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotWithDetailViewResponse;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.presenter.TripSpotPresenter;
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripErrorCode;
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripException;
-import com.followfollowme.tripmarble.domainlayer.trip.application.mapper.TripSpotMapper;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripSpotWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripContentTypeRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotDetailRepositoryPort;
@@ -27,10 +30,11 @@ public class TripSpotFacade implements TripSpotWebUseCase {
 
     private final RepresentativeRegionSigunguMappingRepositoryPort representativeRegionSigunguMappingRepositoryPort;
     private final SigunguRepositoryPort sigunguRepositoryPort;
+    private final RegionRepositoryPort regionRepositoryPort;
     private final TripSpotRepositoryPort tripSpotRepositoryPort;
     private final TripSpotDetailRepositoryPort tripSpotDetailRepositoryPort;
     private final TripContentTypeRepositoryPort tripContentTypeRepositoryPort;
-    private final TripSpotMapper tripSpotMapper;
+    private final TripSpotPresenter tripSpotPresenter;
 
     @Override
     @Transactional(readOnly = true)
@@ -41,19 +45,26 @@ public class TripSpotFacade implements TripSpotWebUseCase {
             representativeRegionSigunguMappingRepositoryPort.findSigunguIdsByRepresentativeRegionId(
                 representativeRegionId);
 
-        // 2. 시군구 ID -> 시군구 코드 변환
-        List<Integer> sigunguCodes = sigunguRepositoryPort.findAllByIdIn(sigunguIds).stream()
+        // 2. 시군구 도메인 조회
+        List<Sigungu> sigungus = sigunguRepositoryPort.findAllByIdIn(sigunguIds);
+
+        // 3. 시군구 코드 + 지역 코드 추출 (법정동 시도 코드, 시군구 코드 => 자연키)
+        List<Integer> sigunguCodes = sigungus.stream()
             .map(Sigungu::sigunguCode)
             .toList();
 
-        // 3. 시군구 코드 기반 여행지 Slice 조회 (No-Offset 방식 - 무한 스크롤)
+        // 4. 시군구 중 하나의 regionId -> regionCode 1개만 조회
+        long regionId = sigungus.getFirst().regionId();
+        int regionCode = regionRepositoryPort.findById(regionId)
+            .orElseThrow(() -> new RegionException(RegionErrorCode.REGION_NOT_FOUND))
+            .regionCode();
+
+        // 5. 시군구 코드 기반 여행지 Slice 조회 (No-Offset 방식 - 무한 스크롤)
         Slice<TripSpot> tripSpots = tripSpotRepositoryPort.findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(
-            sigunguCodes, lastTripSpotId, size, contentTypeId);
+            regionCode, sigunguCodes, lastTripSpotId, size, contentTypeId);
 
-        // 4. 도메인 -> Response 매핑
-        Slice<TripSpotSimpleResponse> responseSlice = tripSpots.map(tripSpotMapper::toSimpleResponseFromDomain);
-
-        return SliceResponse.of(responseSlice);
+        // 6. 도메인 -> Response 매핑
+        return tripSpotPresenter.toSimpleSliceResponse(tripSpots);
     }
 
     @Override
@@ -63,15 +74,15 @@ public class TripSpotFacade implements TripSpotWebUseCase {
         TripSpot tripSpot = tripSpotRepositoryPort.findById(tripSpotId)
             .orElseThrow(() -> new TripException(TripErrorCode.TRIP_SPOT_NOT_FOUND));
 
-        // 2. 해당 여행지 정보의 contentTypeId로 관광 티입 정보 조회 (자연키)
-        String contentTypeName = tripContentTypeRepositoryPort.findNameByContentTypeId(tripSpot.contentTypeId())
-            .orElseThrow(() -> new TripException(TripErrorCode.TRIP_CONTENT_TYPE_NOT_FOUND));
-
-        // 3. 해당 여행지 정보의 contentId로 여행지 상세 정보 조회 (자연키)
+        // 2. 해당 여행지 정보의 contentId로 여행지 상세 정보 조회 (자연키)
         TripSpotDetail tripSpotDetail = tripSpotDetailRepositoryPort.findByContentId(tripSpot.contentId())
             .orElseThrow(() -> new TripException(TripErrorCode.TRIP_SPOT_DETAIL_NOT_FOUND));
 
-        // 4. Mapper를 통한 응답 DTO 생성
-        return tripSpotMapper.toDetailViewResponseFrom(tripSpot, contentTypeName, tripSpotDetail);
+        // 3. 해당 여행지 정보의 contentTypeId로 관광 타입 정보 조회 (자연키)
+        String contentTypeName = tripContentTypeRepositoryPort.findNameByContentTypeId(tripSpot.contentTypeId())
+            .orElseThrow(() -> new TripException(TripErrorCode.TRIP_CONTENT_TYPE_NOT_FOUND));
+
+        // 4. 도메인 전용 객체들을 응답 전용 DTO로 매핑
+        return tripSpotPresenter.toDetailViewResponse(tripSpot, tripSpotDetail, contentTypeName);
     }
 }
