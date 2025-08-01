@@ -1,11 +1,14 @@
+import { useAppSelector } from '@/store/store';
 import React from 'react';
 import { SafeAreaView, ScrollView, View, Text, TextInput, StyleSheet } from 'react-native';
 
 export default function HomeScreen() {
+  const { nickname } = useAppSelector((state) => state.userReducer);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
-        <Text style={styles.welcome}>안녕하세요. 트립마블 님</Text>
+        <Text style={styles.welcome}>안녕하세요. {nickname} 님</Text>
 
         <TextInput placeholder="🔍 여행지 검색" style={styles.searchBox} />
 
