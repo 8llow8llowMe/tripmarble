@@ -1,0 +1,10 @@
+-- 여행 테마별 콘텐츠 타입 매핑
+INSERT INTO trip_theme_content_type_mapping (trip_theme_id, trip_content_type_id, weight)
+VALUES (1, 1, 0.5), -- 테마 1: 관광 -> 콘텐츠 1: 관광지 (content_type_id = 12)
+       (1, 4, 0.3), -- 테마 1: 관광 -> 콘텐츠 4: 여행코스 (content_type_id = 25)
+       (1, 6, 0.2), -- 테마 1: 관광 -> 콘텐츠 6: 숙박 (content_type_id = 32)
+       (2, 2, 1.0), -- 테마 2: 전시 -> 콘텐츠 2: 문화시설 (content_type_id = 14)
+       (3, 3, 1.0), -- 테마 3: 축제/공연 -> 콘텐츠 3: 축제공연행사 (content_type_id = 15)
+       (4, 5, 1.0), -- 테마 4: 액티비티 -> 콘텐츠 5: 레포츠 (content_type_id = 28)
+       (5, 7, 1.0), -- 테마 5: 쇼핑 -> 콘텐츠 7: 쇼핑 (content_type_id = 38)
+       (6, 8, 1.0); -- 테마 6: 맛집 -> 콘텐츠 8: 음식점 (content_type_id = 39)
