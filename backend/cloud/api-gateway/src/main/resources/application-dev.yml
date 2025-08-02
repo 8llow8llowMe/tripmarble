@@ -12,30 +12,30 @@ spring:
       routes:
         # Swagger 문서용 라우트
         - id: auth-service-docs
-          uri: lb://auth-service
+          uri: lb://AUTH-SERVICE-DEV
           predicates:
             - Path=/auth-service/** # /auth-service/v3/api-docs 로 들어오면
           filters:
             - StripPrefix=1 # /v3/api-docs 로 잘라서 전달
         - id: trip-service-docs
-          uri: lb://trip-service
+          uri: lb://TRIP-SERVICE-DEV
           predicates:
             - Path=/trip-service/**
           filters:
             - StripPrefix=1
         - id: trip-game-service-docs
-          uri: lb://trip-game-service
+          uri: lb://TRIP-GAME-SERVICE-DEV
           predicates:
             - Path=/trip-game-service/**
           filters:
             - StripPrefix=1
         # 기존 API 라우트
         - id: trip-service
-          uri: lb://trip-service
+          uri: lb://TRIP-SERVICE-DEV
           predicates:
             - Path=/api/v1/regions/**, /api/v1/trip-spots/**, /api/v1/trip-content-types/**
         - id: trip-game-service
-          uri: lb://trip-game-service
+          uri: lb://TRIP-GAME-SERVICE-DEV
           predicates:
             - Path=/api/v1/trip-themes/**, /api/v1/trip-games/**
 
