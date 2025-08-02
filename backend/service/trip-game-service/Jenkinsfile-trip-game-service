@@ -18,6 +18,16 @@ pipeline {
             defaultValue: 'develop',
             description: 'PR 타겟 브랜치 (배포 환경 결정용)'
         )
+        string(
+            name: 'PR_SHA',
+            defaultValue: '',
+            description: 'PR 커밋 SHA (빌드할 코드)'
+        )
+        string(
+            name: 'PR_NUMBER',
+            defaultValue: '',
+            description: 'PR 번호'
+        )
     }
 
     // 공통 환경 변수
@@ -42,6 +52,8 @@ pipeline {
                     echo "Branch: ${env.BRANCH_NAME}"
                     echo "Service: ${params.SERVICE_NAME}"
                     echo "Target Branch: ${params.TARGET_BRANCH}"
+                    echo "PR SHA: ${params.PR_SHA ?: 'Not provided'}"
+                    echo "PR Number: ${params.PR_NUMBER ?: 'Not provided'}"
                     
                     // 타겟 브랜치 기준으로 배포 환경 결정
                     if (params.TARGET_BRANCH == 'main') {
@@ -62,17 +74,32 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 script {
-                    echo "Using PR branch code (Jenkins 멀티브랜치가 자동으로 PR 브랜치 체크아웃)"
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: scm.branches,
-                        userRemoteConfigs: scm.userRemoteConfigs,
-                        extensions: [
-                            [$class: 'SubmoduleOption',
-                             recursiveSubmodules: true,
-                             parentCredentials: true]
-                        ]
-                    ])
+                    // PR SHA가 있으면 해당 커밋 체크아웃, 없으면 브랜치 HEAD 사용
+                    if (params.PR_SHA && params.PR_SHA != '') {
+                        echo "Checking out PR commit: ${params.PR_SHA}"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: params.PR_SHA]],
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                            extensions: [
+                                [$class: 'SubmoduleOption',
+                                 recursiveSubmodules: true,
+                                 parentCredentials: true]
+                            ]
+                        ])
+                    } else {
+                        echo "Using PR branch code (Jenkins 멀티브랜치가 자동으로 PR 브랜치 체크아웃)"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: scm.branches,
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                            extensions: [
+                                [$class: 'SubmoduleOption',
+                                 recursiveSubmodules: true,
+                                 parentCredentials: true]
+                            ]
+                        ])
+                    }
                 }
             }
         }
