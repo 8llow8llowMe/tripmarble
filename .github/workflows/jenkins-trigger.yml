@@ -13,7 +13,8 @@ jobs:
       run: |
         action="${{ github.event.action }}"
         labels="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
-        branch="${{ github.event.pull_request.base.ref }}"
+        target_branch="${{ github.event.pull_request.base.ref }}"
+        pr_sha="${{ github.event.pull_request.head.sha }}"
         
         # 트리거 조건 체크
         should_trigger=false
@@ -37,35 +38,33 @@ jobs:
         
         # Jenkins 트리거 실행
         if [[ "$should_trigger" == "true" ]]; then
-          echo "Labels: $labels | Branch: $branch"
+          echo "Labels: $labels | Target: $target_branch"
           
           JENKINS_URL="${{ secrets.JENKINS_URL }}"
           JENKINS_USER="${{ secrets.JENKINS_USER }}"
           JENKINS_TOKEN="${{ secrets.JENKINS_TOKEN }}"
           JENKINS_URL="${JENKINS_URL%/}"
           
-          # 서비스 트리거 함수
+          # 서비스 트리거 함수 (타겟 브랜치로 실행)
           trigger_service() {
             local job_name="$1"
             local service_group="$2"
             local service_name="$3"
             
-            echo "Triggering: $job_name for branch: $branch"
+            echo "Triggering: $job_name on $target_branch branch"
             
-            # Jenkins 빌드 트리거 (환경 변수 추가)
+            # 타겟 브랜치(develop/main)로 Jenkins 트리거
             response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
               --user "$JENKINS_USER:$JENKINS_TOKEN" \
-              "$JENKINS_URL/job/$job_name/job/$branch/buildWithParameters" \
+              "$JENKINS_URL/job/$job_name/job/$target_branch/buildWithParameters" \
               --data-urlencode "SERVICE_GROUP=$service_group" \
               --data-urlencode "SERVICE_NAME=$service_name" \
-              --data-urlencode "SKIP_LABEL_CHECK=true" \
-              --data-urlencode "TARGET_BRANCH=$branch" \
-              --data-urlencode "DEPLOY_ENV=$([[ "$branch" == "main" ]] && echo "prod" || echo "dev")")
+              --data-urlencode "PR_SHA=$pr_sha")
             
             http_code=$(echo "$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
             
             if [[ "$http_code" == "201" || "$http_code" == "200" ]]; then
-              echo "SUCCESS: $service_name triggered for $branch"
+              echo "SUCCESS: $service_name triggered on $target_branch"
             else
               echo "FAILED: $service_name (HTTP: $http_code)"
             fi
@@ -77,8 +76,6 @@ jobs:
           [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "tripmarble-backend-trip-game-service" "service" "trip-game-service"
           [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "tripmarble-backend-api-gateway" "cloud" "api-gateway"
           [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "tripmarble-backend-service-discovery" "cloud" "service-discovery"
-          [[ "$labels" == *"frontend-web"* ]] && trigger_service "tripmarble-frontend-web" "web" "frontend-web"
-          [[ "$labels" == *"frontend-mobile"* ]] && trigger_service "tripmarble-frontend-mobile" "mobile" "frontend-mobile"
           
           echo "Jenkins trigger completed"
         fi
