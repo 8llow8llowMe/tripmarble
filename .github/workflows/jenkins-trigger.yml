@@ -41,6 +41,8 @@ jobs:
           
           # Jenkins Job 목록 확인 (디버깅용)
           echo "=== Checking available Jenkins jobs ==="
+          echo "Jenkins URL: ${{ secrets.JENKINS_URL }}"
+          
           jobs_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
             --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
             "${{ secrets.JENKINS_URL }}/api/json?tree=jobs[name,url]")
@@ -48,11 +50,18 @@ jobs:
           jobs_http_code=$(echo "$jobs_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
           jobs_body=$(echo "$jobs_response" | sed 's/HTTP_CODE:[0-9]*$//')
           
+          echo "Jobs API Response Code: $jobs_http_code"
+          echo "Jobs API Response Body (first 500 chars):"
+          echo "$jobs_body" | head -c 500
+          echo ""
+          
           if [[ "$jobs_http_code" == "200" ]]; then
             echo "Available jobs:"
             echo "$jobs_body" | grep -o '"name":"[^"]*"' | sed 's/"name":"//g' | sed 's/"//g'
           else
             echo "Failed to get jobs list (HTTP: $jobs_http_code)"
+            echo "Full response:"
+            echo "$jobs_body"
           fi
           echo ""
           
@@ -140,4 +149,14 @@ jobs:
           [[ "$labels" == *"frontend-mobile"* ]] && trigger_service "frontend-mobile" "mobile"
           
           echo "Jenkins trigger completed!"
+          
+          # 대안: 간단한 Job 확인
+          echo "=== Alternative: Simple job check ==="
+          for job_name in "tripmarble-backend-auth-service multi branch pipeline" "tripmarble-backend-trip-service multi branch pipeline" "tripmarble-backend-trip-game-service multi branch pipeline" "tripmarble-backend-api-gateway multi branch pipeline" "tripmarble-backend-service-discovery multi branch pipeline"; do
+            echo "Checking job: $job_name"
+            simple_check=$(curl -s -w "HTTP:%{http_code}" -I \
+              --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+              "${{ secrets.JENKINS_URL }}/job/$(echo "$job_name" | sed 's/ /%20/g')/")
+            echo "  Result: $simple_check"
+          done
         fi
