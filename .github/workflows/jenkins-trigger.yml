@@ -14,7 +14,8 @@ jobs:
         action="${{ github.event.action }}"
         labels="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
         target_branch="${{ github.event.pull_request.base.ref }}"
-        pr_branch="${{ github.event.pull_request.head.ref }}"
+        pr_sha="${{ github.event.pull_request.head.sha }}"
+        pr_number="${{ github.event.pull_request.number }}"
         
         # 트리거 조건 체크
         should_trigger=false
@@ -38,33 +39,35 @@ jobs:
         
         # Jenkins 트리거 실행
         if [[ "$should_trigger" == "true" ]]; then
-          echo "Labels: $labels | Target: $target_branch | PR: $pr_branch"
+          echo "Labels: $labels | Target: $target_branch | PR SHA: $pr_sha"
           
           JENKINS_URL="${{ secrets.JENKINS_URL }}"
           JENKINS_USER="${{ secrets.JENKINS_USER }}"
           JENKINS_TOKEN="${{ secrets.JENKINS_TOKEN }}"
           JENKINS_URL="${JENKINS_URL%/}"
           
-          # 서비스 트리거 함수
+          # 서비스 트리거 함수 (타겟 브랜치에서 PR SHA 사용)
           trigger_service() {
             local service_name="$1"
             local service_group="$2"
             local job_name="tripmarble-backend-$service_name"
             
-            echo "Triggering: $service_name on PR branch: $pr_branch"
+            echo "Triggering: $job_name on $target_branch with PR SHA"
             
-            # PR 브랜치 빌드 트리거
+            # 타겟 브랜치에서 PR SHA로 빌드 (확실한 방법)
             response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
               --user "$JENKINS_USER:$JENKINS_TOKEN" \
-              "$JENKINS_URL/job/$job_name/job/$pr_branch/buildWithParameters" \
+              "$JENKINS_URL/job/$job_name/job/$target_branch/buildWithParameters" \
               --data-urlencode "SERVICE_GROUP=$service_group" \
               --data-urlencode "SERVICE_NAME=$service_name" \
-              --data-urlencode "TARGET_BRANCH=$target_branch")
+              --data-urlencode "TARGET_BRANCH=$target_branch" \
+              --data-urlencode "PR_SHA=$pr_sha" \
+              --data-urlencode "PR_NUMBER=$pr_number")
             
             http_code=$(echo "$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
             
             if [[ "$http_code" == "201" || "$http_code" == "200" ]]; then
-              echo "SUCCESS: $service_name PR build triggered"
+              echo "SUCCESS: $service_name triggered on $target_branch"
             else
               echo "FAILED: $service_name (HTTP: $http_code)"
             fi
