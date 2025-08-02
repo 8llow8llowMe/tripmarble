@@ -71,7 +71,10 @@ pipeline {
 
         stage('Deploy to Dev') {
             when {
-                expression { env.CHANGE_TARGET == 'develop' }
+                anyOf {
+                    expression { env.CHANGE_TARGET == 'develop' }
+                    expression { env.BRANCH_NAME == 'develop' }
+                }
             }
             steps {
                 script {
@@ -112,7 +115,10 @@ pipeline {
 
         stage('Deploy to Prod') {
             when {
-                expression { env.CHANGE_TARGET == 'main' }
+                anyOf {
+                    expression { env.CHANGE_TARGET == 'main' }
+                    expression { env.BRANCH_NAME == 'main' }
+                }
             }
             steps {
                 script {
