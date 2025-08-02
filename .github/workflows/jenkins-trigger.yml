@@ -1,4 +1,4 @@
-name: Jenkins Auth Test
+name: Jenkins Debug
 
 on:
   pull_request:
@@ -6,80 +6,136 @@ on:
     branches: [develop, main]
 
 jobs:
-  test-jenkins-auth:
+  debug-jenkins:
     runs-on: ubuntu-latest
     steps:
-    - name: Test Jenkins Authentication
+    - name: Debug Jenkins Connection
       run: |
-        echo "=== Jenkins Authentication Test ==="
+        echo "=== Step 1: Environment Check ==="
+        echo "curl version: $(curl --version | head -1)"
+        echo "bash version: $BASH_VERSION"
         
-        # Secrets 존재 여부 확인
-        echo "JENKINS_URL exists: $([[ -n '${{ secrets.JENKINS_URL }}' ]] && echo 'YES' || echo 'NO')"
-        echo "JENKINS_USER exists: $([[ -n '${{ secrets.JENKINS_USER }}' ]] && echo 'YES' || echo 'NO')"
-        echo "JENKINS_TOKEN exists: $([[ -n '${{ secrets.JENKINS_TOKEN }}' ]] && echo 'YES' || echo 'NO')"
+        echo "=== Step 2: Secrets Validation ==="
+        JENKINS_URL="${{ secrets.JENKINS_URL }}"
+        JENKINS_USER="${{ secrets.JENKINS_USER }}"
+        JENKINS_TOKEN="${{ secrets.JENKINS_TOKEN }}"
         
-        if [[ -z '${{ secrets.JENKINS_USER }}' ]]; then
-          echo "❌ JENKINS_USER secret is missing!"
-          echo "Please add JENKINS_USER to GitHub Secrets"
+        echo "URL length: ${#JENKINS_URL}"
+        echo "User length: ${#JENKINS_USER}"
+        echo "Token length: ${#JENKINS_TOKEN}"
+        
+        if [[ ${#JENKINS_URL} -lt 5 ]]; then
+          echo "❌ JENKINS_URL seems too short"
           exit 1
         fi
         
-        if [[ -z '${{ secrets.JENKINS_TOKEN }}' ]]; then
-          echo "❌ JENKINS_TOKEN secret is missing!"
+        if [[ ${#JENKINS_USER} -lt 1 ]]; then
+          echo "❌ JENKINS_USER seems empty"
           exit 1
         fi
         
-        # 1. Jenkins 서버 기본 연결 테스트
-        echo "=== Testing Jenkins Server Connection ==="
-        server_response=$(curl -s -w "HTTP:%{http_code}" -I "$JENKINS_URL")
-        echo "Server response: $server_response"
-        
-        # 2. 인증 테스트 (whoAmI API)
-        echo "=== Testing Authentication ==="
-        auth_response=$(curl -s -w "HTTP:%{http_code}" \
-          --user "$JENKINS_USER:$JENKINS_TOKEN" \
-          "$JENKINS_URL/me/api/json")
-        
-        auth_http_code=$(echo "$auth_response" | grep -o 'HTTP:[0-9]*' | cut -d: -f2)
-        auth_body=$(echo "$auth_response" | sed 's/HTTP:[0-9]*$//')
-        
-        echo "Auth API Response (HTTP $auth_http_code):"
-        if [[ "$auth_http_code" == "200" ]]; then
-          echo "✅ Authentication successful!"
-          echo "User info: $(echo "$auth_body" | head -c 200)"
-        else
-          echo "❌ Authentication failed!"
-          echo "Response: $(echo "$auth_body" | head -c 300)"
+        if [[ ${#JENKINS_TOKEN} -lt 10 ]]; then
+          echo "❌ JENKINS_TOKEN seems too short"
+          exit 1
         fi
         
-        # 3. Job 존재 확인
-        echo "=== Testing Job Access ==="
-        job_response=$(curl -s -w "HTTP:%{http_code}" \
-          --user "$JENKINS_USER:$JENKINS_TOKEN" \
-          "$JENKINS_URL/job/auth-service/api/json")
+        # URL 정제
+        JENKINS_URL="${JENKINS_URL%/}"
+        echo "Cleaned Jenkins URL length: ${#JENKINS_URL}"
         
-        job_http_code=$(echo "$job_response" | grep -o 'HTTP:[0-9]*' | cut -d: -f2)
+        echo "=== Step 3: Basic Connectivity Test ==="
+        echo "Testing basic connectivity..."
         
-        if [[ "$job_http_code" == "200" ]]; then
-          echo "✅ Job access successful!"
+        # 가장 기본적인 연결 테스트
+        set +e  # 에러 발생해도 스크립트 계속 실행
+        
+        echo "Test 1: Simple curl to Jenkins"
+        curl -s -I "$JENKINS_URL" --connect-timeout 10 --max-time 30
+        curl_exit_code=$?
+        echo "Curl exit code: $curl_exit_code"
+        
+        if [[ $curl_exit_code -ne 0 ]]; then
+          echo "❌ Basic curl failed with exit code: $curl_exit_code"
+          
+          # curl 에러 코드 해석
+          case $curl_exit_code in
+            1) echo "Protocol error" ;;
+            3) echo "URL malformed" ;;
+            6) echo "Couldn't resolve host" ;;
+            7) echo "Failed to connect to host" ;;
+            28) echo "Operation timeout" ;;
+            35) echo "SSL connect error" ;;
+            *) echo "Unknown curl error" ;;
+          esac
+          
+          echo "=== URL Analysis ==="
+          echo "First 50 chars of URL: ${JENKINS_URL:0:50}"
+          
+          # URL 구성 요소 분석
+          if [[ "$JENKINS_URL" =~ ^(https?)://([^/]+)(.*) ]]; then
+            protocol="${BASH_REMATCH[1]}"
+            host="${BASH_REMATCH[2]}"
+            path="${BASH_REMATCH[3]}"
+            
+            echo "Protocol: $protocol"
+            echo "Host: $host"
+            echo "Path: $path"
+            
+            # 호스트 해석 테스트
+            echo "Testing host resolution..."
+            nslookup "$host" || echo "Host resolution failed"
+            
+          else
+            echo "❌ URL doesn't match expected pattern"
+          fi
         else
-          echo "❌ Job access failed (HTTP: $job_http_code)"
+          echo "✅ Basic connectivity successful"
         fi
         
-        # 4. 다른 인증 방법들 테스트
-        echo "=== Testing Alternative Auth Methods ==="
+        set -e  # 에러 발생 시 스크립트 종료 다시 활성화
         
-        # Bearer Token 방식
-        echo "Testing Bearer token..."
-        bearer_response=$(curl -s -w "HTTP:%{http_code}" \
-          -H "Authorization: Bearer $JENKINS_TOKEN" \
-          "$JENKINS_URL/me/api/json")
-        bearer_code=$(echo "$bearer_response" | grep -o 'HTTP:[0-9]*' | cut -d: -f2)
-        echo "Bearer auth result: HTTP $bearer_code"
+        echo "=== Step 4: Authentication Test ==="
+        if [[ $curl_exit_code -eq 0 ]]; then
+          echo "Testing authentication..."
+          
+          auth_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
+            --connect-timeout 10 --max-time 30 \
+            --user "$JENKINS_USER:$JENKINS_TOKEN" \
+            "$JENKINS_URL/me/api/json" || echo "CURL_FAILED")
+          
+          if [[ "$auth_response" == "CURL_FAILED" ]]; then
+            echo "❌ Auth curl command failed"
+          else
+            auth_http_code=$(echo "$auth_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+            auth_body=$(echo "$auth_response" | sed 's/HTTP_CODE:[0-9]*$//')
+            
+            echo "Auth HTTP Code: $auth_http_code"
+            
+            if [[ "$auth_http_code" == "200" ]]; then
+              echo "✅ Authentication successful!"
+              echo "Response preview: $(echo "$auth_body" | head -c 100)"
+            else
+              echo "❌ Authentication failed (HTTP: $auth_http_code)"
+              echo "Error response: $(echo "$auth_body" | head -c 200)"
+            fi
+          fi
+        else
+          echo "Skipping auth test due to connectivity issues"
+        fi
         
-        # API Key 방식
-        echo "Testing API key in URL..."
-        apikey_response=$(curl -s -w "HTTP:%{http_code}" \
-          "$JENKINS_URL/me/api/json?token=$JENKINS_TOKEN")
-        apikey_code=$(echo "$apikey_response" | grep -o 'HTTP:[0-9]*' | cut -d: -f2)
-        echo "API key auth result: HTTP $apikey_code"
+        echo "=== Step 5: Alternative Connection Methods ==="
+        
+        # wget으로 테스트
+        echo "Testing with wget..."
+        wget --spider --timeout=10 "$JENKINS_URL" 2>&1 || echo "wget also failed"
+        
+        # nc로 포트 테스트
+        if [[ "$JENKINS_URL" =~ ^https://([^/]+) ]]; then
+          host="${BASH_REMATCH[1]}"
+          echo "Testing port 443 connectivity to $host..."
+          timeout 5 bash -c "</dev/tcp/$host/443" 2>/dev/null && echo "Port 443 is open" || echo "Port 443 is closed/filtered"
+        elif [[ "$JENKINS_URL" =~ ^http://([^/]+) ]]; then
+          host="${BASH_REMATCH[1]}"
+          echo "Testing port 80 connectivity to $host..."
+          timeout 5 bash -c "</dev/tcp/$host/80" 2>/dev/null && echo "Port 80 is open" || echo "Port 80 is closed/filtered"
+        fi
