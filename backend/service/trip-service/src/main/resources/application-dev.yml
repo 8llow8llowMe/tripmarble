@@ -31,6 +31,16 @@ eureka:
   client:
     service-url:
       defaultZone: http://${SERVICE_DISCOVERY_HOSTNAME}:${SERVICE_DISCOVERY_PORT}/eureka/
+    # Prefix 매칭 활성화
+    fetch-registry: true
+    registry-fetch-interval-seconds: 5
+
+# Ribbon 설정 (Load Balancer)
+ribbon:
+  eureka:
+    enabled: true
+  # Prefix 매칭 활성화
+  ServerListRefreshInterval: 5000
 
 # Swagger
 swagger:
