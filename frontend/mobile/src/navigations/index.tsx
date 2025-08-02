@@ -1,14 +1,11 @@
 import { NavigationContainer } from '@react-navigation/native';
-import BottomTabNavigator from './BottomTabNavigator';
 import React, { useEffect, useState } from 'react';
 import SplashScreen from '@/screens/Auth/SplashScreen';
 import AuthNavigator from '@/navigations/AuthNavigator';
 import { useAppSelector } from '@/store/store';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { QUERY_KEY } from '@/constants/keys';
 import { useQueryClient } from '@tanstack/react-query';
-
-const RootStack = createNativeStackNavigator();
+import AppNavigator from '@/navigations/AppNavigator';
 
 export default function RootNavigation() {
   const queryClient = useQueryClient();
@@ -34,8 +31,6 @@ export default function RootNavigation() {
   if (isLoading) return <SplashScreen />; // 로딩 중에는 스플래시 보여주기
 
   return (
-    <NavigationContainer>
-      {accessToken ? <BottomTabNavigator /> : <AuthNavigator />}
-    </NavigationContainer>
+    <NavigationContainer>{accessToken ? <AppNavigator /> : <AuthNavigator />}</NavigationContainer>
   );
 }
