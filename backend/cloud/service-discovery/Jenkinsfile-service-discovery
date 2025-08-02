@@ -178,6 +178,8 @@ pipeline {
                         )],
                         verbose: true
                     )]
+                    
+                    // 애플리케이션 파일 전송 및 배포
                     sshPublisher publishers: [sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [sshTransfer(
