@@ -1,4 +1,4 @@
-name: Jenkins Debug
+name: Jenkins Job Test
 
 on:
   pull_request:
@@ -6,136 +6,137 @@ on:
     branches: [develop, main]
 
 jobs:
-  debug-jenkins:
+  test-jenkins-jobs:
     runs-on: ubuntu-latest
     steps:
-    - name: Debug Jenkins Connection
+    - name: Test Jenkins Jobs
       run: |
-        echo "=== Step 1: Environment Check ==="
-        echo "curl version: $(curl --version | head -1)"
-        echo "bash version: $BASH_VERSION"
+        action="${{ github.event.action }}"
+        labels="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
+        branch="${{ github.event.pull_request.base.ref }}"
         
-        echo "=== Step 2: Secrets Validation ==="
         JENKINS_URL="${{ secrets.JENKINS_URL }}"
         JENKINS_USER="${{ secrets.JENKINS_USER }}"
         JENKINS_TOKEN="${{ secrets.JENKINS_TOKEN }}"
         
-        echo "URL length: ${#JENKINS_URL}"
-        echo "User length: ${#JENKINS_USER}"
-        echo "Token length: ${#JENKINS_TOKEN}"
-        
-        if [[ ${#JENKINS_URL} -lt 5 ]]; then
-          echo "❌ JENKINS_URL seems too short"
-          exit 1
-        fi
-        
-        if [[ ${#JENKINS_USER} -lt 1 ]]; then
-          echo "❌ JENKINS_USER seems empty"
-          exit 1
-        fi
-        
-        if [[ ${#JENKINS_TOKEN} -lt 10 ]]; then
-          echo "❌ JENKINS_TOKEN seems too short"
-          exit 1
-        fi
-        
         # URL 정제
         JENKINS_URL="${JENKINS_URL%/}"
-        echo "Cleaned Jenkins URL length: ${#JENKINS_URL}"
         
-        echo "=== Step 3: Basic Connectivity Test ==="
-        echo "Testing basic connectivity..."
+        echo "=== Jenkins Jobs Investigation ==="
+        echo "Target branch: $branch"
+        echo "Labels: $labels"
         
-        # 가장 기본적인 연결 테스트
-        set +e  # 에러 발생해도 스크립트 계속 실행
+        # 1. 모든 Job 목록 가져오기
+        echo "=== Step 1: Getting all Jenkins jobs ==="
+        jobs_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
+          --user "$JENKINS_USER:$JENKINS_TOKEN" \
+          "$JENKINS_URL/api/json?tree=jobs[name,url,_class]")
         
-        echo "Test 1: Simple curl to Jenkins"
-        curl -s -I "$JENKINS_URL" --connect-timeout 10 --max-time 30
-        curl_exit_code=$?
-        echo "Curl exit code: $curl_exit_code"
+        jobs_http_code=$(echo "$jobs_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+        jobs_body=$(echo "$jobs_response" | sed 's/HTTP_CODE:[0-9]*$//')
         
-        if [[ $curl_exit_code -ne 0 ]]; then
-          echo "❌ Basic curl failed with exit code: $curl_exit_code"
+        echo "Jobs API Response Code: $jobs_http_code"
+        
+        if [[ "$jobs_http_code" == "200" ]]; then
+          echo "✅ Successfully retrieved jobs list"
+          echo "Raw response (first 1000 chars):"
+          echo "$jobs_body" | head -c 1000
+          echo ""
           
-          # curl 에러 코드 해석
-          case $curl_exit_code in
-            1) echo "Protocol error" ;;
-            3) echo "URL malformed" ;;
-            6) echo "Couldn't resolve host" ;;
-            7) echo "Failed to connect to host" ;;
-            28) echo "Operation timeout" ;;
-            35) echo "SSL connect error" ;;
-            *) echo "Unknown curl error" ;;
-          esac
-          
-          echo "=== URL Analysis ==="
-          echo "First 50 chars of URL: ${JENKINS_URL:0:50}"
-          
-          # URL 구성 요소 분석
-          if [[ "$JENKINS_URL" =~ ^(https?)://([^/]+)(.*) ]]; then
-            protocol="${BASH_REMATCH[1]}"
-            host="${BASH_REMATCH[2]}"
-            path="${BASH_REMATCH[3]}"
-            
-            echo "Protocol: $protocol"
-            echo "Host: $host"
-            echo "Path: $path"
-            
-            # 호스트 해석 테스트
-            echo "Testing host resolution..."
-            nslookup "$host" || echo "Host resolution failed"
-            
-          else
-            echo "❌ URL doesn't match expected pattern"
-          fi
+          # Job 이름들 추출
+          echo "Available job names:"
+          echo "$jobs_body" | grep -o '"name":"[^"]*"' | sed 's/"name":"//g' | sed 's/"//g' | sort
+          echo ""
         else
-          echo "✅ Basic connectivity successful"
+          echo "❌ Failed to get jobs list (HTTP: $jobs_http_code)"
+          echo "Response: $jobs_body"
         fi
         
-        set -e  # 에러 발생 시 스크립트 종료 다시 활성화
+        # 2. 특정 Job들 개별 확인
+        echo "=== Step 2: Testing specific job access ==="
         
-        echo "=== Step 4: Authentication Test ==="
-        if [[ $curl_exit_code -eq 0 ]]; then
-          echo "Testing authentication..."
+        # 가능한 Job 이름들 테스트
+        possible_jobs=(
+          "auth-service"
+          "trip-service" 
+          "trip-game-service"
+          "api-gateway"
+          "service-discovery"
+          "tripmarble-backend-auth-service"
+          "tripmarble-backend-trip-service"
+          "tripmarble-backend-trip-game-service"
+          "tripmarble-backend-api-gateway"
+        )
+        
+        for job_name in "${possible_jobs[@]}"; do
+          echo "Testing job: $job_name"
           
-          auth_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
-            --connect-timeout 10 --max-time 30 \
+          # Job 존재 확인
+          job_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
             --user "$JENKINS_USER:$JENKINS_TOKEN" \
-            "$JENKINS_URL/me/api/json" || echo "CURL_FAILED")
+            "$JENKINS_URL/job/$job_name/api/json")
           
-          if [[ "$auth_response" == "CURL_FAILED" ]]; then
-            echo "❌ Auth curl command failed"
-          else
-            auth_http_code=$(echo "$auth_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-            auth_body=$(echo "$auth_response" | sed 's/HTTP_CODE:[0-9]*$//')
+          job_http_code=$(echo "$job_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+          
+          if [[ "$job_http_code" == "200" ]]; then
+            echo "  ✅ Job '$job_name' exists"
             
-            echo "Auth HTTP Code: $auth_http_code"
-            
-            if [[ "$auth_http_code" == "200" ]]; then
-              echo "✅ Authentication successful!"
-              echo "Response preview: $(echo "$auth_body" | head -c 100)"
+            # 멀티브랜치인지 확인
+            job_body=$(echo "$job_response" | sed 's/HTTP_CODE:[0-9]*$//')
+            if echo "$job_body" | grep -q "MultiBranchProject\|WorkflowMultiBranchProject"; then
+              echo "  📁 This is a MultiBranch Pipeline"
+              
+              # 브랜치 확인
+              branches_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
+                --user "$JENKINS_USER:$JENKINS_TOKEN" \
+                "$JENKINS_URL/job/$job_name/api/json?tree=jobs[name]")
+              
+              branches_code=$(echo "$branches_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+              
+              if [[ "$branches_code" == "200" ]]; then
+                branches_body=$(echo "$branches_response" | sed 's/HTTP_CODE:[0-9]*$//')
+                echo "  Available branches:"
+                echo "$branches_body" | grep -o '"name":"[^"]*"' | sed 's/"name":"//g' | sed 's/"//g' | sed 's/^/    /'
+                
+                # develop 브랜치 존재 확인
+                if echo "$branches_body" | grep -q '"name":"develop"'; then
+                  echo "  ✅ 'develop' branch found!"
+                  
+                  # 실제 빌드 트리거 테스트
+                  echo "  Testing build trigger..."
+                  build_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
+                    --user "$JENKINS_USER:$JENKINS_TOKEN" \
+                    "$JENKINS_URL/job/$job_name/job/develop/buildWithParameters" \
+                    --data-urlencode "SERVICE_GROUP=service" \
+                    --data-urlencode "SERVICE_NAME=$job_name" \
+                    --data-urlencode "SKIP_LABEL_CHECK=true")
+                  
+                  build_code=$(echo "$build_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+                  build_body=$(echo "$build_response" | sed 's/HTTP_CODE:[0-9]*$//')
+                  
+                  echo "  Build trigger result: HTTP $build_code"
+                  
+                  if [[ "$build_code" == "201" || "$build_code" == "200" ]]; then
+                    echo "  🎉 BUILD TRIGGERED SUCCESSFULLY!"
+                  else
+                    echo "  ❌ Build trigger failed"
+                    echo "  Response: $(echo "$build_body" | head -c 200)"
+                  fi
+                else
+                  echo "  ❌ 'develop' branch not found"
+                fi
+              fi
             else
-              echo "❌ Authentication failed (HTTP: $auth_http_code)"
-              echo "Error response: $(echo "$auth_body" | head -c 200)"
+              echo "  📄 This is a regular Job (not MultiBranch)"
             fi
+            
+          elif [[ "$job_http_code" == "404" ]]; then
+            echo "  ❌ Job '$job_name' not found"
+          else
+            echo "  ❌ Job '$job_name' access failed (HTTP: $job_http_code)"
           fi
-        else
-          echo "Skipping auth test due to connectivity issues"
-        fi
+          
+          echo ""
+        done
         
-        echo "=== Step 5: Alternative Connection Methods ==="
-        
-        # wget으로 테스트
-        echo "Testing with wget..."
-        wget --spider --timeout=10 "$JENKINS_URL" 2>&1 || echo "wget also failed"
-        
-        # nc로 포트 테스트
-        if [[ "$JENKINS_URL" =~ ^https://([^/]+) ]]; then
-          host="${BASH_REMATCH[1]}"
-          echo "Testing port 443 connectivity to $host..."
-          timeout 5 bash -c "</dev/tcp/$host/443" 2>/dev/null && echo "Port 443 is open" || echo "Port 443 is closed/filtered"
-        elif [[ "$JENKINS_URL" =~ ^http://([^/]+) ]]; then
-          host="${BASH_REMATCH[1]}"
-          echo "Testing port 80 connectivity to $host..."
-          timeout 5 bash -c "</dev/tcp/$host/80" 2>/dev/null && echo "Port 80 is open" || echo "Port 80 is closed/filtered"
-        fi
+        echo "=== Testing Complete ==="
