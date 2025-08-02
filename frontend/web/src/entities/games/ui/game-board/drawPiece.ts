@@ -7,7 +7,7 @@ export function drawPiece(
 ) {
   ctx.save();
   ctx.beginPath();
-  ctx.arc(x, y - 18, cellSize * 0.22, 0, 2 * Math.PI); // y-18로 약간 위에
+  ctx.arc(x, y - 18, cellSize * 0.1, 0, 2 * Math.PI); // y-18로 약간 위에
   ctx.fillStyle = "#36bffa";
   ctx.shadowColor = "#1199ff";
   ctx.shadowBlur = 12;
@@ -20,7 +20,7 @@ export function drawPiece(
   // 말 머리 장식 (예시, 하얀 점)
   ctx.save();
   ctx.beginPath();
-  ctx.arc(x, y - 22, cellSize * 0.07, 0, 2 * Math.PI);
+  ctx.arc(x, y - 22, cellSize * 0.02, 0, 2 * Math.PI);
   ctx.fillStyle = "#fff";
   ctx.fill();
   ctx.restore();
