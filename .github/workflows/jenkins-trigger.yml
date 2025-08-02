@@ -1,4 +1,4 @@
-name: Jenkins Trigger
+name: Jenkins Auth Test
 
 on:
   pull_request:
@@ -6,185 +6,80 @@ on:
     branches: [develop, main]
 
 jobs:
-  trigger-jenkins:
+  test-jenkins-auth:
     runs-on: ubuntu-latest
     steps:
-    - name: Check and trigger Jenkins
+    - name: Test Jenkins Authentication
       run: |
-        action="${{ github.event.action }}"
-        labels="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
-        branch="${{ github.event.pull_request.base.ref }}"
+        echo "=== Jenkins Authentication Test ==="
         
-        # 트리거 조건 체크
-        should_trigger=false
+        # Secrets 존재 여부 확인
+        echo "JENKINS_URL exists: $([[ -n '${{ secrets.JENKINS_URL }}' ]] && echo 'YES' || echo 'NO')"
+        echo "JENKINS_USER exists: $([[ -n '${{ secrets.JENKINS_USER }}' ]] && echo 'YES' || echo 'NO')"
+        echo "JENKINS_TOKEN exists: $([[ -n '${{ secrets.JENKINS_TOKEN }}' ]] && echo 'YES' || echo 'NO')"
         
-        if [[ "$action" == "labeled" || "$action" == "unlabeled" ]]; then
-          should_trigger=true
-          echo "Trigger: Label changed"
-        elif [[ "$action" == "synchronize" && ("$labels" == *"backend-"* || "$labels" == *"frontend-"*) ]]; then
-          # 최근 1시간 이내 push만 허용
-          commit_time=$(date -d "${{ github.event.pull_request.head.repo.pushed_at }}" +%s)
-          current_time=$(date -u +%s)
-          if [[ $((current_time - commit_time)) -lt 3600 ]]; then
-            should_trigger=true
-            echo "Trigger: Recent push with service labels"
-          else
-            echo "Skip: Old push"
-          fi
+        if [[ -z '${{ secrets.JENKINS_USER }}' ]]; then
+          echo "❌ JENKINS_USER secret is missing!"
+          echo "Please add JENKINS_USER to GitHub Secrets"
+          exit 1
+        fi
+        
+        if [[ -z '${{ secrets.JENKINS_TOKEN }}' ]]; then
+          echo "❌ JENKINS_TOKEN secret is missing!"
+          exit 1
+        fi
+        
+        # 1. Jenkins 서버 기본 연결 테스트
+        echo "=== Testing Jenkins Server Connection ==="
+        server_response=$(curl -s -w "HTTP:%{http_code}" -I "$JENKINS_URL")
+        echo "Server response: $server_response"
+        
+        # 2. 인증 테스트 (whoAmI API)
+        echo "=== Testing Authentication ==="
+        auth_response=$(curl -s -w "HTTP:%{http_code}" \
+          --user "$JENKINS_USER:$JENKINS_TOKEN" \
+          "$JENKINS_URL/me/api/json")
+        
+        auth_http_code=$(echo "$auth_response" | grep -o 'HTTP:[0-9]*' | cut -d: -f2)
+        auth_body=$(echo "$auth_response" | sed 's/HTTP:[0-9]*$//')
+        
+        echo "Auth API Response (HTTP $auth_http_code):"
+        if [[ "$auth_http_code" == "200" ]]; then
+          echo "✅ Authentication successful!"
+          echo "User info: $(echo "$auth_body" | head -c 200)"
         else
-          echo "Skip: No service labels or unsupported action"
+          echo "❌ Authentication failed!"
+          echo "Response: $(echo "$auth_body" | head -c 300)"
         fi
         
-        # Jenkins 트리거
-        if [[ "$should_trigger" == "true" ]]; then
-          echo "Labels: $labels | Branch: $branch"
-          
-          # Jenkins Job 목록 확인 (디버깅용)
-          echo "=== Checking available Jenkins jobs ==="
-          
-          # Secrets 검증
-          if [[ -z "${{ secrets.JENKINS_URL }}" ]]; then
-            echo "ERROR: JENKINS_URL is not set"
-            exit 1
-          fi
-          
-          if [[ -z "${{ secrets.JENKINS_USER }}" ]]; then
-            echo "ERROR: JENKINS_USER is not set"
-            exit 1
-          fi
-          
-          if [[ -z "${{ secrets.JENKINS_TOKEN }}" ]]; then
-            echo "ERROR: JENKINS_TOKEN is not set"
-            exit 1
-          fi
-          
-          echo "Jenkins URL: ${{ secrets.JENKINS_URL }}"
-          echo "Jenkins User: ${{ secrets.JENKINS_USER }}"
-          echo "Jenkins Token: [HIDDEN]"
-          
-          # URL 형식 검증
-          if [[ ! "${{ secrets.JENKINS_URL }}" =~ ^https?:// ]]; then
-            echo "ERROR: JENKINS_URL must start with http:// or https://"
-            exit 1
-          fi
-          
-          # URL 끝에 슬래시 제거
-          JENKINS_URL="${JENKINS_URL%/}"
-          
-          jobs_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
-            --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-            "$JENKINS_URL/api/json?tree=jobs[name,url]")
-          
-          jobs_http_code=$(echo "$jobs_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-          jobs_body=$(echo "$jobs_response" | sed 's/HTTP_CODE:[0-9]*$//')
-          
-          echo "Jobs API Response Code: $jobs_http_code"
-          echo "Jobs API Response Body (first 500 chars):"
-          echo "$jobs_body" | head -c 500
-          echo ""
-          
-          if [[ "$jobs_http_code" == "200" ]]; then
-            echo "Available jobs:"
-            echo "$jobs_body" | grep -o '"name":"[^"]*"' | sed 's/"name":"//g' | sed 's/"//g'
-          else
-            echo "Failed to get jobs list (HTTP: $jobs_http_code)"
-            echo "Full response:"
-            echo "$jobs_body"
-          fi
-          echo ""
-          
-          # Basic Auth를 사용한 안전한 트리거 방법
-          trigger_service() {
-            local service_name="$1"
-            local service_group="$2"
-            
-            echo "=== Triggering $service_name ==="
-            
-            # Jenkins 연결 테스트
-            echo "Testing Jenkins connectivity for $service_name..."
-            
-                         # 방법 1: 멀티브랜치 파이프라인 구조 시도
-             connection_test=$(curl -s -w "HTTP:%{http_code}" -I \
-               --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-               "$JENKINS_URL/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/")
-            
-            echo "Connection test (method 1): $connection_test"
-            
-            # 방법 2: 단일 Job 구조 시도 (404인 경우)
-            if [[ "$connection_test" == *"HTTP:404"* ]]; then
-              echo "Trying alternative URL structure..."
-                             connection_test2=$(curl -s -w "HTTP:%{http_code}" -I \
-                 --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-                 "$JENKINS_URL/job/$(echo "$service_name" | sed 's/ /%20/g')/")
-              
-              echo "Connection test (method 2): $connection_test2"
-              
-              # 방법 3: 간단한 이름으로 시도
-              if [[ "$connection_test2" == *"HTTP:404"* ]]; then
-                simple_name=$(echo "$service_name" | sed 's/ multi branch pipeline//g')
-                echo "Trying simple name: $simple_name"
-                                 connection_test3=$(curl -s -w "HTTP:%{http_code}" -I \
-                   --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-                   "$JENKINS_URL/job/$(echo "$simple_name" | sed 's/ /%20/g')/")
-                
-                echo "Connection test (method 3): $connection_test3"
-              fi
-            fi
-            
-            # Basic Auth로 Jenkins 빌드 트리거 (URL 인코딩 방식)
-            echo "Triggering build with parameters..."
-                         response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
-               --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-               "$JENKINS_URL/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/buildWithParameters" \
-              --data-urlencode "SERVICE_GROUP=$service_group" \
-              --data-urlencode "SERVICE_NAME=$service_name" \
-              --data-urlencode "SKIP_LABEL_CHECK=true")
-            
-            http_code=$(echo "$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-            body=$(echo "$response" | sed 's/HTTP_CODE:[0-9]*$//')
-            
-            if [[ "$http_code" == "201" || "$http_code" == "200" ]]; then
-              echo "$service_name triggered successfully (HTTP: $http_code)"
-            else
-              echo "$service_name failed (HTTP: $http_code)"
-              echo "Response preview: $(echo "$body" | head -c 200)..."
-              
-              # 대안: 파라미터 없이 빌드 시도
-              echo "Trying build without parameters..."
-                             fallback_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
-                 --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-                 "$JENKINS_URL/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/build")
-              
-              fallback_code=$(echo "$fallback_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-              
-              if [[ "$fallback_code" == "201" || "$fallback_code" == "200" ]]; then
-                echo "$service_name triggered without parameters (HTTP: $fallback_code)"
-              else
-                echo "$service_name fallback also failed (HTTP: $fallback_code)"
-              fi
-            fi
-            
-            echo ""
-          }
-          
-          # 서비스별 트리거 (라벨 기반 선택적 실행)
-          [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "tripmarble-backend-auth-service multi branch pipeline" "service"
-          [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "tripmarble-backend-trip-service multi branch pipeline" "service"
-          [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "tripmarble-backend-trip-game-service multi branch pipeline" "service"
-          [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "tripmarble-backend-api-gateway multi branch pipeline" "cloud"
-          [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "tripmarble-backend-service-discovery multi branch pipeline" "cloud"
-          [[ "$labels" == *"frontend-web"* ]] && trigger_service "frontend-web" "web"
-          [[ "$labels" == *"frontend-mobile"* ]] && trigger_service "frontend-mobile" "mobile"
-          
-          echo "Jenkins trigger completed!"
-          
-          # 대안: 간단한 Job 확인
-          echo "=== Alternative: Simple job check ==="
-          for job_name in "tripmarble-backend-auth-service multi branch pipeline" "tripmarble-backend-trip-service multi branch pipeline" "tripmarble-backend-trip-game-service multi branch pipeline" "tripmarble-backend-api-gateway multi branch pipeline" "tripmarble-backend-service-discovery multi branch pipeline"; do
-            echo "Checking job: $job_name"
-                         simple_check=$(curl -s -w "HTTP:%{http_code}" -I \
-               --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-               "$JENKINS_URL/job/$(echo "$job_name" | sed 's/ /%20/g')/")
-            echo "  Result: $simple_check"
-          done
+        # 3. Job 존재 확인
+        echo "=== Testing Job Access ==="
+        job_response=$(curl -s -w "HTTP:%{http_code}" \
+          --user "$JENKINS_USER:$JENKINS_TOKEN" \
+          "$JENKINS_URL/job/auth-service/api/json")
+        
+        job_http_code=$(echo "$job_response" | grep -o 'HTTP:[0-9]*' | cut -d: -f2)
+        
+        if [[ "$job_http_code" == "200" ]]; then
+          echo "✅ Job access successful!"
+        else
+          echo "❌ Job access failed (HTTP: $job_http_code)"
         fi
+        
+        # 4. 다른 인증 방법들 테스트
+        echo "=== Testing Alternative Auth Methods ==="
+        
+        # Bearer Token 방식
+        echo "Testing Bearer token..."
+        bearer_response=$(curl -s -w "HTTP:%{http_code}" \
+          -H "Authorization: Bearer $JENKINS_TOKEN" \
+          "$JENKINS_URL/me/api/json")
+        bearer_code=$(echo "$bearer_response" | grep -o 'HTTP:[0-9]*' | cut -d: -f2)
+        echo "Bearer auth result: HTTP $bearer_code"
+        
+        # API Key 방식
+        echo "Testing API key in URL..."
+        apikey_response=$(curl -s -w "HTTP:%{http_code}" \
+          "$JENKINS_URL/me/api/json?token=$JENKINS_TOKEN")
+        apikey_code=$(echo "$apikey_response" | grep -o 'HTTP:[0-9]*' | cut -d: -f2)
+        echo "API key auth result: HTTP $apikey_code"
