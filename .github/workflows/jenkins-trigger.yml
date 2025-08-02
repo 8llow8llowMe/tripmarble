@@ -1,4 +1,4 @@
-name: Jenkins Job Test
+name: Jenkins Safe Test
 
 on:
   pull_request:
@@ -6,10 +6,10 @@ on:
     branches: [develop, main]
 
 jobs:
-  test-jenkins-jobs:
+  safe-jenkins-test:
     runs-on: ubuntu-latest
     steps:
-    - name: Test Jenkins Jobs
+    - name: Safe Jenkins Test
       run: |
         action="${{ github.event.action }}"
         labels="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
@@ -22,121 +22,145 @@ jobs:
         # URL 정제
         JENKINS_URL="${JENKINS_URL%/}"
         
-        echo "=== Jenkins Jobs Investigation ==="
+        echo "=== Safe Jenkins API Test ==="
         echo "Target branch: $branch"
         echo "Labels: $labels"
         
-        # 1. 모든 Job 목록 가져오기
-        echo "=== Step 1: Getting all Jenkins jobs ==="
-        jobs_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
+        # exit 발생 시에도 스크립트 계속 실행
+        set +e
+        
+        # 1. 기본 API 엔드포인트 테스트
+        echo "=== Step 1: Basic API Test ==="
+        
+        echo "Testing /api/json endpoint..."
+        basic_api=$(curl -s --connect-timeout 10 --max-time 30 \
           --user "$JENKINS_USER:$JENKINS_TOKEN" \
-          "$JENKINS_URL/api/json?tree=jobs[name,url,_class]")
+          "$JENKINS_URL/api/json")
         
-        jobs_http_code=$(echo "$jobs_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-        jobs_body=$(echo "$jobs_response" | sed 's/HTTP_CODE:[0-9]*$//')
+        curl_exit=$?
+        echo "Curl exit code: $curl_exit"
         
-        echo "Jobs API Response Code: $jobs_http_code"
-        
-        if [[ "$jobs_http_code" == "200" ]]; then
-          echo "✅ Successfully retrieved jobs list"
-          echo "Raw response (first 1000 chars):"
-          echo "$jobs_body" | head -c 1000
-          echo ""
+        if [[ $curl_exit -eq 0 ]]; then
+          echo "✅ API call successful"
+          echo "Response length: ${#basic_api}"
+          echo "Response preview (first 200 chars): ${basic_api:0:200}"
           
-          # Job 이름들 추출
-          echo "Available job names:"
-          echo "$jobs_body" | grep -o '"name":"[^"]*"' | sed 's/"name":"//g' | sed 's/"//g' | sort
-          echo ""
+          # JSON 파싱 시도 (jq 없이)
+          if echo "$basic_api" | grep -q '"jobs"'; then
+            echo "✅ Valid JSON response detected"
+            
+            # jobs 섹션 추출
+            echo "=== Available Jobs ==="
+            echo "$basic_api" | grep -o '"name":"[^"]*"' | sed 's/"name":"//g' | sed 's/"//g' | head -20
+          else
+            echo "❌ Invalid JSON or no jobs found"
+          fi
         else
-          echo "❌ Failed to get jobs list (HTTP: $jobs_http_code)"
-          echo "Response: $jobs_body"
+          echo "❌ API call failed with exit code: $curl_exit"
         fi
         
-        # 2. 특정 Job들 개별 확인
-        echo "=== Step 2: Testing specific job access ==="
+        # 2. 간단한 Job 이름들로 직접 테스트
+        echo "=== Step 2: Direct Job Testing ==="
         
-        # 가능한 Job 이름들 테스트
-        possible_jobs=(
-          "auth-service"
-          "trip-service" 
-          "trip-game-service"
-          "api-gateway"
-          "service-discovery"
-          "tripmarble-backend-auth-service"
-          "tripmarble-backend-trip-service"
-          "tripmarble-backend-trip-game-service"
-          "tripmarble-backend-api-gateway"
-        )
+        # 일반적인 Job 이름들 테스트
+        test_jobs=("auth-service" "trip-service" "api-gateway")
         
-        for job_name in "${possible_jobs[@]}"; do
-          echo "Testing job: $job_name"
+        for job in "${test_jobs[@]}"; do
+          echo "Testing job: $job"
           
-          # Job 존재 확인
-          job_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
+          # Job API 호출
+          job_api=$(curl -s --connect-timeout 10 --max-time 30 \
             --user "$JENKINS_USER:$JENKINS_TOKEN" \
-            "$JENKINS_URL/job/$job_name/api/json")
+            "$JENKINS_URL/job/$job/api/json")
           
-          job_http_code=$(echo "$job_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+          job_exit=$?
           
-          if [[ "$job_http_code" == "200" ]]; then
-            echo "  ✅ Job '$job_name' exists"
-            
-            # 멀티브랜치인지 확인
-            job_body=$(echo "$job_response" | sed 's/HTTP_CODE:[0-9]*$//')
-            if echo "$job_body" | grep -q "MultiBranchProject\|WorkflowMultiBranchProject"; then
-              echo "  📁 This is a MultiBranch Pipeline"
+          if [[ $job_exit -eq 0 ]]; then
+            if echo "$job_api" | grep -q '"_class"'; then
+              echo "  ✅ Job '$job' exists and accessible"
               
-              # 브랜치 확인
-              branches_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
-                --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                "$JENKINS_URL/job/$job_name/api/json?tree=jobs[name]")
-              
-              branches_code=$(echo "$branches_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-              
-              if [[ "$branches_code" == "200" ]]; then
-                branches_body=$(echo "$branches_response" | sed 's/HTTP_CODE:[0-9]*$//')
-                echo "  Available branches:"
-                echo "$branches_body" | grep -o '"name":"[^"]*"' | sed 's/"name":"//g' | sed 's/"//g' | sed 's/^/    /'
+              # 멀티브랜치인지 확인
+              if echo "$job_api" | grep -q "MultiBranch"; then
+                echo "  📁 MultiBranch Pipeline detected"
                 
-                # develop 브랜치 존재 확인
-                if echo "$branches_body" | grep -q '"name":"develop"'; then
+                # 브랜치 목록 확인
+                echo "  Checking branches..."
+                branches_api=$(curl -s --connect-timeout 10 --max-time 30 \
+                  --user "$JENKINS_USER:$JENKINS_TOKEN" \
+                  "$JENKINS_URL/job/$job/api/json")
+                
+                if echo "$branches_api" | grep -q '"name":"develop"'; then
                   echo "  ✅ 'develop' branch found!"
                   
                   # 실제 빌드 트리거 테스트
-                  echo "  Testing build trigger..."
-                  build_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
+                  echo "  🚀 Testing build trigger..."
+                  
+                  build_result=$(curl -s -w "HTTP_CODE:%{http_code}" \
+                    --connect-timeout 10 --max-time 30 -X POST \
                     --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                    "$JENKINS_URL/job/$job_name/job/develop/buildWithParameters" \
-                    --data-urlencode "SERVICE_GROUP=service" \
-                    --data-urlencode "SERVICE_NAME=$job_name" \
-                    --data-urlencode "SKIP_LABEL_CHECK=true")
+                    "$JENKINS_URL/job/$job/job/develop/buildWithParameters" \
+                    --data "SERVICE_GROUP=service&SERVICE_NAME=$job&SKIP_LABEL_CHECK=true")
                   
-                  build_code=$(echo "$build_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-                  build_body=$(echo "$build_response" | sed 's/HTTP_CODE:[0-9]*$//')
-                  
-                  echo "  Build trigger result: HTTP $build_code"
+                  build_code=$(echo "$build_result" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
                   
                   if [[ "$build_code" == "201" || "$build_code" == "200" ]]; then
-                    echo "  🎉 BUILD TRIGGERED SUCCESSFULLY!"
+                    echo "  🎉 BUILD TRIGGERED SUCCESSFULLY! (HTTP: $build_code)"
                   else
-                    echo "  ❌ Build trigger failed"
-                    echo "  Response: $(echo "$build_body" | head -c 200)"
+                    echo "  ❌ Build trigger failed (HTTP: $build_code)"
+                    echo "  Response: $(echo "$build_result" | sed 's/HTTP_CODE:[0-9]*$//' | head -c 200)"
                   fi
                 else
                   echo "  ❌ 'develop' branch not found"
                 fi
+              else
+                echo "  📄 Regular job (not MultiBranch)"
               fi
             else
-              echo "  📄 This is a regular Job (not MultiBranch)"
+              echo "  ❌ Invalid response from job '$job'"
             fi
-            
-          elif [[ "$job_http_code" == "404" ]]; then
-            echo "  ❌ Job '$job_name' not found"
           else
-            echo "  ❌ Job '$job_name' access failed (HTTP: $job_http_code)"
+            echo "  ❌ Failed to access job '$job' (curl exit: $job_exit)"
           fi
           
           echo ""
         done
         
-        echo "=== Testing Complete ==="
+        # 3. 실제 라벨 기반 트리거 (성공한 Job이 있다면)
+        echo "=== Step 3: Label-based triggering ==="
+        
+        # 간단한 트리거 함수
+        trigger_simple() {
+          local job_name="$1"
+          echo "Attempting to trigger: $job_name"
+          
+          trigger_result=$(curl -s -w "HTTP_CODE:%{http_code}" \
+            --connect-timeout 10 --max-time 30 -X POST \
+            --user "$JENKINS_USER:$JENKINS_TOKEN" \
+            "$JENKINS_URL/job/$job_name/job/$branch/buildWithParameters" \
+            --data "SERVICE_GROUP=service&SERVICE_NAME=$job_name&SKIP_LABEL_CHECK=true")
+          
+          trigger_code=$(echo "$trigger_result" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+          
+          if [[ "$trigger_code" == "201" || "$trigger_code" == "200" ]]; then
+            echo "✅ $job_name triggered successfully!"
+          else
+            echo "❌ $job_name failed (HTTP: $trigger_code)"
+          fi
+        }
+        
+        # 라벨 확인하고 트리거
+        if [[ "$labels" == *"backend-auth-service"* ]]; then
+          trigger_simple "auth-service"
+        fi
+        
+        if [[ "$labels" == *"backend-trip-service"* ]]; then
+          trigger_simple "trip-service"
+        fi
+        
+        if [[ "$labels" == *"backend-api-gateway"* ]]; then
+          trigger_simple "api-gateway"
+        fi
+        
+        echo "=== Test Complete ==="
+        
+        set -e  # 에러 시 종료 다시 활성화
