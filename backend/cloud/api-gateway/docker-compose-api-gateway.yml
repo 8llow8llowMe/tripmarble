@@ -18,8 +18,8 @@ services:
     networks:
       - 8llow8llowme-net
 
-  trip-service-prod:
-    container_name: trip-service-prod
+  api-gateway-prod:
+    container_name: api-gateway-prod
     build:
       context: .
       dockerfile: api-gateway.Dockerfile
