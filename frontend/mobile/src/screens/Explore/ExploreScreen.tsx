@@ -12,11 +12,14 @@ import {
   Dimensions,
 } from 'react-native';
 import jejuImage from '@images/place/jeju.png';
+import { useNavigation } from '@react-navigation/native';
 
 const bgHeight = Dimensions.get('window').height * 0.5;
 const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 가능)
 
 export default function ExploreScreen() {
+  const navigation = useNavigation();
+
   const popularPlaces = ['부산', '제주도', '강릉', '경주'];
 
   return (
@@ -28,8 +31,15 @@ export default function ExploreScreen() {
           <View style={styles.overlay} />
         </View>
 
+        {/* 실제로는 TextInput 대신 TouchableOpacity로 가짜 인풋 */}
         <View style={[styles.searchBoxWrapper, { top: bgHeight - searchBoxHeight / 2 }]}>
-          <TextInput placeholder="🔍 여행지 검색" style={styles.searchBox} />
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('SearchScreen')}
+            style={styles.searchBox}
+          >
+            <Text style={{ color: '#888', fontSize: 17 }}>🔍 여행지 검색</Text>
+          </TouchableOpacity>
         </View>
 
         <Text style={[styles.sectionTitle, { marginTop: searchBoxHeight / 2 + 24 }]}>
