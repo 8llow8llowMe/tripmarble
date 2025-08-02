@@ -1,36 +1,41 @@
 server:
   port: ${API_GATEWAY_PORT}
+  shutdown: graceful
 
 spring:
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       routes:
         # Swagger 문서용 라우트
         - id: auth-service-docs
-          uri: lb://AUTH-SERVICE-DEV
+          uri: lb://auth-service
           predicates:
             - Path=/auth-service/** # /auth-service/v3/api-docs 로 들어오면
           filters:
-            - StripPrefix=1  # /v3/api-docs 로 잘라서 전달
+            - StripPrefix=1 # /v3/api-docs 로 잘라서 전달
         - id: trip-service-docs
-          uri: lb://TRIP-SERVICE-DEV
+          uri: lb://trip-service
           predicates:
             - Path=/trip-service/**
           filters:
             - StripPrefix=1
         - id: trip-game-service-docs
-          uri: lb://TRIP-GAME-SERVICE-DEV
+          uri: lb://trip-game-service
           predicates:
             - Path=/trip-game-service/**
           filters:
             - StripPrefix=1
-          # 기존 API 라우트
+        # 기존 API 라우트
         - id: trip-service
-          uri: lb://TRIP-SERVICE-DEV
+          uri: lb://trip-service
           predicates:
-            - Path=/api/v1/regions/**, /api/v1/trip-spots/**, /api/v1/trip-content-types
+            - Path=/api/v1/regions/**, /api/v1/trip-spots/**, /api/v1/trip-content-types/**
         - id: trip-game-service
-          uri: lb://TRIP-GAME-SERVICE-DEV
+          uri: lb://trip-game-service
           predicates:
             - Path=/api/v1/trip-themes/**, /api/v1/trip-games/**
 
@@ -41,6 +46,9 @@ eureka:
   client:
     service-url:
       defaultZone: http://${SERVICE_DISCOVERY_HOSTNAME}:${SERVICE_DISCOVERY_PORT}/eureka/
+    # Prefix 매칭 활성화
+    fetch-registry: true
+    registry-fetch-interval-seconds: 5
 
 jwt:
   access-key: ${JWT_ACCESS_KEY}

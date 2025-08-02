@@ -35,13 +35,6 @@ eureka:
     fetch-registry: true
     registry-fetch-interval-seconds: 5
 
-# Ribbon 설정 (Load Balancer)
-ribbon:
-  eureka:
-    enabled: true
-  # Prefix 매칭 활성화
-  ServerListRefreshInterval: 5000
-
 # Swagger
 swagger:
   server-url: http://${TRIP_MARBLE_DOMAIN}:${API_GATEWAY_PORT}/trip-service
