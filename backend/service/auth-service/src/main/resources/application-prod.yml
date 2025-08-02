@@ -67,3 +67,15 @@ mail:
   password: ${MAIL_PASSWORD}
   smtp-auth: ${MAIL_SMTP_AUTH}
   starttls-enable: ${MAIL_STARTTLS_ENABLE}
+
+# OAUTH 2.0
+oauth:
+  kakao:
+    client-id: ${OAUTH_KAKAO_CLIENT_ID} # Rest API 키
+    client-secret: ${OAUTH_KAKAO_CLIENT_SECRET}
+    redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI}
+    scope:
+      - profile_nickname
+      - profile_image
+      - account_email
+      - name
