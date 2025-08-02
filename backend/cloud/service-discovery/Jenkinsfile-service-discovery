@@ -154,12 +154,21 @@ pipeline {
         stage('Deploy to Prod') {
             when {
                 anyOf {
+                    // PR을 main에 머지하는 경우
                     expression { env.CHANGE_TARGET == 'main' }
+                    // main 브랜치에서 직접 빌드하는 경우
                     expression { env.BRANCH_NAME == 'main' }
+                    // GitHub Action에서 전달받은 타겟 브랜치가 main인 경우
+                    expression { params.TARGET_BRANCH == 'main' }
+                    // 배포 환경 파라미터가 prod인 경우
+                    expression { params.DEPLOY_ENV == 'prod' }
                 }
             }
             steps {
                 script {
+                    echo "Deploying ${params.SERVICE_NAME} to Production environment"
+                    
+                    // 환경 파일 전송
                     sshPublisher publishers: [sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [sshTransfer(
