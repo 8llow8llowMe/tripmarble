@@ -21,6 +21,18 @@ pipeline {
             defaultValue: 'backend-trip-game-service',
             description: '이 서비스 전용 PR 라벨'
         )
+        // GitHub Action에서 전달받는 타겟 브랜치
+        string(
+            name: 'TARGET_BRANCH',
+            defaultValue: '',
+            description: 'PR의 타겟 브랜치 (GitHub Action에서 전달)'
+        )
+        // 배포 환경
+        string(
+            name: 'DEPLOY_ENV',
+            defaultValue: 'dev',
+            description: '배포 환경 (dev/prod)'
+        )
     }
 
     // 공통 환경 변수
@@ -39,6 +51,21 @@ pipeline {
     }
 
     stages {
+
+        stage('Environment Info') {
+            steps {
+                script {
+                    echo "=== Build Environment Information ==="
+                    echo "BRANCH_NAME: ${env.BRANCH_NAME}"
+                    echo "CHANGE_TARGET: ${env.CHANGE_TARGET}"
+                    echo "CHANGE_ID: ${env.CHANGE_ID}"
+                    echo "TARGET_BRANCH param: ${params.TARGET_BRANCH}"
+                    echo "DEPLOY_ENV param: ${params.DEPLOY_ENV}"
+                    echo "SERVICE_NAME: ${params.SERVICE_NAME}"
+                    echo "=================================="
+                }
+            }
+        }
 
         stage('Init & Submodule Update') {
             steps {
@@ -72,12 +99,21 @@ pipeline {
         stage('Deploy to Dev') {
             when {
                 anyOf {
+                    // PR을 develop에 머지하는 경우
                     expression { env.CHANGE_TARGET == 'develop' }
+                    // develop 브랜치에서 직접 빌드하는 경우
                     expression { env.BRANCH_NAME == 'develop' }
+                    // GitHub Action에서 전달받은 타겟 브랜치가 develop인 경우
+                    expression { params.TARGET_BRANCH == 'develop' }
+                    // 배포 환경 파라미터가 dev인 경우
+                    expression { params.DEPLOY_ENV == 'dev' }
                 }
             }
             steps {
                 script {
+                    echo "Deploying ${params.SERVICE_NAME} to Development environment"
+                    
+                    // 환경 파일 전송
                     sshPublisher publishers: [sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [sshTransfer(
@@ -87,6 +123,8 @@ pipeline {
                         )],
                         verbose: true
                     )]
+                    
+                    // 애플리케이션 파일 전송 및 배포
                     sshPublisher publishers: [sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [sshTransfer(
@@ -116,12 +154,21 @@ pipeline {
         stage('Deploy to Prod') {
             when {
                 anyOf {
+                    // PR을 main에 머지하는 경우
                     expression { env.CHANGE_TARGET == 'main' }
+                    // main 브랜치에서 직접 빌드하는 경우
                     expression { env.BRANCH_NAME == 'main' }
+                    // GitHub Action에서 전달받은 타겟 브랜치가 main인 경우
+                    expression { params.TARGET_BRANCH == 'main' }
+                    // 배포 환경 파라미터가 prod인 경우
+                    expression { params.DEPLOY_ENV == 'prod' }
                 }
             }
             steps {
                 script {
+                    echo "Deploying ${params.SERVICE_NAME} to Production environment"
+                    
+                    // 환경 파일 전송
                     sshPublisher publishers: [sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [sshTransfer(
@@ -131,6 +178,8 @@ pipeline {
                         )],
                         verbose: true
                     )]
+                    
+                    // 애플리케이션 파일 전송 및 배포
                     sshPublisher publishers: [sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [sshTransfer(
