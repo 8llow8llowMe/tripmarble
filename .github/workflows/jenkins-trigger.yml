@@ -15,7 +15,6 @@ jobs:
         labels="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
         target_branch="${{ github.event.pull_request.base.ref }}"
         pr_branch="${{ github.event.pull_request.head.ref }}"
-        pr_number="${{ github.event.pull_request.number }}"
         
         # 트리거 조건 체크
         should_trigger=false
@@ -46,72 +45,32 @@ jobs:
           JENKINS_TOKEN="${{ secrets.JENKINS_TOKEN }}"
           JENKINS_URL="${JENKINS_URL%/}"
           
-          # 스캔 후 빌드 트리거 함수
+          # 서비스 트리거 함수
           trigger_service() {
             local service_name="$1"
             local service_group="$2"
             local job_name="tripmarble-backend-$service_name"
             
-            echo "Processing: $service_name"
+            echo "Triggering: $service_name on PR branch: $pr_branch"
             
-            # 1단계: 멀티브랜치 스캔 트리거 (PR 브랜치 감지)
-            echo "Step 1: Triggering repository scan for $job_name"
-            scan_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
+            # PR 브랜치 빌드 트리거
+            response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
               --user "$JENKINS_USER:$JENKINS_TOKEN" \
-              "$JENKINS_URL/job/$job_name/build")
+              "$JENKINS_URL/job/$job_name/job/$pr_branch/buildWithParameters" \
+              --data-urlencode "SERVICE_GROUP=$service_group" \
+              --data-urlencode "SERVICE_NAME=$service_name" \
+              --data-urlencode "TARGET_BRANCH=$target_branch")
             
-            scan_code=$(echo "$scan_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+            http_code=$(echo "$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
             
-            if [[ "$scan_code" == "201" || "$scan_code" == "200" ]]; then
-              echo "SUCCESS: Repository scan triggered"
-              
-              # 2단계: 스캔 완료 대기
-              echo "Step 2: Waiting for branch scan to complete..."
-              sleep 10
-              
-              # 3단계: PR 브랜치 빌드 시도
-              echo "Step 3: Triggering PR branch build"
-              build_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
-                --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                "$JENKINS_URL/job/$job_name/job/$pr_branch/buildWithParameters" \
-                --data-urlencode "SERVICE_GROUP=$service_group" \
-                --data-urlencode "SERVICE_NAME=$service_name" \
-                --data-urlencode "TARGET_BRANCH=$target_branch" \
-                --data-urlencode "PR_NUMBER=$pr_number")
-              
-              build_code=$(echo "$build_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-              
-              if [[ "$build_code" == "201" || "$build_code" == "200" ]]; then
-                echo "SUCCESS: $service_name PR build triggered"
-              else
-                echo "RETRY: PR branch not ready, trying develop branch with PR SHA"
-                
-                # 4단계: 대안 - develop 브랜치에서 PR SHA로 빌드
-                develop_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
-                  --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                  "$JENKINS_URL/job/$job_name/job/$target_branch/buildWithParameters" \
-                  --data-urlencode "SERVICE_GROUP=$service_group" \
-                  --data-urlencode "SERVICE_NAME=$service_name" \
-                  --data-urlencode "TARGET_BRANCH=$target_branch" \
-                  --data-urlencode "PR_SHA=${{ github.event.pull_request.head.sha }}" \
-                  --data-urlencode "PR_NUMBER=$pr_number")
-                
-                develop_code=$(echo "$develop_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-                
-                if [[ "$develop_code" == "201" || "$develop_code" == "200" ]]; then
-                  echo "SUCCESS: $service_name triggered on $target_branch with PR SHA"
-                else
-                  echo "FAILED: $service_name completely failed"
-                fi
-              fi
+            if [[ "$http_code" == "201" || "$http_code" == "200" ]]; then
+              echo "SUCCESS: $service_name PR build triggered"
             else
-              echo "FAILED: Repository scan failed (HTTP: $scan_code)"
+              echo "FAILED: $service_name (HTTP: $http_code)"
             fi
-            
-            echo ""
           }
           
-          # 라벨별 서비스 트리거 (해당 라벨이 있는 서비스만)
+          # 라벨별 서비스 트리거
           [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "auth-service" "service"
           [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "trip-service" "service"
           [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "trip-game-service" "service"
