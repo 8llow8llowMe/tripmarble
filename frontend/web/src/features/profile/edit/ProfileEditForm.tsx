@@ -3,6 +3,7 @@ import Modal from "@/shared/ui/common/Modal";
 import styles from "./ProfileEditForm.module.scss";
 import { useUploadTempProfileImage } from "@/entities/users/hooks/useUsers";
 import { toast } from "react-toastify";
+import Image from "next/image";
 
 interface ProfileEditFormProps {
   isOpen: boolean;
@@ -71,7 +72,12 @@ const ProfileEditForm = ({ isOpen, onClose }: ProfileEditFormProps) => {
           />
           <label htmlFor="profileImageUpload">
             {previewImage ? (
-              <img src={previewImage} alt="Preview" />
+              <Image
+                width={200}
+                height={200}
+                src={previewImage}
+                alt="Preview"
+              />
             ) : (
               <span>이미지 선택</span>
             )}
