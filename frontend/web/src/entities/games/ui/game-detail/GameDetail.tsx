@@ -1,5 +1,8 @@
 "use client";
 
+import React, { useState } from "react";
+import GameBoard from "@/entities/games/ui/game-board/GameBoard";
+import Image from "next/image";
 import styles from "./GameDetail.module.scss";
 
 type TimelineItem = {
@@ -20,11 +23,8 @@ type Props = {
   onBlockSelect?: (item: TimelineItem) => void;
 };
 
-import React, { useState } from "react";
-
 const GameDetail = ({
   gameId,
-  boardImageUrl = "/images/board-example.png", // 더미 이미지
   timeline,
   selectedBlock,
   onBlockSelect,
@@ -36,12 +36,7 @@ const GameDetail = ({
       <div className={styles.header}>종료된 게임</div>
       {/* 보드판 이미지 */}
       <div className={styles.boardContainer}>
-        <img
-          src={boardImageUrl}
-          alt="게임 보드"
-          className={styles.boardImage}
-        />
-        {/* TODO: 보드판 위 블록 선택, 진행표시 등 SVG로 오버레이 구현 가능 */}
+        <GameBoard count={5} />
       </div>
       {/* 탭 바 */}
       <div className={styles.tabBar}>
@@ -94,7 +89,7 @@ const GameDetail = ({
                 <div className={styles.blockDetail}>
                   <div className={styles.blockHeader}>
                     <div className={styles.blockTitle}>
-                      {selectedBlock.title}{" "}
+                      {selectedBlock.title}
                       <span className={styles.blockBadge}>미션 인증여부</span>
                     </div>
                     <div className={styles.blockDate}>{selectedBlock.date}</div>
@@ -105,7 +100,7 @@ const GameDetail = ({
                   <div className={styles.reviewSection}>
                     <div className={styles.reviewImage}>
                       {selectedBlock.reviewImageUrl ? (
-                        <img
+                        <Image
                           src={selectedBlock.reviewImageUrl}
                           alt="리뷰 이미지"
                         />

@@ -40,7 +40,6 @@ export default function GameDetailPage({ params }: Props) {
   return (
     <GameDetail
       gameId={params.id}
-      boardImageUrl="/images/no-image.png"
       timeline={dummyTimeline}
       selectedBlock={dummyTimeline.find((item) => item.isSelected)}
       // onBlockSelect={setSelectedBlock} 등 추가 예정
