@@ -39,6 +39,23 @@ jobs:
         if [[ "$should_trigger" == "true" ]]; then
           echo "Labels: $labels | Branch: $branch"
           
+          # Jenkins Job 목록 확인 (디버깅용)
+          echo "=== Checking available Jenkins jobs ==="
+          jobs_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
+            --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+            "${{ secrets.JENKINS_URL }}/api/json?tree=jobs[name,url]")
+          
+          jobs_http_code=$(echo "$jobs_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+          jobs_body=$(echo "$jobs_response" | sed 's/HTTP_CODE:[0-9]*$//')
+          
+          if [[ "$jobs_http_code" == "200" ]]; then
+            echo "Available jobs:"
+            echo "$jobs_body" | grep -o '"name":"[^"]*"' | sed 's/"name":"//g' | sed 's/"//g'
+          else
+            echo "Failed to get jobs list (HTTP: $jobs_http_code)"
+          fi
+          echo ""
+          
           # Basic Auth를 사용한 안전한 트리거 방법
           trigger_service() {
             local service_name="$1"
@@ -48,11 +65,34 @@ jobs:
             
             # Jenkins 연결 테스트
             echo "Testing Jenkins connectivity for $service_name..."
+            
+            # 방법 1: 멀티브랜치 파이프라인 구조 시도
             connection_test=$(curl -s -w "HTTP:%{http_code}" -I \
               --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
               "${{ secrets.JENKINS_URL }}/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/")
             
-            echo "Connection test: $connection_test"
+            echo "Connection test (method 1): $connection_test"
+            
+            # 방법 2: 단일 Job 구조 시도 (404인 경우)
+            if [[ "$connection_test" == *"HTTP:404"* ]]; then
+              echo "Trying alternative URL structure..."
+              connection_test2=$(curl -s -w "HTTP:%{http_code}" -I \
+                --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+                "${{ secrets.JENKINS_URL }}/job/$(echo "$service_name" | sed 's/ /%20/g')/")
+              
+              echo "Connection test (method 2): $connection_test2"
+              
+              # 방법 3: 간단한 이름으로 시도
+              if [[ "$connection_test2" == *"HTTP:404"* ]]; then
+                simple_name=$(echo "$service_name" | sed 's/ multi branch pipeline//g')
+                echo "Trying simple name: $simple_name"
+                connection_test3=$(curl -s -w "HTTP:%{http_code}" -I \
+                  --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+                  "${{ secrets.JENKINS_URL }}/job/$(echo "$simple_name" | sed 's/ /%20/g')/")
+                
+                echo "Connection test (method 3): $connection_test3"
+              fi
+            fi
             
             # Basic Auth로 Jenkins 빌드 트리거 (URL 인코딩 방식)
             echo "Triggering build with parameters..."
