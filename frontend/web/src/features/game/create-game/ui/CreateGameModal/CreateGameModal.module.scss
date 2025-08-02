@@ -4,7 +4,7 @@
   gap: 1rem;
   padding: 2rem;
   width: 500px;
-  height: auto;
+  height: calc(100dvh - 150px);
 }
 
 .progress {
