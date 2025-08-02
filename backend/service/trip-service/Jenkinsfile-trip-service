@@ -18,6 +18,11 @@ pipeline {
             defaultValue: '',
             description: 'PR 커밋 SHA (빌드할 코드)'
         )
+        string(
+            name: 'TARGET_BRANCH',
+            defaultValue: 'develop',
+            description: 'PR 타겟 브랜치 (배포 환경 결정용)'
+        )
     }
 
     // 공통 환경 변수
@@ -42,17 +47,18 @@ pipeline {
                     echo "Branch: ${env.BRANCH_NAME}"
                     echo "Service: ${params.SERVICE_NAME}"
                     echo "PR SHA: ${params.PR_SHA ?: 'Not provided'}"
+                    echo "Target Branch: ${params.TARGET_BRANCH}"
                     
-                    // 현재 브랜치 기준으로 배포 환경 결정
-                    if (env.BRANCH_NAME == 'main') {
+                    // 타겟 브랜치 기준으로 배포 환경 결정
+                    if (params.TARGET_BRANCH == 'main') {
                         env.DEPLOY_ENV = 'prod'
-                        echo "Deploy Target: Production"
-                    } else if (env.BRANCH_NAME == 'develop') {
+                        echo "Deploy Target: Production (based on target branch)"
+                    } else if (params.TARGET_BRANCH == 'develop') {
                         env.DEPLOY_ENV = 'dev'
-                        echo "Deploy Target: Development"
+                        echo "Deploy Target: Development (based on target branch)"
                     } else {
                         env.DEPLOY_ENV = 'none'
-                        echo "Deploy Target: None (feature branch)"
+                        echo "Deploy Target: None"
                     }
                     echo "========================="
                 }
@@ -108,7 +114,8 @@ pipeline {
 
         stage('Deploy to Dev') {
             when {
-                expression { env.BRANCH_NAME == 'develop' }
+                // 타겟 브랜치가 develop인 경우 dev 환경에 배포
+                expression { params.TARGET_BRANCH == 'develop' }
             }
             steps {
                 script {
@@ -152,7 +159,8 @@ pipeline {
 
         stage('Deploy to Prod') {
             when {
-                expression { env.BRANCH_NAME == 'main' }
+                // 타겟 브랜치가 main인 경우 prod 환경에 배포
+                expression { params.TARGET_BRANCH == 'main' }
             }
             steps {
                 script {
