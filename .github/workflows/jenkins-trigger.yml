@@ -41,11 +41,39 @@ jobs:
           
           # Jenkins Job 목록 확인 (디버깅용)
           echo "=== Checking available Jenkins jobs ==="
+          
+          # Secrets 검증
+          if [[ -z "${{ secrets.JENKINS_URL }}" ]]; then
+            echo "ERROR: JENKINS_URL is not set"
+            exit 1
+          fi
+          
+          if [[ -z "${{ secrets.JENKINS_USER }}" ]]; then
+            echo "ERROR: JENKINS_USER is not set"
+            exit 1
+          fi
+          
+          if [[ -z "${{ secrets.JENKINS_TOKEN }}" ]]; then
+            echo "ERROR: JENKINS_TOKEN is not set"
+            exit 1
+          fi
+          
           echo "Jenkins URL: ${{ secrets.JENKINS_URL }}"
+          echo "Jenkins User: ${{ secrets.JENKINS_USER }}"
+          echo "Jenkins Token: [HIDDEN]"
+          
+          # URL 형식 검증
+          if [[ ! "${{ secrets.JENKINS_URL }}" =~ ^https?:// ]]; then
+            echo "ERROR: JENKINS_URL must start with http:// or https://"
+            exit 1
+          fi
+          
+          # URL 끝에 슬래시 제거
+          JENKINS_URL="${JENKINS_URL%/}"
           
           jobs_response=$(curl -s -w "HTTP_CODE:%{http_code}" \
             --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-            "${{ secrets.JENKINS_URL }}/api/json?tree=jobs[name,url]")
+            "$JENKINS_URL/api/json?tree=jobs[name,url]")
           
           jobs_http_code=$(echo "$jobs_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
           jobs_body=$(echo "$jobs_response" | sed 's/HTTP_CODE:[0-9]*$//')
@@ -75,19 +103,19 @@ jobs:
             # Jenkins 연결 테스트
             echo "Testing Jenkins connectivity for $service_name..."
             
-            # 방법 1: 멀티브랜치 파이프라인 구조 시도
-            connection_test=$(curl -s -w "HTTP:%{http_code}" -I \
-              --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-              "${{ secrets.JENKINS_URL }}/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/")
+                         # 방법 1: 멀티브랜치 파이프라인 구조 시도
+             connection_test=$(curl -s -w "HTTP:%{http_code}" -I \
+               --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+               "$JENKINS_URL/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/")
             
             echo "Connection test (method 1): $connection_test"
             
             # 방법 2: 단일 Job 구조 시도 (404인 경우)
             if [[ "$connection_test" == *"HTTP:404"* ]]; then
               echo "Trying alternative URL structure..."
-              connection_test2=$(curl -s -w "HTTP:%{http_code}" -I \
-                --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-                "${{ secrets.JENKINS_URL }}/job/$(echo "$service_name" | sed 's/ /%20/g')/")
+                             connection_test2=$(curl -s -w "HTTP:%{http_code}" -I \
+                 --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+                 "$JENKINS_URL/job/$(echo "$service_name" | sed 's/ /%20/g')/")
               
               echo "Connection test (method 2): $connection_test2"
               
@@ -95,9 +123,9 @@ jobs:
               if [[ "$connection_test2" == *"HTTP:404"* ]]; then
                 simple_name=$(echo "$service_name" | sed 's/ multi branch pipeline//g')
                 echo "Trying simple name: $simple_name"
-                connection_test3=$(curl -s -w "HTTP:%{http_code}" -I \
-                  --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-                  "${{ secrets.JENKINS_URL }}/job/$(echo "$simple_name" | sed 's/ /%20/g')/")
+                                 connection_test3=$(curl -s -w "HTTP:%{http_code}" -I \
+                   --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+                   "$JENKINS_URL/job/$(echo "$simple_name" | sed 's/ /%20/g')/")
                 
                 echo "Connection test (method 3): $connection_test3"
               fi
@@ -105,9 +133,9 @@ jobs:
             
             # Basic Auth로 Jenkins 빌드 트리거 (URL 인코딩 방식)
             echo "Triggering build with parameters..."
-            response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
-              --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-              "${{ secrets.JENKINS_URL }}/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/buildWithParameters" \
+                         response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
+               --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+               "$JENKINS_URL/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/buildWithParameters" \
               --data-urlencode "SERVICE_GROUP=$service_group" \
               --data-urlencode "SERVICE_NAME=$service_name" \
               --data-urlencode "SKIP_LABEL_CHECK=true")
@@ -123,9 +151,9 @@ jobs:
               
               # 대안: 파라미터 없이 빌드 시도
               echo "Trying build without parameters..."
-              fallback_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
-                --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-                "${{ secrets.JENKINS_URL }}/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/build")
+                             fallback_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
+                 --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+                 "$JENKINS_URL/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/build")
               
               fallback_code=$(echo "$fallback_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
               
@@ -154,9 +182,9 @@ jobs:
           echo "=== Alternative: Simple job check ==="
           for job_name in "tripmarble-backend-auth-service multi branch pipeline" "tripmarble-backend-trip-service multi branch pipeline" "tripmarble-backend-trip-game-service multi branch pipeline" "tripmarble-backend-api-gateway multi branch pipeline" "tripmarble-backend-service-discovery multi branch pipeline"; do
             echo "Checking job: $job_name"
-            simple_check=$(curl -s -w "HTTP:%{http_code}" -I \
-              --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-              "${{ secrets.JENKINS_URL }}/job/$(echo "$job_name" | sed 's/ /%20/g')/")
+                         simple_check=$(curl -s -w "HTTP:%{http_code}" -I \
+               --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
+               "$JENKINS_URL/job/$(echo "$job_name" | sed 's/ /%20/g')/")
             echo "  Result: $simple_check"
           done
         fi
