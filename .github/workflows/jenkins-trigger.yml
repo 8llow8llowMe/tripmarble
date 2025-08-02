@@ -35,46 +35,81 @@ jobs:
           echo "Skip: No service labels or unsupported action"
         fi
         
-        # Jenkins 트리거 (CSRF Crumb 포함)
+        # Jenkins 트리거
         if [[ "$should_trigger" == "true" ]]; then
           echo "Labels: $labels | Branch: $branch"
           
-          # CSRF Crumb 가져오기
+          # CSRF Crumb 가져오기 (디버깅 포함)
           get_crumb() {
-            curl -s -X GET \
+            echo "Attempting to get crumb from Jenkins..."
+            response=$(curl -s -w "HTTP_CODE:%{http_code}" -X GET \
               -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
-              "${{ secrets.JENKINS_URL }}/crumbIssuer/api/json" | \
-              jq -r '.crumb'
+              "${{ secrets.JENKINS_URL }}/crumbIssuer/api/json")
+            
+            http_code=$(echo "$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+            body=$(echo "$response" | sed 's/HTTP_CODE:[0-9]*$//')
+            
+            echo "Crumb API Response (HTTP $http_code): $body"
+            
+            if [[ "$http_code" == "200" ]] && echo "$body" | jq -e . >/dev/null 2>&1; then
+              echo "$body" | jq -r '.crumb'
+            else
+              echo "Failed to get valid crumb response"
+              return 1
+            fi
+          }
+          
+          # 대체 방법: Crumb 없이 시도
+          trigger_service_simple() {
+            local service_name="$1"
+            local service_group="$2"
+            
+            echo "Triggering $service_name without crumb..."
+            response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
+              -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              "${{ secrets.JENKINS_URL }}/job/$service_name/job/$branch/buildWithParameters" \
+              -d "SERVICE_GROUP=$service_group&SERVICE_NAME=$service_name&SKIP_LABEL_CHECK=true")
+            
+            http_code=$(echo "$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+            
+            if [[ "$http_code" == "201" || "$http_code" == "200" ]]; then
+              echo "$service_name triggered successfully (HTTP: $http_code)"
+            else
+              echo "$service_name failed (HTTP: $http_code)"
+              echo "Response: $(echo "$response" | sed 's/HTTP_CODE:[0-9]*$//')"
+            fi
           }
           
           trigger_service() {
             local service_name="$1"
             local service_group="$2"
             
-            # Crumb 가져오기
-            crumb=$(get_crumb)
-            if [[ -z "$crumb" || "$crumb" == "null" ]]; then
-              echo "Failed to get crumb for $service_name"
-              return 1
-            fi
-            
-            # Jenkins 빌드 트리거
-            response=$(curl -s -w "%{http_code}" -X POST \
-              -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
-              -H "Content-Type: application/json" \
-              -H "Jenkins-Crumb: $crumb" \
-              "${{ secrets.JENKINS_URL }}/job/$service_name/job/$branch/buildWithParameters" \
-              -d "{\"SERVICE_GROUP\":\"$service_group\",\"SERVICE_NAME\":\"$service_name\",\"SKIP_LABEL_CHECK\":\"true\"}")
-            
-            http_code="${response: -3}"
-            if [[ "$http_code" == "201" || "$http_code" == "200" ]]; then
-              echo "$service_name triggered successfully"
+            # 먼저 Crumb을 사용한 방법 시도
+            if crumb=$(get_crumb); then
+              echo "Using crumb: $crumb"
+              response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
+                -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
+                -H "Content-Type: application/json" \
+                -H "Jenkins-Crumb: $crumb" \
+                "${{ secrets.JENKINS_URL }}/job/$service_name/job/$branch/buildWithParameters" \
+                -d "{\"SERVICE_GROUP\":\"$service_group\",\"SERVICE_NAME\":\"$service_name\",\"SKIP_LABEL_CHECK\":\"true\"}")
+              
+              http_code=$(echo "$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+              
+              if [[ "$http_code" == "201" || "$http_code" == "200" ]]; then
+                echo "$service_name triggered successfully with crumb (HTTP: $http_code)"
+              else
+                echo "$service_name failed with crumb (HTTP: $http_code), trying without crumb..."
+                trigger_service_simple "$service_name" "$service_group"
+              fi
             else
-              echo "$service_name failed (HTTP: $http_code)"
+              echo "Could not get crumb, trying without crumb..."
+              trigger_service_simple "$service_name" "$service_group"
             fi
           }
           
-          # 서비스별 트리거
+          # 서비스별 트리거 (라벨 기반 선택적 실행)
           [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "auth-service" "service"
           [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "trip-service" "service"
           [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "trip-game-service" "service"
