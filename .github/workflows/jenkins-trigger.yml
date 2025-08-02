@@ -11,9 +11,6 @@ jobs:
     steps:
     - name: Check and trigger Jenkins
       run: |
-        # 에러 발생해도 스크립트 계속 실행
-        set +e
-        
         action="${{ github.event.action }}"
         labels="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
         branch="${{ github.event.pull_request.base.ref }}"
@@ -38,6 +35,7 @@ jobs:
           echo "Skip: No service labels or unsupported action"
         fi
         
+        # Jenkins 트리거 실행
         if [[ "$should_trigger" == "true" ]]; then
           echo "Labels: $labels | Branch: $branch"
           
@@ -46,7 +44,7 @@ jobs:
           JENKINS_TOKEN="${{ secrets.JENKINS_TOKEN }}"
           JENKINS_URL="${JENKINS_URL%/}"
           
-          # 간단하고 안정적인 트리거 함수
+          # 서비스 트리거 함수
           trigger_service() {
             local job_name="$1"
             local service_group="$2"
@@ -54,60 +52,31 @@ jobs:
             
             echo "Triggering: $job_name"
             
-            # Job 이름 URL 인코딩
-            encoded_job_name=$(echo "$job_name" | sed 's/ /%20/g')
-            
-            # 직접 빌드 트리거 (사전 검증 없이)
-            build_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
-              --connect-timeout 10 --max-time 30 \
+            # Jenkins 빌드 트리거
+            response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
               --user "$JENKINS_USER:$JENKINS_TOKEN" \
-              "$JENKINS_URL/job/$encoded_job_name/job/$branch/buildWithParameters" \
+              "$JENKINS_URL/job/$job_name/job/$branch/buildWithParameters" \
               --data-urlencode "SERVICE_GROUP=$service_group" \
               --data-urlencode "SERVICE_NAME=$service_name" \
-              --data-urlencode "SKIP_LABEL_CHECK=true" 2>/dev/null)
+              --data-urlencode "SKIP_LABEL_CHECK=true")
             
-            build_exit=$?
+            http_code=$(echo "$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
             
-            if [[ $build_exit -eq 0 ]]; then
-              build_code=$(echo "$build_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-              
-              if [[ "$build_code" == "201" || "$build_code" == "200" ]]; then
-                echo "SUCCESS: $service_name triggered (HTTP: $build_code)"
-              else
-                echo "FAILED: $service_name (HTTP: $build_code)"
-                
-                # 간단한 빌드 재시도 (파라미터 없이)
-                retry_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
-                  --connect-timeout 10 --max-time 30 \
-                  --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                  "$JENKINS_URL/job/$encoded_job_name/job/$branch/build" 2>/dev/null)
-                
-                retry_exit=$?
-                
-                if [[ $retry_exit -eq 0 ]]; then
-                  retry_code=$(echo "$retry_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-                  
-                  if [[ "$retry_code" == "201" || "$retry_code" == "200" ]]; then
-                    echo "SUCCESS: $service_name triggered without params (HTTP: $retry_code)"
-                  else
-                    echo "FAILED: $service_name retry failed (HTTP: $retry_code)"
-                  fi
-                fi
-              fi
+            if [[ "$http_code" == "201" || "$http_code" == "200" ]]; then
+              echo "SUCCESS: $service_name triggered"
             else
-              echo "FAILED: $service_name curl error (exit: $build_exit)"
+              echo "FAILED: $service_name (HTTP: $http_code)"
             fi
           }
           
-          # 스크린샷에서 확인된 정확한 Job 이름들로 매핑
-          # 성공한 Job: tripmarble-backend-trip-game-service multi branch pipeline
-          
-          # 다른 Job들도 비슷한 패턴일 것으로 예상하여 트리거
-          [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "tripmarble-backend-auth-service multi branch pipeline" "service" "auth-service"
-          [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "tripmarble-backend-trip-service multi branch pipeline" "service" "trip-service"
-          [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "tripmarble-backend-trip-game-service multi branch pipeline" "service" "trip-game-service"
-          [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "tripmarble-backend-api-gateway multi branch pipeline" "cloud" "api-gateway"
-          [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "tripmarble-backend-service-discovery multi branch pipeline" "cloud" "service-discovery"
+          # 라벨 기반 서비스 트리거
+          [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "tripmarble-backend-auth-service" "service" "auth-service"
+          [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "tripmarble-backend-trip-service" "service" "trip-service"
+          [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "tripmarble-backend-trip-game-service" "service" "trip-game-service"
+          [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "tripmarble-backend-api-gateway" "cloud" "api-gateway"
+          [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "tripmarble-backend-service-discovery" "cloud" "service-discovery"
+          [[ "$labels" == *"frontend-web"* ]] && trigger_service "tripmarble-frontend-web" "web" "frontend-web"
+          [[ "$labels" == *"frontend-mobile"* ]] && trigger_service "tripmarble-frontend-mobile" "mobile" "frontend-mobile"
           
           echo "Jenkins trigger completed"
         fi
