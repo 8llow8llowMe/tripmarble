@@ -50,20 +50,22 @@ jobs:
             local service_group="$2"
             local service_name="$3"
             
-            echo "Triggering: $job_name"
+            echo "Triggering: $job_name for branch: $branch"
             
-            # Jenkins 빌드 트리거
+            # Jenkins 빌드 트리거 (환경 변수 추가)
             response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
               --user "$JENKINS_USER:$JENKINS_TOKEN" \
               "$JENKINS_URL/job/$job_name/job/$branch/buildWithParameters" \
               --data-urlencode "SERVICE_GROUP=$service_group" \
               --data-urlencode "SERVICE_NAME=$service_name" \
-              --data-urlencode "SKIP_LABEL_CHECK=true")
+              --data-urlencode "SKIP_LABEL_CHECK=true" \
+              --data-urlencode "TARGET_BRANCH=$branch" \
+              --data-urlencode "DEPLOY_ENV=$([[ "$branch" == "main" ]] && echo "prod" || echo "dev")")
             
             http_code=$(echo "$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
             
             if [[ "$http_code" == "201" || "$http_code" == "200" ]]; then
-              echo "SUCCESS: $service_name triggered"
+              echo "SUCCESS: $service_name triggered for $branch"
             else
               echo "FAILED: $service_name (HTTP: $http_code)"
             fi
