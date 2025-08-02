@@ -50,7 +50,7 @@ jobs:
             echo "Testing Jenkins connectivity for $service_name..."
             connection_test=$(curl -s -w "HTTP:%{http_code}" -I \
               --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-              "${{ secrets.JENKINS_URL }}/job/$service_name/job/$branch/")
+              "${{ secrets.JENKINS_URL }}/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/")
             
             echo "Connection test: $connection_test"
             
@@ -58,7 +58,7 @@ jobs:
             echo "Triggering build with parameters..."
             response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
               --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-              "${{ secrets.JENKINS_URL }}/job/$service_name/job/$branch/buildWithParameters" \
+              "${{ secrets.JENKINS_URL }}/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/buildWithParameters" \
               --data-urlencode "SERVICE_GROUP=$service_group" \
               --data-urlencode "SERVICE_NAME=$service_name" \
               --data-urlencode "SKIP_LABEL_CHECK=true")
@@ -76,7 +76,7 @@ jobs:
               echo "Trying build without parameters..."
               fallback_response=$(curl -s -w "HTTP_CODE:%{http_code}" -X POST \
                 --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_TOKEN }}" \
-                "${{ secrets.JENKINS_URL }}/job/$service_name/job/$branch/build")
+                "${{ secrets.JENKINS_URL }}/job/$(echo "$service_name" | sed 's/ /%20/g')/job/$branch/build")
               
               fallback_code=$(echo "$fallback_response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
               
@@ -91,11 +91,11 @@ jobs:
           }
           
           # 서비스별 트리거 (라벨 기반 선택적 실행)
-          [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "auth-service" "service"
-          [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "trip-service" "service"
-          [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "trip-game-service" "service"
-          [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "api-gateway" "cloud"
-          [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "service-discovery" "cloud"
+          [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "tripmarble-backend-auth-service multi branch pipeline" "service"
+          [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "tripmarble-backend-trip-service multi branch pipeline" "service"
+          [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "tripmarble-backend-trip-game-service multi branch pipeline" "service"
+          [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "tripmarble-backend-api-gateway multi branch pipeline" "cloud"
+          [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "tripmarble-backend-service-discovery multi branch pipeline" "cloud"
           [[ "$labels" == *"frontend-web"* ]] && trigger_service "frontend-web" "web"
           [[ "$labels" == *"frontend-mobile"* ]] && trigger_service "frontend-mobile" "mobile"
           
