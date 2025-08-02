@@ -35,17 +35,43 @@ jobs:
           echo "Skip: No service labels or unsupported action"
         fi
         
-        # Jenkins 트리거
+        # Jenkins 트리거 (CSRF Crumb 포함)
         if [[ "$should_trigger" == "true" ]]; then
           echo "Labels: $labels | Branch: $branch"
           
+          # CSRF Crumb 가져오기
+          get_crumb() {
+            curl -s -X GET \
+              -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
+              "${{ secrets.JENKINS_URL }}/crumbIssuer/api/json" | \
+              jq -r '.crumb'
+          }
+          
           trigger_service() {
-            curl -s -X POST \
+            local service_name="$1"
+            local service_group="$2"
+            
+            # Crumb 가져오기
+            crumb=$(get_crumb)
+            if [[ -z "$crumb" || "$crumb" == "null" ]]; then
+              echo "Failed to get crumb for $service_name"
+              return 1
+            fi
+            
+            # Jenkins 빌드 트리거
+            response=$(curl -s -w "%{http_code}" -X POST \
               -H "Authorization: Bearer ${{ secrets.JENKINS_TOKEN }}" \
               -H "Content-Type: application/json" \
-              "${{ secrets.JENKINS_URL }}/job/$1/job/$branch/buildWithParameters" \
-              -d "{\"SERVICE_GROUP\":\"$2\",\"SERVICE_NAME\":\"$1\",\"SKIP_LABEL_CHECK\":\"true\"}" \
-              && echo "$1 triggered" || echo "$1 failed"
+              -H "Jenkins-Crumb: $crumb" \
+              "${{ secrets.JENKINS_URL }}/job/$service_name/job/$branch/buildWithParameters" \
+              -d "{\"SERVICE_GROUP\":\"$service_group\",\"SERVICE_NAME\":\"$service_name\",\"SKIP_LABEL_CHECK\":\"true\"}")
+            
+            http_code="${response: -3}"
+            if [[ "$http_code" == "201" || "$http_code" == "200" ]]; then
+              echo "$service_name triggered successfully"
+            else
+              echo "$service_name failed (HTTP: $http_code)"
+            fi
           }
           
           # 서비스별 트리거
