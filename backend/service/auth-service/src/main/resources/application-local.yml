@@ -82,3 +82,15 @@ mail:
   password: ENC(v/BdQ64+bRuu3Jenqhir7N6EW3bjIxZEfxCBGaAVsNc=)
   smtp-auth: true
   starttls-enable: true
+
+# OAUTH 2.0
+oauth:
+  kakao:
+    client-id: ENC(4dbiYUmQjEXC1pxBXOqA/skIkz2pUG8E97iyy3uNYH7yv9ixfsWVIcrJnCsWB/EK) # Rest API 키
+    client-secret: ENC(g3937mPP6h8A5fkrm4gLo7x9uCSjHtYOk9IfX6V2OCvjWnBk3sWODYS/BgssysnF)
+    redirect-uri: http://localhost:8080/auth/callback/kakao
+    scope:
+      - profile_nickname
+      - profile_image
+      - account_email
+      - name
