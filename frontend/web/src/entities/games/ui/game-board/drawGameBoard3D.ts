@@ -1,4 +1,3 @@
-// drawGameBoard3D.ts
 import { BoardCell } from "./types";
 import { getCell3DColors } from "./cellColor";
 
