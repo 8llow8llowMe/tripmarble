@@ -1,0 +1,33 @@
+.boardWrapper {
+  width: 100%;
+  height: 100%;
+  max-width: 600px; // 예시
+  max-height: 600px;
+  background: #fafcff;
+  border-radius: 14px;
+  border: 2.5px solid #52b4ff;
+  box-shadow: 0 2px 10px rgba(38, 153, 251, 0.08);
+  padding: 0; // padding이 있으면 스크롤 위치가 어긋남
+  overflow: hidden;
+
+  /* display: flex;
+  justify-content: center;
+  align-items: center; // <- 이거 제거! */
+  position: relative;
+
+  // 스크롤바 스타일(선택)
+  // &::-webkit-scrollbar {
+  //   width: 8px;
+  //   height: 8px;
+  // }
+  // &::-webkit-scrollbar-thumb {
+  //   background: #bbe3ff;
+  //   border-radius: 4px;
+  // }
+}
+
+.canvas {
+  display: "block";
+  touch-action: none;
+  user-select: none;
+}
