@@ -113,6 +113,8 @@ public class AuthSecurityConfig {
             "http://localhost:8081", // 프론트엔드 개발자가 로컬에서 실행한 React-Native 앱에서 백엔드로 API 요청할 수 있도록 허용
             // 로컬에서 API Gateway 실행 시, Swagger UI 통한 요청 등 CORS 허용 (Aggregation된 API 호출용) -> 하이브리드 인증/인가 패턴 때문에
             "http://localhost:8000",
+            // 개발서버 API Gateway Swagger에서 Auth Service API 호출 시 CORS 허용
+            "http://www.tripmarble-dev.store:*",
             "https://www.tripmarble.com" // 운영 배포된 프론트가 실제 API 서버로 요청할 때 CORS 허용
         ));
         config.setAllowedHeaders(List.of("*"));
