@@ -68,20 +68,24 @@ async function reissueTokenAndRetryRequest(
   instance: AxiosInstance
 ) {
   try {
-    const session = sessionStorage.getItem("email");
-    if (!session) return;
-
-    const memberEmail = JSON.parse(session).state.email;
+    // localStorage에서 memberId 읽기
+    const memberId = localStorage.getItem("memberId");
+    if (!memberId) {
+      throw new Error("No memberId found");
+    }
 
     const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_AUTH_SERVICE}/api/v1/member/reissue/accessToken/${memberEmail}`
+      `${process.env.NEXT_PUBLIC_AUTH_SERVICE}/api/v1/member/auth/token/reissue`,
+      {
+        memberId,
+      }
     );
 
     if (res.data.dataHeader.successCode === 0) {
       const { accessToken } = res.data.dataBody;
       localStorage.setItem("accessToken", accessToken);
     } else {
-      return;
+      throw new Error("토큰 재발급 실패");
     }
 
     const accessToken = localStorage.getItem("accessToken");
