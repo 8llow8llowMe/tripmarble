@@ -63,7 +63,6 @@ minio:
 # Swagger
 swagger:
   server-url: http://localhost:8081
-  docs-server-url: http://localhost:8000/auth-service
 
 # Actuator
 management:

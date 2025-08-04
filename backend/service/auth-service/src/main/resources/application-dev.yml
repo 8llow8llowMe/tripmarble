@@ -83,7 +83,6 @@ oauth:
 # Swagger
 swagger:
   server-url: http://${TRIP_MARBLE_DOMAIN}:${AUTH_SERVICE_PORT}
-  docs-server-url: http://${TRIP_MARBLE_DOMAIN}:${API_GATEWAY_PORT}/auth-service  # 문서 조회용 (API GATEWAY port/auth-service)
 
 # Actuator
 management:

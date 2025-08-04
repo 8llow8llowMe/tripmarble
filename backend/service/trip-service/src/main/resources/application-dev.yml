@@ -38,4 +38,3 @@ eureka:
 # Swagger
 swagger:
   server-url: http://${TRIP_MARBLE_DOMAIN}:${API_GATEWAY_PORT}
-  docs-server-url: http://${TRIP_MARBLE_DOMAIN}:${API_GATEWAY_PORT}/trip-service
