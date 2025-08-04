@@ -8,7 +8,7 @@ import {
   Image,
   TouchableOpacity,
 } from 'react-native';
-import ongoingImage from '@images/place/gyeongju.png';
+import ongoingImage from '@images/places/gyeongju.png';
 import { useNavigation } from '@react-navigation/native';
 // 종료된 게임 목록 데이터 (추후 API로 대체 가능)
 const finishedGames = [
