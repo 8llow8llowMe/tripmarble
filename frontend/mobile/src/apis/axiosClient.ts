@@ -10,8 +10,8 @@ import { store } from '@/store/store';
 import { logout } from '@/store/redux/auth/auth';
 import { Alert } from 'react-native';
 
-export const apiClient: AxiosInstance = axios.create({
-  baseURL: `${process.env.EXPO_PUBLIC_API_SERVICE || 'https://api.tripmarble.com'}/api/v1`,
+export const authApiClient: AxiosInstance = axios.create({
+  baseURL: `${process.env.EXPO_PUBLIC_AUTH_SERVICE || 'https://api.tripmarble.com'}/api/v1`,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -19,8 +19,8 @@ export const apiClient: AxiosInstance = axios.create({
   timeout: 10000,
 });
 
-export const authApiClient: AxiosInstance = axios.create({
-  baseURL: `${process.env.EXPO_PUBLIC_AUTH_SERVICE || 'https://api.tripmarble.com'}/api/v1`,
+export const apiClient: AxiosInstance = axios.create({
+  baseURL: `${process.env.EXPO_PUBLIC_API_GATEWAY || 'https://api.tripmarble.com'}/api/v1`,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -40,8 +40,36 @@ authApiClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+apiClient.interceptors.request.use(
+  async (config) => {
+    const accessToken = await getAsyncStorageItem(STORAGE_KEY.ACCESS_TOKEN);
+    if (accessToken && config.headers) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
 // 응답 인터셉터: 401 → 토큰 재발급 후 재요청
 authApiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      // 토큰 재발급 + 재요청 함수
+      return reissueTokenAndRetryRequest(originalRequest, authApiClient);
+    }
+
+    // 다른 오류는 그대로 반환
+    return Promise.reject(error);
+  },
+);
+
+apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
