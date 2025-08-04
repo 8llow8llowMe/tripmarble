@@ -9,7 +9,6 @@ export default function AuthNavigator() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="SignUp" component={SignUpScreen} />
-      {/* TODO: ID/PW 찾기 등 추가 */}
     </Stack.Navigator>
   );
 }
