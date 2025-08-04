@@ -32,8 +32,7 @@ public class AuthServiceSwaggerConfig {
                 .version("v1")
             )
             .servers(List.of(
-                new Server().url(properties.serverUrl()).description("Auth Service (실제 호출용)"),
-                new Server().url(properties.docsServerUrl()).description("문서 조회용")
+                new Server().url(properties.serverUrl()).description("Auth Service (실제 호출용)")
             ));
     }
 }
