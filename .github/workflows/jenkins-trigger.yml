@@ -46,6 +46,33 @@ jobs:
           JENKINS_TOKEN="${{ secrets.JENKINS_TOKEN }}"
           JENKINS_URL="${JENKINS_URL%/}"
           
+          # PR 브랜치가 이미 Jenkins에서 감지되었는지 확인하는 함수
+          check_pr_branch_exists() {
+            local service_name="$1"
+            local job_name="tripmarble-backend-$service_name"
+            
+            echo "Checking if PR branch $pr_branch exists in $job_name..."
+            
+            # Jenkins API를 통해 브랜치 목록 확인
+            branches_response=$(curl -s -X GET \
+              --user "$JENKINS_USER:$JENKINS_TOKEN" \
+              "$JENKINS_URL/job/$job_name/api/json?tree=jobs[name,url]")
+            
+            if [[ $? -eq 0 ]]; then
+              # PR 브랜치가 이미 존재하는지 확인
+              if echo "$branches_response" | grep -q "\"$pr_branch\""; then
+                echo "PR branch $pr_branch already exists in $job_name - skipping manual trigger"
+                return 0  # 이미 존재함
+              else
+                echo "PR branch $pr_branch not found in $job_name - will trigger manually"
+                return 1  # 존재하지 않음
+              fi
+            else
+              echo "Failed to check branches for $job_name - proceeding with manual trigger"
+              return 1  # 확인 실패시 수동 트리거 진행
+            fi
+          }
+          
           # 스캔 후 빌드 트리거 함수
           trigger_service() {
             local service_name="$1"
@@ -53,6 +80,12 @@ jobs:
             local job_name="tripmarble-backend-$service_name"
             
             echo "Processing: $service_name"
+            
+            # PR 브랜치가 이미 존재하는지 확인
+            if check_pr_branch_exists "$service_name"; then
+              echo "Skipping manual trigger for $service_name - PR branch already detected by Jenkins"
+              return
+            fi
             
             # 1단계: 멀티브랜치 스캔 트리거 (PR 브랜치 감지)
             echo "Step 1: Triggering repository scan for $job_name"
