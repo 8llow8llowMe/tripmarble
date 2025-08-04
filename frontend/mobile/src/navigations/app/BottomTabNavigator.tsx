@@ -1,15 +1,15 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
-import HomeScreen from '../../screens/Home/HomeScreen';
-import ExploreScreen from '../../screens/Explore/ExploreScreen';
-import MomentsScreen from '../../screens/Moments/MomentsScreen';
-import ProfileScreen from '../../screens/Profile/ProfileScreen';
 import useUserInfoQuery from '@/hooks/user/useUserInfo';
 import { useAppDispatch, useAppSelector } from '@/store/store';
 import { useEffect } from 'react';
 import { setUser } from '@/store/redux/user/user';
-import PlayStackNavigator from '@/navigations/PlayStackNavigator';
+import ProfileScreen from '@/screens/Profile/ProfileScreen';
+import MomentsScreen from '@/screens/Moments/MomentsScreen';
+import HomeStackNavigator from '@/navigations/app/HomeStackNavigator';
+import PlayStackNavigator from '@/navigations/app/PlayStackNavigator';
+import ExploreStackNavigator from '@/navigations/app/ExploreStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -61,8 +61,8 @@ export default function BottomTabNavigator() {
         headerShown: false,
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Explore" component={ExploreScreen} />
+      <Tab.Screen name="Home" component={HomeStackNavigator} />
+      <Tab.Screen name="Explore" component={ExploreStackNavigator} />
       <Tab.Screen name="Play" component={PlayStackNavigator} />
       <Tab.Screen name="Moments" component={MomentsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
