@@ -2,9 +2,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import React from 'react';
 
-// 각 스크린 컴포넌트 임포트
 import BottomTabNavigator from '@/navigations/app/BottomTabNavigator';
-import SearchScreen from '@/navigations/app/SearchScreen';
+import SearchScreen from '@/screens/Explore/SearchScreen';
 
 const Stack = createNativeStackNavigator();
 
