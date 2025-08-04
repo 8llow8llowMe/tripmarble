@@ -36,9 +36,10 @@ export default function LoginPage() {
       { email, password },
       {
         onSuccess: async (res: any) => {
-          const { accessToken } = res.data.dataBody;
+          const { accessToken, memberId } = res.data.dataBody;
 
           localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("memberId", memberId.toString());
           await dispatch(fetchMe());
 
           if (saveEmail) {
