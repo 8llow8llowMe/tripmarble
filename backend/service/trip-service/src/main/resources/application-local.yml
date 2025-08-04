@@ -38,4 +38,5 @@ eureka:
 
 # Swagger
 swagger:
-  server-url: http://localhost:8000/trip-service
+  server-url: http://localhost:8000
+  docs-server-url: http://localhost:8000/trip-service
