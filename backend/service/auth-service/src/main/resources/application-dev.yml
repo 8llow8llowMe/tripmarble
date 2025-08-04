@@ -82,7 +82,7 @@ oauth:
 
 # Swagger
 swagger:
-  server-url: http://${TRIP_MARBLE_DOMAIN}:${AUTH_SERVICE_PORT}
+  server-url: http://${TRIP_MARBLE_DOMAIN}:${AUTH_SERVICE_PORT_DEV}
 
 # Actuator
 management:
