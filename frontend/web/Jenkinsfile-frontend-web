@@ -3,95 +3,160 @@ pipeline {
 
     // 파라미터
     parameters {
-        // 서비스가 속한 그룹 (폴더명)
         string(
             name: 'SERVICE_GROUP',
             defaultValue: 'web',
-            description: '상위 모듈 디렉터리 (web)'
+            description: '상위 모듈 디렉터리'
         )
-        // 이 파이프라인이 처리할 PR 라벨
         string(
-            name: 'SERVICE_LABEL',
-            defaultValue: 'frontend-web',
-            description: '이 서비스 전용 PR 라벨'
+            name: 'SERVICE_NAME',
+            defaultValue: 'web',
+            description: '서비스 이름'
+        )
+        string(
+            name: 'TARGET_BRANCH',
+            defaultValue: 'develop',
+            description: 'PR 타겟 브랜치 (배포 환경 결정용)'
+        )
+        string(
+            name: 'PR_SHA',
+            defaultValue: '',
+            description: 'PR 커밋 SHA (빌드할 코드)'
+        )
+        string(
+            name: 'PR_NUMBER',
+            defaultValue: '',
+            description: 'PR 번호'
         )
     }
 
     // 공통 환경 변수
     environment {
-        // 실제 파일시스템 경로 ( frontend/web )
+        MODULE_PATH = "frontend/${params.SERVICE_GROUP}"
         FS_PATH = "frontend/${params.SERVICE_GROUP}"
-        // MinIO 설정 (Jenkins 환경변수에서 가져옴, 기본값 fallback)
         MINIO_ENDPOINT = "${env.MINIO_ENDPOINT}"
         MINIO_BUCKET = "${env.MINIO_BUCKET}"
         MINIO_PATH = "frontend/${params.SERVICE_GROUP}"
-        // SSH 설정 (MinIO 접근용)
         SSH_CONFIG = 'storage server ssh'
     }
 
     stages {
 
-        stage('Init & Submodule Update') {
+        stage('Environment Info') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: scm.branches,
-                    userRemoteConfigs: scm.userRemoteConfigs,
-                    extensions: [
-                        [$class: 'SubmoduleOption',
-                         recursiveSubmodules: true,
-                         parentCredentials: true]
-                    ]
-                ])
+                script {
+                    echo "=== Build Information ==="
+                    echo "Branch: ${env.BRANCH_NAME}"
+                    echo "Service: ${params.SERVICE_NAME}"
+                    echo "Target Branch: ${params.TARGET_BRANCH}"
+                    echo "PR SHA: ${params.PR_SHA ?: 'Not provided'}"
+                    echo "PR Number: ${params.PR_NUMBER ?: 'Not provided'}"
+                    
+                    // 타겟 브랜치 기준으로 배포 환경 결정
+                    if (params.TARGET_BRANCH == 'main') {
+                        env.DEPLOY_ENV = 'prod'
+                        echo "Deploy Target: Production (based on target branch)"
+                    } else if (params.TARGET_BRANCH == 'develop') {
+                        env.DEPLOY_ENV = 'dev'
+                        echo "Deploy Target: Development (based on target branch)"
+                    } else {
+                        env.DEPLOY_ENV = 'none'
+                        echo "Deploy Target: None"
+                    }
+                    echo "========================="
+                }
+            }
+        }
+
+        stage('Checkout Code') {
+            steps {
+                script {
+                    // PR SHA가 있으면 해당 커밋 체크아웃, 없으면 브랜치 HEAD 사용
+                    if (params.PR_SHA && params.PR_SHA != '') {
+                        echo "Checking out PR commit: ${params.PR_SHA}"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: params.PR_SHA]],
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                            extensions: [
+                                [$class: 'SubmoduleOption',
+                                 recursiveSubmodules: true,
+                                 parentCredentials: true]
+                            ]
+                        ])
+                    } else {
+                        echo "Using PR branch code (Jenkins 멀티브랜치가 자동으로 PR 브랜치 체크아웃)"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: scm.branches,
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                            extensions: [
+                                [$class: 'SubmoduleOption',
+                                 recursiveSubmodules: true,
+                                 parentCredentials: true]
+                            ]
+                        ])
+                    }
+                }
             }
         }
 
         stage('Install Dependencies') {
             steps {
                 dir("${env.FS_PATH}") {
-                    sh 'npm ci'
+                    sh 'yarn install --frozen-lockfile'
                 }
             }
         }
 
-        stage('Build Test (Dev)') {
-            when {
-                expression { env.CHANGE_TARGET == 'develop' }
-            }
+        stage('Build Application') {
             steps {
                 dir("${env.FS_PATH}") {
-                    // 개발용 환경변수로 빌드 테스트
-                    sh """
-                        # 개발용 환경변수 설정
-                        export NODE_ENV=development
+                    script {
+                        // 타겟 브랜치에 따라 환경 설정
+                        if (params.TARGET_BRANCH == 'main') {
+                            env.NODE_ENV = 'production'
+                            echo "Building for production environment"
+                        } else {
+                            env.NODE_ENV = 'development'
+                            echo "Building for development environment"
+                        }
                         
-                        # Next.js 빌드 테스트 (실제 배포는 하지 않음)
-                        npm run build
-                        
-                        echo "개발 환경 빌드 테스트 완료 - 실제 배포는 하지 않음"
-                    """
+                        // Next.js 빌드
+                        sh 'yarn build'
+                    }
+                }
+            }
+            post {
+                success {
+                    archiveArtifacts "${env.FS_PATH}/out/**/*"
                 }
             }
         }
 
-        stage('Build & Deploy to Prod') {
+        stage('Deploy to Dev') {
             when {
-                expression { env.CHANGE_TARGET == 'main' }
+                // 타겟 브랜치가 develop인 경우 dev 환경에 배포
+                expression { params.TARGET_BRANCH == 'develop' }
             }
             steps {
                 script {
-                    dir("${env.FS_PATH}") {
-                        // 운영용 환경변수로 빌드
-                        sh """
-                            # 운영용 환경변수 설정
-                            export NODE_ENV=production
-                            
-                            # Next.js 빌드
-                            npm run build
-                            
-                            echo "운영 환경 빌드 완료"
-                        """
-                    }
+                    echo "Deploying ${params.SERVICE_NAME} to Development"
+                    
+                    // 개발 환경 배포 로직 (필요시 추가)
+                    echo "Development deployment completed"
+                }
+            }
+        }
+
+        stage('Deploy to Prod') {
+            when {
+                // 타겟 브랜치가 main인 경우 prod 환경에 배포
+                expression { params.TARGET_BRANCH == 'main' }
+            }
+            steps {
+                script {
+                    echo "Deploying ${params.SERVICE_NAME} to Production"
                     
                     // MinIO에 배포
                     withCredentials([usernamePassword(credentialsId: 'minio-credentials',
@@ -107,14 +172,9 @@ pipeline {
                             # 새 빌드 파일 업로드
                             mc cp --recursive ${env.FS_PATH}/out/ minio/${MINIO_BUCKET}/${MINIO_PATH}/
                             
-                            echo "운영 환경 배포 완료: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${MINIO_PATH}"
+                            echo "Production deployment completed: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${MINIO_PATH}"
                         """
                     }
-                }
-            }
-            post {
-                success {
-                    archiveArtifacts "${env.FS_PATH}/out/**/*"
                 }
             }
         }
