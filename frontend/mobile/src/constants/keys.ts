@@ -5,8 +5,19 @@ const STORAGE_KEY = {
 };
 
 const QUERY_KEY = {
+  //USER
   USER: {
     INFO: 'userInfo',
+  },
+
+  //TRIP
+  TRIP: {
+    SPOT: 'spot',
+    LIST_SPOTS: 'spotsList',
+    LIST_REGIONS: 'regionsList',
+    LIST_SIGUNGUS_BY_REGION: 'sigungusByRegionList',
+    LIST_REPRESENTATIVE_REGIONS: 'representativeRegionsList ',
+    REPRESENTATIVE_REGION: 'representativeRegion',
   },
 };
 
