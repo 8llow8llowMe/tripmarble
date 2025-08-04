@@ -3,7 +3,6 @@ import {
   View,
   ScrollView,
   Text,
-  TextInput,
   Image,
   StyleSheet,
   TouchableOpacity,
@@ -11,8 +10,12 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import jejuImage from '@images/place/jeju.png';
+import jejuImage from '@images/places/jeju3.png';
+import gyeongjuImage from '@images/places/gyeongju.png';
+
 import { useNavigation } from '@react-navigation/native';
+import TextBox from '@/components/atom/TextBox';
+import { palette } from '@/constants/colors';
 
 const bgHeight = Dimensions.get('window').height * 0.5;
 const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 가능)
@@ -20,10 +23,15 @@ const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 �
 export default function ExploreScreen() {
   const navigation = useNavigation();
 
-  const popularPlaces = ['부산', '제주도', '강릉', '경주'];
+  const popularPlaces = [
+    { name: '부산', image: gyeongjuImage, representativeRegionId: 5 },
+    { name: '제주도', image: gyeongjuImage, representativeRegionId: 10 },
+    { name: '강릉', image: gyeongjuImage, representativeRegionId: 6 },
+    { name: '경주', image: gyeongjuImage, representativeRegionId: 8 },
+  ];
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: palette.white }}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={{ position: 'relative' }}>
@@ -31,33 +39,53 @@ export default function ExploreScreen() {
           <View style={styles.overlay} />
         </View>
 
-        {/* 실제로는 TextInput 대신 TouchableOpacity로 가짜 인풋 */}
         <View style={[styles.searchBoxWrapper, { top: bgHeight - searchBoxHeight / 2 }]}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => navigation.navigate('SearchScreen')}
             style={styles.searchBox}
           >
-            <Text style={{ color: '#888', fontSize: 17 }}>🔍 여행지 검색</Text>
+            <TextBox size={15} color={palette.gray300}>
+              여행지를 검색해보세요.
+            </TextBox>
           </TouchableOpacity>
         </View>
 
-        <Text style={[styles.sectionTitle, { marginTop: searchBoxHeight / 2 + 24 }]}>
+        <TextBox size={18} fontsName="Pretendard600" style={styles.sectionTitle}>
           지금 인기있는 여행지
-        </Text>
-        <View style={styles.tagRow}>
-          {popularPlaces.map((place, index) => (
-            <TouchableOpacity key={index} style={styles.tag}>
-              <Text>{place}</Text>
+        </TextBox>
+        <View style={styles.placeWrapper}>
+          {popularPlaces.map((place, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.placeItem}
+              activeOpacity={0.7}
+              onPress={() => {
+                navigation.navigate('SpotListScreen', {
+                  representativeRegionId: place.representativeRegionId,
+                  regionName: place.name,
+                });
+              }}
+            >
+              <View style={styles.placeCircle}>
+                <Image source={place.image} style={styles.placeImage} resizeMode="cover" />
+              </View>
+              <TextBox size={15} color={palette.gray600} style={styles.placeName}>
+                {place.name}
+              </TextBox>
             </TouchableOpacity>
           ))}
         </View>
 
-        <Text style={styles.sectionTitle}>현재 진행중인 트립마블</Text>
+        <TextBox size={18} fontsName="Pretendard600" style={styles.sectionTitle}>
+          현재 진행중인 트립마블
+        </TextBox>
         <View style={styles.card} />
         <View style={styles.card} />
 
-        <Text style={styles.sectionTitle}>어떤 것을 넣으면 좋을까</Text>
+        <TextBox size={18} fontsName="Pretendard600" style={styles.sectionTitle}>
+          어떤 것을 넣으면 좋을까
+        </TextBox>
         <View style={styles.card} />
         <View style={styles.card} />
       </ScrollView>
@@ -65,6 +93,7 @@ export default function ExploreScreen() {
   );
 }
 
+const CIRCLE_SIZE = 70;
 const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 20,
@@ -87,40 +116,53 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   searchBox: {
-    backgroundColor: 'white',
+    backgroundColor: palette.white,
     padding: 12,
     elevation: 3,
     borderRadius: 30,
-    paddingVertical: 18,
-    paddingHorizontal: 22,
-    shadowColor: '#000',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    shadowColor: palette.black,
     shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
-    width: '96%',
-    fontSize: 17,
+    width: '98%',
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 24,
-    marginBottom: 8,
+    marginTop: searchBoxHeight / 2 + 24,
+    marginBottom: 14,
     paddingHorizontal: 16,
   },
-  tagRow: {
+  placeWrapper: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    gap: 10,
+    paddingHorizontal: 26,
+    justifyContent: 'space-between',
   },
-  tag: {
-    backgroundColor: '#eee',
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 20,
+  placeItem: {
+    alignItems: 'center',
+  },
+  placeCircle: {
+    width: CIRCLE_SIZE,
+    height: CIRCLE_SIZE,
+    borderRadius: CIRCLE_SIZE / 2,
+    borderWidth: 1,
+    borderColor: palette.gray200,
+    backgroundColor: palette.gray50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  placeImage: {
+    width: '100%',
+    height: '100%',
+  },
+  placeName: {
+    marginTop: 2,
   },
   card: {
     height: 120,
-    backgroundColor: '#eee',
+    backgroundColor: palette.gray50,
     borderRadius: 10,
     marginHorizontal: 16,
     marginBottom: 12,
