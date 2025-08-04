@@ -4,6 +4,13 @@
   gap: 20px;
 }
 
+.nickname {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 .imageUploader {
   display: flex;
   justify-content: center;

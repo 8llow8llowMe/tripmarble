@@ -2,7 +2,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   getUserProfile,
   updateUserProfile,
-  deleteUserAccount,
   login,
   logout,
   signUp,
@@ -20,10 +19,10 @@ export const useUpdateUserProfile = () =>
     mutationFn: updateUserProfile,
   });
 
-export const useDeleteUserAccount = () =>
-  useMutation({
-    mutationFn: deleteUserAccount,
-  });
+// export const useDeleteUserAccount = () =>
+//   useMutation({
+//     mutationFn: deleteUserAccount,
+//   });
 
 export const useLogin = () =>
   useMutation({
