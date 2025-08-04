@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // 돋보기, 뒤로가기 아이콘
 import { useNavigation } from '@react-navigation/native';
-import SafeAreaScreen from '@/components/layout/SafeAreaScreen';
 
 const DUMMY_RECENT = [
   { keyword: '경주', date: '10.31' },
