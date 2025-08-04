@@ -1,8 +1,8 @@
+import CreateGameScreen from '@/screens/Game/CreateGameScreen';
+import FinishedGameScreen from '@/screens/Game/FinishedGameScreen';
+import OngoingGameScreen from '@/screens/Game/OngoingGameScreen';
+import PlayScreen from '@/screens/Play/PlayScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import PlayScreen from '../screens/Play/PlayScreen';
-import CreateGameScreen from '../screens/Game/CreateGameScreen';
-import OngoingGameScreen from '../screens/Game/OngoingGameScreen';
-import FinishedGameScreen from '../screens/Game/FinishedGameScreen';
 
 const PlayStack = createNativeStackNavigator();
 
