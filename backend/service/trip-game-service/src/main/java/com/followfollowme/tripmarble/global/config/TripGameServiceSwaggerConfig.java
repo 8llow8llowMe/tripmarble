@@ -7,13 +7,12 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
-
-import java.util.List;
 
 @Configuration
 @Profile("!prod")
@@ -33,6 +32,9 @@ public class TripGameServiceSwaggerConfig {
                 .description("Trip Game Service 전용")
                 .version("v1")
             )
-            .servers(List.of(new Server().url(properties.serverUrl())));
+            .servers(List.of(
+                new Server().url(properties.serverUrl()).description("API Gateway (실제 호출용)"),
+                new Server().url(properties.docsServerUrl()).description("문서 조회용")
+            ));
     }
 }
