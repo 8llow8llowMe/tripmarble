@@ -5,6 +5,7 @@ import com.followfollowme.tripmarble.domainlayer.member.adapter.out.persistence.
 import com.followfollowme.tripmarble.domainlayer.member.application.mapper.MemberMapper;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -38,5 +39,11 @@ public class MemberRepositoryAdapter implements MemberRepositoryPort {
     public Optional<Member> findById(Long memberId) {
         return memberRepository.findById(memberId)
             .map(memberMapper::toDomainFromEntity);
+    }
+
+    @Override
+    public List<Member> findByIdIn(List<Long> memberIds) {
+        List<MemberEntity> entities = memberRepository.findByIdIn(memberIds);
+        return memberMapper.toDomainListFromEntityList(entities);
     }
 }
