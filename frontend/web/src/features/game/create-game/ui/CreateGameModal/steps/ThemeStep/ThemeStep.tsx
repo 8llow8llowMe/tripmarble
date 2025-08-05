@@ -1,6 +1,6 @@
-import { useTripThemes } from "@/entities/games/hooks/useGames";
 import { TripThemesResponse } from "@/entities/games/model/gamesType";
 import styles from "./ThemeStep.module.scss";
+import useTripThemes from "@/entities/games/hooks/useTripThemes";
 
 interface ThemeStepProps {
   value: number[];
