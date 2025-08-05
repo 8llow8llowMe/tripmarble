@@ -14,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Hidden
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/internal/v1/trip-spots")
 @Tag(name = "여행지 정보", description = "여행지 정보 관련 내부 서비스 통신 전용 API 입니다.")
+@Hidden
 public class TripSpotInternalController {
 
     private final TripSpotInternalUseCase tripSpotInternalUseCase;
