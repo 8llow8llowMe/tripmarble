@@ -4,7 +4,6 @@ import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.dto.
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.presenter.RepresentativeRegionInternalPresenter;
 import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionErrorCode;
 import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionException;
-import com.followfollowme.tripmarble.domainlayer.region.application.mapper.RepresentativeRegionMapper;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.in.RepresentativeRegionInternalUseCase;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RepresentativeRegionRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.RepresentativeRegion;
@@ -18,7 +17,6 @@ public class RepresentativeRegionInternalFacade implements RepresentativeRegionI
 
     private final RepresentativeRegionRepositoryPort representativeRegionRepositoryPort;
     private final RepresentativeRegionInternalPresenter representativeRegionInternalPresenter;
-    private final RepresentativeRegionMapper representativeRegionMapper;
 
     @Override
     @Transactional(readOnly = true)
