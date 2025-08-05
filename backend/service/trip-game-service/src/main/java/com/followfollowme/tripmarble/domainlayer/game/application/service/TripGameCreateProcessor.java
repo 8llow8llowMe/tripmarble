@@ -29,7 +29,7 @@ public class TripGameCreateProcessor {
     private final RepresentativeRegionClientPort representativeRegionClientPort;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
 
-    public TripGameCreateInfo createTripGame(TripGameCreateCommand command) {
+    public TripGameCreateInfo createGame(TripGameCreateCommand command) {
         // 1. 선택된 테마 조회
         List<TripTheme> tripThemes = tripThemeRepositoryPort.findByIdIn(command.tripThemeIds());
 
