@@ -19,11 +19,9 @@ public class TripGameThemeMappingRepositoryAdapter implements TripGameThemeMappi
     private final TripGameThemeMappingMapper tripGameThemeMappingMapper;
 
     @Override
-    public List<TripGameThemeMapping> saveAll(List<TripGameThemeMapping> mappings, TripGame tripGame,
-        List<TripTheme> tripThemes) {
-        List<TripGameThemeMappingEntity> entities = tripGameThemeMappingMapper.toEntityListFromDomainList(mappings,
-            tripGame, tripThemes);
-        List<TripGameThemeMappingEntity> saved = tripGameThemeMappingRepository.saveAll(entities);
-        return tripGameThemeMappingMapper.toDomainListFromEntityList(saved);
+    public List<TripGameThemeMapping> saveAll(List<TripGameThemeMapping> mappings, TripGame tripGame, List<TripTheme> tripThemes) {
+        List<TripGameThemeMappingEntity> entities = tripGameThemeMappingMapper.toEntityListFromDomainList(mappings, tripGame, tripThemes);
+        List<TripGameThemeMappingEntity> savedEntities = tripGameThemeMappingRepository.saveAll(entities);
+        return tripGameThemeMappingMapper.toDomainListFromEntityList(savedEntities);
     }
 }
