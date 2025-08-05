@@ -7,8 +7,8 @@ import lombok.Builder;
 @Builder
 @Schema(description = "여행 게임 생성 응답 DTO")
 public record TripGameCreateResponse(
-    TripGameInfo tripGameInfo,
-    List<TripGameTileInfo> tripGameTileInfos
+    TripGameView tripGameView,
+    List<TripGameTileView> tripGameTileViews
 ) {
 
 }
