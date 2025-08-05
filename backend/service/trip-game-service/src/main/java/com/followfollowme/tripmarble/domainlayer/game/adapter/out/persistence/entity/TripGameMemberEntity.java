@@ -44,4 +44,8 @@ public class TripGameMemberEntity {
     @Comment("방장 여부")
     @Column(nullable = false)
     private Boolean isHost;
+
+    @Comment("턴 순서")
+    @Column(nullable = false)
+    private Integer turnOrder;
 }
