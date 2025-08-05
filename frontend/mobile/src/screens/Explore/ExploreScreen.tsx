@@ -10,7 +10,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import jejuImage from '@images/places/jeju3.png';
+import jejuImage from '@images/places/jeju2.png';
 import gyeongjuImage from '@images/places/gyeongju.png';
 
 import { useNavigation } from '@react-navigation/native';
