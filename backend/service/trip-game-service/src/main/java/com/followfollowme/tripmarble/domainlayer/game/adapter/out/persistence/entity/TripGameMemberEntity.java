@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity;
 
+import com.followfollowme.tripmarble.persistence.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -22,7 +23,7 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "trip_game_member"
 )
-public class TripGameMemberEntity {
+public class TripGameMemberEntity extends BaseEntity {
 
     @Id
     @Comment("여행 게임(계획) 참여자 아이디")
