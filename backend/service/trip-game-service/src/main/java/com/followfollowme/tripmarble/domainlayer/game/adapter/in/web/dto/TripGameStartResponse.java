@@ -18,7 +18,7 @@ public record TripGameStartResponse(
     String gameStatusDescription,
 
     @Schema(description = "게임 참여자 목록 (순서 및 정보 포함)")
-    List<TripGameStartMemberInfo> members
+    List<TripGameStartMemberView> members
 ) {
 
 }
