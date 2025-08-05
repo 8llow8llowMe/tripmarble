@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.repository;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity.TripGameMemberEntity;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,4 +16,6 @@ public interface TripGameMemberRepository extends JpaRepository<TripGameMemberEn
               AND tgm.isHost = true
         """)
     Optional<TripGameMemberEntity> findHostMemberInGame(long tripGameId, long memberId);
+
+    List<TripGameMemberEntity> findByTripGameId(long tripGameId);
 }
