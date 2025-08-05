@@ -64,6 +64,7 @@ public class TripGameCreateProcessor {
             .memberId(command.memberId())
             .isReady(false)
             .isHost(true)
+            .turnOrder(0) // 기본적으로 방장을 0번 순서로 (게임 시작 시, 순서 shuffle 예정)
             .build();
 
         TripGameMember savedMember = tripGameMemberRepositoryPort.save(tripGameMember, savedTripGame);
