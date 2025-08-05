@@ -1,8 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameInfo;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameTileInfo;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameTileView;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameView;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripSpotRandomResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameTileCreateInfo;
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TripGameCreatePresenter {
 
-    public TripGameInfo toGameInfo(TripGameCreateInfo info) {
-        return TripGameInfo.builder()
+    public TripGameView toGameInfo(TripGameCreateInfo info) {
+        return TripGameView.builder()
             .tripGameId(info.tripGame().id())
             .gameStatus(info.tripGame().status().name())
             .gameStatusDescription(info.tripGame().status().getDescription())
@@ -31,13 +31,13 @@ public class TripGameCreatePresenter {
             .build();
     }
 
-    public List<TripGameTileInfo> toTileInfos(TripGameTileCreateInfo tileInfo) {
+    public List<TripGameTileView> toTileInfos(TripGameTileCreateInfo tileInfo) {
         return IntStream.range(0, tileInfo.tripGameTiles().size())
             .mapToObj(i -> {
                 TripGameTile tile = tileInfo.tripGameTiles().get(i);
                 TripSpotRandomResponse spot = tileInfo.tripSpotInfos().get(i);
 
-                return TripGameTileInfo.builder()
+                return TripGameTileView.builder()
                     .tripGameTileId(tile.id())
                     .tripSpotId(tile.tripSpotId())
                     .stepNo(tile.stepNo())
@@ -49,10 +49,10 @@ public class TripGameCreatePresenter {
             .toList();
     }
 
-    public TripGameCreateResponse toCreateResponseFrom(TripGameInfo gameInfo, List<TripGameTileInfo> tileInfos) {
+    public TripGameCreateResponse toCreateResponseFrom(TripGameView gameView, List<TripGameTileView> tileViews) {
         return TripGameCreateResponse.builder()
-            .tripGameInfo(gameInfo)
-            .tripGameTileInfos(tileInfos)
+            .tripGameView(gameView)
+            .tripGameTileViews(tileViews)
             .build();
     }
 }
