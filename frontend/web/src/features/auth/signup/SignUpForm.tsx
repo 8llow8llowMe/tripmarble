@@ -3,7 +3,7 @@ import { useState, useMemo, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 // query
-import { useSignUp } from "@/entities/users/hooks/useUsers";
+import useSignUp from "@/entities/users/hooks/useSignUp";
 // store
 import { useAppDispatch, useAppSelector } from "@/entities/users/model";
 import { resetForm, updateField } from "@/entities/users/model/form/formSlice";
@@ -33,7 +33,7 @@ export default function SignUpPage() {
   const [step, setStep] = useState(0);
   const [hasError, setHasError] = useState(false);
 
-  const { mutate } = useSignUp();
+  const { signUpMutate } = useSignUp();
 
   const current = useMemo(() => steps[step], [step]);
   const key = useMemo(
@@ -77,7 +77,7 @@ export default function SignUpPage() {
     if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
-      mutate(
+      signUpMutate(
         {
           email: form.email,
           password: form.password,

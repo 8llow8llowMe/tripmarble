@@ -11,13 +11,13 @@ import { logout } from "@/entities/users/model/user/userSlice";
 
 import UserAvatar from "@/entities/users/ui/UserAvatar";
 import UserInfo from "@/entities/users/ui/UserInfo";
-import { useLogout } from "@/entities/users/hooks/useUsers";
 import ProfileEditForm from "./edit";
+import useLogout from "@/entities/users/hooks/useLogout";
 
 export const ProfileInfo = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { mutate: logoutMutate } = useLogout();
+  const { logoutMutate } = useLogout();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleModProfile = () => {
@@ -31,7 +31,6 @@ export const ProfileInfo = () => {
   const handleLogout = () => {
     logoutMutate(undefined, {
       onSuccess: () => {
-        localStorage.removeItem("accessToken");
         dispatch(logout());
         router.push("/");
         toast.success("로그아웃되었습니다.", {

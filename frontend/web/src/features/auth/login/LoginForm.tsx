@@ -9,9 +9,10 @@ import { toast } from "react-toastify";
 import styles from "./LoginForm.module.scss";
 // icon
 import { google, kakao, naver } from "@/shared/assets/images/social-logo";
-import { useLogin } from "@/entities/users/hooks/useUsers";
 import { fetchMe } from "@/entities/users/model/user/userSlice";
 import { useAppDispatch } from "@/entities/users/model";
+// api
+import useLogin from "@/entities/users/hooks/useLogin";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function LoginPage() {
     setEmail(saved ? storedEmail : "");
   }, []);
 
-  const { mutate: loginMutate } = useLogin();
+  const { loginMutate } = useLogin();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
