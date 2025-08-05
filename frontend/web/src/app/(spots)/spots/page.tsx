@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import { StaticImageData } from "next/image";
 // styles
 import styles from "./SpotsList.module.scss";
 import noImage from "/public/images/no-image.png";
@@ -8,9 +10,7 @@ import HorizontalList from "@/shared/ui/common/HorizontalList/HorizontalList";
 // data
 import { spotsData } from "@/shared/constants/spots";
 // api
-import { useRepresentativeRegions } from "@/entities/trips/hooks/useTrips";
-import { useMemo } from "react";
-import { StaticImageData } from "next/image";
+import useRepresentativeRegions from "@/entities/trips/hooks/useRepresentativeRegions";
 
 // import type { Metadata } from "next";
 
