@@ -8,6 +8,7 @@ import {
 import { toast } from "react-toastify";
 import Image from "next/image";
 import { useAppSelector } from "@/entities/users/model";
+import { useRouter } from "next/navigation";
 
 interface ProfileEditFormProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface ProfileEditFormProps {
 }
 
 const ProfileEditForm = ({ isOpen, onClose }: ProfileEditFormProps) => {
+  const router = useRouter();
   const user = useAppSelector((state) => state.user.user);
   const [nickname, setNickname] = useState<string>("");
   const [previewImageURL, setPreviewImageURL] = useState<string | null>(null);
@@ -57,8 +59,9 @@ const ProfileEditForm = ({ isOpen, onClose }: ProfileEditFormProps) => {
         nickname: finalNickname,
       });
 
-      console.log("프로필 변경 성공");
+      toast.success("프로필 정보가 변경되었습니다.");
       onClose();
+      router.refresh();
     } catch (error) {
       console.error("프로필 수정 중 오류:", error);
       toast.error("프로필 수정 중 오류가 발생했습니다.");
