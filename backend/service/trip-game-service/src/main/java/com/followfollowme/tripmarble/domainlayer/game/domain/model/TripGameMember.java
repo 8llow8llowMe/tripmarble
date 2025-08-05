@@ -8,7 +8,18 @@ public record TripGameMember(
     long tripGameId,
     long memberId,
     boolean isReady,
-    boolean isHost
+    boolean isHost,
+    int turnOrder
 ) {
 
+    public TripGameMember assignTurnOrder(int newTurnOrder) {
+        return TripGameMember.builder()
+            .id(this.id())
+            .tripGameId(this.tripGameId())
+            .memberId(this.memberId())
+            .isReady(this.isReady())
+            .isHost(this.isHost())
+            .turnOrder(newTurnOrder)
+            .build();
+    }
 }
