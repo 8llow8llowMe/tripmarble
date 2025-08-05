@@ -2,20 +2,20 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.e
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
+import com.followfollowme.tripmarble.persistence.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
-
-import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -25,7 +25,7 @@ import java.time.LocalDate;
 @Table(
     name = "trip_game"
 )
-public class TripGameEntity {
+public class TripGameEntity extends BaseEntity {
 
     @Id
     @Comment("여행 게임(계획) 아이디")
