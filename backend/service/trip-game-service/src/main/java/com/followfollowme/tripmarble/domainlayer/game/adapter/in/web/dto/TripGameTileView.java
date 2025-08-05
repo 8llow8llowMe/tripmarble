@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "여행 게임 말판 정보 DTO")
-public record TripGameTileInfo(
+@Schema(description = "여행 게임 말판 정보 View DTO")
+public record TripGameTileView(
     @Schema(description = "타일 고유 ID", example = "20250731000123")
     long tripGameTileId,
 

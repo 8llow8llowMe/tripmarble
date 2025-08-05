@@ -6,8 +6,8 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-@Schema(description = "생성된 여행 게임 기본 정보 DTO")
-public record TripGameInfo(
+@Schema(description = "생성된 여행 게임 기본 정보 View DTO")
+public record TripGameView(
     @Schema(description = "생성된 여행 게임 ID", example = "202507110001")
     long tripGameId,
 
