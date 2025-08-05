@@ -9,7 +9,6 @@ import {
 } from "@/features/game/create-game/model/createGameSlice";
 import styles from "./CreateGameModal.module.scss";
 import Modal from "@/shared/ui/common/Modal";
-import { useCreateTripGame } from "@/entities/games/hooks/useGames";
 
 // Step 컴포넌트 import
 import TitleStep from "./steps/TitleStep/TitleStep";
@@ -17,6 +16,7 @@ import DifficultyStep from "./steps/DifficultyStep/DifficultyStep";
 import DateStep from "./steps/DateStep/DateStep";
 import RegionStep from "./steps/ResionStep/RegionStep";
 import ThemeStep from "./steps/ThemeStep/ThemeStep";
+import useCreateTripGame from "@/entities/games/hooks/useCreateTripGame";
 
 type StepKey =
   | "title"
@@ -85,7 +85,7 @@ export default function CreateGameModal({
   const form = useAppSelector((state) => state.createGame);
   const [step, setStep] = useState(0);
   const [hasError, setHasError] = useState(false);
-  const { mutate } = useCreateTripGame();
+  const { createGame } = useCreateTripGame();
 
   const currentStep = steps[step];
   const StepComponent = currentStep.Component as React.ComponentType<any>;
@@ -101,7 +101,7 @@ export default function CreateGameModal({
     setHasError(false);
     if (step < steps.length - 1) setStep(step + 1);
     else {
-      mutate(form, {
+      createGame(form, {
         onSuccess: () => {
           toast.success("게임이 생성되었습니다!");
           dispatch(resetGameForm());
