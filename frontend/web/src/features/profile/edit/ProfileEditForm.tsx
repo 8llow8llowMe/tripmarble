@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import Modal from "@/shared/ui/common/Modal";
 import styles from "./ProfileEditForm.module.scss";
-import {
-  useUploadTempProfileImage,
-  useUpdateUserProfile,
-} from "@/entities/users/hooks/useUsers";
 import { toast } from "react-toastify";
 import Image from "next/image";
 import { useAppSelector } from "@/entities/users/model";
 import { useRouter } from "next/navigation";
+// apis
+import useUploadTempProfileImage from "@/entities/users/hooks/useUploadTempProfileImage";
+import useUpdateUserProfile from "@/entities/users/hooks/useUpdateUserProfile";
 
 interface ProfileEditFormProps {
   isOpen: boolean;
@@ -23,8 +22,8 @@ const ProfileEditForm = ({ isOpen, onClose }: ProfileEditFormProps) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  const { mutateAsync: uploadImageAsync } = useUploadTempProfileImage();
-  const { mutateAsync: updateUserProfileAsync } = useUpdateUserProfile();
+  const { uploadImageAsync } = useUploadTempProfileImage();
+  const { updateUserProfileAsync } = useUpdateUserProfile();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
