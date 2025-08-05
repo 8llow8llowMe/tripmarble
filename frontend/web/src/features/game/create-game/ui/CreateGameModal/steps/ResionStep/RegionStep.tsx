@@ -1,5 +1,6 @@
-import { useRepresentativeRegions } from "@/entities/trips/hooks/useTrips";
-import { RegionsRepresentativeResponse } from "@/entities/trips/model/tripsType";
+import useRepresentativeRegions, {
+  RegionsRepresentativeResponse,
+} from "@/entities/trips/hooks/useRepresentativeRegions";
 import styles from "./RegionStep.module.scss";
 
 interface RegionStepProps {

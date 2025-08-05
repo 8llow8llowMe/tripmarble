@@ -1,8 +1,8 @@
 "use client";
 
+import useTripSpotById from "@/entities/trips/hooks/useTripSpotById";
 import styles from "./TripSpotDetail.module.scss";
 import Image from "next/image";
-import { useTripSpotById } from "@/entities/trips/hooks/useTrips";
 import { useMemo } from "react";
 
 type Props = {

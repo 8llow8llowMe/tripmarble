@@ -8,11 +8,16 @@ type ValueOf<T> = T[keyof T];
 // 사용자 권한 타입
 type Role = "admin" | "user" | "guest";
 
-// 공통 API 응답 타입
-interface ApiResponse<T> {
+export interface dataHeader {
   success: boolean;
-  message?: string;
-  data: T;
+  resultCode: string | null;
+  resultMessage: string | null;
+}
+
+// 공통 API 응답 타입
+export interface ApiResponse<T> {
+  dataHeader: dataHeader;
+  dataBody: T;
 }
 
 // 에러 응답 타입

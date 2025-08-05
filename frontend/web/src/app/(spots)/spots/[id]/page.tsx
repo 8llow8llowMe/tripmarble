@@ -7,12 +7,10 @@ import { seoul2 } from "@/shared/assets/images/places";
 // style
 import styles from "./Spot.module.scss";
 // api
-import {
-  useTripContentTypes,
-  useTripSpotsByRepresentativeRegion,
-} from "@/entities/trips/hooks/useTrips";
+import useTripContentTypes from "@/entities/trips/hooks/useTripContentTypes";
 // component
 import Filter from "@/shared/ui/common/Filter/Filter";
+import useTripSpotsByRepresentativeRegion from "@/entities/trips/hooks/useTripSpotsByRepresentativeRegion";
 
 type Props = {
   params: {
