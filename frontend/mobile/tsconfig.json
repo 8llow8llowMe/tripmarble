@@ -17,13 +17,13 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@icons/*": ["./assets/icons/*"],
-      "@images/*": ["./assets/images/*"],
-      "@fonts/*": ["./assets/fonts/*"]
+      "@/*": ["./src/*"],
+      "@icons/*": ["./src/assets/icons/*"],
+      "@images/*": ["./src/assets/images/*"],
+      "@fonts/*": ["./src/assets/fonts/*"]
     },
     "types": ["react", "react-native"]
   },
-  "include": ["src", "App.tsx", "index.tsx"],
+  "include": ["src", "App.tsx", "index.tsx", "declarations.d.ts"],
   "exclude": ["node_modules"]
 }
