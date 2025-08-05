@@ -25,20 +25,23 @@ public record TripGame(
             .title(this.title)
             .status(Status.ONGOING)
             .difficulty(this.difficulty)
-            .startedAt(LocalDate.now())
-            .endedAt(null)
+            .startedAt(this.startedAt)
+            .endedAt(this.endedAt)
             .representativeRegionId(this.representativeRegionId)
             .build();
     }
 
     public TripGame end() {
+        if (this.status != Status.ENDED) {
+            throw new IllegalStateException("이미 종료된 게임입니다.");
+        }
         return TripGame.builder()
             .id(this.id)
             .title(this.title)
             .status(Status.ENDED)
             .difficulty(this.difficulty)
             .startedAt(this.startedAt)
-            .endedAt(LocalDate.now())
+            .endedAt(this.endedAt)
             .representativeRegionId(this.representativeRegionId)
             .build();
     }
