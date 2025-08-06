@@ -55,7 +55,8 @@ jwt:
 
 # minio
 minio:
-  url: http://localhost:9000
+  internal-url: http://localhost:9000
+  public-url: http://localhost:9000
   bucket-prefix: tripmarble
   access-key: ENC(fkrxtIidUHN1LoxCucgcFpBXqSh22NiO)
   secret-key: ENC(gyy+d4BkG2lphHopsii2hNLjUHutcbZNZcev8D90M08=)
