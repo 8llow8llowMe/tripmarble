@@ -18,12 +18,13 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@icons/*": ["./src/assets/icons/*"],
-      "@images/*": ["./src/assets/images/*"],
-      "@fonts/*": ["./src/assets/fonts/*"]
+      "@assets/*": ["assets/*"],
+      "@icons/*": ["assets/icons/*"],
+      "@images/*": ["assets/images/*"],
+      "@fonts/*": ["assets/fonts/*"]
     },
     "types": ["react", "react-native"]
   },
-  "include": ["src", "App.tsx", "index.tsx", "declarations.d.ts"],
+  "include": ["src", "App.tsx", "index.tsx", "declarations.d.ts", "assets"],
   "exclude": ["node_modules"]
 }

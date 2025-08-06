@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 
-import logo from '../../assets/icon.png';
+import logo from '../../../assets/icon.png';
 import { palette } from '@/constants/colors';
 import useLoginMutaion from '@/hooks/auth/useLogin';
 import { useAppDispatch } from '@/store/store';

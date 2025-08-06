@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import logo from '../../assets/splash-icon.png';
+import logo from '../../../assets/splash-icon.png';
 
 export default function SplashScreen() {
   return (
