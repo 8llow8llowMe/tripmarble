@@ -9,11 +9,16 @@ export default function HomeStackNavigator() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeScreen" component={HomeScreen} />
-      <HomeStack.Screen name="SpotListScreen" component={SpotListScreen} />
+      <HomeStack.Screen
+        name="SpotListScreen"
+        component={SpotListScreen}
+        options={{ headerShown: false }}
+      />
       <HomeStack.Screen
         name="SpotDetailScreen"
         component={SpotDetailScreen}
         options={{
+          headerShown: false,
           tabBarStyle: { display: 'none' },
         }}
       />
