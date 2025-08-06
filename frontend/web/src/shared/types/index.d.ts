@@ -37,3 +37,10 @@ interface User {
 
 // 유틸리티 타입: 함수 타입
 type Fn<T = void> = (...args: any[]) => T;
+
+declare global {
+  interface Window {
+    Kakao?: any;
+  }
+}
+export {};
