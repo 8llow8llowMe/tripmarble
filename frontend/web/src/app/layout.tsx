@@ -6,6 +6,7 @@ import StoreProvider from "@/app/providers/StoreProvider";
 import { ToastContainer } from "react-toastify";
 import { Metadata } from "next";
 import type { ReactNode } from "react";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "TripMarble - 여행을 게임으로!",
@@ -36,6 +37,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko">
+      <head>
+        {/* 카카오 SDK */}
+        <Script
+          src="https://developers.kakao.com/sdk/js/kakao.js"
+          strategy="beforeInteractive" // 페이지 인터렉션 전에 로드
+        />
+      </head>
       <body>
         <QueryProvider>
           <StoreProvider>
