@@ -40,7 +40,7 @@ public class ProfileImageUploader {
             );
 
             // 접두사 포함 전체 URL
-            String url = minioProperties.url() + "/" + bucketName + "/" + objectPath;
+            String url = minioProperties.publicUrl() + "/" + bucketName + "/" + objectPath;
 
             return MemberProfileUploadResponse.builder()
                 .tempImageUrl(url)
