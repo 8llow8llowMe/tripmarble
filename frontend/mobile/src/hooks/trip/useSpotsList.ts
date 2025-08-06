@@ -15,13 +15,13 @@ export interface TripSpotListRequest {
   size?: number;
 }
 
-export interface TripSpoListtResponse extends ApiResponseBase {
+export interface TripSpotListResponse extends ApiResponseBase {
   dataBody: {
     contents: {
       tripSpotId: number;
       contentId: number;
       tripSpotName: string;
-      thumbnailImageUrl: string | null;
+      originalImageUrl: string | null;
     }[];
     hasNext: boolean;
   };
@@ -36,7 +36,7 @@ export const getTripSpotList = async ({
   if (lastTripSpotId !== undefined) params.lastTripSpotId = lastTripSpotId;
   if (size !== undefined) params.size = size;
 
-  const { data } = await apiClient.get<TripSpoListtResponse>(
+  const { data } = await apiClient.get<TripSpotListResponse>(
     END_POINTS.TRIP.LIST_SPOTS(representativeRegionId),
     { params },
   );
