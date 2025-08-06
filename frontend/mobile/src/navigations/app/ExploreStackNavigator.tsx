@@ -13,11 +13,16 @@ export default function ExploreStackNavigator() {
         component={ExploreScreen}
         options={{ headerShown: false }}
       />
-      <ExploreStack.Screen name="SpotListScreen" component={SpotListScreen} />
+      <ExploreStack.Screen
+        name="SpotListScreen"
+        component={SpotListScreen}
+        options={{ headerShown: false }}
+      />
       <ExploreStack.Screen
         name="SpotDetailScreen"
         component={SpotDetailScreen}
         options={{
+          headerShown: false,
           tabBarStyle: { display: 'none' },
         }}
       />
