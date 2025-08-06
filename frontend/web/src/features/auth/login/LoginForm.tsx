@@ -13,6 +13,7 @@ import { fetchMe } from "@/entities/users/model/user/userSlice";
 import { useAppDispatch } from "@/entities/users/model";
 // api
 import useLogin from "@/entities/users/hooks/useLogin";
+import useSocialLoginAutorize from "@/entities/users/hooks/useSocialLoginAutorize";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -77,6 +78,18 @@ export default function LoginPage() {
     );
   };
 
+  const { data } = useSocialLoginAutorize("KAKAO");
+  function handleKakaoLogin(provider: string) {
+    try {
+      const kakaoAuthUrl = data?.data.dataBody;
+      if (kakaoAuthUrl) {
+        window.location.href = kakaoAuthUrl;
+      }
+    } catch (error) {
+      console.error("카카오 로그인 URL 요청 실패", error);
+    }
+  }
+
   return (
     <>
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -122,7 +135,10 @@ export default function LoginPage() {
             <a>로그인</a>
           </div>
         </div>
-        <div className={styles.socialItem}>
+        <div
+          className={styles.socialItem}
+          onClick={() => handleKakaoLogin("KAKAO")}
+        >
           <Image src={kakao} alt="kakao" width={50} height={24} />
           <div className={styles.socialWord}>
             <a>카카오</a>

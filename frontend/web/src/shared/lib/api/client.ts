@@ -36,7 +36,8 @@ authApiClient.interceptors.request.use(
   (config) => {
     if (
       config.url?.includes("/auth/login") ||
-      config.url?.includes("/members/signup")
+      config.url?.includes("/members/signup") ||
+      config.url?.includes("/auth/KAKAO/login")
     ) {
       // 아무것도 하지 않고 config를 바로 반환
       return config;
