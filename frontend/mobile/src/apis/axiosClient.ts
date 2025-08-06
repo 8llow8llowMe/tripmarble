@@ -42,21 +42,42 @@ authApiClient.interceptors.request.use(
 
 apiClient.interceptors.request.use(
   async (config) => {
+    console.log('[Axios Request]', {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      data: config.data,
+    });
     const accessToken = await getAsyncStorageItem(STORAGE_KEY.ACCESS_TOKEN);
     if (accessToken && config.headers) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => {
+    console.error('[Axios Request Error]', error);
+    return Promise.reject(error);
+  },
 );
 
 // 응답 인터셉터: 401 → 토큰 재발급 후 재요청
 authApiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('[Axios Response]', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data,
+    });
+    return response;
+  },
   async (error) => {
-    const originalRequest = error.config;
+    console.error('[Axios Response Error]', {
+      url: error.config.url,
+      status: error.response.status,
+      data: error.response.data,
+    });
 
+    const originalRequest = error.config;
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
