@@ -11,11 +11,11 @@ import org.springframework.context.annotation.Configuration;
 public class MinioConfig {
 
     private final MinioProperties minioProperties;
-    
+
     @Bean
     public MinioClient minioClient() {
         return MinioClient.builder()
-            .endpoint(minioProperties.url())
+            .endpoint(minioProperties.internalUrl())
             .credentials(minioProperties.accessKey(), minioProperties.secretKey())
             .build();
     }
