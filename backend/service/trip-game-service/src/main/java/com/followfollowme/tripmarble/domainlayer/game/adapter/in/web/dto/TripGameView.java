@@ -29,6 +29,12 @@ public record TripGameView(
     @Schema(description = "여행 종료일", example = "2025-07-20")
     LocalDate endedAt,
 
+    @Schema(description = "현재 턴 순서", example = "1")
+    int currentTurnOrder,
+
+    @Schema(description = "말의 현재 위치 (step 번호)", example = "0")
+    int currentStepNo,
+
     @Schema(description = "대표 여행지 이름", example = "제주")
     String representativeRegionName,
 
