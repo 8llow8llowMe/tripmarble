@@ -2,22 +2,16 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
 
 // style
 import styles from "./LoginForm.module.scss";
 // icon
 import { google, kakao, naver } from "@/shared/assets/images/social-logo";
-import { fetchMe } from "@/entities/users/model/user/userSlice";
-import { useAppDispatch } from "@/entities/users/model";
 // api
 import useLogin from "@/entities/users/hooks/useLogin";
 import useSocialLoginAutorize from "@/entities/users/hooks/useSocialLoginAutorize";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [saveEmail, setSaveEmail] = useState(false);
@@ -33,52 +27,19 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    loginMutate({ email, password });
 
-    loginMutate(
-      { email, password },
-      {
-        onSuccess: async (res: any) => {
-          const { accessToken, memberId } = res.data.dataBody;
-
-          localStorage.setItem("accessToken", accessToken);
-          localStorage.setItem("memberId", memberId.toString());
-          await dispatch(fetchMe());
-
-          if (saveEmail) {
-            localStorage.setItem("saveEmail", "true");
-            localStorage.setItem("email", email);
-          } else {
-            localStorage.removeItem("saveEmail");
-            localStorage.removeItem("email");
-          }
-
-          router.push("/");
-          toast.success("환영합니다! 로그인되었습니다.", {
-            position: "top-right",
-            autoClose: 1200,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: false,
-            progress: undefined,
-          });
-        },
-        onError: (err: any) => {
-          toast.error(err.response.data.dataHeader.resultMessage, {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: false,
-            progress: undefined,
-          });
-        },
-      }
-    );
+    if (saveEmail) {
+      localStorage.setItem("saveEmail", "true");
+      localStorage.setItem("email", email);
+    } else {
+      localStorage.removeItem("saveEmail");
+      localStorage.removeItem("email");
+    }
   };
 
   const { data } = useSocialLoginAutorize("KAKAO");
+
   function handleKakaoLogin(provider: string) {
     try {
       const kakaoAuthUrl = data?.data.dataBody;
