@@ -3,6 +3,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import styles from "./DateStep.module.scss";
 import { ko } from "date-fns/locale";
 import { isSameDay } from "date-fns";
+import formatDate from "@/shared/hooks/formatDate";
 
 // 한글 월 표시용
 const monthNames = [
@@ -28,7 +29,6 @@ interface DateStepProps {
 
 export default function DateStep({ value, onChange, label }: DateStepProps) {
   const [start, end] = value || [null, null];
-
   return (
     <div>
       <DatePicker
@@ -37,10 +37,7 @@ export default function DateStep({ value, onChange, label }: DateStepProps) {
         selected={start ? new Date(start) : null}
         onChange={(dates: [Date | null, Date | null]) => {
           const [startDate, endDate] = dates;
-          onChange([
-            startDate ? startDate.toISOString().slice(0, 10) : "",
-            endDate ? endDate.toISOString().slice(0, 10) : "",
-          ]);
+          onChange([formatDate(startDate), formatDate(endDate)]);
         }}
         startDate={start ? new Date(start) : null}
         endDate={end ? new Date(end) : null}
