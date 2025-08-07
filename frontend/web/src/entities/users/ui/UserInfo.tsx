@@ -7,7 +7,9 @@ const UserInfo = () => {
   return (
     <>
       <h2 className={styles.username}>{user?.name || "트립마블"}</h2>
-      <p className={styles.socialInfo}>이메일 로그인</p>
+      <p className={styles.socialInfo}>
+        {`${user?.provider || "이메일"} 로그인`}
+      </p>
     </>
   );
 };
