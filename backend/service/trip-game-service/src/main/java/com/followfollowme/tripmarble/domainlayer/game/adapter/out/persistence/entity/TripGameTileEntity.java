@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity;
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.TileType;
+import com.followfollowme.tripmarble.persistence.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,7 +26,7 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "trip_game_tile"
 )
-public class TripGameTileEntity {
+public class TripGameTileEntity extends BaseEntity {
 
     @Id
     @Comment("게임 내 블록 아이디")
