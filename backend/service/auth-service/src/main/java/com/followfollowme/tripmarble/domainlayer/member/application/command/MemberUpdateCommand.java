@@ -7,14 +7,14 @@ import lombok.Builder;
 public record MemberUpdateCommand(
     long memberId,
     String nickname,
-    String profileImageUrl
+    String profileImage
 ) {
 
     public static MemberUpdateCommand from(long memberId, MemberUpdateRequest request) {
         return MemberUpdateCommand.builder()
             .memberId(memberId)
             .nickname(request.nickname())
-            .profileImageUrl(request.profileImageUrl())
+            .profileImage(request.profileImage())
             .build();
     }
 }
