@@ -12,6 +12,7 @@ x-trip-game-service-environment: &trip_game_service_environment
   SNOWFLAKE_WORKER_ID: ${SNOWFLAKE_WORKER_ID}
   JWT_ACCESS_KEY: ${JWT_ACCESS_KEY}
   TRIP_SERVICE_APP_NAME: ${TRIP_SERVICE_APP_NAME}
+  AUTH_SERVICE_APP_NAME: ${AUTH_SERVICE_APP_NAME}
 
 services:
   trip-game-service-dev:
