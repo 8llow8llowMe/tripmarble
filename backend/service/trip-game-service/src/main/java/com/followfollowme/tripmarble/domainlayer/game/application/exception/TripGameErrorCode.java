@@ -12,7 +12,11 @@ public enum TripGameErrorCode {
     HOST_MEMBER_NOT_FOUND("TRIP_GAME_002", "해당 게임에서 방장 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     NOT_HOST_MEMBER("TRIP_GAME_003", "게임 시작 권한이 없습니다. 방장만 게임을 시작할 수 있습니다.", HttpStatus.FORBIDDEN),
     MEMBER_NOT_READY("TRIP_GAME_004", "모든 플레이어가 준비되어야 게임을 시작할 수 있습니다.", HttpStatus.BAD_REQUEST),
-    MEMBER_PROFILE_FETCH_FAILED("TRIP_GAME_005", "회원 프로필 정보를 가져오는데 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+    MEMBER_PROFILE_FETCH_FAILED("TRIP_GAME_005", "회원 프로필 정보를 가져오는데 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    MEMBER_NOT_FOUND("TRIP_GAME_006", "해당 게임에 참여한 회원이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    MEMBER_TURN_NOT_MATCH("TRIP_GAME_007", "현재 플레이어의 턴이 아닙니다.", HttpStatus.FORBIDDEN),
+    DICE_ROLL_FAILED("TRIP_GAME_008", "주사위 굴리기에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    TILE_NOT_FOUND("TRIP_GAME_009", "해당 위치의 타일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
     private final String code;
     private final String errorMessage;
