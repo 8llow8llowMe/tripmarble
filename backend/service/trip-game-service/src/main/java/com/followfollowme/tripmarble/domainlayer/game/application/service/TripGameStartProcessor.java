@@ -1,6 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileResponse;
+import com.followfollowme.tripmarble.domainlayer.game.application.exception.TripGameErrorCode;
+import com.followfollowme.tripmarble.domainlayer.game.application.exception.TripGameException;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameMemberWithProfileInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.MemberClientPort;
@@ -28,20 +30,21 @@ public class TripGameStartProcessor {
     public TripGameStartInfo startGame(long tripGameId, long hostMemberId) {
         // 1. 게임 정보 조회
         TripGame tripGame = tripGameRepositoryPort.findById(tripGameId)
-            .orElseThrow(() -> new IllegalArgumentException("게임을 찾을 수 없습니다."));
+            .orElseThrow(() -> new TripGameException(TripGameErrorCode.GAME_NOT_FOUND));
 
         // 2. 방장 여부 확인 (권한 체크)
         TripGameMember hostMember = tripGameMemberRepositoryPort.findHostMemberInGame(tripGameId, hostMemberId)
-            .orElseThrow(() -> new IllegalArgumentException("게임 방장을 찾을 수 없습니다."));
+            .orElseThrow(() -> new TripGameException(TripGameErrorCode.HOST_MEMBER_NOT_FOUND));
 
         if (hostMember.isHost()) {
-            throw new IllegalStateException("게임 시작 권한이 없습니다.");
+            throw new TripGameException(TripGameErrorCode.NOT_HOST_MEMBER);
         }
 
         // 3. 모든 인원이 준비 완료인지 확인
+        // TODO: 추후에 Redis에 게임 참여자들의 게임 준비 상태를 확인해서 DB에 반영 및 게임 시작 로직 실행하는 방향으로 설계해야함
         List<TripGameMember> members = tripGameMemberRepositoryPort.findByTripGameId(tripGameId);
         if (members.stream().anyMatch(m -> !m.isReady())) {
-            throw new IllegalStateException("모든 플레이어가 준비되어야 게임을 시작할 수 있습니다.");
+            throw new TripGameException(TripGameErrorCode.MEMBER_NOT_READY);
         }
 
         // 4. 턴 순서 무작위 지정
