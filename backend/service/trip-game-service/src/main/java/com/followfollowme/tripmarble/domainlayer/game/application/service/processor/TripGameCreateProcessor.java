@@ -42,6 +42,8 @@ public class TripGameCreateProcessor {
             .startedAt(command.startedAt())
             .endedAt(command.endedAt())
             .representativeRegionId(command.representativeRegionId())
+            .currentTurnOrder(1) // 게임 턴은 1부터 시작
+            .currentStepNo(0) // 현재 말은 아직 시작점에 들어가기 전
             .build();
 
         TripGame savedTripGame = tripGameRepositoryPort.save(tripGame);
