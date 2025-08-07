@@ -52,6 +52,14 @@ public class TripGameEntity extends BaseEntity {
     @Column(nullable = false)
     private LocalDate endedAt;
 
+    @Column(nullable = false)
+    @Comment("현재 턴 순서 (1부터 시작)")
+    private Integer currentTurnOrder;
+
+    @Column(nullable = false)
+    @Comment("현재 말이 위치한 블럭 번호")
+    private Integer currentStepNo;
+
     @Comment("대표 여행지 연관 외래키")
     @Column(nullable = false)
     private Long representativeRegionId;
