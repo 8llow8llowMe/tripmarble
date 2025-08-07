@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
-    name = "${feign-client.target-services.auth-service}",
+    name = "${feign-client.target-services.auth-service:auth-service}",
     contextId = "memberClient",
     path = "/internal/v1/members"
 )

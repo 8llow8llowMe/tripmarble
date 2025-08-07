@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
-    name = "${feign-client.target-services.trip-service}",
+    name = "${feign-client.target-services.trip-service:trip-service}",
     contextId = "representativeRegionClient",
     path = "/internal/v1/regions/representative"
 )
