@@ -11,7 +11,7 @@ import com.followfollowme.tripmarble.domainlayer.auth.application.command.TokenR
 public interface AuthUseCase {
 
     // 일반(자체) 로그인
-    AuthLoginResponse login(AuthLoginCommand command);
+    AuthLoginResponse loginWithCredentials(AuthLoginCommand command);
 
     // 로그아웃
     void logout(long memberId);

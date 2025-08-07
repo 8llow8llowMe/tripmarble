@@ -25,7 +25,7 @@ public class AuthFacade implements AuthUseCase {
 
     @Override
     @Transactional
-    public AuthLoginResponse login(AuthLoginCommand command) {
+    public AuthLoginResponse loginWithCredentials(AuthLoginCommand command) {
         return credentialLoginProcessor.login(command);
     }
 
