@@ -39,9 +39,9 @@ public class MemberWebController {
         description = "해당 서비스에 일반 회원가입 하는 기능입니다."
     )
     @PostMapping("/signup")
-    public ResponseEntity<Response<Void>> signup(
+    public ResponseEntity<Response<Void>> signupMember(
         @Valid @RequestBody MemberSignupRequest request) {
-        memberWebUseCase.signup(MemberSignupCommand.from(request));
+        memberWebUseCase.signupMember(MemberSignupCommand.from(request));
         return ResponseEntity.ok().body(Response.success());
     }
 
