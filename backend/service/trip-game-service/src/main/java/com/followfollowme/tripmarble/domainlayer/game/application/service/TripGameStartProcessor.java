@@ -36,7 +36,7 @@ public class TripGameStartProcessor {
         TripGameMember hostMember = tripGameMemberRepositoryPort.findHostMemberInGame(tripGameId, hostMemberId)
             .orElseThrow(() -> new TripGameException(TripGameErrorCode.HOST_MEMBER_NOT_FOUND));
 
-        if (hostMember.isHost()) {
+        if (!hostMember.isHost()) {
             throw new TripGameException(TripGameErrorCode.NOT_HOST_MEMBER);
         }
 
