@@ -62,7 +62,7 @@ public class TripGameCreateProcessor {
             .id(snowflakeIdGenerator.generateId())
             .tripGameId(savedTripGame.id())
             .memberId(command.memberId())
-            .isReady(false)
+            .isReady(true) // 기본적으로 방장은 게임 준비상태로
             .isHost(true)
             .turnOrder(0) // 기본적으로 방장을 0번 순서로 (게임 시작 시, 순서 shuffle 예정)
             .build();
