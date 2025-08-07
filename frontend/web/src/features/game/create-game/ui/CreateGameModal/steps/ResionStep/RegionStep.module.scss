@@ -8,7 +8,6 @@
   grid-template-columns: repeat(5, 120px); /* 고정 칸 너비 */
   grid-template-rows: repeat(3, 130px); /* 3줄 고정 */
   gap: 0 30px;
-
   max-width: calc(3 * 130px + 24px * 2);
   max-height: 100%;
   overflow-x: auto;
