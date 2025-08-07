@@ -42,8 +42,8 @@ public class AuthWebController {
         description = "이메일과 비밀번호를 입력하여 로그인을 하는 기능입니다."
     )
     @PostMapping("/login")
-    public ResponseEntity<Response<AuthLoginResponse>> login(@RequestBody AuthLoginRequest request) {
-        AuthLoginResponse response = authUseCase.login(AuthLoginCommand.from(request));
+    public ResponseEntity<Response<AuthLoginResponse>> loginWithCredentials(@RequestBody AuthLoginRequest request) {
+        AuthLoginResponse response = authUseCase.loginWithCredentials(AuthLoginCommand.from(request));
         return ResponseEntity.ok().body(Response.success(response));
     }
 
