@@ -13,6 +13,8 @@ public record TripGame(
     Difficulty difficulty,
     LocalDate startedAt,
     LocalDate endedAt,
+    int currentTurnOrder,
+    int currentStepNo,
     long representativeRegionId
 ) {
 
@@ -27,6 +29,8 @@ public record TripGame(
             .difficulty(this.difficulty)
             .startedAt(this.startedAt)
             .endedAt(this.endedAt)
+            .currentTurnOrder(this.currentTurnOrder)
+            .currentStepNo(this.currentStepNo)
             .representativeRegionId(this.representativeRegionId)
             .build();
     }
@@ -42,6 +46,36 @@ public record TripGame(
             .difficulty(this.difficulty)
             .startedAt(this.startedAt)
             .endedAt(this.endedAt)
+            .currentTurnOrder(this.currentTurnOrder)
+            .currentStepNo(this.currentStepNo)
+            .representativeRegionId(this.representativeRegionId)
+            .build();
+    }
+
+    public TripGame updateCurrentStepNo(int updatedStepNo) {
+        return TripGame.builder()
+            .id(this.id)
+            .title(this.title)
+            .status(this.status)
+            .difficulty(this.difficulty)
+            .startedAt(this.startedAt)
+            .endedAt(this.endedAt)
+            .currentTurnOrder(this.currentTurnOrder)
+            .currentStepNo(updatedStepNo)
+            .representativeRegionId(this.representativeRegionId)
+            .build();
+    }
+
+    public TripGame updateTurnAndStep(int updatedStepNo, int nextTurnOrder) {
+        return TripGame.builder()
+            .id(this.id)
+            .title(this.title)
+            .status(this.status)
+            .difficulty(this.difficulty)
+            .startedAt(this.startedAt)
+            .endedAt(this.endedAt)
+            .currentTurnOrder(nextTurnOrder)
+            .currentStepNo(updatedStepNo)
             .representativeRegionId(this.representativeRegionId)
             .build();
     }
