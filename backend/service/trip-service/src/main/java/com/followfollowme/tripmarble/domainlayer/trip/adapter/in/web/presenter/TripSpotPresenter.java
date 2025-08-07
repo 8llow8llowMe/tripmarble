@@ -23,8 +23,7 @@ public class TripSpotPresenter {
         return SliceResponse.of(tripSpots.map(this::toSimpleResponse));
     }
 
-    public TripSpotWithDetailViewResponse toDetailViewResponse(TripSpot tripSpot, TripSpotDetail tripSpotDetail,
-        String contentTypeName) {
+    public TripSpotWithDetailViewResponse toDetailViewResponse(TripSpot tripSpot, TripSpotDetail tripSpotDetail, String contentTypeName) {
         return TripSpotWithDetailViewResponse.builder()
             .tripSpotId(tripSpot.id())
             .tripSpotName(tripSpot.title())
