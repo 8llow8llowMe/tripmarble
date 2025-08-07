@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.domainlayer.auth.application.service;
+package com.followfollowme.tripmarble.domainlayer.auth.application.service.processor;
 
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginResponse;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
