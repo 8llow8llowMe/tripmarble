@@ -10,16 +10,16 @@ spring:
     password: ${DB_PASSWORD}
 
   jpa:
-    open-in-view: true
-    defer-datasource-initialization: true
-    generate-ddl: true
+    open-in-view: false
+    defer-datasource-initialization: false
+    generate-ddl: false
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
-        format_sql: true
-        use_sql_comments: true
-        show_sql: true
+        format_sql: false
+        use_sql_comments: false
+        show_sql: false
         jdbc:
           batch_size: 100
         default_batch_fetch_size: 100
@@ -33,12 +33,14 @@ eureka:
   instance:
     hostname: ${spring.application.name}
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    lease-renewal-interval-in-seconds: 30 # 인스턴스가 헬스 체크 전송하는 주기 (안정적 갱신 주기, default: true)
+    lease-expiration-duration-in-seconds: 90 # 인스턴스 만료 대기 시간 (운영에서는 너무 빠르게 내려가지 않도록)
   client:
     service-url:
       defaultZone: http://${SERVICE_DISCOVERY_HOSTNAME}:${SERVICE_DISCOVERY_PORT}/eureka/
-    # Prefix 매칭 활성화
-    fetch-registry: true
-    registry-fetch-interval-seconds: 5
+    fetch-registry: true # 유레카 클라이언트가 유레카 서버로부터 인스턴스 레지스트리 주기적으로 받아올지 여부 (default: true)
+    registry-fetch-interval-seconds: 30 # 레지스트리 몇 초마다 가져올지 (부하 줄이기, default: 30)
+    initial-instance-info-replication-interval-seconds: 5 # 유레카 서버에 처음 등록할 때까지 대기 시간
 
 # Snowflake
 snowflake:
