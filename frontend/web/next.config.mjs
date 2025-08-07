@@ -16,7 +16,7 @@ const nextConfig = {
       return env;
     }, {}),
   images: {
-    domains: ["tong.visitkorea.or.kr"],
+    domains: ["tong.visitkorea.or.kr", "k.kakaocdn.net"],
   },
 };
 
