@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.domainlayer.game.application.service;
+package com.followfollowme.tripmarble.domainlayer.game.application.service.processor;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.exception.TripGameErrorCode;

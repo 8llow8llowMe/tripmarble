@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.domainlayer.game.application.service;
+package com.followfollowme.tripmarble.domainlayer.game.application.service.processor;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.RepresentativeRegionInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;

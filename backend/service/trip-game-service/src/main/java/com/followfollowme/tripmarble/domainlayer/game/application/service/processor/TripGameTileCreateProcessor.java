@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.domainlayer.game.application.service;
+package com.followfollowme.tripmarble.domainlayer.game.application.service.processor;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripContentTypeInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripSpotRandomResponse;
