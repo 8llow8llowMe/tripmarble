@@ -8,7 +8,7 @@ import lombok.Builder;
 public record TripContentTypeResponse(
 
     @Schema(description = "TourAPI 콘텐츠 타입 아이디", example = "12")
-    String contentTypeId,
+    int contentTypeId,
 
     @Schema(description = "여행 콘텐츠 타입 (관광 타입) 명칭", example = "관광지")
     String contentTypeName
