@@ -7,6 +7,7 @@ import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripG
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -22,5 +23,16 @@ public class TripGameTileRepositoryAdapter implements TripGameTileRepositoryPort
         List<TripGameTileEntity> entities = tripGameTileMapper.toEntityListFromDomainList(tripGameTiles, tripGame);
         List<TripGameTileEntity> saved = tripGameTileRepository.saveAll(entities);
         return tripGameTileMapper.toDomainListFromEntityList(saved);
+    }
+
+    @Override
+    public int findMaxStepNoByTripGameId(long tripGameId) {
+        return tripGameTileRepository.findMaxStepNoByTripGameId(tripGameId);
+    }
+
+    @Override
+    public Optional<TripGameTile> findByTripGameIdAndStepNo(long tripGameId, int stepNo) {
+        return tripGameTileRepository.findByTripGameIdAndStepNo(tripGameId, stepNo)
+            .map(tripGameTileMapper::toDomainFromEntity);
     }
 }
