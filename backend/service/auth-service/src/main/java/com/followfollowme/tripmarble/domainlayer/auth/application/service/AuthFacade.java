@@ -9,6 +9,10 @@ import com.followfollowme.tripmarble.domainlayer.auth.application.command.SendEm
 import com.followfollowme.tripmarble.domainlayer.auth.application.command.TokenReissueCommand;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.in.AuthUseCase;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.OAuthAuthorizationUrlProvider;
+import com.followfollowme.tripmarble.domainlayer.auth.application.service.processor.CredentialLoginProcessor;
+import com.followfollowme.tripmarble.domainlayer.auth.application.service.processor.JwtTokenProcessor;
+import com.followfollowme.tripmarble.domainlayer.auth.application.service.processor.MailVerificationProcessor;
+import com.followfollowme.tripmarble.domainlayer.auth.application.service.processor.OAuthLoginProcessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

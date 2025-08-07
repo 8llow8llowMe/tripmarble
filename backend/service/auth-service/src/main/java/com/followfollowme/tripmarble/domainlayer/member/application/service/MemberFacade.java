@@ -5,6 +5,10 @@ import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.Membe
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberUpdateCommand;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberWebUseCase;
+import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.MemberInfoProcessor;
+import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.MemberSignupProcessor;
+import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.MemberUpdateProcessor;
+import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.ProfileImageProcessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.domainlayer.member.application.service;
+package com.followfollowme.tripmarble.domainlayer.member.application.service.processor;
 
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;

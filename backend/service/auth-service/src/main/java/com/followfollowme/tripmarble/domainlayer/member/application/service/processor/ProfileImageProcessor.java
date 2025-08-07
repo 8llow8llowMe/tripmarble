@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.domainlayer.member.application.service;
+package com.followfollowme.tripmarble.domainlayer.member.application.service.processor;
 
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
