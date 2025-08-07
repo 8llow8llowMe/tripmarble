@@ -24,6 +24,8 @@ public class TripGameCreatePresenter {
             .difficultyDescription(info.tripGame().difficulty().getDescription())
             .startedAt(info.tripGame().startedAt())
             .endedAt(info.tripGame().endedAt())
+            .currentTurnOrder(info.tripGame().currentTurnOrder())
+            .currentStepNo(info.tripGame().currentStepNo())
             .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
             .tripThemeNames(info.tripThemes().stream().map(TripTheme::name).toList())
             .isReady(info.tripGameMember().isReady())
