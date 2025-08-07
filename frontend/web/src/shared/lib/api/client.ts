@@ -1,5 +1,12 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from "axios";
 
+const PUBLIC_PATHS = [
+  "/auth/login",
+  "/members/signup",
+  "/auth/KAKAO/login",
+  "/auth/KAKAO/authorize",
+];
+
 export const authApiClient: AxiosInstance = axios.create({
   baseURL: `${
     process.env.NEXT_PUBLIC_AUTH_SERVICE || "https://api.tripmarble.com"
@@ -34,12 +41,7 @@ apiClient.interceptors.request.use(
 
 authApiClient.interceptors.request.use(
   (config) => {
-    if (
-      config.url?.includes("/auth/login") ||
-      config.url?.includes("/members/signup") ||
-      config.url?.includes("/auth/KAKAO/login")
-    ) {
-      // 아무것도 하지 않고 config를 바로 반환
+    if (PUBLIC_PATHS.some((path) => config.url?.includes(path))) {
       return config;
     }
     const accessToken = localStorage.getItem("accessToken");
@@ -93,6 +95,7 @@ async function reissueTokenAndRetryRequest(
     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
     return await instance.request(originalRequest);
   } catch (error) {
+    localStorage.removeItem("accessToken");
     console.error("Token reissue failed:", error);
     throw error;
   }
