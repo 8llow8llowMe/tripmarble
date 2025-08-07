@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberWebUseCase {
 
-    void signup(MemberSignupCommand command);
+    void signupMember(MemberSignupCommand command);
 
     MemberMyInfoResponse getMyInfo(long memberId);
 
