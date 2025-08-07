@@ -126,9 +126,19 @@ export default function GameBoard({ count = 5 }) {
           ? `주사위 결과: ${diceValue}`
           : "주사위를 굴려주세요"}
       </div>
+      <audio id="mouse-click" src="/sounds/mouse-click.mp3" preload="auto" />
       <button
         className={styles.moveButton}
-        onClick={() => animateMove(Math.floor(Math.random() * 6) + 1)}
+        onClick={() => {
+          const audio = document.getElementById(
+            "mouse-click"
+          ) as HTMLAudioElement | null;
+          if (audio) {
+            audio.currentTime = 0; // 반복 클릭도 항상 처음부터
+            audio.play();
+          }
+          animateMove(Math.floor(Math.random() * 6) + 1);
+        }}
       >
         이동
       </button>
