@@ -26,8 +26,8 @@ public class TripGameCreatePresenter {
             .endedAt(info.tripGame().endedAt())
             .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
             .tripThemeNames(info.tripThemes().stream().map(TripTheme::name).toList())
-            .isHost(true)
-            .isReady(false)
+            .isReady(info.tripGameMember().isReady())
+            .isHost(info.tripGameMember().isHost())
             .build();
     }
 
