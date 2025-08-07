@@ -4,16 +4,8 @@ import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.Membe
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberUpdateCommand;
-import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
-import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
-import com.followfollowme.tripmarble.domainlayer.member.application.mapper.MemberMapper;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberWebUseCase;
-import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
-import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
-import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
-import com.followfollowme.tripmarble.security.common.enums.SecurityRole;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,64 +14,31 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class MemberFacade implements MemberWebUseCase {
 
-    private final MemberRepositoryPort memberRepositoryPort;
-    private final PasswordEncoder passwordEncoder;
-    private final SnowflakeIdGenerator snowflakeIdGenerator;
-    private final ProfileImageUploader profileImageUploader;
-    private final MemberMapper memberMapper;
+    private final MemberSignupProcessor memberSignupProcessor;
+    private final MemberInfoProcessor memberInfoProcessor;
+    private final ProfileImageProcessor profileImageProcessor;
+    private final MemberUpdateProcessor memberUpdateProcessor;
 
     @Override
     @Transactional
-    public void signup(MemberSignupCommand command) {
-        if (memberRepositoryPort.existByEmail(command.email())) {
-            throw new MemberException(MemberErrorCode.EXIST_MEMBER_EMAIL, command.email());
-        }
-
-        Member member = Member.builder()
-            .id(snowflakeIdGenerator.generateId())
-            .email(command.email())
-            .password(passwordEncoder.encode(command.password()))
-            .name(command.name())
-            .nickname(command.nickname())
-            .profileImage(null)
-            .role(SecurityRole.USER)
-            .provider(null)
-            .build();
-
-        memberRepositoryPort.save(member);
+    public void signupMember(MemberSignupCommand command) {
+        memberSignupProcessor.signup(command);
     }
 
     @Override
     @Transactional(readOnly = true)
     public MemberMyInfoResponse getMyInfo(long memberId) {
-        Member member = memberRepositoryPort.findById(memberId)
-            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-
-        return memberMapper.toMyInfoResponseFromDomain(member);
+        return memberInfoProcessor.loadMyInfo(memberId);
     }
 
     @Override
     public MemberProfileUploadResponse uploadProfileImage(MultipartFile imageFile) {
-        return profileImageUploader.upload(imageFile);
+        return profileImageProcessor.upload(imageFile);
     }
 
     @Override
     @Transactional
     public void updateMyInfo(MemberUpdateCommand command) {
-        Member member = memberRepositoryPort.findById(command.memberId())
-            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
-
-        Member updated = Member.builder()
-            .id(member.id())
-            .email(member.email())
-            .password(member.password())
-            .name(member.name())
-            .nickname(member.nickname())
-            .profileImage(member.profileImage())
-            .role(member.role())
-            .provider(member.provider())
-            .build();
-
-        memberRepositoryPort.save(updated); // ID가 있으므로 merge() 호출
+        memberUpdateProcessor.update(command);
     }
 }
