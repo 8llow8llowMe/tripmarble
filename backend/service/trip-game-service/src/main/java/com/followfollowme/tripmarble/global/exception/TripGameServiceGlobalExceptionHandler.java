@@ -2,6 +2,7 @@ package com.followfollowme.tripmarble.global.exception;
 
 import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.common.exception.ValidationErrorCode;
+import com.followfollowme.tripmarble.domainlayer.game.application.exception.TripGameException;
 import com.followfollowme.tripmarble.domainlayer.theme.application.exception.TripThemeException;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,13 @@ public class TripGameServiceGlobalExceptionHandler {
     @ExceptionHandler(TripThemeException.class)
     public ResponseEntity<Response<Void>> tripThemeException(TripThemeException e) {
         log.error("여행 테마 관련 오류: {}", e.getMessage());
+        return ResponseEntity.status(e.getErrorCode().getHttpStatus())
+            .body(Response.fail(e.getErrorCode().getCode(), e.getMessage()));
+    }
+
+    @ExceptionHandler(TripGameException.class)
+    public ResponseEntity<Response<Void>> tripGameException(TripGameException e) {
+        log.error("여행 게임 관련 오류: {}", e.getMessage());
         return ResponseEntity.status(e.getErrorCode().getHttpStatus())
             .body(Response.fail(e.getErrorCode().getCode(), e.getMessage()));
     }
