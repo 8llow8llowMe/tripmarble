@@ -14,7 +14,7 @@ public record MemberProfileResponse(
     String nickname,
 
     @Schema(description = "프로필 이미지 URL", example = "https://cdn.tripmarble.com/profile.jpg")
-    String profileImage
+    String profileImageUrl
 ) {
 
 }
