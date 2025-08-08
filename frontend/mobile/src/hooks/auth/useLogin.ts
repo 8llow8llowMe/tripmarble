@@ -25,14 +25,14 @@ export const postLogin = async ({ email, password }: LoginRequest) => {
 };
 
 const useLoginMutaion = () => {
-  const { mutate: login } = useMutation({
+  const { mutateAsync: login, isPending } = useMutation({
     mutationFn: postLogin,
     onError: (error) => {
       console.log('로그인 에러', error);
     },
   });
 
-  return { login };
+  return { login, isPending };
 };
 
 export default useLoginMutaion;
