@@ -14,7 +14,7 @@ public record RepresentativeRegionSummaryResponse(
     String representativeRegionName,
 
     @Schema(description = "대표 여행지 썸네일 이미지 URL", example = "https://cdn.tripmarble.com/seoul.jpg")
-    String imageUrl
+    String representativeRegionImageUrl
 ) {
 
 }
