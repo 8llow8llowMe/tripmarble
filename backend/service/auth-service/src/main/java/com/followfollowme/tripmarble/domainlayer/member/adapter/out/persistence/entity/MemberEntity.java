@@ -50,7 +50,7 @@ public class MemberEntity extends BaseEntity {
     private String nickname;
 
     @Comment("프로필 이미지 URL")
-    private String profileImage;
+    private String profileImageUrl;
 
     @Comment("권한")
     @Column(nullable = false)
