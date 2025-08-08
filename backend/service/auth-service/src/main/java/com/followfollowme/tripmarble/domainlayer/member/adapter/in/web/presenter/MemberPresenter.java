@@ -13,7 +13,7 @@ public class MemberPresenter {
             .email(member.email())
             .name(member.name())
             .nickname(member.nickname())
-            .profileImage(member.profileImage())
+            .profileImageUrl(member.profileImageUrl())
             .role(member.role())
             .provider(member.provider())
             .build();

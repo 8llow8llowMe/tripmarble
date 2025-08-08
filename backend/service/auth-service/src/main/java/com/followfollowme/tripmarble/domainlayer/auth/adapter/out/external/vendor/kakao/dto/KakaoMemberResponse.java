@@ -20,7 +20,7 @@ public record KakaoMemberResponse(
             .email(kakaoAccount.email())
             .name(kakaoAccount.name())
             .nickname(kakaoAccount.profile().nickname())
-            .profileImage(kakaoAccount.profile().profileImageUrl())
+            .profileImageUrl(kakaoAccount.profile().profileImageUrl())
             .role(SecurityRole.USER)
             .provider(OAuthProvider.KAKAO)
             .build();

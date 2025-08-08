@@ -21,7 +21,7 @@ public class MemberUpdateProcessor {
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
         // 2. 프로필 이미지 URL 처리
-        String profileImageUrl = command.profileImage();
+        String profileImageUrl = command.profileImageUrl();
         if (profileImageUrl != null && profileImageUrl.contains("/temp/")) {
             profileImageUrl = profileImageProcessor.promoteToReal(profileImageUrl);
         }
@@ -33,7 +33,7 @@ public class MemberUpdateProcessor {
             .password(member.password())
             .name(member.name())
             .nickname(command.nickname())
-            .profileImage(profileImageUrl)
+            .profileImageUrl(profileImageUrl)
             .role(member.role())
             .provider(member.provider())
             .build();

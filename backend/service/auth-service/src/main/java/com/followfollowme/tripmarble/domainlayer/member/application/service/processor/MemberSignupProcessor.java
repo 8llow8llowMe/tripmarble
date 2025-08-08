@@ -30,7 +30,7 @@ public class MemberSignupProcessor {
             .password(passwordEncoder.encode(command.password()))
             .name(command.name())
             .nickname(command.nickname())
-            .profileImage(null)
+            .profileImageUrl(null)
             .role(SecurityRole.USER)
             .provider(null)
             .build();
