@@ -9,23 +9,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class RepresentativeRegionPresenter {
 
-    public RepresentativeRegionSummaryResponse toSummaryResponse(RepresentativeRegion domain) {
+    public RepresentativeRegionSummaryResponse toSummaryResponse(RepresentativeRegion representativeRegion) {
         return RepresentativeRegionSummaryResponse.builder()
-            .representativeRegionId(domain.id())
-            .representativeRegionName(domain.name())
+            .representativeRegionId(representativeRegion.id())
+            .representativeRegionName(representativeRegion.name())
             .build();
     }
 
-    public List<RepresentativeRegionSummaryResponse> toSummaryResponseList(List<RepresentativeRegion> domains) {
-        return domains.stream()
+    public List<RepresentativeRegionSummaryResponse> toSummaryResponseList(List<RepresentativeRegion> representativeRegions) {
+        return representativeRegions.stream()
             .map(this::toSummaryResponse)
             .toList();
     }
 
-    public RepresentativeRegionDetailResponse toDetailResponse(RepresentativeRegion domain) {
+    public RepresentativeRegionDetailResponse toDetailResponse(RepresentativeRegion representativeRegion) {
         return RepresentativeRegionDetailResponse.builder()
-            .representativeRegionId(domain.id())
-            .representativeRegionName(domain.name())
+            .representativeRegionId(representativeRegion.id())
+            .representativeRegionName(representativeRegion.name())
+            .representativeRegionImageUrl(representativeRegion.imageUrl())
+            .description(representativeRegion.description())
             .build();
     }
 }
