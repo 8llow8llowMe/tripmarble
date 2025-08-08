@@ -38,7 +38,7 @@ public class TripSpotCustomRepositoryImpl implements TripSpotCustomRepository {
         }
 
         // 2. limit + 1로 가져와서 hasNext 판단
-        List<TripSpotEntity> results = queryFactory
+        List<TripSpotEntity> rows = queryFactory
             .selectFrom(t)
             .where(where)
             .orderBy(t.id.desc())
@@ -46,14 +46,14 @@ public class TripSpotCustomRepositoryImpl implements TripSpotCustomRepository {
             .fetch();
 
         // 3. hasNext 체크 및 초과 아이템 제거
-        boolean hasNext = results.size() > size;
+        boolean hasNext = rows.size() > size;
         if (hasNext) {
             // 초과분 하나 제거
-            results.removeLast();
+            rows.removeLast();
         }
 
         // 4. SliceImpl로 포장하여 반환
-        return new SliceImpl<>(results, Pageable.unpaged(), hasNext);
+        return new SliceImpl<>(rows, Pageable.unpaged(), hasNext);
     }
 
     @Override
