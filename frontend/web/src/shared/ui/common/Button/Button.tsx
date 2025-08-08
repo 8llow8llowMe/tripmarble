@@ -2,11 +2,12 @@ import styles from "./Button.module.scss";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  paddingSize?: "sm" | "md" | "lg";
+  paddingSize?: "sm" | "md" | "lg" | "xl";
   radius?: "sm" | "md" | "lg";
   bgColor?: "primary" | "secondary" | "accent";
-  width?: "auto" | "100px" | "200px";
-  height?: "auto" | "50px";
+  width?: string;
+  height?: string;
+  fontSize?: string;
 }
 
 const Button = ({
@@ -16,11 +17,13 @@ const Button = ({
   bgColor,
   width,
   height,
+  fontSize,
   ...props
 }: ButtonProps) => {
   const style: React.CSSProperties = {};
   if (width) style.width = width;
   if (height) style.height = height;
+  if (fontSize) style.fontSize = fontSize;
 
   return (
     <button
