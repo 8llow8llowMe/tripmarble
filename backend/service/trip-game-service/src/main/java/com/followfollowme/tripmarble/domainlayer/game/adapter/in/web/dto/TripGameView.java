@@ -23,6 +23,9 @@ public record TripGameView(
     @Schema(description = "게임 난이도 설명", example = "보통")
     String difficultyDescription,
 
+    @Schema(description = "게임 제목", example = "여름 제주도 여행")
+    String title,
+
     @Schema(description = "여행 시작일", example = "2025-07-15")
     LocalDate startedAt,
 
