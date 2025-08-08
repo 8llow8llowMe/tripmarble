@@ -8,7 +8,7 @@ const CustomSafeAreaView = ({ children }: { children: ReactNode }) => {
       style={{
         flex: 1,
         backgroundColor: '#fff',
-        paddingTop: insets.top,
+        // paddingTop: insets.top,
         paddingLeft: insets.left,
         paddingRight: insets.right,
       }}
