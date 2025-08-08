@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class RegionPresenter {
 
-    public RegionResponse toResponse(Region domain) {
+    public RegionResponse toResponse(Region region) {
         return RegionResponse.builder()
-            .regionId(domain.id())
-            .regionCode(domain.regionCode())
-            .regionName(domain.regionName())
+            .regionId(region.id())
+            .regionCode(region.regionCode())
+            .regionName(region.regionName())
             .build();
     }
 

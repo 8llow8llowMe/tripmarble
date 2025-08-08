@@ -8,16 +8,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class SigunguPresenter {
 
-    public SigunguResponse toResponse(Sigungu domain) {
+    public SigunguResponse toResponse(Sigungu sigungu) {
         return SigunguResponse.builder()
-            .sigunguId(domain.id())
-            .sigunguCode(domain.sigunguCode())
-            .sigunguName(domain.sigunguName())
+            .sigunguId(sigungu.id())
+            .sigunguCode(sigungu.sigunguCode())
+            .sigunguName(sigungu.sigunguName())
             .build();
     }
 
-    public List<SigunguResponse> toResponseList(List<Sigungu> domains) {
-        return domains.stream()
+    public List<SigunguResponse> toResponseList(List<Sigungu> sigungus) {
+        return sigungus.stream()
             .map(this::toResponse)
             .toList();
     }
