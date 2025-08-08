@@ -1,7 +1,7 @@
 export const palette = {
   black: '#000',
   white: '#fff', // primaryWhite
-  error: 'red', // errorText
+  error: '#e74c3c', // errorText
   Neutral300: '#A8B1BD',
   Neutral800: '#0F1B2A',
   orange100: '#FDEAD7',
@@ -19,7 +19,7 @@ export const palette = {
   gray500: '#7D8998', // textGray
   gray550: '#5F6B7A', // countColor
   gray600: '#414D5C', // subText, labelText, receivedMessageText
-  gray800: '#0F1B2A', // recentListBackground
+  gray800: '#0F1B2A',
   blue100: '#9ED4FF',
   blue300: '#5984FF',
   blue400: '#36BFFA',
@@ -27,7 +27,6 @@ export const palette = {
   mainColor: '#4BA1FD',
 
   bottomSheetBackground: '#F3F4F8',
-  receivedMessageBackground: '#F3F4F8',
   confirmCheck: '#DCFAE6',
   completeText: '#12B76A',
   alertError: '#FEE4E2',

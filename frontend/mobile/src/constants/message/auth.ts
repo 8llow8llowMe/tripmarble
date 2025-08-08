@@ -1,9 +1,9 @@
 const SIGNUP = {
   EMAIL: {
     LABEL: '이메일',
-    REQUIRED: '이메일을 입력해 주세요.',
-    PLACEHOLDER: '이메일을 입력하세요.',
-    PATTERN: '입력하신 이메일이 형식에 맞지 않습니다.',
+    REQUIRED: '이메일 주소를 입력해주세요.',
+    PLACEHOLDER: '예) tripmarble@tripmarble.co.kr',
+    PATTERN: '올바른 이메일을 입력해주세요.',
   },
   NAME: {
     LABEL: '이름',
@@ -42,15 +42,17 @@ const SIGNUP = {
 };
 
 const LOGIN = {
-  ID: {
-    LABEL: '아이디',
-    REQUIRED: '아이디를 입력해 주세요.',
-    PLACEHOLDER: '아이디를 입력하세요.',
+  EMAIL: {
+    LABEL: '이메일',
+    REQUIRED: '이메일 주소를 입력해주세요.',
+    PLACEHOLDER: '예) tripmarble@tripmarble.co.kr',
+    PATTERN: '올바른 이메일을 입력해주세요.',
   },
   PASSWORD: {
     LABEL: '비밀번호',
     REQUIRED: '비밀번호를 입력해 주세요.',
     PLACEHOLDER: '비밀번호를 입력하세요.',
+    PATTERN: '영문, 숫자, 특수문자를 포함하여 입력해주세요. (8~20자)',
   },
   ALERT: {
     WRONG_ID: '아이디가 올바르지 않습니다.',
