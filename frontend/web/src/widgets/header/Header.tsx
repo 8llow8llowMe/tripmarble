@@ -8,7 +8,8 @@ import { useAppSelector } from "@/entities/users/model";
 const Header = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(pathname !== "/");
+  // const [scrolled, setScrolled] = useState(pathname !== "/");
+  const [scrolled, setScrolled] = useState(true);
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLDivElement>(null);
   const user = useAppSelector((state) => state.user.user);
@@ -40,29 +41,29 @@ const Header = () => {
     };
   }, [isOpen]);
 
-  useEffect(() => {
-    if (pathname !== "/") {
-      setScrolled(true);
-      return;
-    }
-    if (window.scrollY === 0) {
-      setScrolled(false);
-    } else {
-      setScrolled(true);
-    }
-    const handleScroll = () => {
-      if (window.scrollY > 0) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
-    };
+  // useEffect(() => {
+  //   if (pathname !== "/") {
+  //     setScrolled(true);
+  //     return;
+  //   }
+  //   if (window.scrollY === 0) {
+  //     setScrolled(false);
+  //   } else {
+  //     setScrolled(true);
+  //   }
+  //   const handleScroll = () => {
+  //     if (window.scrollY > 0) {
+  //       setScrolled(true);
+  //     } else {
+  //       setScrolled(false);
+  //     }
+  //   };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [pathname]);
+  //   window.addEventListener("scroll", handleScroll);
+  //   return () => {
+  //     window.removeEventListener("scroll", handleScroll);
+  //   };
+  // }, [pathname]);
 
   const isActive = (path: string) => (pathname === path ? styles.active : "");
 
