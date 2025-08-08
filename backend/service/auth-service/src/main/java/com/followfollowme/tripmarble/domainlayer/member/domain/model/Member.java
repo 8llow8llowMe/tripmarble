@@ -11,7 +11,7 @@ public record Member(
     String password,
     String name,
     String nickname,
-    String profileImage,
+    String profileImageUrl,
     SecurityRole role,
     OAuthProvider provider
 ) {
