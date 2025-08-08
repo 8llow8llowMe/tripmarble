@@ -40,7 +40,7 @@ public class OAuthLoginProcessor {
             .password(null)
             .name(oAuthMember.name())
             .nickname(oAuthMember.nickname())
-            .profileImage(oAuthMember.profileImage())
+            .profileImageUrl(oAuthMember.profileImageUrl())
             .role(SecurityRole.USER)
             .provider(oAuthMember.provider())
             .build();

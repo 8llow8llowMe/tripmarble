@@ -8,16 +8,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class MemberInternalPresenter {
 
-    public MemberProfileResponse toProfileResponse(Member domain) {
+    public MemberProfileResponse toProfileResponse(Member member) {
         return MemberProfileResponse.builder()
-            .memberId(domain.id())
-            .nickname(domain.nickname())
-            .profileImage(domain.profileImage())
+            .memberId(member.id())
+            .nickname(member.nickname())
+            .profileImageUrl(member.profileImageUrl())
             .build();
     }
 
-    public List<MemberProfileResponse> toProfileResonseList(List<Member> domains) {
-        return domains.stream()
+    public List<MemberProfileResponse> toProfileResonseList(List<Member> members) {
+        return members.stream()
             .map(this::toProfileResponse)
             .toList();
     }
