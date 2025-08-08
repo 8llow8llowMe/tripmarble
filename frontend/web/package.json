@@ -11,8 +11,10 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.6",
     "@tanstack/react-query": "^5.81.2",
+    "@types/three": "^0.179.0",
     "axios": "^1.10.0",
     "dotenv": "^17.2.0",
+    "gsap": "^3.13.0",
     "next": "^14.2.5",
     "react": "^18.2.0",
     "react-cookie": "^8.0.1",
@@ -22,7 +24,8 @@
     "react-toastify": "^11.0.5",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0",
-    "sass": "^1.77.8"
+    "sass": "^1.77.8",
+    "three": "^0.179.1"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.11.0",
