@@ -10,17 +10,15 @@
   padding: 1rem 2rem;
   background-color: transparent;
   font-weight: 600;
-  transition:
-    background-color 0.3s ease,
-    box-shadow 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   z-index: 1000;
 }
 
 .header.scrolled {
-  background-color: #ffffff;
+  // background-color: #ffffff;
   color: #333;
-  border-bottom: 1px solid #eaeaea;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  // border-bottom: 1px solid #eaeaea;
+  // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .nav.scrolled a,
@@ -29,10 +27,12 @@
 }
 
 .logo {
+  padding: 0.5rem 1rem;
   font-size: 1.5rem;
   font-weight: bold;
   color: #0070f3;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .logo a {
@@ -42,10 +42,16 @@
 
 .nav {
   display: flex;
-  gap: 1.5rem;
+  // gap: 1.5rem;
+  border: #eee solid 1px;
+  background-color: #ffffff;
+  padding: 0.2rem;
+  border-radius: 99px;
 }
 
 .nav a {
+  padding: 0.5rem 1rem;
+  border-radius: 1.8rem;
   color: #ffffff;
   text-decoration: none;
   font-weight: 500;
@@ -55,6 +61,7 @@
 .nav a:hover,
 .hamburger:hover {
   color: #0070f3;
+  background-color: rgba(0, 112, 243, 0.1);
 }
 
 .hamburger {
@@ -69,6 +76,7 @@
 
 .nav a.active {
   color: #0070f3;
+  background-color: rgba(0, 112, 243, 0.1);
   font-weight: bold;
   // border-bottom: 2px solid #0070f3;
 }
