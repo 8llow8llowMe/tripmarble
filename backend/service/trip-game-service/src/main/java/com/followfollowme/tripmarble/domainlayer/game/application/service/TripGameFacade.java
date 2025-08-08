@@ -1,12 +1,10 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.DifficultyResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameCardView;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameTileView;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameView;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter.TripGameCreatePresenter;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter.TripGameStartPresenter;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter.TripGamePresenter;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
@@ -16,7 +14,9 @@ import com.followfollowme.tripmarble.domainlayer.game.application.service.proces
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameStartProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameTileCreateProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
+import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +30,7 @@ public class TripGameFacade implements TripGameWebUseCase {
     private final TripGameCreateProcessor tripGameCreateProcessor;
     private final TripGameTileCreateProcessor tripGameTileCreateProcessor;
     private final TripGameStartProcessor tripGameStartProcessor;
-    private final TripGameCreatePresenter tripGameCreatePresenter;
-    private final TripGameStartPresenter tripGameStartPresenter;
+    private final TripGamePresenter tripGamePresenter;
 
     @Override
     public List<DifficultyResponse> getAllDifficulties() {
@@ -56,12 +55,15 @@ public class TripGameFacade implements TripGameWebUseCase {
             tripGameCreateInfo.tripGame().difficulty()
         );
 
-        // 3. 도메인 객체들을 응답 전용 DTO로 매핑 (TripGameView, TripGameTileView)
-        TripGameView gameInfo = tripGameCreatePresenter.toGameInfo(tripGameCreateInfo);
-        List<TripGameTileView> tileInfos = tripGameCreatePresenter.toTileInfos(tripGameTileCreateInfo);
+        // 3. 최종 응답 dto 조립 및 반환
+        return tripGamePresenter.toCreateResponseFrom(tripGameCreateInfo, tripGameTileCreateInfo);
+    }
 
-        // 4. 최종 응답 dto 조립 및 반환
-        return tripGameCreatePresenter.toCreateResponseFrom(gameInfo, tileInfos);
+    @Override
+    @Transactional(readOnly = true)
+    public SliceResponse<MyTripGameCardView> getMyTripGames(long memberId, long lastTripGameId, int size, Status status) {
+
+        return null;
     }
 
     @Override
@@ -71,6 +73,6 @@ public class TripGameFacade implements TripGameWebUseCase {
         TripGameStartInfo tripGameStartInfo = tripGameStartProcessor.startGame(tripGameId, hostMemberId);
 
         // 2. 응답용 DTO로 변환
-        return tripGameStartPresenter.toStartResponse(tripGameStartInfo);
+        return tripGamePresenter.toStartResponse(tripGameStartInfo);
     }
 }
