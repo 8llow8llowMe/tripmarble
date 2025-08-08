@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class RepresentativeRegionInternalPresenter {
 
-    public RepresentativeRegionInfoResponse toInfoResponse(RepresentativeRegion domain) {
+    public RepresentativeRegionInfoResponse toInfoResponse(RepresentativeRegion representativeRegion) {
         return RepresentativeRegionInfoResponse.builder()
-            .representativeRegionId(domain.id())
-            .representativeRegionName(domain.name())
+            .representativeRegionId(representativeRegion.id())
+            .representativeRegionName(representativeRegion.name())
             .build();
     }
 }
