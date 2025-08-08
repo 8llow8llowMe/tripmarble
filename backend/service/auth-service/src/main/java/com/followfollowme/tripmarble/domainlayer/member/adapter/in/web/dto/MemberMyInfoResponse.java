@@ -22,7 +22,7 @@ public record MemberMyInfoResponse(
     String nickname,
 
     @Schema(description = "프로필 이미지 URL", example = "https://cdn.tripmarble.com/profile.jpg")
-    String profileImage,
+    String profileImageUrl,
 
     @Schema(description = "회원 권한", example = "USER")
     SecurityRole role,
