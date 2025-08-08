@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.port.out;
 
+import com.followfollowme.tripmarble.domainlayer.game.application.readmodel.TripGameMemberCount;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import java.util.List;
@@ -14,4 +15,6 @@ public interface TripGameMemberRepositoryPort {
     List<TripGameMember> findByTripGameId(long tripGameId);
 
     List<TripGameMember> saveAll(List<TripGameMember> tripGameMembers, TripGame tripGame);
+
+    List<TripGameMemberCount> countByTripGameIds(List<Long> gameIds);
 }
