@@ -1,9 +1,11 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity.TripGameMemberEntity;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.projection.TripGameMemberCountProjection;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.repository.TripGameMemberRepository;
 import com.followfollowme.tripmarble.domainlayer.game.application.mapper.TripGameMemberMapper;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMemberRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.game.application.readmodel.TripGameMemberCount;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import java.util.List;
@@ -42,5 +44,16 @@ public class TripGameMemberRepositoryAdapter implements TripGameMemberRepository
         List<TripGameMemberEntity> entities = tripGameMemberMapper.toEntityListFromDomainList(tripGameMembers, tripGame);
         List<TripGameMemberEntity> savedEntities = tripGameMemberRepository.saveAll(entities);
         return tripGameMemberMapper.toDomainListFromEntityList(savedEntities);
+    }
+
+    @Override
+    public List<TripGameMemberCount> countByTripGameIds(List<Long> gameIds) {
+        List<TripGameMemberCountProjection> rows = tripGameMemberRepository.countByTripGameIds(gameIds);
+        return rows.stream()
+            .map(p -> TripGameMemberCount.builder()
+                .tripGameId(p.tripGameId())
+                .memberCount(p.memberCount())
+                .build())
+            .toList();
     }
 }
