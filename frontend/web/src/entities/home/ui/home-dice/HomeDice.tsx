@@ -1,20 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/entities/users/model";
+import { toast } from "react-toastify";
+// three
 import * as THREE from "three";
 import { PMREMGenerator } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+// gsap
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 // styles
 import styles from "./HomeDice.module.scss";
-import Link from "next/link";
-import Button from "@/shared/ui/common/Button/Button";
-import { useRouter } from "next/navigation";
-import { useAppSelector } from "@/entities/users/model";
-import { toast } from "react-toastify";
+// components
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
+import LiquidButton from "@/shared/ui/common/LiquidButton/LiquidButton";
 
 export default function HomeDicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -32,7 +35,7 @@ export default function HomeDicePage() {
       0.1,
       100
     );
-    camera.position.set(0, 0, 8);
+    camera.position.set(0, 0, 6);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -288,18 +291,18 @@ export default function HomeDicePage() {
         {/* 버튼 */}
         <div className={`button-container ${styles.buttonContainer}`}>
           <Link href="/recommend">
-            <Button
+            <LiquidButton
               width="100%"
               height="100%"
               fontSize="1.5rem"
               radius="lg"
-              bgColor="accent"
+              bgColor="primary"
               paddingSize="xl"
             >
               랜덤 여행지 추천받기
-            </Button>
+            </LiquidButton>
           </Link>
-          <Button
+          <LiquidButton
             width="100%"
             height="100%"
             fontSize="1.5rem"
@@ -309,7 +312,7 @@ export default function HomeDicePage() {
             onClick={handleCreateClick}
           >
             게임 만들기
-          </Button>
+          </LiquidButton>
         </div>
         <CreateGameModal
           isOpen={isCreateModalOpen}
