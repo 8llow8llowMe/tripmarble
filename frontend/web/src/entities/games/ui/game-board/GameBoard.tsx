@@ -3,16 +3,50 @@ import styles from "./GameBoard.module.scss";
 import { useCanvasDrag } from "@/entities/games/ui/game-board/useCanvasDrag";
 import { drawGameBoard3D } from "@/entities/games/ui/game-board/drawGameBoard3D";
 import { useCanvasInitialScroll } from "@/entities/games/ui/game-board/useCanvasInitialScroll";
-import { createDummyBoardData } from "@/entities/games/ui/game-board/createDummyBoardData";
 import { drawPiece } from "@/entities/games/ui/game-board/drawPiece";
 import { getCustomPosition } from "@/entities/games/ui/game-board/getCustomPosition";
+import type { TripGameTileView } from "@/entities/games/model/gameInfoDummy";
 
-const CELL_SIZE = 80;
+const CELL_SIZE = 100;
 
-export default function GameBoard({ count = 5 }) {
+type Props = {
+  count?: number;
+  tiles: TripGameTileView[];
+  onCellClick?: (tile: TripGameTileView, index: number) => void;
+};
+
+export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const boardData = createDummyBoardData(count);
+
+  const edgePositions: { row: number; col: number }[] = [];
+  for (let row = 0; row < count; row++) {
+    for (let col = 0; col < count; col++) {
+      if (row === 0 || row === count - 1 || col === 0 || col === count - 1) {
+        edgePositions.push({ row, col });
+      }
+    }
+  }
+
+  const boardData = tiles.map((tile, i) => {
+    const { row, col } = edgePositions[i];
+    const type =
+      tile.tileTypeCode === "START"
+        ? "start"
+        : tile.tileTypeCode === "END"
+        ? "end"
+        : tile.tileTypeCode === "MISSION"
+        ? "mission"
+        : "normal";
+
+    return {
+      index: i,
+      row,
+      col,
+      type,
+      title: tile.tripSpotName,
+    };
+  });
 
   const [piecePos, setPiecePos] = useState({ x: 0, y: 0 });
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -22,6 +56,10 @@ export default function GameBoard({ count = 5 }) {
   useCanvasInitialScroll(canvasRef, wrapperRef);
   useCanvasDrag(canvasRef, wrapperRef);
 
+  const cellRectsRef = useRef<
+    { index: number; x: number; y: number; w: number; h: number }[]
+  >([]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -30,6 +68,15 @@ export default function GameBoard({ count = 5 }) {
 
     canvas.width = CELL_SIZE * count + 15;
     canvas.height = CELL_SIZE * count + 15;
+
+    // cache clickable rects (top faces only)
+    cellRectsRef.current = boardData.map((cell, index) => ({
+      index,
+      x: cell.col * CELL_SIZE + 10,
+      y: cell.row * CELL_SIZE,
+      w: CELL_SIZE,
+      h: CELL_SIZE,
+    }));
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#fff";
@@ -110,6 +157,24 @@ export default function GameBoard({ count = 5 }) {
 
     animateStep(currentIndex, (currentIndex + 1) % boardData.length);
   };
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const handleClick = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const hit = cellRectsRef.current.find(
+        (r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h
+      );
+      if (hit && onCellClick) {
+        onCellClick(tiles[hit.index], hit.index);
+      }
+    };
+    canvas.addEventListener("click", handleClick);
+    return () => canvas.removeEventListener("click", handleClick);
+  }, [tiles, onCellClick, count]);
 
   return (
     <>
