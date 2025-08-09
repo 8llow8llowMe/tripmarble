@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import GameBoard from "@/entities/games/ui/game-board/GameBoard";
 import Image from "next/image";
-import styles from "./GameDetail.module.scss";
+import styles from "./GameHistory.module.scss";
+import { gameInfoDummy } from "@/entities/games/model/gameInfoDummy";
 
 type TimelineItem = {
   index: number;
@@ -23,7 +24,7 @@ type Props = {
   onBlockSelect?: (item: TimelineItem) => void;
 };
 
-const GameDetail = ({
+const GameHistory = ({
   gameId,
   timeline,
   selectedBlock,
@@ -31,12 +32,32 @@ const GameDetail = ({
 }: Props) => {
   const [activeTab, setActiveTab] = useState<"timeline" | "detail">("timeline");
 
+  const { tripGameView, tripGameTileViews } = gameInfoDummy.dataBody;
+  const [activeStep, setActiveStep] = useState<number>(1);
+  const activeTile = useMemo(
+    () =>
+      tripGameTileViews.find((t) => t.stepNo === activeStep) ??
+      tripGameTileViews[0],
+    [activeStep, tripGameTileViews]
+  );
+
+  const [modalTile, setModalTile] = useState<
+    (typeof tripGameTileViews)[number] | null
+  >(null);
+
   return (
     <div className={styles.detailWrapper}>
       <div className={styles.header}>종료된 게임</div>
       {/* 보드판 이미지 */}
       <div className={styles.boardContainer}>
-        <GameBoard count={5} />
+        <GameBoard
+          count={5}
+          tiles={tripGameTileViews}
+          onCellClick={(tile) => {
+            setActiveStep(tile.stepNo);
+            setModalTile(tile);
+          }}
+        />
       </div>
       {/* 탭 바 */}
       <div className={styles.tabBar}>
@@ -134,4 +155,4 @@ const GameDetail = ({
   );
 };
 
-export default GameDetail;
+export default GameHistory;
