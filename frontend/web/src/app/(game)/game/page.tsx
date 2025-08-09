@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 // styles
-import styles from "./Game-page.module.scss";
+import styles from "./GameList.module.scss";
 // components
 import { GameList } from "@/widgets/game-list/GameList";
 import { MyGamesHorizontal } from "@/widgets/my-games-horizontal/MyGamesHorizontal";

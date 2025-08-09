@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./MyGamesHorizontal.module.scss";
 
 export type MyGame = {
@@ -26,15 +27,17 @@ export function MyGamesHorizontal({
           .filter((g) => g.status === status)
           .map((game) => (
             <div className={styles.hCard} key={game.id}>
-              <Image
-                src={game.imageUrl || "/images/no-image.png"}
-                alt="게임 이미지"
-                width={220}
-                height={200}
-                style={{ borderRadius: "8px" }}
-              />
-              <div className={styles.hCardTitle}>{game.title}</div>
-              <div className={styles.hCardDate}>{game.date}</div>
+              <Link key={game.id} href={`/game/${game.id}`}>
+                <Image
+                  src={game.imageUrl || "/images/no-image.png"}
+                  alt="게임 이미지"
+                  width={220}
+                  height={200}
+                  style={{ borderRadius: "8px" }}
+                />
+                <div className={styles.hCardTitle}>{game.title}</div>
+                <div className={styles.hCardDate}>{game.date}</div>
+              </Link>
             </div>
           ))}
       </div>
