@@ -29,6 +29,7 @@
 }
 
 .fadeText {
+  width: 100%;
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
@@ -43,10 +44,10 @@
 }
 
 .fadeText[data-index="0"] {
-  top: 22%;
+  top: 16%;
 }
 .fadeText[data-index="1"] {
-  top: 28%;
+  top: 23%;
 }
 
 @media screen and (max-width: 700px) {
@@ -83,4 +84,16 @@
   left: 10%;
   top: 50%;
   transform: translateY(-50%);
+}
+
+@media screen and (max-width: 700px) {
+  .buttonContainer {
+    width: 45vw;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .buttonContainer {
+    width: 45vw; /* 유지: 요청대로 700px까지 35vw */
+  }
 }
