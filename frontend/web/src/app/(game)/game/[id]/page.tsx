@@ -1,48 +1,14 @@
-import GameDetail from "@/entities/games/ui/game-detail/GameDetail";
-type TimelineItem = {
-  index: number;
-  title: string;
-  date?: string;
-  mission?: string;
-  reviewImageUrl?: string;
-  reviewContent?: string;
-  isSelected?: boolean;
-};
+import { gameInfoDummy } from "@/entities/games/model/gameInfoDummy";
+import GamePlay from "@/entities/games/ui/game-play/GamePlay";
 
-const dummyTimeline: TimelineItem[] = [
-  {
-    index: 1,
-    title: "1. 방문한 지역",
-    date: "2025.05.15",
-    mission: "광한루원 앞에서 사진찍기",
-    reviewImageUrl: "",
-    reviewContent: "정말 즐거운 미션이었어요!",
-    isSelected: true,
-  },
-  {
-    index: 2,
-    title: "2. 방문한 지역",
-    date: "2025.05.16",
-    mission: "전주 한옥마을 인증샷",
-    reviewImageUrl: "",
-    reviewContent: "",
-    isSelected: false,
-  },
-  // ... 원하는 만큼 추가
-];
 type Props = {
   params: {
-    id: string;
+    gameId: string;
   };
 };
 
-export default function GameDetailPage({ params }: Props) {
-  return (
-    <GameDetail
-      gameId={params.id}
-      timeline={dummyTimeline}
-      selectedBlock={dummyTimeline.find((item) => item.isSelected)}
-      // onBlockSelect={setSelectedBlock} 등 추가 예정
-    />
-  );
+export default function GamePlayPage({ params }: Props) {
+  // TODO: 임시로 더미데이터 전달, 추후에 gameId로 gameInfo 받아온 후 게임 페이지로 전달 예정
+  const gameData = gameInfoDummy;
+  return <GamePlay gameData={gameData} />;
 }
