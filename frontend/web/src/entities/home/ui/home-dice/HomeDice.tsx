@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/entities/users/model";
 import { toast } from "react-toastify";
@@ -22,8 +23,25 @@ import LiquidButton from "@/shared/ui/common/LiquidButton/LiquidButton";
 export default function HomeDicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cubeRef = useRef<THREE.Object3D | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
+
+  const [loadedCount, setLoadedCount] = useState(0);
+  const handlePieceLoaded = () => {
+    setLoadedCount((count) => count + 1);
+  };
 
   useEffect(() => {
+    if (loadedCount === 5 && boardRef.current) {
+      gsap.to(boardRef.current, {
+        autoAlpha: 1,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+    }
+  }, [loadedCount]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
     gsap.registerPlugin(ScrollTrigger);
     if (!containerRef.current) return;
 
@@ -45,7 +63,6 @@ export default function HomeDicePage() {
     );
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-    console.log(containerRef.current);
     const existingCanvas = containerRef.current.querySelector("canvas");
     if (existingCanvas) {
       containerRef.current.removeChild(existingCanvas);
@@ -121,6 +138,23 @@ export default function HomeDicePage() {
       },
       defaults: { ease: "power2.out" },
     });
+
+    tl.to(
+      [
+        `.${styles.pOuterLeft}`,
+        `.${styles.pMidLeft}`,
+        `.${styles.pCenter}`,
+        `.${styles.pMidRight}`,
+        `.${styles.pOuterRight}`,
+      ],
+      {
+        y: (i) => [-90, -60, -20, -60, -90][i] + "vh",
+        autoAlpha: 0,
+        duration: 1,
+        ease: "power2.in",
+      },
+      3
+    );
 
     // 던지는 느낌으로 왼쪽 위에서 중앙으로 천천히 회전하며 이동
     tl.fromTo(
@@ -238,6 +272,9 @@ export default function HomeDicePage() {
       window.removeEventListener("resize", onResize);
       gsap.ticker.remove(ticker);
       ScrollTrigger.getAll().forEach((t) => t.kill());
+      gsap.set(`.${styles.boardPieces}, .${styles.piece}`, {
+        clearProps: "all",
+      });
       cancelAnimationFrame(raf);
       renderer.dispose();
       pmrem?.dispose();
@@ -287,6 +324,55 @@ export default function HomeDicePage() {
         </div>
         <div className={`text ${styles.fadeText}`} data-index="1">
           주사위를 굴려 여행을 떠나보세요!
+        </div>
+        {/* Board (over canvas) */}
+        <div className={styles.boardLayerWrapper} ref={boardRef}>
+          <Image
+            className={`${styles.piece} ${styles.pOuterLeft}`}
+            src="/images/board/Board01.png"
+            alt="Board outer left"
+            fill
+            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
+            style={{ objectFit: "contain" }}
+            priority
+            onLoadingComplete={handlePieceLoaded}
+          />
+          <Image
+            className={`${styles.piece} ${styles.pMidLeft}`}
+            src="/images/board/Board02.png"
+            alt="Board mid left"
+            fill
+            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
+            style={{ objectFit: "contain" }}
+            onLoadingComplete={handlePieceLoaded}
+          />
+          <Image
+            className={`${styles.piece} ${styles.pOuterRight}`}
+            src="/images/board/Board05.png"
+            alt="Board outer right"
+            fill
+            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
+            style={{ objectFit: "contain" }}
+            onLoadingComplete={handlePieceLoaded}
+          />
+          <Image
+            className={`${styles.piece} ${styles.pMidRight}`}
+            src="/images/board/Board04.png"
+            alt="Board mid right"
+            fill
+            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
+            style={{ objectFit: "contain" }}
+            onLoadingComplete={handlePieceLoaded}
+          />
+          <Image
+            className={`${styles.piece} ${styles.pCenter}`}
+            src="/images/board/Board03.png"
+            alt="Board center"
+            fill
+            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
+            style={{ objectFit: "contain" }}
+            onLoadingComplete={handlePieceLoaded}
+          />
         </div>
         {/* 버튼 */}
         <div className={`button-container ${styles.buttonContainer}`}>

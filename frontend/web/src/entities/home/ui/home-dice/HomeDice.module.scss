@@ -86,14 +86,45 @@
   transform: translateY(-50%);
 }
 
+.boardLayerWrapper {
+  --piece-w: clamp(280px, 30vw, 520px);
+  --col: calc(var(--piece-w) / 2);
+
+  position: fixed;
+  inset: 0;
+  top: 65vh;
+  left: calc((100vw - var(--col) * 6) / 2);
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.piece {
+  position: absolute;
+  width: var(--piece-w);
+  height: auto;
+  will-change: transform, opacity;
+}
+/* Original vertical offsets were approximately -200/0/220/0/-200px
+   When step(col)=300px, that is about -0.66/0/0.73/0/-0.66 of a step. */
+.pOuterLeft {
+  transform: translate3d(calc(var(--col) * 0), calc(var(--col) * -0.66), 0);
+}
+.pMidLeft {
+  transform: translate3d(calc(var(--col) * 1), 0, 0);
+}
+.pCenter {
+  transform: translate3d(calc(var(--col) * 2), calc(var(--col) * 0.73), 0);
+}
+.pMidRight {
+  transform: translate3d(calc(var(--col) * 3), 0, 0);
+}
+.pOuterRight {
+  transform: translate3d(calc(var(--col) * 4), calc(var(--col) * -0.66), 0);
+}
+
 @media screen and (max-width: 700px) {
   .buttonContainer {
     width: 45vw;
-  }
-}
-
-@media screen and (max-width: 500px) {
-  .buttonContainer {
-    width: 45vw; /* 유지: 요청대로 700px까지 35vw */
   }
 }
