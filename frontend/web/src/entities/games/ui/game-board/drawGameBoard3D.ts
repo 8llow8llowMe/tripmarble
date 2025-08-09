@@ -155,12 +155,12 @@ export function drawGameBoard3D(
 
     // 텍스트 그리기 (중앙, 약간 아래)
     ctx.save();
-    ctx.font = "bold 18px sans-serif";
-    ctx.fillStyle = "#222";
+    ctx.font = "700 8px pretendard";
+    ctx.fillStyle = "#000";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.shadowColor = "#fff6";
-    ctx.shadowBlur = 4;
+    // ctx.shadowColor = "#fff6";
+    // ctx.shadowBlur = 4;
     ctx.fillText(
       cell.title,
       col * cellSize + cellSize / 2 + 10,
