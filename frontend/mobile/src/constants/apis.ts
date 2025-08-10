@@ -30,6 +30,14 @@ const END_POINTS = {
     // 여행 콘텐츠 타입
     LIST_CONTENT_TYPES: '/trip-content-types',
   },
+
+  GAME: {
+    LIST_TRIP_THEMES: '/trip-themes',
+    LIST_DIFFICULTY: '/trip-games/difficulties',
+
+    CREATE: '/trip-games',
+    START: (tripGameId: number) => `/trip-games/${tripGameId}/start`,
+  },
 };
 
 export { END_POINTS };
