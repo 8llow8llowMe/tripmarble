@@ -1,3 +1,4 @@
+import TabHeader from '@/components/layout/header/TabHeader';
 import CreateGameScreen from '@/screens/Game/CreateGameScreen';
 import FinishedGameScreen from '@/screens/Game/FinishedGameScreen';
 import OngoingGameScreen from '@/screens/Game/OngoingGameScreen';
@@ -8,11 +9,35 @@ const PlayStack = createNativeStackNavigator();
 
 export default function PlayStackNavigator() {
   return (
-    <PlayStack.Navigator screenOptions={{ headerShown: false }}>
-      <PlayStack.Screen name="PlayMain" component={PlayScreen} />
-      <PlayStack.Screen name="CreateGame" component={CreateGameScreen} />
-      <PlayStack.Screen name="OngoingGame" component={OngoingGameScreen} />
-      <PlayStack.Screen name="FinishedGame" component={FinishedGameScreen} />
+    <PlayStack.Navigator>
+      <PlayStack.Screen
+        name="PlayMain"
+        component={PlayScreen}
+        options={{
+          header: () => <TabHeader type="PlayTab" />,
+        }}
+      />
+      <PlayStack.Screen
+        name="CreateGame"
+        component={CreateGameScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <PlayStack.Screen
+        name="OngoingGame"
+        component={OngoingGameScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <PlayStack.Screen
+        name="FinishedGame"
+        component={FinishedGameScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
     </PlayStack.Navigator>
   );
 }
