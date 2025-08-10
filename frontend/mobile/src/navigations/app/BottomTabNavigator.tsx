@@ -10,6 +10,7 @@ import MomentsScreen from '@/screens/Moments/MomentsScreen';
 import HomeStackNavigator from '@/navigations/app/HomeStackNavigator';
 import PlayStackNavigator from '@/navigations/app/PlayStackNavigator';
 import ExploreStackNavigator from '@/navigations/app/ExploreStackNavigator';
+import TabHeader from '@/components/layout/header/TabHeader';
 
 const Tab = createBottomTabNavigator();
 
@@ -58,14 +59,43 @@ export default function BottomTabNavigator() {
         },
         tabBarActiveTintColor: '#36bffa',
         tabBarInactiveTintColor: 'gray',
-        headerShown: false,
       })}
     >
-      <Tab.Screen name="Home" component={HomeStackNavigator} />
-      <Tab.Screen name="Explore" component={ExploreStackNavigator} />
-      <Tab.Screen name="Play" component={PlayStackNavigator} />
-      <Tab.Screen name="Moments" component={MomentsScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeStackNavigator}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Explore"
+        component={ExploreStackNavigator}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Play"
+        component={PlayStackNavigator}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Tab.Screen
+        name="Moments"
+        component={MomentsScreen}
+        options={{
+          header: () => <TabHeader type="MomentsTab" />,
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          header: () => <TabHeader type="ProfileTab" />,
+        }}
+      />
     </Tab.Navigator>
   );
 }
