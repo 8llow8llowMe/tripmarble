@@ -19,6 +19,11 @@ const QUERY_KEY = {
     LIST_REPRESENTATIVE_REGIONS: 'representativeRegionsList ',
     REPRESENTATIVE_REGION: 'representativeRegion',
   },
+
+  GAME: {
+    LIST_TRIP_THEMES: 'tripThemesList',
+    LIST_DIFFICULTY: 'difficultyList',
+  },
 };
 
 export { STORAGE_KEY, QUERY_KEY };
