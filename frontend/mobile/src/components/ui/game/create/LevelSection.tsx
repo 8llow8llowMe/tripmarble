@@ -1,36 +1,58 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import Section from './Section';
+import { View, StyleSheet, Text } from 'react-native';
 import Chip from './Chip';
 
-type Props = {
-  value?: string | null;
-  onSelect: (lv: string) => void;
-  onNext?: () => void;
+type Level = {
+  code: string;
+  description: string;
 };
 
-const LEVELS = ['쉬움', '보통', '어려움'];
+type LevelSectionProps = {
+  onLayout?: (e: any) => void;
+  onNext?: () => void;
+  levels: Level[]; // ⬅️ 상위에서 주입
+  selectedCode: string | null; // ⬅️ 상위 상태
+  onSelect: (code: string) => void; // ⬅️ 상위로 올리기
+  minHeight: number;
+};
 
-export default function LevelSection({ value, onSelect, onNext }: Props) {
+const LevelSection = ({
+  onLayout,
+  levels,
+  selectedCode,
+  onSelect,
+  onNext,
+  minHeight,
+}: LevelSectionProps) => {
   return (
-    <Section title="난이도">
+    <View onLayout={onLayout} style={[styles.section, minHeight ? { minHeight } : null]}>
+      <Text style={styles.sectionTitle}>난이도 선택</Text>
+
       <View style={styles.row}>
-        {LEVELS.map((lv) => (
+        {levels.map(({ code, description }) => (
           <Chip
-            key={lv}
-            label={lv}
-            active={value === lv}
+            key={code}
+            label={description}
+            active={selectedCode === code}
             onPress={() => {
-              onSelect(lv);
+              onSelect(code);
               onNext?.();
             }}
           />
         ))}
       </View>
-    </Section>
+    </View>
   );
-}
+};
+
+export default LevelSection;
 
 const styles = StyleSheet.create({
+  section: {
+    paddingHorizontal: 20,
+    paddingTop: 14,
+  },
+  sectionTitle: { fontSize: 20, fontWeight: '700', color: '#0F172A', marginBottom: 14 },
+
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
 });
