@@ -1,43 +1,72 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Section, Chip } from './index';
+import { useNavigation } from '@react-navigation/native';
+import Chip from '@/components/ui/game/create/Chip';
 
-type LocationValue = { id: number; name: string } | null;
-
-type Props = {
-  value: LocationValue;
-  onSelect: (loc: { id: number; name: string }) => void;
-  onSearchPress: () => void;
-  onNext?: () => void; // 선택 시 자동 다음 이동
+type Region = {
+  representativeRegionId: number;
+  representativeRegionName: string;
+  imageUrl: string | null;
 };
 
-const CANDIDATES = ['제주', '경주', '전주', '부산', '광주', '강릉'];
+type LocationSectionProps = {
+  onLayout?: (e: any) => void;
+  onNext?: () => void; // 선택 시 자동 다음 이동
+  regions: Region[]; // ⬅️ 상위에서 주입
+  selectedId: number | null; // ⬅️ 상위 상태
+  onSelect: (id: number) => void; // ⬅️ 상위로 올리기
+  minHeight: number;
+};
 
-export default function LocationSection({ value, onSelect, onSearchPress, onNext }: Props) {
+const LocationSection = ({
+  onLayout,
+  onNext,
+  regions,
+  selectedId,
+  onSelect,
+  minHeight,
+}: LocationSectionProps) => {
+  const navigation = useNavigation<any>();
+  console.log(minHeight);
+
   return (
-    <Section title="여행지 선택">
-      <TouchableOpacity style={styles.searchBar} onPress={onSearchPress} activeOpacity={0.85}>
-        <Text style={styles.searchPlaceholder}>{value?.name ?? '여행지 검색'}</Text>
+    <View onLayout={onLayout} style={[styles.section, minHeight ? { minHeight } : null]}>
+      <Text style={styles.sectionTitle}>여행지 선택</Text>
+
+      <TouchableOpacity
+        style={styles.searchBar}
+        onPress={() => navigation.navigate('SearchScreen')}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.searchPlaceholder}>여행지 검색</Text>
       </TouchableOpacity>
 
       <View style={styles.row}>
-        {CANDIDATES.map((name, idx) => (
+        {regions.map(({ representativeRegionId: id, representativeRegionName: name }) => (
           <Chip
-            key={name}
+            key={id}
             label={name}
-            active={value?.name === name}
+            active={selectedId === id}
             onPress={() => {
-              onSelect({ id: idx + 1, name });
+              onSelect(id);
               onNext?.();
             }}
           />
         ))}
       </View>
-    </Section>
+    </View>
   );
-}
+};
+
+export default LocationSection;
 
 const styles = StyleSheet.create({
+  section: {
+    paddingHorizontal: 20,
+    paddingTop: 14,
+  },
+  sectionTitle: { fontSize: 20, fontWeight: '700', color: '#0F172A', marginBottom: 14 },
+
   searchBar: {
     height: 48,
     borderRadius: 14,
