@@ -57,73 +57,14 @@ function draw3DCell(
 
   // 배경 밝기(그라데이션, 글래스 베이스)
   const grad = ctx.createLinearGradient(x, y, x + w, y + h);
-  // grad.addColorStop(0, "rgba(255,255,255,0.35)");
-  grad.addColorStop(0.5, mainColor + "cc");
+  // grad.addColorStop(0, "rgba(255,255,255,0.25)");
+  grad.addColorStop(0.25, mainColor + "cc");
   grad.addColorStop(1, mainColor + "88");
   ctx.fillStyle = grad;
   ctx.shadowColor = "rgba(160,200,255,0.13)";
   ctx.shadowBlur = 18;
   ctx.fill();
-
-  // 하이라이트(굵고 밝은 곡선 하이라이트) - 메인
-  ctx.save();
-  ctx.globalAlpha = 0.45;
-  ctx.beginPath();
-  ctx.ellipse(
-    x + w * 0.38,
-    y + h * 0.29,
-    w * 0.24,
-    h * 0.11,
-    Math.PI / 8,
-    0,
-    2 * Math.PI
-  );
-  ctx.fillStyle = "white";
-  ctx.filter = "blur(3px)";
-  ctx.fill();
   ctx.restore();
-
-  // 작은 물방울 하이라이트
-  ctx.save();
-  ctx.globalAlpha = 0.2;
-  ctx.beginPath();
-  ctx.ellipse(
-    x + w * 0.62,
-    y + h * 0.44,
-    w * 0.1,
-    h * 0.06,
-    Math.PI / 5,
-    0,
-    2 * Math.PI
-  );
-  ctx.fillStyle = "#fff";
-  ctx.filter = "blur(1.2px)";
-  ctx.fill();
-  ctx.restore();
-
-  // 곡면/오팔(은은한 파란 느낌, 내부 광택)
-  // let opal = ctx.createRadialGradient(
-  //   x + w * 0.82,
-  //   y + h * 0.8,
-  //   w * 0.05,
-  //   x + w * 0.82,
-  //   y + h * 0.8,
-  //   w * 0.19
-  // );
-  // opal.addColorStop(0, "rgba(160,190,255,0.12)");
-  // opal.addColorStop(1, "rgba(255,255,255,0.0)");
-  // ctx.globalAlpha = 0.5;
-  // ctx.fillStyle = opal;
-  // ctx.fill();
-  // ctx.globalAlpha = 1;
-
-  // // 테두리(유리 느낌)
-  // ctx.strokeStyle = "rgba(255,255,255,0.78)";
-  // ctx.lineWidth = 2.5;
-  // ctx.shadowColor = "rgba(255,255,255,0.13)";
-  // ctx.shadowBlur = 2;
-  // ctx.stroke();
-  // ctx.restore();
 }
 
 /**
@@ -138,7 +79,10 @@ export function drawGameBoard3D(
   cells.forEach((cell) => {
     const row = cell.row;
     const col = cell.col;
-    const [main, bottom] = getCell3DColors(cell.type);
+    const [main, bottom] =
+      cell.type === "start-go"
+        ? ["#d4f6da", "#7edb8a"]
+        : getCell3DColors(cell.type);
 
     // draw 3D cell
     draw3DCell(
@@ -153,19 +97,73 @@ export function drawGameBoard3D(
       16
     );
 
+    // Special START cell: big GO + bottom arrow
+    if (cell.type === "start-go") {
+      const cx = col * cellSize + cellSize / 2 + 10;
+      const cy = row * cellSize + cellSize / 2 + 5;
+
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      // GO label
+      ctx.font = "800 28px pretendard";
+      ctx.fillStyle = "#0a8453";
+      ctx.shadowColor = "#ffffffaa";
+      ctx.shadowBlur = 6;
+      ctx.fillText("GO", cx, cy - 6);
+
+      // Bottom arrow text
+      ctx.font = "700 14px pretendard";
+      ctx.fillStyle = "#0a8453";
+      ctx.shadowBlur = 0;
+      ctx.fillText("<---", cx, row * cellSize + cellSize - 14);
+
+      ctx.restore();
+      return; // skip normal title rendering
+    }
+
     // 텍스트 그리기 (중앙, 약간 아래)
     ctx.save();
-    ctx.font = "700 8px pretendard";
-    ctx.fillStyle = "#000";
+    ctx.font = "400 14px pretendard";
+    ctx.fillStyle = "#222";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    // ctx.shadowColor = "#fff6";
-    // ctx.shadowBlur = 4;
-    ctx.fillText(
-      cell.title,
-      col * cellSize + cellSize / 2 + 10,
-      row * cellSize + cellSize / 2 + 5
-    );
+
+    // 표시할 문자열
+    const title = cell.title || "";
+
+    // 줄바꿈 처리 (텍스트 픽셀 너비 기반)
+    let lines: string[] = [];
+    if (title.length === 0) {
+      lines = [title];
+    } else {
+      // 최대 텍스트 폭 (셀 크기의 80%)
+      const maxWidth = cellSize * 0.8;
+      let currentLine = "";
+      for (let i = 0; i < title.length; i++) {
+        const testLine = currentLine + title[i];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && currentLine.length > 0) {
+          lines.push(currentLine);
+          currentLine = title[i];
+        } else {
+          currentLine = testLine;
+        }
+      }
+      if (currentLine.length > 0) {
+        lines.push(currentLine);
+      }
+    }
+
+    // 텍스트 위치 계산 (여러 줄 지원)
+    const baseX = col * cellSize + cellSize / 2 + 10;
+    const baseY = row * cellSize + cellSize / 2 + 5;
+    const lineHeight = 16; // 줄간 간격 (px)
+    const totalHeight = (lines.length - 1) * lineHeight;
+    lines.forEach((line, idx) => {
+      ctx.fillText(line, baseX, baseY - totalHeight / 2 + idx * lineHeight);
+    });
     ctx.restore();
   });
 }
