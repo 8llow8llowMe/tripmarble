@@ -12,16 +12,12 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { palette } from '@/constants/colors';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons'; // 돋보기, 뒤로가기 아이콘
+import { Ionicons } from '@expo/vector-icons';
 import useContentTypesListQuery from '@/hooks/trip/useContentTypesList';
-import useRepresentativeRegionsListQuery from '@/hooks/trip/useRepresentativeRegionsList';
 import useDifficultyListQuery from '@/hooks/game/useDifficultyList';
 import useCreateGameMutaion from '@/hooks/game/useCreateGame';
-
-const { height: SCREEN_H } = Dimensions.get('window');
-const SECTION_H = SCREEN_H * 0.9;
-const CTA_H = 64; // 고정바 높이
+import { LevelSection, LocationSection } from '@/components/ui/game/create';
+import useRepresentativeRegionsListQuery from '@/hooks/trip/useRepresentativeRegionsList';
 
 type SectionKey = 'location' | 'theme' | 'date' | 'level' | 'summary';
 const ORDER: SectionKey[] = ['location', 'theme', 'date', 'level', 'summary'];
@@ -29,16 +25,13 @@ const ORDER: SectionKey[] = ['location', 'theme', 'date', 'level', 'summary'];
 export default function CreateGameScreen() {
   const navigation = useNavigation<any>();
   const scrollRef = useRef<ScrollView>(null);
-  const insets = useSafeAreaInsets();
 
   const { representativeRegionsList } = useRepresentativeRegionsListQuery(); //대표여행지 목록(전주, 부산....)
+
   const { contentTypesList } = useContentTypesListQuery(); //여행테마 목록(관광, 맛집...)
   const { difficultyList } = useDifficultyListQuery(); //게임 난이도 목록(쉬움, 보통, 어려움)
 
   const { createGame } = useCreateGameMutaion(); //게임 생성
-  console.log(representativeRegionsList);
-  console.log(contentTypesList);
-  console.log(difficultyList);
 
   // 각 섹션의 y 포지션 저장
   const yMapRef = useRef<Record<SectionKey, number>>({
@@ -50,18 +43,21 @@ export default function CreateGameScreen() {
   });
   const [activeStep, setActiveStep] = useState(0);
 
-  // 선택값 (예시)
-  const [location, setLocation] = useState<string | null>(null);
-  const [themes, setThemes] = useState<string[]>([]);
+  // 선택값
+  const [regionId, setRegionId] = useState<number | null>(null); //representativeRegionId
+  const [themes, setThemes] = useState<string[]>([]); // tripThemeIds
   const [dates, setDates] = useState<{ start?: string; end?: string }>({});
-  const [level, setLevel] = useState<string | null>(null);
+  const [level, setLevel] = useState<string | null>(null); // difficulty
+
+  const [pendingScrollKey, setPendingScrollKey] = useState<SectionKey | null>(null);
+  const [viewportH, setViewportH] = useState(0);
 
   // 완료 조건
   const complete = {
-    location: !!location,
+    location: regionId != null,
     theme: themes.length > 0,
     date: !!dates.start && !!dates.end,
-    level: !!level,
+    level: level != null,
     summary: false, // 마지막은 생성 버튼 누를 때
   };
 
@@ -79,6 +75,29 @@ export default function CreateGameScreen() {
 
   const onLayoutFactory = (key: SectionKey) => (e: any) => {
     yMapRef.current[key] = e.nativeEvent.layout.y;
+
+    // 이 섹션이 지금 스크롤 대기 중이면, 레이아웃 직후 스크롤
+    if (pendingScrollKey === key) {
+      requestAnimationFrame(() => {
+        scrollToKey(key);
+        setPendingScrollKey(null);
+      });
+    }
+  };
+
+  const nextOf = (key: SectionKey) => ORDER[Math.min(ORDER.indexOf(key) + 1, ORDER.length - 1)];
+
+  const completeAndGoNext = (key: SectionKey) => {
+    const nextKey = nextOf(key);
+    const y = yMapRef.current[nextKey];
+
+    // 이미 다음 섹션이 렌더돼서 y가 측정돼 있으면 즉시 이동
+    if (typeof y === 'number' && y > 0) {
+      scrollToKey(nextKey);
+      return;
+    }
+    // 아직 렌더 전이면 대기 → onLayout에서 자동 처리
+    setPendingScrollKey(nextKey);
   };
 
   const scrollToKey = (key: SectionKey) => {
@@ -86,46 +105,36 @@ export default function CreateGameScreen() {
     scrollRef.current?.scrollTo({ y, animated: true });
   };
 
-  // 스냅 오프셋(각 섹션 시작 y). 레이아웃 후 업데이트를 위해 매 렌더에서 계산
-  const snapOffsets = useMemo(
-    () => ORDER.map((k) => yMapRef.current[k] ?? 0),
-    [activeStep, maxAllowedIndex],
+  // ORDER는 그대로
+  const visibleOrder = useMemo(
+    () => ORDER.slice(0, maxAllowedIndex + 1), // 초기엔 ['location']만 렌더
+    [maxAllowedIndex],
   );
 
-  // 스크롤 끝났을 때, 허용 범위를 넘어가면 현재 허용 섹션으로 되돌림
+  const snapOffsets = useMemo(
+    () => visibleOrder.map((k) => yMapRef.current[k] ?? 0),
+    [visibleOrder, activeStep],
+  );
+
   const onMomentumScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const y = e.nativeEvent.contentOffset.y;
-    // 현재 스냅 인덱스 추정
     let targetIdx = 0;
-    for (let i = 0; i < ORDER.length; i++) {
-      const top = yMapRef.current[ORDER[i]];
-      const next = i < ORDER.length - 1 ? yMapRef.current[ORDER[i + 1]] : Number.MAX_SAFE_INTEGER;
+    for (let i = 0; i < visibleOrder.length; i++) {
+      const key = visibleOrder[i];
+      const top = yMapRef.current[key];
+      const next =
+        i < visibleOrder.length - 1
+          ? yMapRef.current[visibleOrder[i + 1]]
+          : Number.MAX_SAFE_INTEGER;
       if (y >= top - 10 && y < next - 10) {
         targetIdx = i;
         break;
       }
     }
-    // 아래(미완료 단계)로 넘어가려 하면 되돌리기
-    if (targetIdx > maxAllowedIndex) {
-      const backKey = ORDER[maxAllowedIndex];
-      requestAnimationFrame(() => scrollToKey(backKey));
-      return;
-    }
     setActiveStep(targetIdx);
   };
 
-  // 선택 즉시 다음 섹션으로 자동 스크롤하는 헬퍼
-  const completeAndGoNext = (key: SectionKey) => {
-    const curIdx = ORDER.indexOf(key);
-    const nextKey = ORDER[Math.min(curIdx + 1, ORDER.length - 1)];
-    requestAnimationFrame(() => scrollToKey(nextKey));
-  };
-
   // 예시 핸들러들
-  const handleSelectLocation = (name: string) => {
-    setLocation(name);
-    completeAndGoNext('location');
-  };
   const handleToggleTheme = (name: string) => {
     setThemes((prev) => {
       const exists = prev.includes(name);
@@ -135,14 +144,15 @@ export default function CreateGameScreen() {
       return next;
     });
   };
+
   const handleSetDates = (start: string, end: string) => {
     setDates({ start, end });
     completeAndGoNext('date');
   };
-  const handleSelectLevel = (lv: string) => {
-    setLevel(lv);
-    completeAndGoNext('level');
-  };
+
+  const selectedRegionName =
+    representativeRegionsList?.find((r) => r.representativeRegionId === regionId)
+      ?.representativeRegionName ?? '-';
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -151,7 +161,6 @@ export default function CreateGameScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={28} color="#555" />
         </TouchableOpacity>
-
         <Text style={styles.headerTitle}>게임 만들기</Text>
         <TouchableOpacity
           onPress={() => {
@@ -171,142 +180,120 @@ export default function CreateGameScreen() {
         total={ORDER.length}
         activeIndex={activeStep}
         onPressDot={(i) => {
-          // 도트 탭도 동일 정책: 허용된 최대 이하만 점프
           const clamped = Math.min(i, maxAllowedIndex);
           scrollToKey(ORDER[clamped]);
         }}
       />
 
       {/* 본문 */}
-      <ScrollView
-        ref={scrollRef}
-        style={styles.scroll}
-        showsVerticalScrollIndicator={false}
-        onMomentumScrollEnd={onMomentumScrollEnd}
-        scrollEventThrottle={16}
-        decelerationRate="fast"
-        snapToOffsets={snapOffsets}
-        snapToAlignment="start"
-        contentContainerStyle={{ paddingBottom: CTA_H + insets.bottom + 24 }}
-      >
-        {/* 1. 여행지 */}
-        <Section
-          title="여행지 선택"
-          onLayout={onLayoutFactory('location')}
-          footer={
-            <Next
-              label="다음(테마)"
-              onPress={() => complete.location && scrollToKey('theme')}
-              disabled={!complete.location}
-            />
-          }
+      <View style={{ flex: 1 }} onLayout={(e) => setViewportH(e.nativeEvent.layout.height)}>
+        <ScrollView
+          ref={scrollRef} // 스크롤 제어(프로그램적으로 scrollTo) 위해 ref 연결
+          showsVerticalScrollIndicator={false} // 우측 스크롤바 숨김
+          onMomentumScrollEnd={onMomentumScrollEnd} // 스크롤 관성(플링) 종료 시점에 현재 섹션 인덱스 계산
+          scrollEventThrottle={16} // onScroll 계열 이벤트 호출 주기(≈60FPS) — 부드러운 추적
+          decelerationRate="fast" // 관성 감속 속도 — iOS에서 특히 스냅 느낌 강화
+          snapToOffsets={snapOffsets} // 섹션 시작 y좌표 배열 → 해당 위치들로만 ‘착’ 붙도록 스냅
+          snapToAlignment="start" // 스냅 기준(섹션의 top을 화면 top에 정렬)
+          // contentContainerStyle={{
+          //   paddingBottom: insets.bottom + 24, // 하단 고정 버튼/안전영역에 가리지 않도록 여유! (를 주지 말자)
+          // }}
         >
-          <TouchableOpacity
-            style={styles.searchBar}
-            onPress={() => navigation.navigate('SearchScreen')}
-          >
-            <Text style={styles.searchPlaceholder}>{location ?? '여행지 검색'}</Text>
-          </TouchableOpacity>
-
-          <View style={styles.row}>
-            {['제주', '경주', '전주', '부산', '광주', '강릉'].map((n) => (
-              <Chip
-                key={n}
-                active={location === n}
-                label={n}
-                onPress={() => handleSelectLocation(n)}
-              />
-            ))}
-          </View>
-        </Section>
-
-        {/* 2. 테마 */}
-        <Section title="여행 테마" onLayout={onLayoutFactory('theme')}>
-          <View style={styles.row}>
-            {['관광', '전시', '축제/공연', '액티비티', '쇼핑', '맛집'].map((t) => (
-              <Chip
-                key={t}
-                active={themes.includes(t)}
-                label={t}
-                onPress={() => handleToggleTheme(t)}
-              />
-            ))}
-          </View>
-          <Next
-            label="다음(기간)"
-            onPress={() => complete.theme && scrollToKey('date')}
-            disabled={!complete.theme}
+          {/* 1. 여행지 */}
+          <LocationSection
+            onLayout={onLayoutFactory('location')}
+            onNext={() => completeAndGoNext('location')}
+            regions={representativeRegionsList ?? []}
+            selectedId={regionId}
+            onSelect={(id) => {
+              setRegionId(id);
+              completeAndGoNext('location'); // 매 변경 시 이동
+            }}
+            minHeight={viewportH}
           />
-        </Section>
 
-        {/* 3. 여행 기간 */}
-        <Section title="여행 기간" onLayout={onLayoutFactory('date')}>
-          <View style={styles.placeholderBox}>
-            <Text style={styles.placeholderText}>📅 캘린더 자리</Text>
-          </View>
-          <View style={styles.row}>
-            {[
-              ['2025-08-20', '2025-08-22'],
-              ['2025-09-01', '2025-09-03'],
-            ].map(([s, e]) => (
-              <Chip
-                key={s}
-                label={`${s} ~ ${e}`}
-                active={dates.start === s && dates.end === e}
-                onPress={() => handleSetDates(s, e)}
-              />
-            ))}
-          </View>
-          <Next
-            label="다음(난이도)"
-            onPress={() => complete.date && scrollToKey('level')}
-            disabled={!complete.date}
-          />
-        </Section>
+          {/* 2. 테마 */}
+          {complete.location && (
+            <Section title="여행 테마" onLayout={onLayoutFactory('theme')} minHeight={viewportH}>
+              <View style={styles.row}>
+                {['관광', '전시', '축제/공연', '액티비티', '쇼핑', '맛집'].map((t) => (
+                  <Chip
+                    key={t}
+                    active={themes.includes(t)}
+                    label={t}
+                    onPress={() => handleToggleTheme(t)}
+                  />
+                ))}
+              </View>
+            </Section>
+          )}
 
-        {/* 4. 난이도 */}
-        <Section title="난이도" onLayout={onLayoutFactory('level')}>
-          <View style={styles.row}>
-            {['쉬움', '보통', '어려움'].map((lv) => (
-              <Chip
-                key={lv}
-                label={lv}
-                active={level === lv}
-                onPress={() => handleSelectLevel(lv)}
-              />
-            ))}
-          </View>
-          <Next
-            label="다음(요약)"
-            onPress={() => complete.level && scrollToKey('summary')}
-            disabled={!complete.level}
-          />
-        </Section>
+          {/* 3. 여행 기간 */}
+          {complete.theme && (
+            <Section title="여행 기간" onLayout={onLayoutFactory('date')} minHeight={viewportH}>
+              <View style={styles.placeholderBox}>
+                <Text style={styles.placeholderText}>📅 캘린더 자리</Text>
+              </View>
+              <View style={styles.row}>
+                {[
+                  ['2025-08-20', '2025-08-22'],
+                  ['2025-09-01', '2025-09-03'],
+                ].map(([s, e]) => (
+                  <Chip
+                    key={s}
+                    label={`${s} ~ ${e}`}
+                    active={dates.start === s && dates.end === e}
+                    onPress={() => handleSetDates(s, e)}
+                  />
+                ))}
+              </View>
+            </Section>
+          )}
 
-        {/* 5. 요약 */}
-        <Section title="요약" onLayout={onLayoutFactory('summary')}>
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>선택 요약</Text>
-            <Text style={styles.summaryItem}>여행지: {location ?? '-'}</Text>
-            <Text style={styles.summaryItem}>테마: {themes.length ? themes.join(', ') : '-'}</Text>
-            <Text style={styles.summaryItem}>
-              기간: {dates.start && dates.end ? `${dates.start} ~ ${dates.end}` : '-'}
-            </Text>
-            <Text style={styles.summaryItem}>난이도: {level ?? '-'}</Text>
-          </View>
+          {/* 4. 난이도 */}
+          {complete.date && (
+            <LevelSection
+              onLayout={onLayoutFactory('level')}
+              onNext={() => completeAndGoNext('level')}
+              levels={difficultyList ?? []}
+              selectedCode={level}
+              onSelect={(code) => {
+                setLevel(code);
+                completeAndGoNext('level');
+              }}
+              minHeight={viewportH}
+            />
+          )}
 
-          <TouchableOpacity
-            style={[styles.primaryBtn, !isFormValid && { opacity: 0.4 }]}
-            disabled={!isFormValid}
-          >
-            <Text style={styles.primaryBtnText}>게임 만들기</Text>
-          </TouchableOpacity>
+          {/* 5. 요약 */}
+          {complete.level && (
+            <Section title="요약" onLayout={onLayoutFactory('summary')} minHeight={viewportH}>
+              <View style={styles.summaryCard}>
+                <Text style={styles.summaryTitle}>선택 요약</Text>
+                <Text style={styles.summaryItem}>여행지: {selectedRegionName}</Text>
+                <Text style={styles.summaryItem}>
+                  테마: {themes.length ? themes.join(', ') : '-'}
+                </Text>
+                <Text style={styles.summaryItem}>
+                  기간: {dates.start && dates.end ? `${dates.start} ~ ${dates.end}` : '-'}
+                </Text>
+                <Text style={styles.summaryItem}>난이도: {level ?? '-'}</Text>
+              </View>
 
-          <TouchableOpacity style={styles.toTopBtn} onPress={() => scrollToKey('location')}>
-            <Text style={styles.toTopText}>맨 위로</Text>
-          </TouchableOpacity>
-        </Section>
-      </ScrollView>
+              <TouchableOpacity
+                style={[styles.primaryBtn, !isFormValid && { opacity: 0.4 }]}
+                disabled={!isFormValid}
+              >
+                <Text style={styles.primaryBtnText}>게임 만들기</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.toTopBtn} onPress={() => scrollToKey('location')}>
+                <Text style={styles.toTopText}>맨 위로</Text>
+              </TouchableOpacity>
+            </Section>
+          )}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -345,29 +332,17 @@ function Section({
   title,
   onLayout,
   children,
-  footer, // ⬅️ 추가
+  minHeight,
 }: {
   title: string;
   onLayout?: (e: any) => void;
   children: React.ReactNode;
-  footer?: React.ReactNode;
+  minHeight: number;
 }) {
   return (
-    <View
-      onLayout={onLayout}
-      style={[
-        styles.section,
-        { minHeight: SECTION_H },
-        title === '여행지 선택' && { backgroundColor: palette.yellow300 },
-      ]}
-    >
+    <View onLayout={onLayout} style={[styles.section, minHeight ? { minHeight } : null]}>
       <Text style={styles.sectionTitle}>{title}</Text>
-
-      {/* 본문 */}
-      <View style={styles.sectionBody}>{children}</View>
-
-      {/* 섹션 하단 고정 영역 */}
-      {footer ? <View style={styles.sectionFooter}>{footer}</View> : null}
+      {children}
     </View>
   );
 }
@@ -387,24 +362,6 @@ const Chip = ({
     activeOpacity={0.95}
   >
     <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
-  </TouchableOpacity>
-);
-
-const Next = ({
-  label,
-  onPress,
-  disabled,
-}: {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-}) => (
-  <TouchableOpacity
-    style={[styles.nextBtn, disabled && styles.nextBtnDisabled]}
-    onPress={onPress}
-    disabled={disabled}
-  >
-    <Text style={[styles.nextBtnText, disabled && styles.nextBtnTextDisabled]}>{label}</Text>
   </TouchableOpacity>
 );
 
@@ -456,16 +413,11 @@ const styles = StyleSheet.create({
   dotDone: { borderColor: '#22C55E', backgroundColor: '#22C55E' },
   dotCheck: { color: '#FFF', fontSize: 10, fontWeight: '800' },
 
-  scroll: { flex: 1 },
-
   section: {
     paddingHorizontal: 20,
     paddingTop: 14,
-    paddingBottom: 28,
   },
   sectionTitle: { fontSize: 20, fontWeight: '700', color: '#0F172A', marginBottom: 14 },
-  sectionBody: { flexGrow: 1 }, // 남는 공간을 차지해서 푸터를 아래로 밀기
-  sectionFooter: { marginTop: 18 }, // 버튼 위 여백
 
   searchBar: {
     height: 48,
@@ -503,20 +455,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   placeholderText: { color: '#6B7280' },
-
-  nextBtn: {
-    marginTop: 0,
-    height: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  nextBtnDisabled: { opacity: 0.4 },
-  nextBtnText: { fontSize: 16, color: '#111827' },
-  nextBtnTextDisabled: { color: '#9CA3AF' },
 
   summaryCard: {
     padding: 16,
