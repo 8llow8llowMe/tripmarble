@@ -5,6 +5,7 @@ import GameBoard from "@/entities/games/ui/game-board/GameBoard";
 import styles from "./GamePlay.module.scss";
 import { GameInfoDataBody } from "@/entities/games/model/gameInfoDummy";
 import { ApiResponse } from "@/shared/types";
+import TileInfoModal from "@/entities/games/ui/tile-info-modal/TileInfoModal";
 
 type Props = {
   gameData: ApiResponse<GameInfoDataBody>;
@@ -42,7 +43,9 @@ const GamePlay = ({ gameData }: Props) => {
     [activeStep, tripGameTileViews]
   );
 
-  const [modalTile, setModalTile] = useState<typeof tripGameTileViews[number] | null>(null);
+  const [modalTile, setModalTile] = useState<
+    (typeof tripGameTileViews)[number] | null
+  >(null);
 
   return (
     <div className={styles.detailWrapper}>
@@ -86,18 +89,10 @@ const GamePlay = ({ gameData }: Props) => {
           </div>
 
           {modalTile && (
-            <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.35)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:50}} onClick={()=>setModalTile(null)}>
-              <div style={{background:'#fff', borderRadius:12, padding:'18px 20px', width:'min(520px, 92vw)'}} onClick={(e)=>e.stopPropagation()}>
-                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12}}>
-                  <strong style={{fontSize:'1.15rem'}}>{modalTile.tripSpotName}</strong>
-                  <button onClick={()=>setModalTile(null)} style={{border:'none', background:'transparent', fontSize:'1.2rem', cursor:'pointer'}}>✕</button>
-                </div>
-                <div style={{color:'#5d6b7b', marginBottom:8}}>
-                  단계: step{modalTile.stepNo} · {modalTile.tileTypeDescription}
-                </div>
-                <div style={{fontSize:'0.95rem'}}>tripSpotId: {modalTile.tripSpotId}</div>
-              </div>
-            </div>
+            <TileInfoModal
+              tile={modalTile}
+              onClose={() => setModalTile(null)}
+            />
           )}
 
           {/* CTA Buttons */}

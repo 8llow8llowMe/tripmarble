@@ -5,6 +5,7 @@ import GameBoard from "@/entities/games/ui/game-board/GameBoard";
 import Image from "next/image";
 import styles from "./GameHistory.module.scss";
 import { gameInfoDummy } from "@/entities/games/model/gameInfoDummy";
+import TileInfoModal from "@/entities/games/ui/tile-info-modal/TileInfoModal";
 
 type TimelineItem = {
   index: number;
@@ -59,6 +60,10 @@ const GameHistory = ({
           }}
         />
       </div>
+      {modalTile && (
+        <TileInfoModal tile={modalTile} onClose={() => setModalTile(null)} />
+      )}
+
       {/* 탭 바 */}
       <div className={styles.tabBar}>
         <button
