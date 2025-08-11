@@ -4,19 +4,19 @@
 
 // 타일 타입 색상(상단, 하단)
 const TILE_TYPE_COLORS: Record<string, [string, string]> = {
-  start: ["#d4f6da", "#7edb8a"], // 연한 초록 / 진한 초록
-  end: ["#ffd6d6", "#ff7b7b"], // 연한 빨강 / 진한 빨강
-  mission: ["#ffe0f0", "#ff9ec5"], // 연한 핑크 / 진한 핑크
-  normal: ["#eaf0f8", "#b6c5da"], // 연한 블루그레이 / 진한 블루그레이
+  start: ["#FCB6CB", "#C790A5"],
+  end: ["#01C5D9", "#0296A4"],
+  mission: ["#40C896", "#2E936F"],
+  normal: ["#F7F7F8", "#BBBBBB"],
 };
 
 // 카테고리 색상(상단, 하단)
 const CATEGORY_COLORS: Record<string, [string, string]> = {
-  음식점: ["#ffc7c7", "#fa7676"],
-  카페: ["#cdfcd7", "#5ed17d"],
-  관광지: ["#c9e7ff", "#6bb9f3"],
-  공원: ["#e2d4fd", "#a694e8"],
-  기타: ["#f1f1f1", "#bdbdbd"],
+  음식점: ["#ffc7c7", "#C790A5"],
+  카페: ["#40C896", "#2E936F"],
+  관광지: ["#FCB6CB", "#6bb9f3"],
+  공원: ["#01C5D9", "#0296A4"],
+  기타: ["#F7F7F8", "#BBBBBB"],
 };
 
 /**
@@ -31,7 +31,7 @@ export function getCell3DColors(type: string): [string, string] {
 
   if (CATEGORY_COLORS[type]) return CATEGORY_COLORS[type];
 
-  return ["#eee", "#bbb"]; // fallback
+  return ["#eee", "#bbb"];
 }
 
 // (선택) 외부에서 카테고리 팔레트를 한눈에 쓰고 싶을 때
