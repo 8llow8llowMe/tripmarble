@@ -18,6 +18,7 @@ const QUERY_KEY = {
     LIST_SIGUNGUS_BY_REGION: 'sigungusByRegionList',
     LIST_REPRESENTATIVE_REGIONS: 'representativeRegionsList ',
     REPRESENTATIVE_REGION: 'representativeRegion',
+    LIST_CONTENT_TYPES: 'contentTypesList',
   },
 
   GAME: {
