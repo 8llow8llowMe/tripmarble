@@ -18,13 +18,6 @@ export default function PlayStackNavigator() {
         }}
       />
       <PlayStack.Screen
-        name="CreateGame"
-        component={CreateGameScreen}
-        options={{
-          headerShown: false,
-        }}
-      />
-      <PlayStack.Screen
         name="OngoingGame"
         component={OngoingGameScreen}
         options={{
