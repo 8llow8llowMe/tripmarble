@@ -19,17 +19,52 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const edgePositions: { row: number; col: number }[] = [];
+  // --- Build two position lists ---
+  // 1) renderPositions: row-major border order (good for painter's algorithm / overlaps)
+  const renderPositions: { row: number; col: number }[] = [];
   for (let row = 0; row < count; row++) {
     for (let col = 0; col < count; col++) {
       if (row === 0 || row === count - 1 || col === 0 || col === count - 1) {
-        edgePositions.push({ row, col });
+        renderPositions.push({ row, col });
       }
     }
   }
 
-  const boardData = tiles.map((tile, i) => {
-    const { row, col } = edgePositions[i];
+  // 2) logicalPositions: start at right-bottom and go clockwise
+  const logicalPositions: { row: number; col: number }[] = [];
+  const max = count - 1;
+
+  // 1) bottom row: right -> left  (포함: RB..LB)
+  for (let c = max; c >= 0; c--) logicalPositions.push({ row: max, col: c });
+
+  // 2) left col: bottom-1 -> top   (제외: LB)
+  for (let r = max - 1; r >= 0; r--) logicalPositions.push({ row: r, col: 0 });
+
+  // 3) top row: left+1 -> right    (제외: LT)
+  for (let c = 1; c <= max; c++) logicalPositions.push({ row: 0, col: c });
+
+  // 4) right col: top+1 -> bottom-1 (제외: RT, RB)
+  for (let r = 1; r <= max - 1; r++)
+    logicalPositions.push({ row: r, col: max });
+  // Map coordinate -> tile payload (clockwise assignment)
+  type CoordKey = string;
+  const toKey = (rc: { row: number; col: number }): CoordKey =>
+    `${rc.row},${rc.col}`;
+  const coordToTile = new Map<
+    CoordKey,
+    { index: number; type: string; title: string }
+  >();
+
+  // Reserve start cell (right-bottom) as GO marker, then place tiles from the next cell clockwise
+  //  - Start cell key
+  const startKey = toKey(logicalPositions[0]);
+  coordToTile.set(startKey, { index: -1, type: "start-go", title: "GO" });
+
+  //  - Assign tiles offset by +1 position (clockwise)
+  for (let i = 0; i < tiles.length; i++) {
+    const pos = logicalPositions[(i + 1) % logicalPositions.length];
+    const tile = tiles[i];
+    if (!tile) continue;
     const type =
       tile.tileTypeCode === "START"
         ? "start"
@@ -38,13 +73,22 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
         : tile.tileTypeCode === "MISSION"
         ? "mission"
         : "normal";
-
-    return {
+    coordToTile.set(toKey(pos), {
       index: i,
-      row,
-      col,
       type,
       title: tile.tripSpotName,
+    });
+  }
+
+  // Finally, build boardData in the SAFE render order, but pulling tile info by coordinate
+  const boardData = renderPositions.map((pos) => {
+    const payload = coordToTile.get(toKey(pos));
+    return {
+      index: payload?.index ?? -1,
+      row: pos.row,
+      col: pos.col,
+      type: payload?.type ?? "normal",
+      title: payload?.title ?? "",
     };
   });
 
@@ -70,8 +114,8 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
     canvas.height = CELL_SIZE * count + 15;
 
     // cache clickable rects (top faces only)
-    cellRectsRef.current = boardData.map((cell, index) => ({
-      index,
+    cellRectsRef.current = boardData.map((cell) => ({
+      index: cell.index,
       x: cell.col * CELL_SIZE + 10,
       y: cell.row * CELL_SIZE,
       w: CELL_SIZE,
@@ -79,7 +123,7 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
     }));
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = "#ecf1fe";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     drawGameBoard3D(ctx, boardData, count, CELL_SIZE);
@@ -163,12 +207,16 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
     if (!canvas) return;
     const handleClick = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
       const hit = cellRectsRef.current.find(
         (r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h
       );
-      if (hit && onCellClick) {
+
+      if (hit && hit.index !== -1 && onCellClick) {
         onCellClick(tiles[hit.index], hit.index);
       }
     };
