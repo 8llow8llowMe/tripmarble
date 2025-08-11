@@ -106,14 +106,6 @@ export const gameInfoDummy: ApiResponse<GameInfoDataBody> = {
         tripSpotName: "DDP 디자인&아트",
       },
       {
-        tripGameTileId: 609394785194741767,
-        tripSpotId: 30864,
-        stepNo: 8,
-        tileTypeCode: "NORMAL",
-        tileTypeDescription: "기본",
-        tripSpotName: "외로움이의 집",
-      },
-      {
         tripGameTileId: 609394785194741761,
         tripSpotId: 15813,
         stepNo: 2,
