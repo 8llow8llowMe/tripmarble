@@ -21,7 +21,8 @@
       "@assets/*": ["assets/*"],
       "@icons/*": ["assets/icons/*"],
       "@images/*": ["assets/images/*"],
-      "@fonts/*": ["assets/fonts/*"]
+      "@fonts/*": ["assets/fonts/*"],
+      "@components/*": ["src/components/*"]
     },
     "types": ["react", "react-native", "node"]
   },
