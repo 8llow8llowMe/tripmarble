@@ -335,7 +335,7 @@ export default function HomeDicePage() {
             sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
             style={{ objectFit: "contain" }}
             priority
-            onLoadingComplete={handlePieceLoaded}
+            onLoad={handlePieceLoaded}
           />
           <Image
             className={`${styles.piece} ${styles.pMidLeft}`}
@@ -344,7 +344,7 @@ export default function HomeDicePage() {
             fill
             sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
             style={{ objectFit: "contain" }}
-            onLoadingComplete={handlePieceLoaded}
+            onLoad={handlePieceLoaded}
           />
           <Image
             className={`${styles.piece} ${styles.pOuterRight}`}
@@ -353,7 +353,7 @@ export default function HomeDicePage() {
             fill
             sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
             style={{ objectFit: "contain" }}
-            onLoadingComplete={handlePieceLoaded}
+            onLoad={handlePieceLoaded}
           />
           <Image
             className={`${styles.piece} ${styles.pMidRight}`}
@@ -362,7 +362,7 @@ export default function HomeDicePage() {
             fill
             sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
             style={{ objectFit: "contain" }}
-            onLoadingComplete={handlePieceLoaded}
+            onLoad={handlePieceLoaded}
           />
           <Image
             className={`${styles.piece} ${styles.pCenter}`}
@@ -371,7 +371,7 @@ export default function HomeDicePage() {
             fill
             sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
             style={{ objectFit: "contain" }}
-            onLoadingComplete={handlePieceLoaded}
+            onLoad={handlePieceLoaded}
           />
         </div>
         {/* 버튼 */}
