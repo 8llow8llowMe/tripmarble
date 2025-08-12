@@ -1,8 +1,8 @@
-// ThemeCardGrid.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, LayoutChangeEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
+import NextFloatingButton from '@/components/ui/game/create/NextFloatingButton';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -23,7 +23,7 @@ type Props = {
   themes: Theme[]; // 8개 예상
   selectedIds: number[];
   onToggle: (id: number) => void;
-  onFirstSelectNext?: () => void; // 첫 선택 시 다음 섹션 이동
+  onNext?: () => void; // 첫 선택 시 다음 섹션 이동
   minHeight: number;
 };
 
@@ -35,7 +35,7 @@ export default function ThemeCardGrid({
   themes,
   selectedIds,
   onToggle,
-  onFirstSelectNext,
+  onNext,
   minHeight,
 }: Props) {
   const [gridW, setGridW] = useState(0);
@@ -59,9 +59,7 @@ export default function ThemeCardGrid({
             <Pressable
               key={t.contentTypeId}
               onPress={() => {
-                const first = selectedIds.length === 0 && !active;
                 onToggle(t.contentTypeId);
-                if (first) onFirstSelectNext?.();
               }}
               style={({ pressed }) => [
                 styles.card,
@@ -93,12 +91,18 @@ export default function ThemeCardGrid({
           );
         })}
       </View>
+
+      <NextFloatingButton
+        visible={selectedIds.length > 0}
+        onPress={() => onNext?.()}
+        label="여행 테마 선택 완료, 다음 섹션으로 이동"
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  section: { paddingHorizontal: 20, paddingTop: 14 },
+  section: { paddingHorizontal: 20, paddingTop: 14, position: 'relative' },
   title: { fontSize: 20, fontWeight: '700', color: palette.Neutral800 },
   subtitle: { marginTop: 14, fontSize: 15, color: palette.gray600 },
 
@@ -107,7 +111,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    backgroundColor: '#FFF',
+    backgroundColor: palette.white,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 10,
