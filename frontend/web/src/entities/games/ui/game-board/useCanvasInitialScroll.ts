@@ -6,9 +6,10 @@ export function useCanvasInitialScroll(
 ) {
   useEffect(() => {
     const wrapper = wrapperRef.current;
-    if (wrapper && canvasRef.current) {
-      wrapper.scrollLeft = canvasRef.current.width + 10 - wrapper.clientWidth;
-      wrapper.scrollTop = canvasRef.current.height - wrapper.clientHeight;
-    }
+    const canvas = canvasRef.current;
+    if (!canvas || !wrapper) return;
+
+    wrapper.scrollLeft = canvas.width + 10 - wrapper.clientWidth;
+    wrapper.scrollTop = canvas.height - wrapper.clientHeight;
   }, [canvasRef, wrapperRef]);
 }
