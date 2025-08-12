@@ -1,36 +1,45 @@
+import { palette } from '@/constants/colors';
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Section from './Section';
 
 type Props = {
-  location?: string | null;
-  themes: string[];
-  dates: { start?: string; end?: string };
+  onLayout?: (e: any) => void;
+  location: string;
+  themes: string[] | null;
+  startedAt: string | null;
+  endedAt: string | null;
   level?: string | null;
-  onSubmit: () => void;
+  onSubmit?: () => void;
   disabled?: boolean;
   onToTop?: () => void;
+  minHeight: number;
 };
 
-export default function SummarySection({
+const SummarySection = ({
+  onLayout,
   location,
   themes,
-  dates,
+  startedAt,
+  endedAt,
   level,
   onSubmit,
   disabled,
   onToTop,
-}: Props) {
+  minHeight,
+}: Props) => {
   return (
-    <Section title="요약">
+    <View onLayout={onLayout} style={[styles.section, minHeight ? { minHeight } : null]}>
+      <Text style={styles.title}>선택을 확인하고 게임을 생성해요</Text>
+      <Text style={styles.subtitle}>필요하면 위로 올려 수정할 수 있어요</Text>
+
       <View style={styles.card}>
-        <Text style={styles.title}>선택 요약</Text>
-        <Text style={styles.item}>여행지: {location ?? '-'}</Text>
-        <Text style={styles.item}>테마: {themes.length ? themes.join(', ') : '-'}</Text>
-        <Text style={styles.item}>
-          기간: {dates.start && dates.end ? `${dates.start} ~ ${dates.end}` : '-'}
+        <Text style={styles.summaryTitle}>선택 요약</Text>
+        <Text style={styles.summaryItem}>여행지: {location}</Text>
+        <Text style={styles.summaryItem}>테마: {themes}</Text>
+        <Text style={styles.summaryItem}>
+          기간: {startedAt && endedAt ? `${startedAt} ~ ${endedAt}` : '-'}
         </Text>
-        <Text style={styles.item}>난이도: {level ?? '-'}</Text>
+        <Text style={styles.summaryItem}>난이도: {level ?? '-'}</Text>
       </View>
 
       <TouchableOpacity
@@ -44,30 +53,36 @@ export default function SummarySection({
       <TouchableOpacity style={styles.toTopBtn} onPress={onToTop}>
         <Text style={styles.toTopText}>맨 위로</Text>
       </TouchableOpacity>
-    </Section>
+    </View>
   );
-}
+};
+
+export default SummarySection;
 
 const styles = StyleSheet.create({
+  section: { paddingHorizontal: 20, paddingTop: 14 },
+  title: { fontSize: 20, fontWeight: '700', color: palette.Neutral800 },
+  subtitle: { marginTop: 14, fontSize: 15, color: palette.gray600 },
+
   card: {
     padding: 16,
     borderRadius: 16,
     backgroundColor: '#F8FAFC',
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    marginBottom: 16,
+    marginVertical: 16,
   },
-  title: { fontSize: 16, fontWeight: '700', marginBottom: 10, color: '#0F172A' },
-  item: { fontSize: 14, color: '#334155', marginBottom: 4 },
+  summaryTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10, color: '#0F172A' },
+  summaryItem: { fontSize: 14, color: '#334155', marginBottom: 4 },
 
   primaryBtn: {
     height: 52,
     borderRadius: 14,
-    backgroundColor: '#4BA1FD',
+    backgroundColor: palette.mainColor,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  primaryBtnText: { color: palette.white, fontSize: 16, fontWeight: '700' },
 
   toTopBtn: { alignSelf: 'center', marginTop: 16, paddingVertical: 8, paddingHorizontal: 12 },
   toTopText: { color: '#64748B' },
