@@ -1,3 +1,4 @@
+import { palette } from '@/constants/colors';
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
@@ -29,7 +30,7 @@ export default function StepDots({ total, activeIndex, onPressDot }: Props) {
 }
 
 const styles = StyleSheet.create({
-  dotsWrap: { paddingVertical: 10, backgroundColor: '#FFF' },
+  dotsWrap: { paddingVertical: 10, backgroundColor: palette.white },
   dotsLine: {
     position: 'absolute',
     top: 22,
@@ -45,11 +46,11 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 2,
     borderColor: '#CBD5E1',
-    backgroundColor: '#FFF',
+    backgroundColor: palette.white,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  dotActive: { borderColor: '#4BA1FD', backgroundColor: '#4BA1FD' },
-  dotDone: { borderColor: '#22C55E', backgroundColor: '#22C55E' },
-  dotCheck: { color: '#FFF', fontSize: 10, fontWeight: '800' },
+  dotActive: { borderColor: palette.mainColor, backgroundColor: palette.mainColor },
+  dotDone: { borderColor: palette.currentCheck, backgroundColor: palette.currentCheck },
+  dotCheck: { color: palette.white, fontSize: 10, fontWeight: '800' },
 });
