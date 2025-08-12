@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Dimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
@@ -16,7 +15,14 @@ import { Ionicons } from '@expo/vector-icons';
 import useContentTypesListQuery from '@/hooks/trip/useContentTypesList';
 import useDifficultyListQuery from '@/hooks/game/useDifficultyList';
 import useCreateGameMutaion from '@/hooks/game/useCreateGame';
-import { LevelSection, LocationSection } from '@/components/ui/game/create';
+import {
+  DateSection,
+  LevelSection,
+  LocationSection,
+  StepDots,
+  SummarySection,
+  ThemeSection,
+} from '@/components/ui/game/create';
 import useRepresentativeRegionsListQuery from '@/hooks/trip/useRepresentativeRegionsList';
 
 type SectionKey = 'location' | 'theme' | 'date' | 'level' | 'summary';
@@ -26,10 +32,9 @@ export default function CreateGameScreen() {
   const navigation = useNavigation<any>();
   const scrollRef = useRef<ScrollView>(null);
 
-  const { representativeRegionsList } = useRepresentativeRegionsListQuery(); //대표여행지 목록(전주, 부산....)
-
-  const { contentTypesList } = useContentTypesListQuery(); //여행테마 목록(관광, 맛집...)
-  const { difficultyList } = useDifficultyListQuery(); //게임 난이도 목록(쉬움, 보통, 어려움)
+  const { representativeRegionsList } = useRepresentativeRegionsListQuery();
+  const { contentTypesList } = useContentTypesListQuery();
+  const { difficultyList } = useDifficultyListQuery();
 
   const { createGame } = useCreateGameMutaion(); //게임 생성
 
@@ -45,8 +50,9 @@ export default function CreateGameScreen() {
 
   // 선택값
   const [regionId, setRegionId] = useState<number | null>(null); //representativeRegionId
-  const [themes, setThemes] = useState<string[]>([]); // tripThemeIds
-  const [dates, setDates] = useState<{ start?: string; end?: string }>({});
+  const [themeIds, setThemeIds] = useState<number[]>([]); //tripThemeIds
+  const [startedAt, setStartedAt] = useState<string | null>(null); //startedAt
+  const [endedAt, setEndedAt] = useState<string | null>(null); //endedAt
   const [level, setLevel] = useState<string | null>(null); // difficulty
 
   const [pendingScrollKey, setPendingScrollKey] = useState<SectionKey | null>(null);
@@ -55,8 +61,8 @@ export default function CreateGameScreen() {
   // 완료 조건
   const complete = {
     location: regionId != null,
-    theme: themes.length > 0,
-    date: !!dates.start && !!dates.end,
+    theme: themeIds.length > 0,
+    date: !!startedAt && !!endedAt,
     level: level != null,
     summary: false, // 마지막은 생성 버튼 누를 때
   };
@@ -134,25 +140,55 @@ export default function CreateGameScreen() {
     setActiveStep(targetIdx);
   };
 
-  // 예시 핸들러들
-  const handleToggleTheme = (name: string) => {
-    setThemes((prev) => {
-      const exists = prev.includes(name);
-      const next = exists ? prev.filter((t) => t !== name) : [...prev, name];
-      // 최소 1개 선택되면 다음으로 이동
-      if (!exists && next.length === 1) completeAndGoNext('theme');
-      return next;
-    });
+  // 핸들러
+  const toggleTheme = (id: number) => {
+    setThemeIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
-  const handleSetDates = (start: string, end: string) => {
-    setDates({ start, end });
+  const setDateRange = (start: string, end: string) => {
+    if (start > end) {
+      // swap 처리
+      setStartedAt(end);
+      setEndedAt(start);
+    } else {
+      setStartedAt(start);
+      setEndedAt(end);
+    }
     completeAndGoNext('date');
   };
 
   const selectedRegionName =
     representativeRegionsList?.find((r) => r.representativeRegionId === regionId)
       ?.representativeRegionName ?? '-';
+
+  const selectedThemeNames = useMemo(
+    () =>
+      contentTypesList &&
+      contentTypesList
+        .filter((t) => themeIds.includes(t.contentTypeId))
+        .map((t) => t.contentTypeName),
+    [contentTypesList, themeIds],
+  );
+
+  const handleCreate = async () => {
+    if (!regionId || !startedAt || !endedAt || !level || themeIds.length === 0) return;
+
+    const body = {
+      representativeRegionId: regionId,
+      tripThemeIds: themeIds, // 테마 id 배열
+      startedAt,
+      endedAt,
+      difficulty: level,
+      title: `${selectedRegionName} 여행`,
+    };
+
+    try {
+      await createGame(body);
+      // 네비게이션 이동 등
+    } catch (e) {
+      // 에러 처리
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -166,11 +202,10 @@ export default function CreateGameScreen() {
           onPress={() => {
             /* submit */
           }}
-          style={[styles.createBtn, !isFormValid && styles.createBtnDisabled]}
           disabled={!isFormValid}
         >
           <Text style={[styles.createBtnText, !isFormValid && styles.createBtnTextDisabled]}>
-            생성
+            확인
           </Text>
         </TouchableOpacity>
       </View>
@@ -214,40 +249,26 @@ export default function CreateGameScreen() {
 
           {/* 2. 테마 */}
           {complete.location && (
-            <Section title="여행 테마" onLayout={onLayoutFactory('theme')} minHeight={viewportH}>
-              <View style={styles.row}>
-                {['관광', '전시', '축제/공연', '액티비티', '쇼핑', '맛집'].map((t) => (
-                  <Chip
-                    key={t}
-                    active={themes.includes(t)}
-                    label={t}
-                    onPress={() => handleToggleTheme(t)}
-                  />
-                ))}
-              </View>
-            </Section>
+            <ThemeSection
+              onLayout={onLayoutFactory('theme')}
+              themes={contentTypesList ?? []}
+              selectedIds={themeIds}
+              onToggle={toggleTheme} // 토글 핸들러
+              onFirstSelectNext={() => completeAndGoNext('theme')} // 첫 선택 시 다음으로
+              minHeight={viewportH} // 가용 높이
+            />
           )}
 
           {/* 3. 여행 기간 */}
           {complete.theme && (
-            <Section title="여행 기간" onLayout={onLayoutFactory('date')} minHeight={viewportH}>
-              <View style={styles.placeholderBox}>
-                <Text style={styles.placeholderText}>📅 캘린더 자리</Text>
-              </View>
-              <View style={styles.row}>
-                {[
-                  ['2025-08-20', '2025-08-22'],
-                  ['2025-09-01', '2025-09-03'],
-                ].map(([s, e]) => (
-                  <Chip
-                    key={s}
-                    label={`${s} ~ ${e}`}
-                    active={dates.start === s && dates.end === e}
-                    onPress={() => handleSetDates(s, e)}
-                  />
-                ))}
-              </View>
-            </Section>
+            <DateSection
+              onLayout={onLayoutFactory('date')}
+              minHeight={viewportH}
+              startedAt={startedAt}
+              endedAt={endedAt}
+              onSelectRange={setDateRange}
+              onNext={() => completeAndGoNext('date')}
+            />
           )}
 
           {/* 4. 난이도 */}
@@ -267,30 +288,17 @@ export default function CreateGameScreen() {
 
           {/* 5. 요약 */}
           {complete.level && (
-            <Section title="요약" onLayout={onLayoutFactory('summary')} minHeight={viewportH}>
-              <View style={styles.summaryCard}>
-                <Text style={styles.summaryTitle}>선택 요약</Text>
-                <Text style={styles.summaryItem}>여행지: {selectedRegionName}</Text>
-                <Text style={styles.summaryItem}>
-                  테마: {themes.length ? themes.join(', ') : '-'}
-                </Text>
-                <Text style={styles.summaryItem}>
-                  기간: {dates.start && dates.end ? `${dates.start} ~ ${dates.end}` : '-'}
-                </Text>
-                <Text style={styles.summaryItem}>난이도: {level ?? '-'}</Text>
-              </View>
-
-              <TouchableOpacity
-                style={[styles.primaryBtn, !isFormValid && { opacity: 0.4 }]}
-                disabled={!isFormValid}
-              >
-                <Text style={styles.primaryBtnText}>게임 만들기</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.toTopBtn} onPress={() => scrollToKey('location')}>
-                <Text style={styles.toTopText}>맨 위로</Text>
-              </TouchableOpacity>
-            </Section>
+            <SummarySection
+              onLayout={onLayoutFactory('summary')}
+              location={selectedRegionName}
+              themes={selectedThemeNames ?? []}
+              startedAt={startedAt}
+              endedAt={endedAt}
+              level={level}
+              disabled={!isFormValid}
+              onToTop={() => scrollToKey('location')}
+              minHeight={viewportH}
+            />
           )}
         </ScrollView>
       </View>
@@ -298,74 +306,6 @@ export default function CreateGameScreen() {
   );
 }
 
-/* ---------------- Components ---------------- */
-function StepDots({
-  total,
-  activeIndex,
-  onPressDot,
-}: {
-  total: number;
-  activeIndex: number;
-  onPressDot?: (i: number) => void;
-}) {
-  return (
-    <View style={styles.dotsWrap}>
-      <View style={styles.dotsLine} />
-      <View style={styles.dotsRow}>
-        {Array.from({ length: total }).map((_, i) => {
-          const isActive = i === activeIndex;
-          const isDone = i < activeIndex;
-          return (
-            <TouchableOpacity key={i} onPress={() => onPressDot?.(i)} activeOpacity={0.8}>
-              <View style={[styles.dot, isActive && styles.dotActive, isDone && styles.dotDone]}>
-                {isDone ? <Text style={styles.dotCheck}>✓</Text> : null}
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </View>
-  );
-}
-
-function Section({
-  title,
-  onLayout,
-  children,
-  minHeight,
-}: {
-  title: string;
-  onLayout?: (e: any) => void;
-  children: React.ReactNode;
-  minHeight: number;
-}) {
-  return (
-    <View onLayout={onLayout} style={[styles.section, minHeight ? { minHeight } : null]}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {children}
-    </View>
-  );
-}
-
-const Chip = ({
-  label,
-  onPress,
-  active,
-}: {
-  label: string;
-  onPress?: () => void;
-  active?: boolean;
-}) => (
-  <TouchableOpacity
-    style={[styles.chip, active && styles.chipActive]}
-    onPress={onPress}
-    activeOpacity={0.95}
-  >
-    <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
-  </TouchableOpacity>
-);
-
-/* ---------------- Styles ---------------- */
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white },
 
@@ -379,103 +319,13 @@ const styles = StyleSheet.create({
     backgroundColor: palette.white,
   },
   headerTitle: { flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: '#0F172A' },
-  createBtn: {
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#4BA1FD',
-  },
-  createBtnDisabled: { backgroundColor: '#D1D5DB' },
-  createBtnText: { color: '#FFF', fontWeight: '700' },
-  createBtnTextDisabled: { color: '#F9FAFB' },
 
-  dotsWrap: { paddingVertical: 10, backgroundColor: '#FFF' },
-  dotsLine: {
-    position: 'absolute',
-    top: 22,
-    left: 24,
-    right: 24,
-    height: 2,
-    backgroundColor: '#E5E7EB',
+  createBtnText: {
+    color: palette.mainColor,
+    fontWeight: '700',
+    fontSize: 16,
   },
-  dotsRow: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20 },
-  dot: {
-    width: 16,
-    height: 16,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: '#CBD5E1',
-    backgroundColor: '#FFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+  createBtnTextDisabled: {
+    color: '#D1D5DB', // 비활성화 시 회색
   },
-  dotActive: { borderColor: '#4BA1FD', backgroundColor: '#4BA1FD' },
-  dotDone: { borderColor: '#22C55E', backgroundColor: '#22C55E' },
-  dotCheck: { color: '#FFF', fontSize: 10, fontWeight: '800' },
-
-  section: {
-    paddingHorizontal: 20,
-    paddingTop: 14,
-  },
-  sectionTitle: { fontSize: 20, fontWeight: '700', color: '#0F172A', marginBottom: 14 },
-
-  searchBar: {
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: '#F2F4F7',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  searchPlaceholder: { color: '#9CA3AF', fontSize: 16 },
-
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  chip: {
-    paddingHorizontal: 16,
-    height: 40,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-  },
-  chipActive: { borderColor: '#4BA1FD', backgroundColor: '#E8F3FF' },
-  chipText: { fontSize: 15, color: '#111827' },
-  chipTextActive: { color: '#0F172A', fontWeight: '700' },
-
-  placeholderBox: {
-    height: 260,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    backgroundColor: '#FAFAFA',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  placeholderText: { color: '#6B7280' },
-
-  summaryCard: {
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginBottom: 16,
-  },
-  summaryTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10, color: '#0F172A' },
-  summaryItem: { fontSize: 14, color: '#334155', marginBottom: 4 },
-
-  primaryBtn: {
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: '#4BA1FD',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-
-  toTopBtn: { alignSelf: 'center', marginTop: 16, paddingVertical: 8, paddingHorizontal: 12 },
-  toTopText: { color: '#64748B' },
 });
