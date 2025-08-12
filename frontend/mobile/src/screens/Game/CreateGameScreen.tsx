@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -35,8 +35,7 @@ export default function CreateGameScreen() {
   const { representativeRegionsList } = useRepresentativeRegionsListQuery();
   const { contentTypesList } = useContentTypesListQuery();
   const { difficultyList } = useDifficultyListQuery();
-
-  const { createGame } = useCreateGameMutaion(); //게임 생성
+  const { createGame } = useCreateGameMutaion();
 
   // 각 섹션의 y 포지션 저장
   const yMapRef = useRef<Record<SectionKey, number>>({
@@ -57,6 +56,14 @@ export default function CreateGameScreen() {
 
   const [pendingScrollKey, setPendingScrollKey] = useState<SectionKey | null>(null);
   const [viewportH, setViewportH] = useState(0);
+
+  // difficultyList 로드 후 기본값 설정(NORMAL로 세팅)
+  useEffect(() => {
+    if (!difficultyList?.length) return;
+    const defaultCode =
+      difficultyList.find((d) => d.code === 'NORMAL')?.code ?? difficultyList[0].code;
+    if (!level) setLevel(defaultCode); // 최초 1회만 세팅
+  }, [difficultyList, level]);
 
   // 완료 조건
   const complete = {
@@ -254,7 +261,7 @@ export default function CreateGameScreen() {
               themes={contentTypesList ?? []}
               selectedIds={themeIds}
               onToggle={toggleTheme} // 토글 핸들러
-              onFirstSelectNext={() => completeAndGoNext('theme')} // 첫 선택 시 다음으로
+              onNext={() => completeAndGoNext('theme')}
               minHeight={viewportH} // 가용 높이
             />
           )}
@@ -278,10 +285,7 @@ export default function CreateGameScreen() {
               onNext={() => completeAndGoNext('level')}
               levels={difficultyList ?? []}
               selectedCode={level}
-              onSelect={(code) => {
-                setLevel(code);
-                completeAndGoNext('level');
-              }}
+              onSelect={setLevel}
               minHeight={viewportH}
             />
           )}
