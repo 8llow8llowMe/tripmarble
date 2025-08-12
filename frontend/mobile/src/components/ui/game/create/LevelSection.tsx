@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import Chip from './Chip';
+import { palette } from '@/constants/colors';
 
 type Level = {
   code: string;
@@ -26,7 +27,8 @@ const LevelSection = ({
 }: LevelSectionProps) => {
   return (
     <View onLayout={onLayout} style={[styles.section, minHeight ? { minHeight } : null]}>
-      <Text style={styles.sectionTitle}>난이도 선택</Text>
+      <Text style={styles.title}>게임 난이도를 선택해주세요</Text>
+      <Text style={styles.subtitle}>일정에 맞춰 알맞은 난이도를 선택하세요!</Text>
 
       <View style={styles.row}>
         {levels.map(({ code, description }) => (
@@ -48,11 +50,9 @@ const LevelSection = ({
 export default LevelSection;
 
 const styles = StyleSheet.create({
-  section: {
-    paddingHorizontal: 20,
-    paddingTop: 14,
-  },
-  sectionTitle: { fontSize: 20, fontWeight: '700', color: '#0F172A', marginBottom: 14 },
+  section: { paddingHorizontal: 20, paddingTop: 14 },
+  title: { fontSize: 20, fontWeight: '700', color: palette.Neutral800 },
+  subtitle: { marginTop: 14, fontSize: 15, color: palette.gray600 },
 
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
 });
