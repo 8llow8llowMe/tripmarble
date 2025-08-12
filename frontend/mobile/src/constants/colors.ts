@@ -4,12 +4,15 @@ export const palette = {
   error: '#e74c3c', // errorText
   Neutral300: '#A8B1BD',
   Neutral800: '#0F1B2A',
+
   orange100: '#FDEAD7',
   orange300: '#F7B27A',
   orange400: '#F38744',
   orange500: '#EF6820',
   rose200: '#FECCD6',
+  rose300: '#FEA3B4',
   rose500: '#F63D68', // removeText, countNumber
+
   gray50: '#F8F9FB', // placeholderBack
   gray100: '#EEF1F6', // bottomSheetBackground,
   gray150: '#E4E8EE', // focusInputShadow
@@ -20,7 +23,9 @@ export const palette = {
   gray550: '#5F6B7A', // countColor
   gray600: '#414D5C', // subText, labelText, receivedMessageText
   gray800: '#0F1B2A',
+
   blue100: '#9ED4FF',
+  blue200: '#89A8FF',
   blue300: '#5984FF',
   blue400: '#36BFFA',
   blue500: '#0076FB',
@@ -45,8 +50,6 @@ export const palette = {
   yellow300: '#FEC84B',
   pink300: '#FAA7E0',
   green300: '#6CE9A6',
-  rose300: '#FEA3B4',
   blueLight300: '#7CD4FD',
-  blue200: '#89A8FF',
   red300: '#FDA29B',
 };
