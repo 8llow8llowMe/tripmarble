@@ -1,11 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Section, Chip } from './index';
+import Chip from './Chip';
+import { palette } from '@/constants/colors';
 
 type Props = {
-  value: { start?: string; end?: string };
+  onLayout?: (e: any) => void;
+  startedAt: string | null;
+  endedAt: string | null;
   onSelectRange: (start: string, end: string) => void;
   onNext?: () => void;
+  minHeight: number;
 };
 
 const PRESETS: Array<[string, string]> = [
@@ -13,14 +17,25 @@ const PRESETS: Array<[string, string]> = [
   ['2025-09-01', '2025-09-03'],
 ];
 
-export default function DateSection({ value, onSelectRange, onNext }: Props) {
-  const isActive = (s: string, e: string) => value.start === s && value.end === e;
+export default function DateSection({
+  onLayout,
+  startedAt,
+  endedAt,
+  onSelectRange,
+  onNext,
+  minHeight,
+}: Props) {
+  const isActive = (s: string, e: string) => startedAt === s && endedAt === e;
 
   return (
-    <Section title="여행 기간">
+    <View onLayout={onLayout} style={[styles.section, { minHeight }]}>
+      <Text style={styles.title}>여행 기간을 선택해주세요</Text>
+      <Text style={styles.subtitle}>시작일과 종료일을 모두 선택해요</Text>
+
       <View style={styles.placeholderBox}>
         <Text style={styles.placeholderText}>📅 캘린더 자리 (추후 연결)</Text>
       </View>
+
       <View style={styles.row}>
         {PRESETS.map(([s, e]) => (
           <Chip
@@ -34,11 +49,15 @@ export default function DateSection({ value, onSelectRange, onNext }: Props) {
           />
         ))}
       </View>
-    </Section>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  section: { paddingHorizontal: 20, paddingTop: 14 },
+  title: { fontSize: 20, fontWeight: '700', color: palette.Neutral800 },
+  subtitle: { marginTop: 14, fontSize: 15, color: palette.gray600 },
+
   placeholderBox: {
     height: 260,
     borderRadius: 16,
