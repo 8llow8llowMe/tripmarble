@@ -35,4 +35,10 @@ public class TripGameTileRepositoryAdapter implements TripGameTileRepositoryPort
         return tripGameTileRepository.findByTripGameIdAndStepNo(tripGameId, stepNo)
             .map(tripGameTileMapper::toDomainFromEntity);
     }
+
+    @Override
+    public List<TripGameTile> findAllByTripGameId(long tripGameId) {
+        List<TripGameTileEntity> entities = tripGameTileRepository.findAllByTripGameId(tripGameId);
+        return tripGameTileMapper.toDomainListFromEntityList(entities);
+    }
 }

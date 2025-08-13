@@ -55,8 +55,8 @@ public class TripGameFacade implements TripGameWebUseCase {
             tripGameCreateInfo.tripGame().difficulty()
         );
 
-        // 3. 최종 응답 dto 조립 및 반환
-        return tripGamePresenter.toCreateResponseFrom(tripGameCreateInfo, tripGameTileCreateInfo);
+        // 3. 응답용 DTO로 변환
+        return tripGamePresenter.toGameCreateResponseFrom(tripGameCreateInfo);
     }
 
     @Override
@@ -73,6 +73,6 @@ public class TripGameFacade implements TripGameWebUseCase {
         TripGameStartInfo tripGameStartInfo = tripGameStartProcessor.startGame(tripGameId, hostMemberId);
 
         // 2. 응답용 DTO로 변환
-        return tripGamePresenter.toStartResponse(tripGameStartInfo);
+        return tripGamePresenter.toGameStartResponse(tripGameStartInfo);
     }
 }
