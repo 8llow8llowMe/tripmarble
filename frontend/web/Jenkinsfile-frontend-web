@@ -103,15 +103,16 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                dir("${env.FS_PATH}") {
-                    sh 'yarn cache clean'
-                    sh 'yarn install --frozen-lockfile'
-                }
+                // Workspaces: 반드시 레포 루트에서 설치
+                sh 'yarn cache clean || true'
+                sh 'yarn install --frozen-lockfile'
             }
         }
 
         stage('Build Application') {
             steps {
+                sh "grep -RnE 'next export|yarn export' -- package.json **/package.json Jenkinsfile* **/Jenkinsfile* || true"
+                sh "node -e \"console.log('next bin (root):', require.resolve('next/bin/next'))\""
                 dir("${env.FS_PATH}") {
                     script {
                         // 타겟 브랜치에 따라 환경 설정
