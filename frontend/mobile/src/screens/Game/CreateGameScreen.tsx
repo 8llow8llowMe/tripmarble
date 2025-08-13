@@ -162,7 +162,6 @@ export default function CreateGameScreen() {
       setStartedAt(start);
       setEndedAt(end);
     }
-    completeAndGoNext('date');
   };
 
   const selectedRegionName =
@@ -187,7 +186,7 @@ export default function CreateGameScreen() {
       startedAt,
       endedAt,
       difficulty: level,
-      title: `${selectedRegionName} 여행`,
+      title: `${selectedRegionName} 여행`, // title은 임시로 넣고, 나중에 사용자가 수정하게 끔
     };
 
     try {
