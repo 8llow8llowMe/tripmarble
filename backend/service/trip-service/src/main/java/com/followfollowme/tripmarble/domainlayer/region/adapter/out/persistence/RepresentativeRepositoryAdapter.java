@@ -28,4 +28,10 @@ public class RepresentativeRepositoryAdapter implements RepresentativeRegionRepo
         return representativeRegionRepository.findById(representativeRegionId)
             .map(representativeRegionMapper::toDomainFromEntity);
     }
+
+    @Override
+    public List<RepresentativeRegion> findAllByIdIn(List<Long> representativeRegionIds) {
+        List<RepresentativeRegionEntity> entities = representativeRegionRepository.findAllByIdIn(representativeRegionIds);
+        return representativeRegionMapper.toDomainListFromEntityList(entities);
+    }
 }

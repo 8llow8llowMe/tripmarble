@@ -9,4 +9,6 @@ public interface RepresentativeRegionRepositoryPort {
     List<RepresentativeRegion> findAll();
 
     Optional<RepresentativeRegion> findById(long representativeRegionId);
+
+    List<RepresentativeRegion> findAllByIdIn(List<Long> representativeRegionIds);
 }
