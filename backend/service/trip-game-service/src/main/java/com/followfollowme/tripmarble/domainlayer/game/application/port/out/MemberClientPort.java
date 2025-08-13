@@ -1,9 +1,9 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.port.out;
 
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileInternalResponse;
 import java.util.List;
 
 public interface MemberClientPort {
 
-    List<MemberProfileResponse> getMemberProfiles(List<Long> memberIds);
+    List<MemberProfileInternalResponse> getMemberProfiles(List<Long> memberIds);
 }

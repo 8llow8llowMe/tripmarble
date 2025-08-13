@@ -1,8 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.region.application.port.in;
 
-import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.dto.RepresentativeRegionInfoResponse;
+import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.dto.RepresentativeRegionInfoInternalResponse;
 
 public interface RepresentativeRegionInternalUseCase {
 
-    RepresentativeRegionInfoResponse getRepresentativeRegionInfo(long representativeRegionId);
+    RepresentativeRegionInfoInternalResponse getRepresentativeRegionInfo(long representativeRegionId);
 }

@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto;
 
-public record RepresentativeRegionInfoResponse(
+public record RepresentativeRegionInfoInternalResponse(
     long representativeRegionId,
     String representativeRegionName
 ) {

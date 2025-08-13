@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service.processor;
 
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.RepresentativeRegionInfoResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.RepresentativeRegionInfoInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.RepresentativeRegionClientPort;
@@ -72,7 +72,7 @@ public class TripGameCreateProcessor {
         TripGameMember savedMember = tripGameMemberRepositoryPort.save(tripGameMember, savedTripGame);
 
         // 5. 대표 지역 정보 조회
-        RepresentativeRegionInfoResponse regionInfo = representativeRegionClientPort.getRepresentativeRegionInfo(
+        RepresentativeRegionInfoInternalResponse regionInfo = representativeRegionClientPort.getRepresentativeRegionInfo(
             command.representativeRegionId());
 
         // 결과 DTO 반환

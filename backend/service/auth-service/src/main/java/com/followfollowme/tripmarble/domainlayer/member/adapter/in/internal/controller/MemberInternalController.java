@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.member.adapter.in.internal.controller;
 
-import com.followfollowme.tripmarble.domainlayer.member.adapter.in.internal.dto.MemberProfileResponse;
+import com.followfollowme.tripmarble.domainlayer.member.adapter.in.internal.dto.MemberProfileInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberInternalUseCase;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,8 +27,8 @@ public class MemberInternalController {
         description = "회원 ID 리스트를 통해 회원의 프로필 정보를 조회합니다."
     )
     @GetMapping
-    public ResponseEntity<List<MemberProfileResponse>> getMemberProfiles(@RequestParam List<Long> memberIds) {
-        List<MemberProfileResponse> responses = memberInternalUseCase.getMemberProfiles(memberIds);
+    public ResponseEntity<List<MemberProfileInternalResponse>> getMemberProfiles(@RequestParam List<Long> memberIds) {
+        List<MemberProfileInternalResponse> responses = memberInternalUseCase.getMemberProfiles(memberIds);
         return ResponseEntity.ok().body(responses);
     }
 }

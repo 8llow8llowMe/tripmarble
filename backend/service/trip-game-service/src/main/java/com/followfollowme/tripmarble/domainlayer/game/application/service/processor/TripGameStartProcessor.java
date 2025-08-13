@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service.processor;
 
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.exception.TripGameErrorCode;
 import com.followfollowme.tripmarble.domainlayer.game.application.exception.TripGameException;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameMemberWithProfileInfo;
@@ -62,16 +62,16 @@ public class TripGameStartProcessor {
 
         // 7. 회원 ID 기준 프로필 조회
         List<Long> memberIds = updatedMembers.stream().map(TripGameMember::memberId).toList();
-        List<MemberProfileResponse> memberProfiles = memberClientPort.getMemberProfiles(memberIds);
+        List<MemberProfileInternalResponse> memberProfiles = memberClientPort.getMemberProfiles(memberIds);
 
         // 8. memberId 기준으로 매핑
-        Map<Long, MemberProfileResponse> profileMap = memberProfiles.stream()
-            .collect(Collectors.toMap(MemberProfileResponse::memberId, profile -> profile));
+        Map<Long, MemberProfileInternalResponse> profileMap = memberProfiles.stream()
+            .collect(Collectors.toMap(MemberProfileInternalResponse::memberId, profile -> profile));
 
         // 9. 도메인 속성과 외부 프로필 정보를 통합한 DTO 생성
         List<TripGameMemberWithProfileInfo> membersWithProfile = updatedMembers.stream()
             .map(member -> {
-                MemberProfileResponse profile = profileMap.get(member.memberId());
+                MemberProfileInternalResponse profile = profileMap.get(member.memberId());
                 return TripGameMemberWithProfileInfo.of(member, profile);
             })
             .toList();

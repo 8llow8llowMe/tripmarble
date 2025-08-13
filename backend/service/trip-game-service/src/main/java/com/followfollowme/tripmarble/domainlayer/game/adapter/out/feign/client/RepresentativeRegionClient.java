@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.client;
 
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.RepresentativeRegionInfoResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.RepresentativeRegionInfoInternalResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,5 +13,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface RepresentativeRegionClient {
 
     @GetMapping("/{representativeRegionId}")
-    RepresentativeRegionInfoResponse getRepresentativeRegionInfo(@PathVariable long representativeRegionId);
+    RepresentativeRegionInfoInternalResponse getRepresentativeRegionInfo(@PathVariable long representativeRegionId);
 }

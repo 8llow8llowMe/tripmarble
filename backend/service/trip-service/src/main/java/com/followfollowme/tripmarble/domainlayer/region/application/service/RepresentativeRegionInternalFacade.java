@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.region.application.service;
 
-import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.dto.RepresentativeRegionInfoResponse;
+import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.dto.RepresentativeRegionInfoInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.presenter.RepresentativeRegionInternalPresenter;
 import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionErrorCode;
 import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionException;
@@ -20,7 +20,7 @@ public class RepresentativeRegionInternalFacade implements RepresentativeRegionI
 
     @Override
     @Transactional(readOnly = true)
-    public RepresentativeRegionInfoResponse getRepresentativeRegionInfo(long representativeRegionId) {
+    public RepresentativeRegionInfoInternalResponse getRepresentativeRegionInfo(long representativeRegionId) {
         RepresentativeRegion representativeRegion = representativeRegionRepositoryPort.findById(representativeRegionId)
             .orElseThrow(() -> new RegionException(RegionErrorCode.REPRESENTATIVE_REGION_NOT_FOUND));
         return representativeRegionInternalPresenter.toInfoResponse(representativeRegion);

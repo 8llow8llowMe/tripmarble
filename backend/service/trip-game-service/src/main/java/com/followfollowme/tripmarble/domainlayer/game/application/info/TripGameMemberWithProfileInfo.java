@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.info;
 
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import lombok.Builder;
 
@@ -13,7 +13,7 @@ public record TripGameMemberWithProfileInfo(
     boolean isHost
 ) {
 
-    public static TripGameMemberWithProfileInfo of(TripGameMember member, MemberProfileResponse profile) {
+    public static TripGameMemberWithProfileInfo of(TripGameMember member, MemberProfileInternalResponse profile) {
         return TripGameMemberWithProfileInfo.builder()
             .memberId(member.memberId())
             .nickname(profile.nickname())
