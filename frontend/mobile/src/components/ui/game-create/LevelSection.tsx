@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
-import NextFloatingButton from '@/components/ui/game/create/NextFloatingButton';
+import NextFloatingButton from './NextFloatingButton';
 
 type Level = { code: string; description: string };
 
