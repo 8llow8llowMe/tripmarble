@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.controller;
 
-import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.dto.RepresentativeRegionInfoResponse;
+import com.followfollowme.tripmarble.domainlayer.region.adapter.in.internal.dto.RepresentativeRegionInfoInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.in.RepresentativeRegionInternalUseCase;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +25,7 @@ public class RepresentativeRegionInternalController {
         description = "대표 여행지 정보를 조회합니다."
     )
     @GetMapping("/{representativeRegionId}")
-    public RepresentativeRegionInfoResponse getRepresentativeRegionInfo(@PathVariable long representativeRegionId) {
+    public RepresentativeRegionInfoInternalResponse getRepresentativeRegionInfo(@PathVariable long representativeRegionId) {
         return representativeRegionInternalUseCase.getRepresentativeRegionInfo(representativeRegionId);
     }
 }

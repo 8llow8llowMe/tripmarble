@@ -1,7 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.client.MemberClient;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.MemberClientPort;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ public class MemberClientAdapter implements MemberClientPort {
     private final MemberClient memberClient;
 
     @Override
-    public List<MemberProfileResponse> getMemberProfiles(List<Long> memberIds) {
+    public List<MemberProfileInternalResponse> getMemberProfiles(List<Long> memberIds) {
         return memberClient.getMemberProfiles(memberIds);
     }
 }

@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.member.application.service;
 
-import com.followfollowme.tripmarble.domainlayer.member.adapter.in.internal.dto.MemberProfileResponse;
+import com.followfollowme.tripmarble.domainlayer.member.adapter.in.internal.dto.MemberProfileInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.internal.presenter.MemberInternalPresenter;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberInternalUseCase;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
@@ -19,7 +19,7 @@ public class MemberInternalFacade implements MemberInternalUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MemberProfileResponse> getMemberProfiles(List<Long> memberIds) {
+    public List<MemberProfileInternalResponse> getMemberProfiles(List<Long> memberIds) {
         List<Member> members = memberRepositoryPort.findByIdIn(memberIds);
         return memberInternalPresenter.toProfileResonseList(members);
     }
