@@ -1,7 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service.processor;
 
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripContentTypeInternalResponse;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripSpotRandomResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripContentTypeQueryInternalResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripSpotRandomInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameTileCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripContentTypeClientPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameTileRepositoryPort;
@@ -9,7 +9,7 @@ import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripS
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.TileType;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.MissionType;
 import com.followfollowme.tripmarble.domainlayer.theme.application.port.out.TripThemeContentTypeMappingRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripThemeContentTypeMapping;
 import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
@@ -46,28 +46,28 @@ public class TripGameTileCreateProcessor {
             .toList();
 
         // 2-2. 내부 서비스 호출을 통해 여행 콘텐츠 타입 목록 조회 (매핑 관련)
-        List<TripContentTypeInternalResponse> mappingResponses =
+        List<TripContentTypeQueryInternalResponse> mappingResponses =
             tripContentTypeClientPort.getTripContentTypes(tripContentTypeIds);
 
         // TODO: 여행 테마_콘텐츠 타입_매핑 테이블에서 가중치를 이용해서 가중치 고려한 여행지 조회해야함
 
         // 3. 랜덤 여행지 조회 (내부 서비스 통신)
-        List<TripSpotRandomResponse> randomTripSpots = tripSpotClientPort.getRandomTripSpots(
+        List<TripSpotRandomInternalResponse> randomTripSpots = tripSpotClientPort.getRandomTripSpots(
             tripGame.representativeRegionId(),
-            mappingResponses.stream().map(TripContentTypeInternalResponse::contentTypeId).toList(),
+            mappingResponses.stream().map(TripContentTypeQueryInternalResponse::contentTypeId).toList(),
             tileCount
         );
 
         // 4. TripGameTile 엔티티 생성
         List<TripGameTile> tripGameTiles = IntStream.range(0, randomTripSpots.size())
             .mapToObj(i -> {
-                TripSpotRandomResponse randomResponse = randomTripSpots.get(i);
+                TripSpotRandomInternalResponse randomResponse = randomTripSpots.get(i);
                 return TripGameTile.builder()
                     .id(snowflakeIdGenerator.generateId())
                     .tripGameId(tripGame.id())
                     .tripSpotId(randomResponse.tripSpotId())
                     .stepNo(i + 1)
-                    .tileType(determineTileType(i, tileCount))
+                    .missionType(determineMissionTypeRandom())
                     .build();
             })
             .toList();
@@ -86,16 +86,10 @@ public class TripGameTileCreateProcessor {
         };
     }
 
-    private TileType determineTileType(int index, int totalSize) {
-        if (index == 0) {
-            return TileType.START;
-        }
-        if (index == totalSize - 1) {
-            return TileType.END;
-        }
-        if (index % 5 == 0) {
-            return TileType.MISSION;
-        }
-        return TileType.NORMAL;
+    private MissionType determineMissionTypeRandom() {
+        // 균등 랜덤
+        MissionType[] values = MissionType.values();
+        int idx = java.util.concurrent.ThreadLocalRandom.current().nextInt(values.length);
+        return values[idx];
     }
 }
