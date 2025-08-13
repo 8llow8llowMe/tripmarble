@@ -103,9 +103,9 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                // Workspaces: 반드시 레포 루트에서 설치
-                sh 'yarn cache clean || true'
-                sh 'yarn install --frozen-lockfile'
+                dir("${env.FS_PATH}") {
+                    sh 'yarn install --frozen-lockfile'
+                }
             }
         }
 
