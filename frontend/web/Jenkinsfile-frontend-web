@@ -104,6 +104,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 dir("${env.FS_PATH}") {
+                    sh 'yarn cache clean'
                     sh 'yarn install --frozen-lockfile'
                 }
             }
