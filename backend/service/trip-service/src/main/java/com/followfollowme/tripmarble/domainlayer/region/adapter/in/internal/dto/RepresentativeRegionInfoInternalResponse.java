@@ -11,7 +11,10 @@ public record RepresentativeRegionInfoInternalResponse(
     long representativeRegionId,
 
     @Schema(description = "대표 여행지 이름", example = "서울")
-    String representativeRegionName
+    String representativeRegionName,
+
+    @Schema(description = "대표 여행지 썸네일 이미지 URL", example = "http://~~~.jpg")
+    String imageUrl
 ) {
 
 }
