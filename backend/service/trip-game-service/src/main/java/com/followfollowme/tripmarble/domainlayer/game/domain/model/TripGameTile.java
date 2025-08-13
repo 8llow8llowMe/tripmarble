@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.domain.model;
 
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.TileType;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.MissionType;
 import lombok.Builder;
 
 @Builder
@@ -9,7 +9,7 @@ public record TripGameTile(
     long tripGameId,
     long tripSpotId,
     int stepNo,
-    TileType tileType
+    MissionType missionType
 ) {
 
 }
