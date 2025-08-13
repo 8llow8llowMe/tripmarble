@@ -1,7 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.DifficultyResponse;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameCardView;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter.TripGamePresenter;
@@ -61,7 +61,7 @@ public class TripGameFacade implements TripGameWebUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public SliceResponse<MyTripGameCardView> getMyTripGames(long memberId, long lastTripGameId, int size, Status status) {
+    public SliceResponse<MyTripGameResponse> getMyTripGames(long memberId, long lastTripGameId, int size, Status status) {
 
         return null;
     }
