@@ -22,27 +22,27 @@ public class TripGameCustomRepositoryImpl implements TripGameCustomRepository {
 
     @Override
     public Slice<TripGameEntity> findMyGamesNoOffset(long memberId, long lastTripGameId, int size, Status status) {
-        QTripGameEntity g = QTripGameEntity.tripGameEntity;
-        QTripGameMemberEntity gm = QTripGameMemberEntity.tripGameMemberEntity;
+        QTripGameEntity game = QTripGameEntity.tripGameEntity;
+        QTripGameMemberEntity gameMember = QTripGameMemberEntity.tripGameMemberEntity;
 
         BooleanBuilder where = new BooleanBuilder();
         // 내가 속한 게임인지 EXISTS로 필터 (조인 X)
         where.and(JPAExpressions.selectOne()
-            .from(gm)
-            .where(gm.tripGame.eq(g).and(gm.memberId.eq(memberId)))
+            .from(gameMember)
+            .where(gameMember.tripGame.eq(game).and(gameMember.memberId.eq(memberId)))
             .exists());
 
         if (lastTripGameId > 0) {
-            where.and(g.id.lt(lastTripGameId));
+            where.and(game.id.lt(lastTripGameId));
         }
         if (status != null) {
-            where.and(g.status.eq(status));
+            where.and(game.status.eq(status));
         }
 
         List<TripGameEntity> rows = queryFactory
-            .selectFrom(g)
+            .selectFrom(game)
             .where(where)
-            .orderBy(g.id.desc())
+            .orderBy(game.id.desc())
             .limit(size + 1)
             .fetch();
 
