@@ -6,7 +6,7 @@ import com.followfollowme.tripmarble.domainlayer.region.application.port.out.Reg
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RepresentativeRegionSigunguMappingRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.SigunguRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.Sigungu;
-import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripSpotRandomResponse;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripSpotRandomInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.presenter.TripSpotInternalPresenter;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
@@ -24,7 +24,7 @@ public class TripSpotRandomSelectInternalProcessor {
     private final TripSpotRepositoryPort tripSpotRepositoryPort;
     private final TripSpotInternalPresenter tripSpotInternalPresenter;
 
-    public List<TripSpotRandomResponse> selectRandomTripSpots(long representativeRegionId, List<Integer> contentTypeIds, int limit) {
+    public List<TripSpotRandomInternalResponse> getRandomTripSpots(long representativeRegionId, List<Integer> contentTypeIds, int limit) {
         // 1. 대표지역 ID를 이용하여 시군구 ID 목록 조회
         List<Long> sigunguIds =
             representativeRegionSigunguMappingRepositoryPort.findSigunguIdsByRepresentativeRegionId(representativeRegionId);
