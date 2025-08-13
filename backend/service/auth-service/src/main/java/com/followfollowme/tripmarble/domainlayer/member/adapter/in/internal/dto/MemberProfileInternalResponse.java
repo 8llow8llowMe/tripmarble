@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 @Schema(hidden = true, description = "내부 서비스 통신 전용 회원 프로필 조회 응답 DTO")
-public record MemberProfileResponse(
+public record MemberProfileInternalResponse(
 
     @Schema(description = "회원 아이디", example = "202507110001")
     long memberId,
