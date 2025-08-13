@@ -10,15 +10,23 @@ import org.springframework.data.jpa.repository.Query;
 public interface TripGameMemberRepository extends JpaRepository<TripGameMemberEntity, Long>, TripGameMemberCustomRepository {
 
     @Query("""
-            SELECT tgm
-            FROM TripGameMemberEntity tgm
-            WHERE tgm.tripGame.id = :tripGameId
-              AND tgm.memberId = :memberId
-              AND tgm.isHost = true
+            select tgm
+            from TripGameMemberEntity tgm
+            where tgm.tripGame.id = :tripGameId
+              and tgm.memberId = :memberId
+              and tgm.isHost = true
         """)
     Optional<TripGameMemberEntity> findHostMemberInGame(long tripGameId, long memberId);
 
     List<TripGameMemberEntity> findByTripGameId(long tripGameId);
 
     boolean existsByTripGameIdAndMemberId(long tripGameId, long memberId);
+
+    @Query("""
+            select m
+            from TripGameMemberEntity m
+            where m.tripGame.id in :tripGameIds
+              and m.memberId = :memberId
+        """)
+    List<TripGameMemberEntity> findByTripGameIdsAndMemberId(List<Long> tripGameIds, long memberId);
 }
