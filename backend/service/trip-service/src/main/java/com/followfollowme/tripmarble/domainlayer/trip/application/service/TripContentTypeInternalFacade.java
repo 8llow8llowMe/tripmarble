@@ -1,8 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.trip.application.service;
 
-import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripContentTypeInternalResponse;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripContentTypeQueryInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripContentTypeInternalUseCase;
-import com.followfollowme.tripmarble.domainlayer.trip.application.service.processor.TripContentTypeFetchInternalProcessor;
+import com.followfollowme.tripmarble.domainlayer.trip.application.service.processor.TripContentTypeQueryInternalProcessor;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,11 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TripContentTypeInternalFacade implements TripContentTypeInternalUseCase {
 
-    private final TripContentTypeFetchInternalProcessor tripContentTypeFetchInternalProcessor;
+    private final TripContentTypeQueryInternalProcessor tripContentTypeQueryInternalProcessor;
 
     @Override
     @Transactional(readOnly = true)
-    public List<TripContentTypeInternalResponse> getTripContentTypes(List<Long> tripContentTypeIds) {
-        return tripContentTypeFetchInternalProcessor.fetchTripContentTypes(tripContentTypeIds);
+    public List<TripContentTypeQueryInternalResponse> getTripContentTypes(List<Long> tripContentTypeIds) {
+        return tripContentTypeQueryInternalProcessor.getTripContentTypes(tripContentTypeIds);
     }
 }
