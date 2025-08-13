@@ -111,8 +111,6 @@ pipeline {
 
         stage('Build Application') {
             steps {
-                sh "grep -RnE 'next export|yarn export' -- package.json **/package.json Jenkinsfile* **/Jenkinsfile* || true"
-                sh "node -e \"console.log('next bin (root):', require.resolve('next/bin/next'))\""
                 dir("${env.FS_PATH}") {
                     script {
                         // 타겟 브랜치에 따라 환경 설정
@@ -126,28 +124,7 @@ pipeline {
                         
                         sh 'rm -rf .next .turbo || true'
                         // Next.js 빌드
-                        // sh 'yarn build'
-                        
-                        // 어디서 빌드 중인지 확인
-                        sh 'pwd; ls -la'
-
-                        // 어떤 next 바이너리를 실행 중인지
-                        sh 'node -e "console.log(\'next bin:\', require.resolve(\'next/bin/next\'))"'
-
-                        // 현재 패키지의 build 스크립트가 정확히 뭔지
-                        sh 'node -e "console.log(\'build script:\', require(\'./package.json\').scripts.build)"'
-
-                        // 루트/상위 package.json/Jenkinsfile에 export 흔적이 있는지
-                        sh "grep -RnE 'next export|yarn export' -- package.json ../package.json ../../package.json Jenkinsfile* ../Jenkinsfile* || true"
-
-                        // 빌드 전에 산출물/캐시 정리
-                        sh 'rm -rf .next .turbo out || true'
-
-                        // 빌드
                         sh 'yarn build'
-
-                        // 빌드 후 out/가 생겼는지 (= export가 실제로 돌았는지) 확인
-                        sh 'if [ -d out ]; then echo \"❌ out/ exists (export ran)\"; ls -la out; else echo \"✅ no out/ (no export)\"; fi'
                     }
                 }
             }
