@@ -122,6 +122,7 @@ pipeline {
                             echo "Building for development environment"
                         }
                         
+                        sh 'rm -rf .next .turbo || true'
                         // Next.js 빌드
                         sh 'yarn build'
                     }
