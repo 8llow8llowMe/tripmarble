@@ -4,9 +4,14 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "start:dev": "cross-env APP_ENV=development expo start -c",
+    "start:prod": "cross-env APP_ENV=production expo start -c",
+    "android:dev": "cross-env APP_ENV=development expo run:android",
+    "ios:dev": "cross-env APP_ENV=development expo run:ios",
+    "build:dev:android": "cross-env APP_ENV=development eas build -p android --profile development",
+    "build:dev:ios": "cross-env APP_ENV=development eas build -p ios --profile development",
+    "build:prod:android": "cross-env APP_ENV=production eas build -p android --profile production",
+    "build:prod:ios": "cross-env APP_ENV=production eas build -p ios --profile production"
   },
   "dependencies": {
     "@expo/metro-runtime": "~5.0.4",
@@ -43,6 +48,8 @@
     "@types/react": "~19.0.10",
     "@types/react-native": "^0.73.0",
     "babel-plugin-module-resolver": "^5.0.2",
+    "cross-env": "^10.0.0",
+    "dotenv": "^17.2.1",
     "eslint": "^9.31.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.1",
