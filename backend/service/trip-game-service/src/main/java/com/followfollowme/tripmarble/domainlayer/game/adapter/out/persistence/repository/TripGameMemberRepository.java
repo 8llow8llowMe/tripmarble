@@ -19,4 +19,6 @@ public interface TripGameMemberRepository extends JpaRepository<TripGameMemberEn
     Optional<TripGameMemberEntity> findHostMemberInGame(long tripGameId, long memberId);
 
     List<TripGameMemberEntity> findByTripGameId(long tripGameId);
+
+    boolean existsByTripGameIdAndMemberId(long tripGameId, long memberId);
 }

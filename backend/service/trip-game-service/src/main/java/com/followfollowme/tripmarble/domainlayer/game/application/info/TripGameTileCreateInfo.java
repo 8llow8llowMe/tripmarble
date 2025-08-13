@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.info;
 
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripSpotRandomResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripSpotRandomInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
 import java.util.List;
 import lombok.Builder;
@@ -8,10 +8,10 @@ import lombok.Builder;
 @Builder
 public record TripGameTileCreateInfo(
     List<TripGameTile> tripGameTiles,
-    List<TripSpotRandomResponse> tripSpotInfos
+    List<TripSpotRandomInternalResponse> tripSpotInfos
 ) {
 
-    public static TripGameTileCreateInfo of(List<TripGameTile> tiles, List<TripSpotRandomResponse> infos) {
+    public static TripGameTileCreateInfo of(List<TripGameTile> tiles, List<TripSpotRandomInternalResponse> infos) {
         return TripGameTileCreateInfo.builder()
             .tripGameTiles(tiles)
             .tripSpotInfos(infos)

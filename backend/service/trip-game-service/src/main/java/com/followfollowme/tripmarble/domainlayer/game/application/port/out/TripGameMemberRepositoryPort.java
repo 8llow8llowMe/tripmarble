@@ -17,4 +17,6 @@ public interface TripGameMemberRepositoryPort {
     List<TripGameMember> saveAll(List<TripGameMember> tripGameMembers, TripGame tripGame);
 
     List<TripGameMemberCount> countByTripGameIds(List<Long> gameIds);
+
+    boolean existsByTripGameIdAndMemberId(long tripGameId, long memberId);
 }
