@@ -19,17 +19,17 @@ public class TripGameMemberCustomRepositoryImpl implements TripGameMemberCustomR
         if (tripGameIds == null || tripGameIds.isEmpty()) {
             return List.of();
         }
-        QTripGameMemberEntity gm = QTripGameMemberEntity.tripGameMemberEntity;
+        QTripGameMemberEntity gameMember = QTripGameMemberEntity.tripGameMemberEntity;
 
         return queryFactory
             .select(Projections.constructor(
                 TripGameMemberCountProjection.class,
-                gm.tripGame.id,
-                gm.id.count()
+                gameMember.tripGame.id,
+                gameMember.id.count()
             ))
-            .from(gm)
-            .where(gm.tripGame.id.in(tripGameIds))
-            .groupBy(gm.tripGame.id)
+            .from(gameMember)
+            .where(gameMember.tripGame.id.in(tripGameIds))
+            .groupBy(gameMember.tripGame.id)
             .fetch();
     }
 }

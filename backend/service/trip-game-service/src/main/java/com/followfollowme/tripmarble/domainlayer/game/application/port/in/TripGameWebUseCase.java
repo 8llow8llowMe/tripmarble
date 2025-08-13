@@ -1,7 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.port.in;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.DifficultyResponse;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameCardView;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
@@ -15,7 +15,7 @@ public interface TripGameWebUseCase {
 
     TripGameCreateResponse crateTripGame(TripGameCreateCommand command);
 
-    SliceResponse<MyTripGameCardView> getMyTripGames(long memberId, long lastTripGameId, int size, Status status);
+    SliceResponse<MyTripGameResponse> getMyTripGames(long memberId, long lastTripGameId, int size, Status status);
 
     TripGameStartResponse startTripGame(long tripGameId, long hostMemberId);
 }

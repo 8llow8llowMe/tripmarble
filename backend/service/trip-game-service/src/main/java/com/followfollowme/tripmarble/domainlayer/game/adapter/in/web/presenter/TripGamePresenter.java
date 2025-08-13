@@ -1,9 +1,11 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter;
 
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartMemberView;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
@@ -50,5 +52,28 @@ public class TripGamePresenter {
             .gameStatusDescription(game.status().getDescription())
             .members(members)
             .build();
+    }
+
+    public List<MyTripGameResponse> toMyGameResponseList(List<TripGameQueryInfo> infos) {
+        return infos.stream()
+            .map(info -> {
+                TripGame game = info.tripGame();
+                return MyTripGameResponse.builder()
+                    .tripGameId(game.id())
+                    .gameStatus(game.status().name())
+                    .gameStatusDescription(game.status().getDescription())
+                    .difficultyCode(game.difficulty().name())
+                    .difficultyDescription(game.difficulty().getDescription())
+                    .representativeRegionImageUrl(info.representativeRegionInfo().imageUrl())
+                    .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
+                    .title(game.title())
+                    .startedAt(game.startedAt())
+                    .endedAt(game.endedAt())
+                    .tripThemeNames(info.tripThemeNames())
+                    .isHost(false)
+                    .isReady(false)
+                    .build();
+            })
+            .toList();
     }
 }

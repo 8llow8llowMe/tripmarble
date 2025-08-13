@@ -61,4 +61,10 @@ public class TripGameMemberRepositoryAdapter implements TripGameMemberRepository
     public boolean existsByTripGameIdAndMemberId(long tripGameId, long memberId) {
         return tripGameMemberRepository.existsByTripGameIdAndMemberId(tripGameId, memberId);
     }
+
+    @Override
+    public List<TripGameMember> findByTripGameIdAndMemberId(List<Long> tripGameIds, long memberId) {
+        List<TripGameMemberEntity> entities = tripGameMemberRepository.fi
+        return null;
+    }
 }
