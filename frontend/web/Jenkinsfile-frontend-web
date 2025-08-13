@@ -130,6 +130,7 @@ pipeline {
             }
             post {
                 success {
+                    sh "cp -R ${env.FS_PATH}/public ${env.FS_PATH}/.next/standalone/public || true"
                     archiveArtifacts allowEmptyArchive: true, artifacts: """
                     ${env.FS_PATH}/.next/standalone/**
                     ${env.FS_PATH}/.next/static/**
