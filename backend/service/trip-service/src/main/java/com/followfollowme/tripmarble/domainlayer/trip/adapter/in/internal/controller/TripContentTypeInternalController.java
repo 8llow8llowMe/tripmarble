@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.controller;
 
-import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripContentTypeInternalResponse;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripContentTypeQueryInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripContentTypeInternalUseCase;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,9 +27,9 @@ public class TripContentTypeInternalController {
         description = "여행 콘텐츠 타입 ID 목록(tripContentTypeIds)을 기반으로, 여행 콘텐츠 타입 목록을 조회하는 기능입니다."
     )
     @GetMapping
-    public ResponseEntity<List<TripContentTypeInternalResponse>> getTripContentTypes(
+    public ResponseEntity<List<TripContentTypeQueryInternalResponse>> getTripContentTypes(
         @RequestParam List<Long> tripContentTypeIds) {
-        List<TripContentTypeInternalResponse> contentTypeIds = tripContentTypeInternalUseCase.getTripContentTypes(
+        List<TripContentTypeQueryInternalResponse> contentTypeIds = tripContentTypeInternalUseCase.getTripContentTypes(
             tripContentTypeIds);
         return ResponseEntity.ok().body(contentTypeIds);
     }
