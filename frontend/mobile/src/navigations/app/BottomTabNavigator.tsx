@@ -82,13 +82,13 @@ export default function BottomTabNavigator() {
           headerShown: false,
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Moments"
         component={MomentsScreen}
         options={{
           header: () => <TabHeader type="MomentsTab" />,
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
