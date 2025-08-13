@@ -11,4 +11,6 @@ public interface TripContentTypeRepositoryPort {
     Optional<String> findNameByContentTypeId(int contentTypeId);
 
     List<TripContentType> findAllById(List<Long> tripContentTypeIds);
+
+    List<TripContentType> findByContentTypeIdIn(List<Integer> contentTypeIds);
 }
