@@ -33,4 +33,10 @@ public class TripContentTypeRepositoryAdapter implements TripContentTypeReposito
         List<TripContentTypeEntity> entities = tripContentTypeRepository.findAllById(tripContentTypeIds);
         return tripContentTypeMapper.toDomainListFromEntityList(entities);
     }
+
+    @Override
+    public List<TripContentType> findByContentTypeIdIn(List<Integer> contentTypeIds) {
+        List<TripContentTypeEntity> entities = tripContentTypeRepository.findByContentTypeIdIn(contentTypeIds);
+        return tripContentTypeMapper.toDomainListFromEntityList(entities);
+    }
 }

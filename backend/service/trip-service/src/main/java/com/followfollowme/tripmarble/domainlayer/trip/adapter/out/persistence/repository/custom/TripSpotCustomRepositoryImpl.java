@@ -1,8 +1,11 @@
 package com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.repository.custom;
 
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.QTripContentTypeEntity;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.QTripSpotEntity;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.TripSpotEntity;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.projection.TripSpotWIthContentTypeNameProjection;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
@@ -76,6 +79,26 @@ public class TripSpotCustomRepositoryImpl implements TripSpotCustomRepository {
             .where(where)
             .orderBy(Expressions.numberTemplate(Double.class, "RAND()").asc()) // MySQL 기준 RAND()
             .limit(limit)
+            .fetch();
+    }
+
+    @Override
+    public List<TripSpotWIthContentTypeNameProjection> findAllWithContentTypeNameByIds(List<Long> tripSpotIds) {
+        QTripSpotEntity spot = QTripSpotEntity.tripSpotEntity;
+        QTripContentTypeEntity type = QTripContentTypeEntity.tripContentTypeEntity;
+
+        return queryFactory
+            .select(Projections.constructor(
+                TripSpotWIthContentTypeNameProjection.class,
+                spot.id.as("tripSpotId"),
+                type.contentTypeName,
+                spot.title.as("tripSpotName"),
+                spot.mapX.as("longitude"),
+                spot.mapY.as("latitude")
+            ))
+            .from(spot)
+            .join(type).on(spot.contentTypeId.eq(type.contentTypeId))
+            .where(spot.id.in(tripSpotIds))
             .fetch();
     }
 }
