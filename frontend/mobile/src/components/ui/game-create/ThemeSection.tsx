@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, LayoutChangeEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
-import NextFloatingButton from '@/components/ui/game/create/NextFloatingButton';
+import NextFloatingButton from './NextFloatingButton';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
