@@ -56,4 +56,9 @@ public class TripGameMemberRepositoryAdapter implements TripGameMemberRepository
                 .build())
             .toList();
     }
+
+    @Override
+    public boolean existsByTripGameIdAndMemberId(long tripGameId, long memberId) {
+        return tripGameMemberRepository.existsByTripGameIdAndMemberId(tripGameId, memberId);
+    }
 }

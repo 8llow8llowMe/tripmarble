@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto;
 
-public record TripContentTypeInternalResponse(
+public record TripContentTypeQueryInternalResponse(
     long tripContentTypeId,
     int contentTypeId
 ) {

@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.client;
 
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripContentTypeInternalResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.TripContentTypeQueryInternalResponse;
 import java.util.List;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,5 +14,5 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface TripContentTypeClient {
 
     @GetMapping
-    List<TripContentTypeInternalResponse> getTripContentTypes(@RequestParam List<Long> tripContentTypeIds);
+    List<TripContentTypeQueryInternalResponse> getTripContentTypes(@RequestParam List<Long> tripContentTypeIds);
 }

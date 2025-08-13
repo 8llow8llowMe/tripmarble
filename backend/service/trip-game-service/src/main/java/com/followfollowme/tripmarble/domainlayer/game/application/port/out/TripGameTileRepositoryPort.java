@@ -12,4 +12,6 @@ public interface TripGameTileRepositoryPort {
     int findMaxStepNoByTripGameId(long tripGameId);
 
     Optional<TripGameTile> findByTripGameIdAndStepNo(long tripGameId, int stepNo);
+
+    List<TripGameTile> findAllByTripGameId(long tripGameId);
 }
