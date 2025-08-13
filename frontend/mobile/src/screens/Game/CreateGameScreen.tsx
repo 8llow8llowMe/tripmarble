@@ -22,7 +22,7 @@ import {
   StepDots,
   SummarySection,
   ThemeSection,
-} from '@/components/ui/game/create';
+} from '@/components/ui/game-create';
 import useRepresentativeRegionsListQuery from '@/hooks/trip/useRepresentativeRegionsList';
 
 type SectionKey = 'location' | 'theme' | 'date' | 'level' | 'summary';
@@ -58,12 +58,12 @@ export default function CreateGameScreen() {
   const [viewportH, setViewportH] = useState(0);
 
   // difficultyList 로드 후 기본값 설정(NORMAL로 세팅)
-  useEffect(() => {
-    if (!difficultyList?.length) return;
-    const defaultCode =
-      difficultyList.find((d) => d.code === 'NORMAL')?.code ?? difficultyList[0].code;
-    if (!level) setLevel(defaultCode); // 최초 1회만 세팅
-  }, [difficultyList, level]);
+  // useEffect(() => {
+  //   if (!difficultyList?.length) return;
+  //   const defaultCode =
+  //     difficultyList.find((d) => d.code === 'NORMAL')?.code ?? difficultyList[0].code;
+  //   if (!level) setLevel(defaultCode); // 최초 1회만 세팅
+  // }, [difficultyList, level]);
 
   // 완료 조건
   const complete = {
