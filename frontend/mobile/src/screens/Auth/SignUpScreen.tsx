@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { useForm, FormProvider } from 'react-hook-form';
-import SignUpHeader from './SignUpHeader';
-import StepTerms from './StepTerms';
-import StepEmail from './StepEmail';
-import StepName from './StepName';
-import StepNickname from './StepNickname';
-import StepPassword from './StepPassword';
-import SignUpComplete from './SignUpComplete';
+
 import SafeAreaScreen from '@/components/layout/SafeAreaScreen';
 import { palette } from '@/constants/colors';
+import {
+  SignUpComplete,
+  SignUpHeader,
+  StepEmail,
+  StepName,
+  StepNickname,
+  StepPassword,
+  StepTerms,
+} from '@/components/ui/auth-signup';
 
 export type SignUpFormType = {
   email: string;
