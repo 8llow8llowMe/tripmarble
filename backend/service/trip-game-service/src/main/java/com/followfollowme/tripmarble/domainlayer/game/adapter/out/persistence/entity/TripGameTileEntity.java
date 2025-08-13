@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity;
 
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.TileType;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.MissionType;
 import com.followfollowme.tripmarble.persistence.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -45,8 +45,8 @@ public class TripGameTileEntity extends BaseEntity {
     @Column(nullable = false)
     private Integer stepNo;
 
-    @Comment("블록 특성 (기본/출발점/미션/도착점 등)")
+    @Comment("블록 미션 타입 (사진 인증/후기 작성/위치 인증 등)")
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TileType tileType;
+    private MissionType missionType;
 }
