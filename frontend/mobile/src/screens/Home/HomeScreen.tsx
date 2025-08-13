@@ -22,7 +22,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         <TextBox size={20} fontsName="Pretendard800" color={palette.gray800} style={styles.welcome}>
-          안녕하세요. {nickname} 님
+          반가워요. {nickname} 님
         </TextBox>
         <View style={styles.searchBoxWrapper}>
           <TouchableOpacity
