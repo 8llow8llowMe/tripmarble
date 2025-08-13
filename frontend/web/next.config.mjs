@@ -14,12 +14,25 @@ dotenv.config({ path: envPath, override: true });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // ▶ SSR standalone build
+  output: "standalone",
+  experimental: {
+    outputFileTracingRoot: path.join(__dirname), // 트레이싱 기준 루트 명시
+  },
+  // NEXT_PUBLIC_*만 런타임 주입
   env: Object.fromEntries(
     Object.keys(process.env)
       .filter((k) => k.startsWith("NEXT_PUBLIC_"))
       .map((k) => [k, process.env[k]])
   ),
-  images: { domains: ["tong.visitkorea.or.kr", "k.kakaocdn.net"] },
+
+  // next/image domains 설정 (SSR이므로 unoptimized 제거)
+  images: {
+    domains: ["tong.visitkorea.or.kr", "k.kakaocdn.net"],
+  },
+
+  // (옵션) 정적 호스팅 환경에서 404를 줄이기 위한 슬래시 강제. 필요 없으면 제거하세요.
+  // trailingSlash: true,
 };
 
 export default nextConfig;
