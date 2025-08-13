@@ -16,7 +16,8 @@ public enum TripGameErrorCode {
     MEMBER_NOT_FOUND("TRIP_GAME_006", "해당 게임에 참여한 회원이 존재하지 않습니다.", HttpStatus.NOT_FOUND),
     MEMBER_TURN_NOT_MATCH("TRIP_GAME_007", "현재 플레이어의 턴이 아닙니다.", HttpStatus.FORBIDDEN),
     DICE_ROLL_FAILED("TRIP_GAME_008", "주사위 굴리기에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
-    TILE_NOT_FOUND("TRIP_GAME_009", "해당 위치의 타일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
+    TILE_NOT_FOUND("TRIP_GAME_009", "해당 위치의 타일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    MEMBER_NOT_PARTICIPANT("TRIP_GAME_010", "해당 게임에 참여하지 않은 회원입니다.", HttpStatus.FORBIDDEN);
 
     private final String code;
     private final String errorMessage;
