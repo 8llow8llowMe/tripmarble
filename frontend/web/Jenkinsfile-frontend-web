@@ -129,7 +129,12 @@ pipeline {
             }
             post {
                 success {
-                    archiveArtifacts "${env.FS_PATH}/out/**/*"
+                    archiveArtifacts allowEmptyArchive: true, artifacts: """
+                    ${env.FS_PATH}/.next/standalone/**
+                    ${env.FS_PATH}/.next/static/**
+                    ${env.FS_PATH}/public/**
+                    ${env.FS_PATH}/package.json
+                    """
                 }
             }
         }
@@ -159,7 +164,7 @@ pipeline {
                     echo "Deploying ${params.SERVICE_NAME} to Production"
                     
                     // MinIO에 배포
-                    withCredentials([usernamePassword(credentialsId: 'minio-credentials',
+                    withCredentials([usernamePassword(credentialsId: '₩minio-credentials',
                                                       usernameVariable: 'MINIO_ACCESS_KEY',
                                                       passwordVariable: 'MINIO_SECRET_KEY')]) {
                         sh """
@@ -169,10 +174,14 @@ pipeline {
                             # 기존 파일 삭제 (버킷 경로 전체)
                             mc rm --recursive --force minio/${MINIO_BUCKET}/${MINIO_PATH} || true
                             
-                            # 새 빌드 파일 업로드
-                            mc cp --recursive ${env.FS_PATH}/out/ minio/${MINIO_BUCKET}/${MINIO_PATH}/
+                            # SSR 산출물 업로드 (.next/standalone, .next/static, public)
+                            mc cp --recursive ${env.FS_PATH}/.next/standalone/ minio/${MINIO_BUCKET}/${MINIO_PATH}/.next/standalone/
+                            mc cp --recursive ${env.FS_PATH}/.next/static/     minio/${MINIO_BUCKET}/${MINIO_PATH}/.next/static/
+                            mc cp --recursive ${env.FS_PATH}/public/           minio/${MINIO_BUCKET}/${MINIO_PATH}/public/
+                            mc cp ${env.FS_PATH}/package.json                  minio/${MINIO_BUCKET}/${MINIO_PATH}/package.json
                             
                             echo "Production deployment completed: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${MINIO_PATH}"
+                            echo "Note: SSR requires running Node with .next/standalone/server.js on your runtime host. MinIO stores the build artifacts only."
                         """
                     }
                 }
