@@ -17,7 +17,7 @@ export const themeIconMap: Record<string, IconName> = {
   음식점: 'restaurant-outline', // 맛집
 };
 
-type Theme = { contentTypeId: number; contentTypeName: string };
+type Theme = { tripThemeId: number; tripThemeName: string };
 type Props = {
   onLayout?: (e: any) => void;
   themes: Theme[]; // 8개 예상
@@ -51,15 +51,15 @@ export default function ThemeCardGrid({
 
       <View style={styles.grid} onLayout={onWrapLayout}>
         {themes.map((t, i) => {
-          const active = selectedIds.includes(t.contentTypeId);
+          const active = selectedIds.includes(t.tripThemeId);
           const col = i % COLS;
           const row = Math.floor(i / COLS);
 
           return (
             <Pressable
-              key={t.contentTypeId}
+              key={t.tripThemeId}
               onPress={() => {
-                onToggle(t.contentTypeId);
+                onToggle(t.tripThemeId);
               }}
               style={({ pressed }) => [
                 styles.card,
@@ -74,13 +74,13 @@ export default function ThemeCardGrid({
             >
               <View style={styles.iconWrap}>
                 <Ionicons
-                  name={themeIconMap[t.contentTypeName] ?? 'sparkles-outline'}
+                  name={themeIconMap[t.tripThemeName] ?? 'sparkles-outline'}
                   size={24}
                   color={active ? '#2563EB' : '#64748B'}
                 />
               </View>
               <Text numberOfLines={1} style={[styles.cardLabel, active && styles.cardLabelActive]}>
-                {t.contentTypeName}
+                {t.tripThemeName}
               </Text>
               {active && (
                 <View style={styles.check}>
