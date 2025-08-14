@@ -18,7 +18,7 @@ public interface TripGameMemberRepository extends JpaRepository<TripGameMemberEn
         """)
     Optional<TripGameMemberEntity> findHostMemberInGame(long tripGameId, long memberId);
 
-    List<TripGameMemberEntity> findByTripGameId(long tripGameId);
+    List<TripGameMemberEntity> findAllByTripGameId(long tripGameId);
 
     boolean existsByTripGameIdAndMemberId(long tripGameId, long memberId);
 
@@ -28,5 +28,5 @@ public interface TripGameMemberRepository extends JpaRepository<TripGameMemberEn
             where m.tripGame.id in :tripGameIds
               and m.memberId = :memberId
         """)
-    List<TripGameMemberEntity> findByTripGameIdsAndMemberId(List<Long> tripGameIds, long memberId);
+    List<TripGameMemberEntity> findAllByTripGameIdAndMemberId(List<Long> tripGameIds, long memberId);
 }

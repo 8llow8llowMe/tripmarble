@@ -34,8 +34,8 @@ public class TripGameMemberRepositoryAdapter implements TripGameMemberRepository
     }
 
     @Override
-    public List<TripGameMember> findByTripGameId(long tripGameId) {
-        List<TripGameMemberEntity> entities = tripGameMemberRepository.findByTripGameId(tripGameId);
+    public List<TripGameMember> findAllByTripGameId(long tripGameId) {
+        List<TripGameMemberEntity> entities = tripGameMemberRepository.findAllByTripGameId(tripGameId);
         return tripGameMemberMapper.toDomainListFromEntityList(entities);
     }
 
@@ -63,8 +63,8 @@ public class TripGameMemberRepositoryAdapter implements TripGameMemberRepository
     }
 
     @Override
-    public List<TripGameMember> findByTripGameIdAndMemberId(List<Long> tripGameIds, long memberId) {
-        List<TripGameMemberEntity> entities = tripGameMemberRepository.findByTripGameIdsAndMemberId(tripGameIds, memberId);
+    public List<TripGameMember> findAllByTripGameIdAndMemberId(List<Long> tripGameIds, long memberId) {
+        List<TripGameMemberEntity> entities = tripGameMemberRepository.findAllByTripGameIdAndMemberId(tripGameIds, memberId);
         return tripGameMemberMapper.toDomainListFromEntityList(entities);
     }
 }

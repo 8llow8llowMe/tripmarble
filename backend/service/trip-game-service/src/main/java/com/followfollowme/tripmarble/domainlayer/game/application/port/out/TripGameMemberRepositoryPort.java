@@ -12,7 +12,7 @@ public interface TripGameMemberRepositoryPort {
 
     Optional<TripGameMember> findHostMemberInGame(long tripGameId, long memberId);
 
-    List<TripGameMember> findByTripGameId(long tripGameId);
+    List<TripGameMember> findAllByTripGameId(long tripGameId);
 
     List<TripGameMember> saveAll(List<TripGameMember> tripGameMembers, TripGame tripGame);
 
@@ -20,5 +20,5 @@ public interface TripGameMemberRepositoryPort {
 
     boolean existsByTripGameIdAndMemberId(long tripGameId, long memberId);
 
-    List<TripGameMember> findByTripGameIdAndMemberId(List<Long> tripGameIds, long memberId);
+    List<TripGameMember> findAllByTripGameIdAndMemberId(List<Long> tripGameIds, long memberId);
 }
