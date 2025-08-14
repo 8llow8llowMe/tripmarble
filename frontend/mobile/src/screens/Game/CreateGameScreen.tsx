@@ -8,11 +8,11 @@ import {
   TouchableOpacity,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { palette } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
-import useContentTypesListQuery from '@/hooks/trip/useContentTypesList';
 import useDifficultyListQuery from '@/hooks/game/useDifficultyList';
 import useCreateGameMutaion from '@/hooks/game/useCreateGame';
 
@@ -25,6 +25,7 @@ import {
   SummarySection,
   ThemeSection,
 } from '@/components/ui/game-create';
+import useTripThemesListQuery from '@/hooks/game/useTripThemesList';
 
 type SectionKey = 'location' | 'theme' | 'date' | 'level' | 'summary';
 const ORDER: SectionKey[] = ['location', 'theme', 'date', 'level', 'summary'];
@@ -34,9 +35,10 @@ export default function CreateGameScreen() {
   const scrollRef = useRef<ScrollView>(null);
 
   const { representativeRegionsList } = useRepresentativeRegionsListQuery();
-  const { contentTypesList } = useContentTypesListQuery();
+  const { tripThemesList } = useTripThemesListQuery();
   const { difficultyList } = useDifficultyListQuery();
-  const { createGame } = useCreateGameMutaion();
+
+  const { createGame, isPending: creating } = useCreateGameMutaion();
 
   // 각 섹션의 y 포지션 저장
   const yMapRef = useRef<Record<SectionKey, number>>({
@@ -85,7 +87,8 @@ export default function CreateGameScreen() {
     return idx;
   }, [complete]);
 
-  const isFormValid = maxAllowedIndex >= 4;
+  // 유효성
+  const isFormValid = regionId != null && themeIds.length > 0 && startedAt && endedAt && level;
 
   const onLayoutFactory = (key: SectionKey) => (e: any) => {
     yMapRef.current[key] = e.nativeEvent.layout.y;
@@ -170,19 +173,17 @@ export default function CreateGameScreen() {
 
   const selectedThemeNames = useMemo(
     () =>
-      contentTypesList &&
-      contentTypesList
-        .filter((t) => themeIds.includes(t.contentTypeId))
-        .map((t) => t.contentTypeName),
-    [contentTypesList, themeIds],
+      tripThemesList &&
+      tripThemesList.filter((t) => themeIds.includes(t.tripThemeId)).map((t) => t.tripThemeName),
+    [tripThemesList, themeIds],
   );
 
   const handleCreate = async () => {
-    if (!regionId || !startedAt || !endedAt || !level || themeIds.length === 0) return;
+    if (!isFormValid || creating) return;
 
     const body = {
       representativeRegionId: regionId,
-      tripThemeIds: themeIds, // 테마 id 배열
+      tripThemeIds: themeIds,
       startedAt,
       endedAt,
       difficulty: level,
@@ -190,10 +191,22 @@ export default function CreateGameScreen() {
     };
 
     try {
-      await createGame(body);
-      // 네비게이션 이동 등
-    } catch (e) {
-      // 에러 처리
+      console.log('🛠️ [CreateGame] 요청 바디:', body);
+      const res = await createGame(body);
+      const tripGameId = res.dataBody.tripGameId;
+
+      console.log('✅ [CreateGame] 성공 응답:', res);
+      if (tripGameId) {
+        console.log(`🎉 게임 생성 완료! tripGameId=${tripGameId}`);
+        navigation.replace('OngoingGame', { tripGameId }); // TODO: 어디로 navigate? 예시) tripGameId=611073007951155200
+      } else {
+        // 혹시 id가 없으면 Play 메인으로 fallback
+        console.log('⚠️ [CreateGame] 성공이지만 tripGameId 없음. PlayMain으로 이동');
+        navigation.navigate('PlayMain');
+      }
+    } catch (e: any) {
+      console.error('💥 [CreateGame] 실패:', e);
+      Alert.alert('게임 생성 실패', e?.message ?? '게임 생성 중 오류가 발생했어요.');
     }
   };
 
@@ -205,12 +218,7 @@ export default function CreateGameScreen() {
           <Ionicons name="arrow-back" size={28} color="#555" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>게임 만들기</Text>
-        <TouchableOpacity
-          onPress={() => {
-            /* submit */
-          }}
-          disabled={!isFormValid}
-        >
+        <TouchableOpacity onPress={handleCreate} disabled={!isFormValid}>
           <Text style={[styles.createBtnText, !isFormValid && styles.createBtnTextDisabled]}>
             확인
           </Text>
@@ -249,7 +257,7 @@ export default function CreateGameScreen() {
             selectedId={regionId}
             onSelect={(id) => {
               setRegionId(id);
-              completeAndGoNext('location'); // 매 변경 시 이동
+              // completeAndGoNext('location'); // 매 변경 시 이동
             }}
             minHeight={viewportH}
           />
@@ -258,7 +266,7 @@ export default function CreateGameScreen() {
           {complete.location && (
             <ThemeSection
               onLayout={onLayoutFactory('theme')}
-              themes={contentTypesList ?? []}
+              themes={tripThemesList ?? []}
               selectedIds={themeIds}
               onToggle={toggleTheme} // 토글 핸들러
               onNext={() => completeAndGoNext('theme')}
@@ -299,7 +307,9 @@ export default function CreateGameScreen() {
               startedAt={startedAt}
               endedAt={endedAt}
               level={level}
+              onSubmit={handleCreate}
               disabled={!isFormValid}
+              loading={creating}
               onToTop={() => scrollToKey('location')}
               minHeight={viewportH}
             />
