@@ -9,8 +9,10 @@ import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQ
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
+import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -34,6 +36,27 @@ public class TripGamePresenter {
             .build();
     }
 
+    public SliceResponse<MyTripGameResponse> toMyGameSliceResponse(Slice<TripGameQueryInfo> infoSlice) {
+        return SliceResponse.of(infoSlice.map(info -> {
+            TripGame game = info.tripGame();
+            return MyTripGameResponse.builder()
+                .tripGameId(game.id())
+                .gameStatus(game.status().name())
+                .gameStatusDescription(game.status().getDescription())
+                .difficultyCode(game.difficulty().name())
+                .difficultyDescription(game.difficulty().getDescription())
+                .representativeRegionImageUrl(info.representativeRegionInfo().imageUrl())
+                .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
+                .title(game.title())
+                .startedAt(game.startedAt())
+                .endedAt(game.endedAt())
+                .tripThemeNames(info.tripThemeNames())
+                .isHost(info.isHost())
+                .isReady(info.isReady())
+                .build();
+        }));
+    }
+
     public TripGameStartResponse toGameStartResponse(TripGameStartInfo startInfo) {
         TripGame game = startInfo.tripGame();
         List<TripGameStartMemberView> members = startInfo.members().stream()
@@ -52,28 +75,5 @@ public class TripGamePresenter {
             .gameStatusDescription(game.status().getDescription())
             .members(members)
             .build();
-    }
-
-    public List<MyTripGameResponse> toMyGameResponseList(List<TripGameQueryInfo> infos) {
-        return infos.stream()
-            .map(info -> {
-                TripGame game = info.tripGame();
-                return MyTripGameResponse.builder()
-                    .tripGameId(game.id())
-                    .gameStatus(game.status().name())
-                    .gameStatusDescription(game.status().getDescription())
-                    .difficultyCode(game.difficulty().name())
-                    .difficultyDescription(game.difficulty().getDescription())
-                    .representativeRegionImageUrl(info.representativeRegionInfo().imageUrl())
-                    .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
-                    .title(game.title())
-                    .startedAt(game.startedAt())
-                    .endedAt(game.endedAt())
-                    .tripThemeNames(info.tripThemeNames())
-                    .isHost(false)
-                    .isReady(false)
-                    .build();
-            })
-            .toList();
     }
 }
