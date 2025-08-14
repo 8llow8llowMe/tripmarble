@@ -64,7 +64,7 @@ public class TripGameMemberRepositoryAdapter implements TripGameMemberRepository
 
     @Override
     public List<TripGameMember> findByTripGameIdAndMemberId(List<Long> tripGameIds, long memberId) {
-        List<TripGameMemberEntity> entities = tripGameMemberRepository.fi
-        return null;
+        List<TripGameMemberEntity> entities = tripGameMemberRepository.findByTripGameIdsAndMemberId(tripGameIds, memberId);
+        return tripGameMemberMapper.toDomainListFromEntityList(entities);
     }
 }
