@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, LayoutChangeEvent, Image } fr
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
+import NextFloatingButton from './NextFloatingButton';
 
 type Region = {
   representativeRegionId: number;
@@ -66,7 +67,7 @@ export default function LocationSection({
                 activeOpacity={0.9}
                 onPress={() => {
                   onSelect(id);
-                  onNext?.();
+                  // onNext?.();
                 }}
                 style={{
                   width: size,
@@ -101,6 +102,12 @@ export default function LocationSection({
           },
         )}
       </View>
+
+      <NextFloatingButton
+        visible={!!selectedId}
+        onPress={() => onNext?.()}
+        label="여행지 선택 완료, 다음 섹션으로 이동"
+      />
     </View>
   );
 }
@@ -111,7 +118,7 @@ const styles = StyleSheet.create({
   subtitle: { marginTop: 14, fontSize: 15, color: palette.gray600 },
 
   searchBar: {
-    marginTop: 12,
+    marginTop: 16,
     height: 48,
     borderRadius: 14,
     backgroundColor: '#F2F4F7',
