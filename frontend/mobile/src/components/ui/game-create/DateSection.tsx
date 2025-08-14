@@ -109,6 +109,7 @@ export default function DateSection({
         markedDates={marked}
         onDayPress={handleDayPress}
         initialDate={startedAt ?? dayjs().format('YYYY-MM-DD')} // 초기 노출 월
+        minDate={dayjs().format('YYYY-MM-DD')} // 오늘 이전의 날짜 자동 비활성
         theme={{
           todayTextColor: '#2563EB',
           selectedDayBackgroundColor: '#4BA1FD',
@@ -143,7 +144,7 @@ export default function DateSection({
 const styles = StyleSheet.create({
   section: { paddingHorizontal: 20, paddingTop: 14 },
   title: { fontSize: 20, fontWeight: '700', color: palette.Neutral800 },
-  subtitle: { marginTop: 10, fontSize: 13, color: palette.gray600 },
+  subtitle: { marginTop: 14, fontSize: 15, color: palette.gray600 },
 
   calendar: { marginTop: 16, borderRadius: 12, overflow: 'hidden' },
   helper: { marginTop: 10, fontSize: 13, color: palette.gray600 },
