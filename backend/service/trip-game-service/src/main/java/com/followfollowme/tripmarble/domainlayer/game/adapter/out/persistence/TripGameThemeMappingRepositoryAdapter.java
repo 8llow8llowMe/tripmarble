@@ -35,4 +35,9 @@ public class TripGameThemeMappingRepositoryAdapter implements TripGameThemeMappi
                 .build())
             .toList();
     }
+
+    @Override
+    public List<String> findThemeNamesByTripGameId(long tripGameId) {
+        return tripGameThemeMappingRepository.findThemeNamesByTripGameId(tripGameId);
+    }
 }

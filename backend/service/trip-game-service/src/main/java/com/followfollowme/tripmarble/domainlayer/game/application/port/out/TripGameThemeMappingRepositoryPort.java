@@ -11,4 +11,6 @@ public interface TripGameThemeMappingRepositoryPort {
     List<TripGameThemeMapping> saveAll(List<TripGameThemeMapping> mappings, TripGame tripGame, List<TripTheme> tripThemes);
 
     List<TripGameThemeNames> findThemeNamesByTripGameIds(List<Long> tripGameIds);
+
+    List<String> findThemeNamesByTripGameId(long tripGameId);
 }
