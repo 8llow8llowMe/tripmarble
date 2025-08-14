@@ -7,10 +7,12 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter.TripGamePresenter;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameTileCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameCreateProcessor;
+import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameQueryProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameStartProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameTileCreateProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
@@ -20,6 +22,7 @@ import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +32,7 @@ public class TripGameFacade implements TripGameWebUseCase {
 
     private final TripGameCreateProcessor tripGameCreateProcessor;
     private final TripGameTileCreateProcessor tripGameTileCreateProcessor;
+    private final TripGameQueryProcessor tripGameQueryProcessor;
     private final TripGameStartProcessor tripGameStartProcessor;
     private final TripGamePresenter tripGamePresenter;
 
@@ -62,8 +66,8 @@ public class TripGameFacade implements TripGameWebUseCase {
     @Override
     @Transactional(readOnly = true)
     public SliceResponse<MyTripGameResponse> getMyTripGames(long memberId, long lastTripGameId, int size, Status status) {
-
-        return null;
+        Slice<TripGameQueryInfo> infoSlice = tripGameQueryProcessor.getMyTripGames(memberId, lastTripGameId, size, status);
+        return tripGamePresenter.toMyGameSliceResponse(infoSlice);
     }
 
     @Override
