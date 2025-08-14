@@ -1,5 +1,4 @@
 import TabHeader from '@/components/layout/header/TabHeader';
-import CreateGameScreen from '@/screens/Game/CreateGameScreen';
 import FinishedGameScreen from '@/screens/Game/FinishedGameScreen';
 import OngoingGameScreen from '@/screens/Game/OngoingGameScreen';
 import PlayScreen from '@/screens/Play/PlayScreen';
