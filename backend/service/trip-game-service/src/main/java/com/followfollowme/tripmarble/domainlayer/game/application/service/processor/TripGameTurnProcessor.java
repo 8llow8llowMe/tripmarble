@@ -26,7 +26,7 @@ public class TripGameTurnProcessor {
             .orElseThrow(() -> new TripGameException(TripGameErrorCode.GAME_NOT_FOUND));
 
         // 2. 참여자 목록 조회 및 현재 유저 찾기
-        List<TripGameMember> members = tripGameMemberRepositoryPort.findByTripGameId(tripGameId);
+        List<TripGameMember> members = tripGameMemberRepositoryPort.findAllByTripGameId(tripGameId);
         TripGameMember me = members.stream()
             .filter(m -> m.memberId() == memberId)
             .findFirst()
