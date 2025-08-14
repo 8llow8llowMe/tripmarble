@@ -13,7 +13,20 @@ export interface CreateGameRequest {
 }
 
 export interface CreateGameResponse extends ApiResponseBase {
-  dataBody: {};
+  dataBody: {
+    tripGameId: number;
+    title: string; // not null(front에서 디폴트로 값 지정)
+    gameStatus: string; // WAITING
+    gameStatusDescription: string; // 시작 전
+    difficultyCode: string; //NORMAL
+    difficultyDescription: string; //보통
+    startedAt: string; // 'YYYY-MM-DD'
+    endedAt: string; //'YYYY-MM-DD'
+    representativeRegionName: string;
+    tripThemeNames: string[];
+    isHost: boolean;
+    isReady: boolean;
+  };
 }
 
 export const postCreateGame = async ({
@@ -37,7 +50,7 @@ export const postCreateGame = async ({
 };
 
 const useCreateGameMutaion = () => {
-  const { mutate: createGame, isPending } = useMutation({
+  const { mutateAsync: createGame, isPending } = useMutation({
     mutationFn: postCreateGame,
     onError: (error) => {
       console.log('❌ 게임 생성 실패', error);
