@@ -46,7 +46,7 @@ public class TripGameQueryProcessor {
         Map<Long, RepresentativeRegionInfoInternalResponse> regionInfoMap = getRegionInfoMap(games);
 
         // 3. 현재 로그인 사용자의 host/ready 여부
-        Map<Long, TripGameMember> myMemberMap = tripGameMemberRepositoryPort.findByTripGameIdAndMemberId(gameIds, memberId).stream()
+        Map<Long, TripGameMember> myMemberMap = tripGameMemberRepositoryPort.findAllByTripGameIdAndMemberId(gameIds, memberId).stream()
             .collect(Collectors.toMap(TripGameMember::tripGameId, Function.identity()));
 
         // 3. 최종 조합
