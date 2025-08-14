@@ -9,6 +9,7 @@ import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripG
 import com.followfollowme.tripmarble.domainlayer.game.application.readmodel.TripGameMemberCount;
 import com.followfollowme.tripmarble.domainlayer.game.application.readmodel.TripGameThemeNames;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,12 +29,12 @@ public class TripGameQueryProcessor {
     private final TripGameThemeMappingRepositoryPort tripGameThemeMappingRepositoryPort;
     private final RepresentativeRegionClientPort representativeRegionClientPort;
 
-    public List<TripGameQueryInfo> getMyTripGames(long memberId, long lastTripGameId, int size, Status status) {
+    public Slice<TripGameQueryInfo> getMyTripGames(long memberId, long lastTripGameId, int size, Status status) {
         // 1. 내 게임 목록 조회
         Slice<TripGame> gameSlice = tripGameRepositoryPort
             .findMyGameNoOffset(memberId, lastTripGameId, size, status);
         if (gameSlice.isEmpty()) {
-            return List.of();
+            return new SliceImpl<>(List.of(), gameSlice.getPageable(), false);
         }
 
         List<TripGame> games = gameSlice.getContent();
@@ -43,15 +45,26 @@ public class TripGameQueryProcessor {
         Map<Long, List<String>> themeNamesMap = getThemeNamesMap(gameIds);
         Map<Long, RepresentativeRegionInfoInternalResponse> regionInfoMap = getRegionInfoMap(games);
 
+        // 3. 현재 로그인 사용자의 host/ready 여부
+        Map<Long, TripGameMember> myMemberMap = tripGameMemberRepositoryPort.findByTripGameIdAndMemberId(gameIds, memberId).stream()
+            .collect(Collectors.toMap(TripGameMember::tripGameId, Function.identity()));
+
         // 3. 최종 조합
-        return games.stream()
-            .map(game -> TripGameQueryInfo.of(
-                game,
-                memberCountMap.get(game.id()),
-                themeNamesMap.get(game.id()),
-                regionInfoMap.get(game.representativeRegionId())
-            ))
+        List<TripGameQueryInfo> infos = games.stream()
+            .map(game -> {
+                TripGameMember myMember = myMemberMap.get(game.id());
+                return TripGameQueryInfo.of(
+                    game,
+                    memberCountMap.getOrDefault(game.id(), 0L),
+                    themeNamesMap.getOrDefault(game.id(), List.of()),
+                    regionInfoMap.get(game.representativeRegionId()),
+                    myMember != null && myMember.isHost(),
+                    myMember != null && myMember.isReady()
+                );
+            })
             .toList();
+
+        return new SliceImpl<>(infos, gameSlice.getPageable(), gameSlice.hasNext());
     }
 
     private List<Long> extractGameIds(List<TripGame> games) {
