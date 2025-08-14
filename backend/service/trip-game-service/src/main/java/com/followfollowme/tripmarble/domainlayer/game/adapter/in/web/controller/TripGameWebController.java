@@ -2,11 +2,14 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.controller
 
 import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.DifficultyResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateRequest;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameWebUseCase;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
+import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -64,6 +68,19 @@ public class TripGameWebController {
     public ResponseEntity<Response<TripGameStartResponse>> startTripGame(
         @PathVariable long tripGameId, @AuthenticationPrincipal MemberLoginActive loginActive) {
         TripGameStartResponse response = tripGameWebUseCase.startTripGame(tripGameId, loginActive.id());
+        return ResponseEntity.ok().body(Response.success(response));
+    }
+
+    @Operation(
+        summary = "나의 여행 게임 목록 조회",
+        description = "무한 스크롤 + 상태 필터링이 가능한 나의 여행 게임 목록을 조회합니다."
+    )
+    @GetMapping
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<SliceResponse<MyTripGameResponse>>> getMyTripGames(
+        @AuthenticationPrincipal MemberLoginActive loginActive, @RequestParam(defaultValue = "0") long lastTripGameId,
+        @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) Status status) {
+        SliceResponse<MyTripGameResponse> response = tripGameWebUseCase.getMyTripGames(loginActive.id(), lastTripGameId, size, status);
         return ResponseEntity.ok().body(Response.success(response));
     }
 }
