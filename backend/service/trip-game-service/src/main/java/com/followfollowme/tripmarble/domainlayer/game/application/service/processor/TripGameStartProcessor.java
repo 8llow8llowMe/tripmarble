@@ -42,7 +42,7 @@ public class TripGameStartProcessor {
 
         // 3. 모든 인원이 준비 완료인지 확인
         // TODO: 추후에 Redis에 게임 참여자들의 게임 준비 상태를 확인해서 DB에 반영 및 게임 시작 로직 실행하는 방향으로 설계해야함
-        List<TripGameMember> members = tripGameMemberRepositoryPort.findByTripGameId(tripGameId);
+        List<TripGameMember> members = tripGameMemberRepositoryPort.findAllByTripGameId(tripGameId);
         if (members.stream().anyMatch(m -> !m.isReady())) {
             throw new TripGameException(TripGameErrorCode.MEMBER_NOT_READY);
         }
