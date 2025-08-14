@@ -6,4 +6,6 @@ import java.util.List;
 public interface TripGameThemeMappingCustomRepository {
 
     List<TripGameThemeNamesProjection> findThemeNamesByTripGameIds(List<Long> tripGameIds);
+
+    List<String> findThemeNamesByTripGameId(long tripGameId);
 }

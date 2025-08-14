@@ -35,4 +35,18 @@ public class TripGameThemeMappingCustomRepositoryImpl implements TripGameThemeMa
             .where(mapping.tripGame.id.in(tripGameIds))
             .fetch();
     }
+
+    @Override
+    public List<String> findThemeNamesByTripGameId(long tripGameId) {
+        QTripGameThemeMappingEntity mapping = QTripGameThemeMappingEntity.tripGameThemeMappingEntity;
+        QTripThemeEntity theme = QTripThemeEntity.tripThemeEntity;
+
+        return queryFactory
+            .select(theme.name)
+            .from(mapping)
+            .join(mapping.tripTheme, theme)
+            .where(mapping.tripGame.id.eq(tripGameId))
+            .fetch();
+    }
+
 }
