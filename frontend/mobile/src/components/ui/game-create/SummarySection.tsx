@@ -11,6 +11,7 @@ type Props = {
   level?: string | null;
   onSubmit?: () => void;
   disabled?: boolean;
+  loading?: boolean;
   onToTop?: () => void;
   minHeight: number;
 };
@@ -24,6 +25,7 @@ const SummarySection = ({
   level,
   onSubmit,
   disabled,
+  loading,
   onToTop,
   minHeight,
 }: Props) => {
@@ -32,27 +34,33 @@ const SummarySection = ({
       <Text style={styles.title}>선택을 확인하고 게임을 생성해요</Text>
       <Text style={styles.subtitle}>필요하면 위로 올려 수정할 수 있어요</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.summaryTitle}>선택 요약</Text>
-        <Text style={styles.summaryItem}>여행지: {location}</Text>
-        <Text style={styles.summaryItem}>테마: {themes}</Text>
-        <Text style={styles.summaryItem}>
-          기간: {startedAt && endedAt ? `${startedAt} ~ ${endedAt}` : '-'}
-        </Text>
-        <Text style={styles.summaryItem}>난이도: {level ?? '-'}</Text>
+      <View style={styles.contentWrap}>
+        <View>
+          <View style={styles.card}>
+            <Text style={styles.summaryTitle}>선택 요약</Text>
+            <Text style={styles.summaryItem}>여행지: {location}</Text>
+            <Text style={styles.summaryItem}>테마: {themes?.join(', ') || '-'}</Text>
+            <Text style={styles.summaryItem}>
+              기간: {startedAt && endedAt ? `${startedAt} ~ ${endedAt}` : '-'}
+            </Text>
+            <Text style={styles.summaryItem}>난이도: {level ?? '-'}</Text>
+          </View>
+        </View>
+
+        <View>
+          <TouchableOpacity
+            style={[styles.primaryBtn, (disabled || loading) && { opacity: 0.4 }]}
+            disabled={disabled || loading}
+            onPress={onSubmit}
+          >
+            <Text style={styles.primaryBtnText}>{loading ? '생성 중...' : '게임 만들기'}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.toTopBtn} onPress={onToTop}>
+            <Text style={styles.toTopText}>맨 위로</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      <TouchableOpacity
-        style={[styles.primaryBtn, disabled && { opacity: 0.4 }]}
-        disabled={disabled}
-        onPress={onSubmit}
-      >
-        <Text style={styles.primaryBtnText}>게임 만들기</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.toTopBtn} onPress={onToTop}>
-        <Text style={styles.toTopText}>맨 위로</Text>
-      </TouchableOpacity>
     </View>
   );
 };
@@ -64,6 +72,10 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '700', color: palette.Neutral800 },
   subtitle: { marginTop: 14, fontSize: 15, color: palette.gray600 },
 
+  contentWrap: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
   card: {
     padding: 16,
     borderRadius: 16,
@@ -77,7 +89,7 @@ const styles = StyleSheet.create({
 
   primaryBtn: {
     height: 52,
-    borderRadius: 14,
+    borderRadius: 10,
     backgroundColor: palette.mainColor,
     justifyContent: 'center',
     alignItems: 'center',
