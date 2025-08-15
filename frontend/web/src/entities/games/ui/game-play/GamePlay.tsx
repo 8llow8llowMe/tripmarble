@@ -3,12 +3,15 @@
 import React, { useMemo, useState } from "react";
 import GameBoard from "@/entities/games/ui/game-board/GameBoard";
 import styles from "./GamePlay.module.scss";
-import { GameInfoDataBody } from "@/entities/games/model/gameInfoDummy";
-import { ApiResponse } from "@/shared/types";
+import {
+  TripGameTileView,
+  TripGameView,
+} from "@/entities/games/model/gameInfoDummy";
 import TileInfoModal from "@/entities/games/ui/tile-info-modal/TileInfoModal";
 
 type Props = {
-  gameData: ApiResponse<GameInfoDataBody>;
+  tripGameView: TripGameView;
+  tripGameTileViews: TripGameTileView[];
 };
 
 const formatDate = (d?: string) => {
@@ -24,9 +27,7 @@ const formatDate = (d?: string) => {
   }
 };
 
-const GamePlay = ({ gameData }: Props) => {
-  const { tripGameView, tripGameTileViews } = gameData.dataBody;
-
+const GamePlay = ({ tripGameView, tripGameTileViews }: Props) => {
   const dateRange = useMemo(
     () =>
       `${formatDate(tripGameView.startedAt)} - ${formatDate(
@@ -132,7 +133,7 @@ const GamePlay = ({ gameData }: Props) => {
               <div className={styles.blockTitle}>
                 {activeTile.tripSpotName}
                 <span className={styles.blockBadge}>
-                  {activeTile.tileTypeDescription}
+                  {activeTile.missionTypeDescription}
                 </span>
               </div>
               <div className={styles.blockDate}>{dateRange}</div>

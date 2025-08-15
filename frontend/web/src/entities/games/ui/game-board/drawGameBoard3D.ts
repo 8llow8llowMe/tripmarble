@@ -1,6 +1,29 @@
 import { BoardCell } from "./types";
 import { getCell3DColors } from "./cellColor";
 
+// ---- color utils: safely apply alpha to hex colors (#RGB, #RRGGBB, #RRGGBBAA) ----
+function hexToRgba(hex: string, alpha: number): string {
+  if (!hex || typeof hex !== "string") return `rgba(0,0,0,${alpha})`;
+  const m = hex.trim();
+  if (!m.startsWith("#")) return `rgba(0,0,0,${alpha})`;
+  let h = m.slice(1);
+  if (h.length === 3) {
+    h = h
+      .split("")
+      .map((ch) => ch + ch)
+      .join("");
+  }
+  if (h.length === 8) {
+    h = h.slice(0, 6);
+  }
+  if (h.length !== 6) return `rgba(0,0,0,${alpha})`;
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const a = Math.max(0, Math.min(1, alpha));
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
 /**
  * 입체(3D) 셀 하나를 그림
  */
@@ -58,8 +81,10 @@ function draw3DCell(
   // 배경 밝기(그라데이션, 글래스 베이스)
   const grad = ctx.createLinearGradient(x, y, x + w, y + h);
   // grad.addColorStop(0, "rgba(255,255,255,0.25)");
-  grad.addColorStop(0.25, mainColor + "cc");
-  grad.addColorStop(1, mainColor + "88");
+  // grad.addColorStop(0.25, mainColor + "cc");
+  // grad.addColorStop(1, mainColor + "88");
+  grad.addColorStop(0.25, hexToRgba(mainColor, 0.8));
+  grad.addColorStop(1, hexToRgba(mainColor, 0.53));
   ctx.fillStyle = grad;
   ctx.shadowColor = "rgba(160,200,255,0.13)";
   ctx.shadowBlur = 18;
