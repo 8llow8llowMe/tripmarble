@@ -66,12 +66,12 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
     const tile = tiles[i];
     if (!tile) continue;
     const type =
-      tile.tileTypeCode === "START"
-        ? "start"
-        : tile.tileTypeCode === "END"
-        ? "end"
-        : tile.tileTypeCode === "MISSION"
-        ? "mission"
+      tile.missionTypeCode === "PHOTO"
+        ? "PHOTO"
+        : tile.missionTypeCode === "REVIEW"
+        ? "REVIEW"
+        : tile.missionTypeCode === "CHECKIN_GPS"
+        ? "CHECKIN_GPS"
         : "normal";
     coordToTile.set(toKey(pos), {
       index: i,
@@ -83,6 +83,7 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
   // Finally, build boardData in the SAFE render order, but pulling tile info by coordinate
   const boardData = renderPositions.map((pos) => {
     const payload = coordToTile.get(toKey(pos));
+    console.log(payload?.type);
     return {
       index: payload?.index ?? -1,
       row: pos.row,
@@ -125,7 +126,7 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#ecf1fe";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+    console.log(boardData);
     drawGameBoard3D(ctx, boardData, count, CELL_SIZE);
     drawPiece(ctx, piecePos.x, piecePos.y, CELL_SIZE);
   }, [boardData, count, piecePos]);

@@ -4,9 +4,9 @@
 
 // 타일 타입 색상(상단, 하단)
 const TILE_TYPE_COLORS: Record<string, [string, string]> = {
-  start: ["#FCB6CB", "#C790A5"],
-  end: ["#01C5D9", "#0296A4"],
-  mission: ["#40C896", "#2E936F"],
+  PHOTO: ["#FCB6CB", "#C790A5"],
+  REVIEW: ["#01C5D9", "#0296A4"],
+  CHECKIN_GPS: ["#40C896", "#2E936F"],
   normal: ["#F7F7F8", "#BBBBBB"],
 };
 

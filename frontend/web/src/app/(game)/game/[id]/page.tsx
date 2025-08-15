@@ -1,14 +1,27 @@
+"use client";
+
+import useGetGameTiles from "@/entities/games/hooks/useGetGameTiles";
 import { gameInfoDummy } from "@/entities/games/model/gameInfoDummy";
 import GamePlay from "@/entities/games/ui/game-play/GamePlay";
 
 type Props = {
   params: {
-    gameId: string;
+    id: string;
   };
 };
 
-export default function GamePlayPage({ params }: Props) {
-  // TODO: 임시로 더미데이터 전달, 추후에 gameId로 gameInfo 받아온 후 게임 페이지로 전달 예정
-  const gameData = gameInfoDummy;
-  return <GamePlay gameData={gameData} />;
-}
+const GamePlayPage = ({ params }: Props) => {
+  const { data } = useGetGameTiles(Number(params.id));
+  const tileViews = data?.data?.dataBody?.slice(0, 15) ?? [];
+
+  if (!tileViews.length) return null;
+  return (
+    tileViews && (
+      <GamePlay
+        tripGameView={gameInfoDummy.dataBody.tripGameView}
+        tripGameTileViews={tileViews}
+      />
+    )
+  );
+};
+export default GamePlayPage;
