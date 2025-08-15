@@ -28,10 +28,7 @@ const nextConfig = {
 
   // next/image domains 설정 (SSR이므로 unoptimized 제거)
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "tong.visitkorea.or.kr" },
-      { protocol: "https", hostname: "k.kakaocdn.net" },
-    ],
+    domains: ["tong.visitkorea.or.kr", "k.kakaocdn.net"],
   },
 
   // (옵션) 정적 호스팅 환경에서 404를 줄이기 위한 슬래시 강제. 필요 없으면 제거하세요.
