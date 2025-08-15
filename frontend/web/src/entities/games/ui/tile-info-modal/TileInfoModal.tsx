@@ -22,7 +22,7 @@ const TileInfoModal: React.FC<TileInfoModalProps> = ({ tile, onClose }) => {
           </button>
         </div>
         <div className={styles.meta}>
-          단계: step{tile.stepNo} · {tile.tileTypeDescription}
+          단계: step{tile.stepNo} · {tile.missionTypeDescription}
         </div>
         <div className={styles.id}>tripSpotId: {tile.tripSpotId}</div>
       </div>
