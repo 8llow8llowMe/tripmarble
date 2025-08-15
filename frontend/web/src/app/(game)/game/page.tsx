@@ -14,6 +14,7 @@ import { gamesDummy } from "@/entities/games/model/gamesDummy";
 import { myGamesDummy } from "@/entities/games/model/MyGamesDummy";
 // stores
 import { useAppSelector } from "@/entities/users/model";
+import useMyGameList from "@/entities/games/hooks/useMyGameList";
 
 export default function Game() {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
@@ -28,6 +29,10 @@ export default function Game() {
     }
     setCreateModalOpen(true);
   };
+
+  // 나의 게임 목록 호출
+  const { data } = useMyGameList();
+
   return (
     <div className={styles.mainContainer}>
       <div className={styles.titleAndButton}>
@@ -47,8 +52,11 @@ export default function Game() {
         <GameList games={gamesDummy} />
       </div>
 
-      <MyGamesHorizontal games={myGamesDummy} status="playing" />
-      <MyGamesHorizontal games={myGamesDummy} status="ended" />
+      <MyGamesHorizontal
+        games={data?.data.dataBody.contents}
+        gameStatus="WAITING"
+      />
+      <MyGamesHorizontal games={myGamesDummy} gameStatus="ENDED" />
 
       <CreateGameModal
         isOpen={isCreateModalOpen}
