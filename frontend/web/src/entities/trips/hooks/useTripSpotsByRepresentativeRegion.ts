@@ -7,7 +7,7 @@ export interface TripSpot {
   tripSpotId: number;
   contentId: number;
   tripSpotName: string;
-  thumbnailImageUrl: string;
+  originalImageUrl: string;
 }
 export interface TripSpotsResponse {
   dataHeader: dataHeader;

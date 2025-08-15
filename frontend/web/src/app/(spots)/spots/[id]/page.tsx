@@ -25,67 +25,67 @@ export default function SpotDetail({ params }: Props) {
   //     tripSpotId: 50693,
   //     contentId: 2609624,
   //     tripSpotName: "[백년가게]온천입구기장곰장어",
-  //     thumbnailImageUrl: "",
+  //     originalImageUrl: "",
   //   },
   //   {
   //     tripSpotId: 50692,
   //     contentId: 2563357,
   //     tripSpotName: "[백년가게]옥미아구찜",
-  //     thumbnailImageUrl: "",
+  //     originalImageUrl: "",
   //   },
   //   {
   //     tripSpotId: 50691,
   //     contentId: 2605849,
   //     tripSpotName: "[백년가게]언양한우불고기",
-  //     thumbnailImageUrl:
+  //     originalImageUrl:
   //       "http://tong.visitkorea.or.kr/cms/resource/68/2606468_image2_1.JPG",
   //   },
   //   {
   //     tripSpotId: 50689,
   //     contentId: 2609601,
   //     tripSpotName: "[백년가게]신흥장어",
-  //     thumbnailImageUrl:
+  //     originalImageUrl:
   //       "http://tong.visitkorea.or.kr/cms/resource/90/2609790_image2_1.JPG",
   //   },
   //   {
   //     tripSpotId: 50687,
   //     contentId: 2609183,
   //     tripSpotName: "[백년가게]신포순대",
-  //     thumbnailImageUrl: "",
+  //     originalImageUrl: "",
   //   },
   //   {
   //     tripSpotId: 50685,
   //     contentId: 2608933,
   //     tripSpotName: "[백년가게]신안촌",
-  //     thumbnailImageUrl:
+  //     originalImageUrl:
   //       "http://tong.visitkorea.or.kr/cms/resource/26/2609026_image2_1.JPG",
   //   },
   //   {
   //     tripSpotId: 50684,
   //     contentId: 2616274,
   //     tripSpotName: "[백년가게]신동양",
-  //     thumbnailImageUrl:
+  //     originalImageUrl:
   //       "http://tong.visitkorea.or.kr/cms/resource/30/2616330_image2_1.jpg",
   //   },
   //   {
   //     tripSpotId: 50683,
   //     contentId: 2563226,
   //     tripSpotName: "[백년가게]스미센",
-  //     thumbnailImageUrl:
+  //     originalImageUrl:
   //       "http://tong.visitkorea.or.kr/cms/resource/81/2563281_image2_1.jpg",
   //   },
   //   {
   //     tripSpotId: 50682,
   //     contentId: 2563237,
   //     tripSpotName: "[백년가게]쉐라미",
-  //     thumbnailImageUrl:
+  //     originalImageUrl:
   //       "http://tong.visitkorea.or.kr/cms/resource/26/2563326_image2_1.jpg",
   //   },
   //   {
   //     tripSpotId: 50679,
   //     contentId: 2609645,
   //     tripSpotName: "[백년가게]선동보리밥",
-  //     thumbnailImageUrl:
+  //     originalImageUrl:
   //       "http://tong.visitkorea.or.kr/cms/resource/12/2609812_image2_1.jpg",
   //   },
   // ];
@@ -160,7 +160,7 @@ export default function SpotDetail({ params }: Props) {
                 <div className={styles.contentCard}>
                   <div className={styles.cardImage}>
                     <Image
-                      src={spot.thumbnailImageUrl || "/images/no-image.png"}
+                      src={spot.originalImageUrl || "/images/no-image.png"}
                       alt={spot.tripSpotName}
                       fill
                       priority
