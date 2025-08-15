@@ -104,12 +104,9 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                // dir("${env.FS_PATH}") {
-                //     sh 'yarn install --frozen-lockfile'
-                // }
-                // Workspaces 기준 정석: 루트에서 설치
-                sh 'yarn cache clean || true'
-                sh 'yarn install --frozen-lockfile'
+                dir("${env.FS_PATH}") {
+                    sh 'yarn install --frozen-lockfile'
+                }
             }
         }
 
