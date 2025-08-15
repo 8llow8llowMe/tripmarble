@@ -26,7 +26,7 @@ const CATEGORY_COLORS: Record<string, [string, string]> = {
 export function getCell3DColors(type: string): [string, string] {
   if (!type) return ["#eee", "#bbb"];
 
-  const key = String(type).toLowerCase();
+  const key = String(type).toUpperCase();
   if (TILE_TYPE_COLORS[key]) return TILE_TYPE_COLORS[key];
 
   if (CATEGORY_COLORS[type]) return CATEGORY_COLORS[type];
