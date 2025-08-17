@@ -15,7 +15,7 @@
 }
 
 .header {
-  display: flex;
+  // display: flex;
   justify-content: center;
   align-items: flex-end;
   gap: 1rem;
@@ -40,25 +40,20 @@
 
 .content {
   display: flex;
-  // gap: 40px;
-  width: 100%;
-  height: 100%;
-  // flex: 1 1 0%;
-}
-
-.leftPanel {
-  width: 100%;
-  min-width: 320px;
-  display: flex;
   flex-direction: column;
   gap: 32px;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  // flex: 1 1 0%;
 }
 
 .boardContainer {
   width: 100%;
-  max-width: 100%;
+  max-width: 600px;
   height: 100%;
-  max-height: 100%;
+  max-height: 600px;
   aspect-ratio: 1;
 
   display: flex;
@@ -74,6 +69,7 @@
 }
 
 .timelineBox {
+  width: 100%;
   background: #f3f5fb;
   border-radius: 10px;
   padding: 18px 20px;
@@ -120,103 +116,6 @@
   font-size: 1.04rem;
 }
 
-.rightPanel {
-  flex: 1 1 0%;
-  min-width: 320px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  height: 100%;
-}
-
-.blockDetail {
-  background: #f6f8fa;
-  border-radius: 14px;
-  padding: 24px 28px;
-  border: 2px solid #bbdbff;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.blockHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.blockTitle {
-  font-weight: 600;
-  font-size: 1.13rem;
-}
-.blockBadge {
-  margin-left: 12px;
-  background: #ddefff;
-  color: #368aff;
-  font-size: 0.94rem;
-  padding: 3px 12px;
-  border-radius: 10px;
-}
-.blockDate {
-  color: #222;
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-}
-
-.blockMission {
-  color: #444;
-  font-size: 1.04rem;
-  margin-bottom: 6px;
-  margin-top: -7px;
-}
-
-.reviewSection {
-  display: flex;
-  gap: 20px;
-  align-items: stretch;
-}
-
-.reviewImage {
-  width: 120px;
-  min-width: 120px;
-  height: 90px;
-  background: #e9f2fa;
-  border-radius: 7px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 7px;
-  }
-  .noImage {
-    color: #aaa;
-    font-size: 0.93rem;
-    text-align: center;
-  }
-}
-
-.reviewContent {
-  flex: 1;
-  min-height: 90px;
-  background: #eef7ff;
-  border-radius: 7px;
-  padding: 16px 18px;
-  font-size: 1.03rem;
-  color: #1a2230;
-  display: flex;
-  align-items: center;
-}
-
-.placeholder {
-  color: #b5b5b5;
-}
-
 .buttonRow {
   margin-top: 18px;
   display: flex;
@@ -245,75 +144,9 @@
   color: #368aff;
 }
 
-.blockDetailEmpty {
-  padding: 60px 0 0 0;
-  text-align: center;
-  color: #b7bec6;
-  font-size: 1.13rem;
-}
-
-.tabBar {
-  display: flex;
-  width: 100%;
-  gap: 10px;
-  border-bottom: 2.5px solid #e6f0fe;
-  margin-bottom: 20px;
-  padding-bottom: 3px;
-}
-
-.tab {
-  width: 50%;
-  background: transparent;
-  border: none;
-  font-size: 1.13rem;
-  font-weight: 500;
-  color: #7b8ea3;
-  padding: 12px 32px 9px 32px;
-  cursor: pointer;
-  border-radius: 10px 10px 0 0;
-  transition: color 0.13s, background 0.18s;
-
-  &:hover {
-    color: #368aff;
-    background: #f7fbff;
-  }
-}
-
-.activeTab {
-  color: #368aff;
-  background: #e6f0fe;
-  border-bottom: 2.5px solid #368aff;
-  font-weight: 700;
-}
-
-.tabContent {
-  min-height: 0;
-  width: 100%;
-  height: 100%;
-  flex: 1 1 0%;
-  /* padding: 0 2px; */
-  display: flex;
-  flex-direction: column;
-}
-
-.timelineTabContent,
-.detailTabContent {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  flex: 1 1 0%;
-  display: flex;
-  flex-direction: column;
-}
-
 @media (max-width: 900px) {
   .content {
     flex-direction: column;
     gap: 28px;
-  }
-  .leftPanel,
-  .rightPanel {
-    width: 100%;
-    min-width: 0;
   }
 }
