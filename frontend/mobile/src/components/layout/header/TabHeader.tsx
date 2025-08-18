@@ -4,7 +4,6 @@ import { palette } from '@/constants/colors';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import useHeaderHeight from '@/hooks/useHeaderHeight';
@@ -19,7 +18,6 @@ interface TabHeaderProps {
 const TabHeader = ({ type, showBorderBottom = false }: TabHeaderProps) => {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
   const { headerHeight, paddingTop } = useHeaderHeight();
-  //TODO: hook heigth으로 연결 필요(네트워크 로직 추가 후)
 
   const showTitle = () => {
     switch (type) {
