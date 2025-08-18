@@ -1,11 +1,15 @@
 import TextBox from '@/components/atom/TextBox';
 
 import { palette } from '@/constants/colors';
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
+import useHeaderHeight from '@/hooks/useHeaderHeight';
 
-export type TabHeaderType = 'PlayTab' | 'MomentsTab' | 'ProfileTab';
+export type TabHeaderType = 'HomeTab' | 'PlayTab' | 'ProfileTab';
 
 interface TabHeaderProps {
   type: TabHeaderType;
@@ -13,26 +17,35 @@ interface TabHeaderProps {
 }
 
 const TabHeader = ({ type, showBorderBottom = false }: TabHeaderProps) => {
-  const { top } = useSafeAreaInsets();
+  const navigation = useNavigation<AppNavigatorNavigationProp>();
+  const { headerHeight, paddingTop } = useHeaderHeight();
+  //TODO: hook heigth으로 연결 필요(네트워크 로직 추가 후)
 
   const showTitle = () => {
     switch (type) {
+      case 'HomeTab':
+        return '홈';
       case 'PlayTab':
         return '게임';
-      case 'MomentsTab':
-        return '히스토리';
       case 'ProfileTab':
-        return '내 프로필';
+        return '프로필';
     }
   };
+
   const title = showTitle();
+
+  const goToSettingScreen = () => {
+    navigation.navigate('SettingsNavigator', {
+      screen: 'SettingsHomeScreen',
+    });
+  };
 
   return (
     <View
       style={[
         {
-          height: 54 + top,
-          paddingTop: top,
+          height: headerHeight,
+          paddingTop: paddingTop,
           backgroundColor: palette.white,
           borderBottomWidth: showBorderBottom ? 1 : 0,
           borderBottomColor: palette.gray100,
@@ -48,6 +61,15 @@ const TabHeader = ({ type, showBorderBottom = false }: TabHeaderProps) => {
         >
           {title}
         </TextBox>
+        {type === 'ProfileTab' && (
+          <TouchableOpacity
+            style={{ position: 'absolute', right: 16, top: 8, padding: 8 }}
+            onPress={goToSettingScreen}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="settings-outline" size={22} />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
