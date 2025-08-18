@@ -1,20 +1,13 @@
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
 import { useAppSelector } from '@/store/store';
+import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { SafeAreaView, ScrollView, View, StyleSheet, TouchableOpacity } from 'react-native';
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<AppNavigatorNavigationProp>();
 
   const { nickname } = useAppSelector((state) => state.userReducer);
 
