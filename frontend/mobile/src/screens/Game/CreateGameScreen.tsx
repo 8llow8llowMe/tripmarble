@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -59,14 +59,6 @@ export default function CreateGameScreen() {
 
   const [pendingScrollKey, setPendingScrollKey] = useState<SectionKey | null>(null);
   const [viewportH, setViewportH] = useState(0);
-
-  // difficultyList 로드 후 기본값 설정(NORMAL로 세팅)
-  // useEffect(() => {
-  //   if (!difficultyList?.length) return;
-  //   const defaultCode =
-  //     difficultyList.find((d) => d.code === 'NORMAL')?.code ?? difficultyList[0].code;
-  //   if (!level) setLevel(defaultCode); // 최초 1회만 세팅
-  // }, [difficultyList, level]);
 
   // 완료 조건
   const complete = {
@@ -202,7 +194,7 @@ export default function CreateGameScreen() {
       } else {
         // 혹시 id가 없으면 Play 메인으로 fallback
         console.log('⚠️ [CreateGame] 성공이지만 tripGameId 없음. PlayMain으로 이동');
-        navigation.navigate('PlayMain');
+        navigation.navigate('PlayHomeScreen');
       }
     } catch (e: any) {
       console.error('💥 [CreateGame] 실패:', e);
