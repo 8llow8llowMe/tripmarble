@@ -26,6 +26,7 @@
     "axios": "^1.10.0",
     "dayjs": "^1.11.13",
     "expo": "^53.0.20",
+    "expo-linear-gradient": "~14.1.5",
     "expo-status-bar": "~2.2.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
