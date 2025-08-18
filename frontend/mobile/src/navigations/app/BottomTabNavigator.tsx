@@ -5,14 +5,15 @@ import useUserInfoQuery from '@/hooks/user/useUserInfo';
 import { useAppDispatch, useAppSelector } from '@/store/store';
 import { useEffect } from 'react';
 import { setUser } from '@/store/redux/user/user';
-import ProfileScreen from '@/screens/Profile/ProfileScreen';
-import MomentsScreen from '@/screens/Moments/MomentsScreen';
+import ProfileHomeScreen from '@/screens/Profile/ProfileHomeScreen';
 import HomeStackNavigator from '@/navigations/app/HomeStackNavigator';
 import PlayStackNavigator from '@/navigations/app/PlayStackNavigator';
 import ExploreStackNavigator from '@/navigations/app/ExploreStackNavigator';
 import TabHeader from '@/components/layout/header/TabHeader';
+import { palette } from '@/constants/colors';
+import { BottomTabParamList } from '@/types/navigation/navigation';
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 export default function BottomTabNavigator() {
   const dispatch = useAppDispatch();
@@ -38,61 +39,57 @@ export default function BottomTabNavigator() {
           let iconName = '';
 
           switch (route.name) {
-            case 'Home':
+            case 'HomeTab':
               iconName = focused ? 'home' : 'home-outline';
               break;
-            case 'Explore':
+            case 'ExploreTab':
               iconName = focused ? 'search' : 'search-outline';
               break;
-            case 'Play':
+            case 'PlayTab':
               iconName = focused ? 'game-controller' : 'game-controller-outline';
               break;
-            case 'Moments':
-              iconName = focused ? 'book' : 'book-outline';
-              break;
-            case 'Profile':
+            case 'ProfileTab':
               iconName = focused ? 'person' : 'person-outline';
               break;
           }
 
           return <Ionicons name={iconName as any} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#36bffa',
+        tabBarHideOnKeyboard: true,
+        lazy: true,
+        tabBarActiveTintColor: palette.mainColor,
         tabBarInactiveTintColor: 'gray',
       })}
     >
       <Tab.Screen
-        name="Home"
+        name="HomeTab"
         component={HomeStackNavigator}
         options={{
+          tabBarLabel: '홈',
           headerShown: false,
         }}
       />
       <Tab.Screen
-        name="Explore"
+        name="ExploreTab"
         component={ExploreStackNavigator}
         options={{
+          tabBarLabel: '떠나보기',
           headerShown: false,
         }}
       />
       <Tab.Screen
-        name="Play"
+        name="PlayTab"
         component={PlayStackNavigator}
         options={{
+          tabBarLabel: '게임',
           headerShown: false,
         }}
       />
-      {/* <Tab.Screen
-        name="Moments"
-        component={MomentsScreen}
-        options={{
-          header: () => <TabHeader type="MomentsTab" />,
-        }}
-      /> */}
       <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
+        name="ProfileTab"
+        component={ProfileHomeScreen}
         options={{
+          tabBarLabel: '프로필',
           header: () => <TabHeader type="ProfileTab" />,
         }}
       />
