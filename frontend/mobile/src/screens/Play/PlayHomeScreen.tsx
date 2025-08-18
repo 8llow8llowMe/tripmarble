@@ -10,28 +10,30 @@ import {
 } from 'react-native';
 import ongoingImage from '@images/places/gyeongju.png';
 import { useNavigation } from '@react-navigation/native';
+import { palette } from '@/constants/colors';
+import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 // 종료된 게임 목록 데이터 (추후 API로 대체 가능)
 const finishedGames = [
   { id: 2, title: '부산여행', month: 'May', day: '05' },
   { id: 3, title: '경주여행', month: 'Apr', day: '12' },
 ];
 
-export default function PlayScreen() {
-  const navigation = useNavigation();
+export default function PlayHomeScreen() {
+  const navigation = useNavigation<AppNavigatorNavigationProp>();
 
   // 진행중인 게임 카드 클릭 시
   const handleOngoingCardPress = () => {
-    navigation.navigate('OngoingGame', { title: '경주여행', id: 1 });
+    navigation.navigate('OngoingGameScreen', { title: '경주여행', id: 1 });
   };
 
-  // 종료된 게임 카드 클릭 시
-  const handleFinishedCardPress = (id: number, title: string) => {
-    navigation.navigate('FinishedGame', { id, title });
-  };
+  // // 종료된 게임 카드 클릭 시
+  // const handleFinishedCardPress = (id: number, title: string) => {
+  //   navigation.navigate('FinishedGameScreen', { id, title });
+  // };
 
   // 게임 만들기 버튼 클릭 시
   const handleCreateGamePress = () => {
-    navigation.navigate('CreateGame');
+    navigation.navigate('CreateGameScreen');
   };
 
   return (
@@ -58,11 +60,7 @@ export default function PlayScreen() {
         <Text style={styles.title}>종료된 게임</Text>
         {/* 종료된 게임 목록 */}
         {finishedGames.map((game) => (
-          <TouchableOpacity
-            key={game.id}
-            onPress={() => handleFinishedCardPress(game.id, game.title)}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity key={game.id} activeOpacity={0.8}>
             <View style={styles.endedCard}>
               <View style={styles.endedDateBox}>
                 <Text style={styles.endedDateMonth}>{game.month}</Text>
@@ -110,7 +108,7 @@ const styles = StyleSheet.create({
     color: '#222',
   },
   createGameButton: {
-    backgroundColor: '#36bffa',
+    backgroundColor: palette.mainColor,
     borderRadius: 8,
     paddingVertical: 12,
     marginBottom: 20,
