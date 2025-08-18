@@ -12,6 +12,7 @@ import ongoingImage from '@images/places/gyeongju.png';
 import { useNavigation } from '@react-navigation/native';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
+import useMyGameListQuery from '@/hooks/game/useMyGameList';
 // 종료된 게임 목록 데이터 (추후 API로 대체 가능)
 const finishedGames = [
   { id: 2, title: '부산여행', month: 'May', day: '05' },
@@ -20,17 +21,7 @@ const finishedGames = [
 
 export default function PlayHomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
-
-  // 진행중인 게임 카드 클릭 시
-  const handleOngoingCardPress = () => {
-    navigation.navigate('OngoingGameScreen', { title: '경주여행', id: 1 });
-  };
-
-  // // 종료된 게임 카드 클릭 시
-  // const handleFinishedCardPress = (id: number, title: string) => {
-  //   navigation.navigate('FinishedGameScreen', { id, title });
-  // };
-
+  const { myGameList } = useMyGameListQuery();
   // 게임 만들기 버튼 클릭 시
   const handleCreateGamePress = () => {
     navigation.navigate('CreateGameScreen');
@@ -40,14 +31,40 @@ export default function PlayHomeScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
         <Text style={styles.title}>진행중인 게임</Text>
-        <TouchableOpacity onPress={handleOngoingCardPress} activeOpacity={0.8}>
-          <View style={styles.ongoingCard}>
-            <Image source={ongoingImage} style={styles.ongoingImage} resizeMode="cover" />
-            <View style={styles.ongoingFooter}>
-              <Text style={styles.ongoingText}>경주여행</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.ongoingRow}
+        >
+          {(myGameList?.data.dataBody.contents ?? []).map((game) => (
+            <TouchableOpacity
+              key={game.tripGameId}
+              onPress={() =>
+                navigation.navigate('OngoingGameScreen', {
+                  title: game.title || game.representativeRegionName,
+                  id: game.tripGameId,
+                })
+              }
+              activeOpacity={0.8}
+              style={styles.ongoingCardHorizontal}
+            >
+              <Image
+                source={
+                  game.representativeRegionImageUrl
+                    ? { uri: game.representativeRegionImageUrl }
+                    : ongoingImage
+                }
+                style={styles.ongoingImage}
+                resizeMode="cover"
+              />
+              <View style={styles.ongoingFooter}>
+                <Text style={styles.ongoingText} numberOfLines={1}>
+                  {game.title || game.representativeRegionName}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
 
         <TouchableOpacity
           style={styles.createGameButton}
@@ -111,7 +128,7 @@ const styles = StyleSheet.create({
     backgroundColor: palette.mainColor,
     borderRadius: 8,
     paddingVertical: 12,
-    marginBottom: 20,
+    marginVertical: 20,
     alignItems: 'center',
   },
   createGameButtonText: {
@@ -163,5 +180,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#222',
     marginTop: 4,
+  },
+  ongoingRow: {
+    paddingRight: 8,
+    gap: 12,
+  },
+  ongoingCardHorizontal: {
+    width: 260,
+    backgroundColor: '#F5F6F8',
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: '#BCC2C8',
   },
 });
