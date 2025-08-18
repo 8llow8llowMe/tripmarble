@@ -190,7 +190,7 @@ export default function CreateGameScreen() {
       console.log('✅ [CreateGame] 성공 응답:', res);
       if (tripGameId) {
         console.log(`🎉 게임 생성 완료! tripGameId=${tripGameId}`);
-        navigation.replace('OngoingGame', { tripGameId }); // TODO: 어디로 navigate? 예시) tripGameId=611073007951155200
+        navigation.replace('OngoingGameScreen', { tripGameId }); // TODO: 어디로 navigate? 예시) tripGameId=611073007951155200
       } else {
         // 혹시 id가 없으면 Play 메인으로 fallback
         console.log('⚠️ [CreateGame] 성공이지만 tripGameId 없음. PlayMain으로 이동');
