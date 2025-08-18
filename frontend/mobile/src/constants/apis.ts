@@ -34,9 +34,11 @@ const END_POINTS = {
   GAME: {
     LIST_TRIP_THEMES: '/trip-themes',
     LIST_DIFFICULTY: '/trip-games/difficulties',
+    LIST_MY_GAMES: '/trip-games',
 
     CREATE: '/trip-games',
-    START: (tripGameId: number) => `/trip-games/${tripGameId}/start`,
+    START: (tripGameId: string) => `/trip-games/${tripGameId}/start`,
+    TILES: (tripGameId: string) => `/trip-games/${tripGameId}/tiles`,
   },
 };
 

@@ -24,6 +24,9 @@ const QUERY_KEY = {
   GAME: {
     LIST_TRIP_THEMES: 'tripThemesList',
     LIST_DIFFICULTY: 'difficultyList',
+    GET_GAME_TILES: 'getGameTiles',
+    GAME_START: 'gameStart',
+    MY_GAME_LIST: 'myGameList',
   },
 };
 
