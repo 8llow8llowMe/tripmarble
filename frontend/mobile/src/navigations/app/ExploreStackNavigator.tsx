@@ -1,9 +1,10 @@
 import ExploreScreen from '@/screens/Explore/ExploreScreen';
 import SpotDetailScreen from '@/screens/Explore/SpotDetailScreen';
 import SpotListScreen from '@/screens/Explore/SpotListScreen';
+import { ExploreStackParamList } from '@/types/navigation/navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-const ExploreStack = createNativeStackNavigator();
+const ExploreStack = createNativeStackNavigator<ExploreStackParamList>();
 
 export default function ExploreStackNavigator() {
   return (
@@ -23,7 +24,6 @@ export default function ExploreStackNavigator() {
         component={SpotDetailScreen}
         options={{
           headerShown: false,
-          tabBarStyle: { display: 'none' },
         }}
       />
     </ExploreStack.Navigator>
