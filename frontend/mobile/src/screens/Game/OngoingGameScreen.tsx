@@ -31,6 +31,9 @@ export default function OngoingGameScreen({ route }) {
   const [modalTile, setModalTile] = useState<TripGameTileView | null>(null);
   const [currentIndexInParent, setCurrentIndexInParent] = useState<number>(0);
   const boardRef = useRef<GameBoardHandle>(null);
+  const [canMove, setCanMove] = useState<boolean>(true);
+  const currentTileIndex =
+    currentIndexInParent === 0 ? -1 : (currentIndexInParent - 1) % tiles.length;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -55,22 +58,41 @@ export default function OngoingGameScreen({ route }) {
             setModalTile(tile);
           }}
           onIndexChange={(next) => {
-            // 말이 최종적으로 도착한 인덱스
             setCurrentIndexInParent(next);
+            // 새 칸 도착 → 이동 버튼 숨기고 미션하기 버튼 노출
+            setCanMove(false);
           }}
         />
       </View>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          const steps = Math.floor(Math.random() * 6) + 1; // 기본: 랜덤 주사위
-          boardRef.current?.move(steps);
-        }}
-        accessibilityRole="button"
-        accessibilityLabel="이동"
-      >
-        <Text style={styles.buttonText}>이동</Text>
-      </TouchableOpacity>
+      {canMove ? (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            // 이동 시작: 이동 버튼 숨김(중복 클릭 방지)
+            setCanMove(false);
+            const steps = Math.floor(Math.random() * 6) + 1;
+            boardRef.current?.move(steps);
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="이동"
+        >
+          <Text style={styles.buttonText}>이동</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            // 현재 위치 타일 상세 보기 모달
+            if (currentTileIndex >= 0) {
+              setModalTile(tiles[currentTileIndex]);
+            }
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="미션 인증"
+        >
+          <Text style={styles.buttonText}>미션 인증</Text>
+        </TouchableOpacity>
+      )}
 
       <Modal
         visible={!!modalTile}
@@ -89,7 +111,7 @@ export default function OngoingGameScreen({ route }) {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.modalMeta}>단계: step{modalTile?.stepNo} ·</Text>
+            <Text style={styles.modalMeta}>단계: step{modalTile?.stepNo}</Text>
             <Text style={styles.modalId}>tripSpotId: {modalTile?.tripSpotId}</Text>
 
             <View style={styles.modalActions}>
@@ -104,7 +126,9 @@ export default function OngoingGameScreen({ route }) {
               <TouchableOpacity
                 style={styles.actionPrimary}
                 onPress={() => {
-                  /* TODO: open certify flow */
+                  // 미션 완료 → 다시 이동 버튼 보이도록
+                  setCanMove(true);
+                  setModalTile(null);
                 }}
               >
                 <Text style={styles.actionPrimaryText}>미션 인증</Text>
@@ -212,19 +236,15 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   button: {
-    fontFamily: 'Pretendard700',
-    fontSize: 16,
-    width: '100%',
-    borderRadius: 4,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 20,
-    color: palette.white,
     backgroundColor: palette.mainColor,
+    borderRadius: 8,
+    paddingVertical: 12,
+    marginVertical: 20,
+    alignItems: 'center',
   },
   buttonText: {
-    fontFamily: 'Pretendard700',
-    fontSize: 16,
-    color: palette.white,
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
   },
 });
