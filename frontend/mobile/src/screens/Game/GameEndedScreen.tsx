@@ -3,9 +3,9 @@ import { View, Text, StyleSheet } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { GamePlayStackParamList } from '@/types/navigation/navigation';
 
-type Props = NativeStackScreenProps<GamePlayStackParamList, 'GameOverviewScreen'>;
+type Props = NativeStackScreenProps<GamePlayStackParamList, 'GameEndedScreen'>;
 
-export default function GameOverviewScreen({ route }: Props) {
+export default function GameEndedScreen({ route }: Props) {
   const { tripGameId } = route.params;
 
   return (
