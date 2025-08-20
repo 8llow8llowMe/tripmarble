@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import useMyGameListQuery from '@/hooks/game/useMyGameList';
+
 // 종료된 게임 목록 데이터 (추후 API로 대체 가능)
 const finishedGames = [
   { id: 2, title: '부산여행', month: 'May', day: '05' },
@@ -21,10 +22,20 @@ const finishedGames = [
 
 export default function PlayHomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
+
   const { myGameList } = useMyGameListQuery();
-  // 게임 만들기 버튼 클릭 시
-  const handleCreateGamePress = () => {
+
+  // 게임 만들기 스크린으로 이동
+  const goToGameCreateScreen = () => {
     navigation.navigate('CreateGameScreen');
+  };
+
+  // 진행중인 게임 스크린으로 이동
+  const goToGameOngoingScreen = (tripGameId: number) => {
+    navigation.navigate('GamePlayStackNavigator', {
+      screen: 'OngoingGameScreen',
+      params: { tripGameId },
+    });
   };
 
   return (
@@ -39,12 +50,7 @@ export default function PlayHomeScreen() {
           {(myGameList?.data.dataBody.contents ?? []).map((game) => (
             <TouchableOpacity
               key={game.tripGameId}
-              onPress={() =>
-                navigation.navigate('OngoingGameScreen', {
-                  title: game.title || game.representativeRegionName,
-                  id: game.tripGameId,
-                })
-              }
+              onPress={() => goToGameOngoingScreen(game.tripGameId)}
               activeOpacity={0.8}
               style={styles.ongoingCardHorizontal}
             >
@@ -68,7 +74,7 @@ export default function PlayHomeScreen() {
 
         <TouchableOpacity
           style={styles.createGameButton}
-          onPress={handleCreateGamePress}
+          onPress={goToGameCreateScreen}
           activeOpacity={0.8}
         >
           <Text style={styles.createGameButtonText}>게임 만들기</Text>
