@@ -38,6 +38,14 @@ export default function PlayHomeScreen() {
     });
   };
 
+  // 종료된 게임 스크린으로 이동
+  const goToGameEndedScreen = (tripGameId: number) => {
+    navigation.navigate('GamePlayStackNavigator', {
+      screen: 'GameEndedScreen',
+      params: { tripGameId },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -72,6 +80,7 @@ export default function PlayHomeScreen() {
           ))}
         </ScrollView>
 
+        {/* 게임 만들기 */}
         <TouchableOpacity
           style={styles.createGameButton}
           onPress={goToGameCreateScreen}
@@ -83,7 +92,11 @@ export default function PlayHomeScreen() {
         <Text style={styles.title}>종료된 게임</Text>
         {/* 종료된 게임 목록 */}
         {finishedGames.map((game) => (
-          <TouchableOpacity key={game.id} activeOpacity={0.8}>
+          <TouchableOpacity
+            key={game.id}
+            onPress={() => goToGameEndedScreen(game.id)}
+            activeOpacity={0.8}
+          >
             <View style={styles.endedCard}>
               <View style={styles.endedDateBox}>
                 <Text style={styles.endedDateMonth}>{game.month}</Text>
