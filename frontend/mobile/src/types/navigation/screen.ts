@@ -6,6 +6,7 @@ import {
   BottomTabParamList,
   RootStackParamList,
   SettingsParamList,
+  GamePlayStackParamList,
 } from './navigation';
 
 // ── NavigationProps
@@ -14,5 +15,6 @@ export type AuthNavigationProp = NativeStackNavigationProp<AuthtNavigatorParamLi
 export type AppNavigatorNavigationProp = NativeStackNavigationProp<AppNavigatorParamList>;
 export type AppBottomTabNavigationProp = BottomTabNavigationProp<BottomTabParamList>;
 export type SettingStackNavigationProp = NativeStackNavigationProp<SettingsParamList>;
+export type GamePlayStackNavigationProp = NativeStackNavigationProp<GamePlayStackParamList>;
 
 // ── ScreenProps
