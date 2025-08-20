@@ -26,12 +26,14 @@ import {
   ThemeSection,
 } from '@/components/ui/game-create';
 import useTripThemesListQuery from '@/hooks/game/useTripThemesList';
+import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 
 type SectionKey = 'location' | 'theme' | 'date' | 'level' | 'summary';
 const ORDER: SectionKey[] = ['location', 'theme', 'date', 'level', 'summary'];
 
 export default function CreateGameScreen() {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<AppNavigatorNavigationProp>();
+
   const scrollRef = useRef<ScrollView>(null);
 
   const { representativeRegionsList } = useRepresentativeRegionsListQuery();
@@ -170,6 +172,21 @@ export default function CreateGameScreen() {
     [tripThemesList, themeIds],
   );
 
+  // 진행중인 게임 스크린으로 이동
+  const goToGameOngoingScreen = (tripGameId: number) => {
+    navigation.navigate('GamePlayStackNavigator', {
+      screen: 'OngoingGameScreen',
+      params: { tripGameId },
+    });
+  };
+
+  // 게임 탭 메인 홈 스크린으로 이동
+  const goToPlayHomeScreen = () => {
+    navigation.navigate('BottomTabNavigator', {
+      screen: 'PlayTab',
+    });
+  };
+
   const handleCreate = async () => {
     if (!isFormValid || creating) return;
 
@@ -189,15 +206,15 @@ export default function CreateGameScreen() {
 
       console.log('✅ [CreateGame] 성공 응답:', res);
       if (tripGameId) {
-        console.log(`🎉 게임 생성 완료! tripGameId=${tripGameId}`);
-        navigation.replace('OngoingGameScreen', { tripGameId }); // TODO: 어디로 navigate? 예시) tripGameId=611073007951155200
+        console.log(`🎉🎉🎉 게임 생성 완료! tripGameId: ${tripGameId}`);
+        goToGameOngoingScreen(tripGameId); // TODO: tripGameId=611073007951155200 진행중? 시작은 언제해주지?
       } else {
         // 혹시 id가 없으면 Play 메인으로 fallback
-        console.log('⚠️ [CreateGame] 성공이지만 tripGameId 없음. PlayMain으로 이동');
-        navigation.navigate('PlayHomeScreen');
+        console.log('⚠️⚠️⚠️ [CreateGame] 성공이지만 tripGameId 없음. PlayHome으로 이동');
+        goToPlayHomeScreen;
       }
     } catch (e: any) {
-      console.error('💥 [CreateGame] 실패:', e);
+      console.error('💥💥💥 [CreateGame] 실패:', e);
       Alert.alert('게임 생성 실패', e?.message ?? '게임 생성 중 오류가 발생했어요.');
     }
   };
