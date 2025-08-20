@@ -80,7 +80,7 @@ export const gameInfoDummy: GetTileResponse = {
       {
         tripGameTileId: 609394785194741761n,
         tripSpotId: 15813,
-        stepNo: 2,
+        stepNo: 8,
         missionTypeCode: 'REVIEW',
         missionTypeDescription: '기본',
         tripSpotName: '반짝반짝 DDP (Twinkle DDP)',
@@ -96,7 +96,7 @@ export const gameInfoDummy: GetTileResponse = {
       {
         tripGameTileId: 609394785194741764n,
         tripSpotId: 45031,
-        stepNo: 5,
+        stepNo: 10,
         missionTypeCode: 'PHOTO',
         missionTypeDescription: '기본',
         tripSpotName: '2024 청와대 뮤직 페스티벌',
@@ -104,7 +104,7 @@ export const gameInfoDummy: GetTileResponse = {
       {
         tripGameTileId: 609394785194741765n,
         tripSpotId: 2126,
-        stepNo: 6,
+        stepNo: 11,
         missionTypeCode: 'CHECKIN_GPS',
         missionTypeDescription: '미션',
         tripSpotName: '경춘선 공릉숲길 커피축제',
@@ -112,7 +112,7 @@ export const gameInfoDummy: GetTileResponse = {
       {
         tripGameTileId: 609394785194741766n,
         tripSpotId: 45243,
-        stepNo: 7,
+        stepNo: 12,
         missionTypeCode: 'REVIEW',
         missionTypeDescription: '기본',
         tripSpotName: 'DDP 디자인&아트',
@@ -120,7 +120,7 @@ export const gameInfoDummy: GetTileResponse = {
       {
         tripGameTileId: 609394785194741767n,
         tripSpotId: 30864,
-        stepNo: 8,
+        stepNo: 13,
         missionTypeCode: 'CHECKIN_GPS',
         missionTypeDescription: '기본',
         tripSpotName: '외로움이의 집',
@@ -128,7 +128,7 @@ export const gameInfoDummy: GetTileResponse = {
       {
         tripGameTileId: 609394785194741768n,
         tripSpotId: 25075,
-        stepNo: 9,
+        stepNo: 14,
         missionTypeCode: 'PHOTO',
         missionTypeDescription: '기본',
         tripSpotName: '아시테지 국제여름축제',
@@ -136,7 +136,7 @@ export const gameInfoDummy: GetTileResponse = {
       {
         tripGameTileId: 609394785194741769n,
         tripSpotId: 44620,
-        stepNo: 10,
+        stepNo: 15,
         missionTypeCode: 'CHECKIN_GPS',
         missionTypeDescription: '도착점',
         tripSpotName: '2025서울국제불교박람회',
