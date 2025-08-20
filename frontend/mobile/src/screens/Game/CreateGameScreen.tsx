@@ -210,7 +210,7 @@ export default function CreateGameScreen() {
         // TODO: 나의 게임 목록 쿼리 무효화
       } else {
         console.log('⚠️⚠️⚠️ [CreateGame] 성공이지만 tripGameId 없음. PlayHome으로 이동'); // fallback
-        goToPlayHomeScreen;
+        goToPlayHomeScreen();
       }
     } catch (e: any) {
       console.error('💥💥💥 [CreateGame] 실패:', e);
