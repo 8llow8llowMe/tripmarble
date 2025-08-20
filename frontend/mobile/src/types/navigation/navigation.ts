@@ -49,6 +49,8 @@ export type SettingsParamList = {
 };
 
 export type GamePlayStackParamList = {
-  GameOverviewScreen: { tripGameId: number };
+  GameEndedScreen: { tripGameId: number };
   OngoingGameScreen: { tripGameId: number };
+  GameListScreen: { status?: 'WAITING' | 'ONGOING' | 'ENDED' };
+  GameMissionAuthScreen: undefined;
 };
