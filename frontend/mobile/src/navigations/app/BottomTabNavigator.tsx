@@ -7,11 +7,11 @@ import { useEffect } from 'react';
 import { setUser } from '@/store/redux/user/user';
 import ProfileHomeScreen from '@/screens/Profile/ProfileHomeScreen';
 import HomeStackNavigator from '@/navigations/app/HomeStackNavigator';
-import PlayStackNavigator from '@/navigations/app/PlayStackNavigator';
 import ExploreStackNavigator from '@/navigations/app/ExploreStackNavigator';
 import TabHeader from '@/components/layout/header/TabHeader';
 import { palette } from '@/constants/colors';
 import { BottomTabParamList } from '@/types/navigation/navigation';
+import PlayHomeScreen from '@/screens/Play/PlayHomeScreen';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -79,10 +79,10 @@ export default function BottomTabNavigator() {
       />
       <Tab.Screen
         name="PlayTab"
-        component={PlayStackNavigator}
+        component={PlayHomeScreen}
         options={{
           tabBarLabel: '게임',
-          headerShown: false,
+          header: () => <TabHeader type="PlayTab" />,
         }}
       />
       <Tab.Screen
