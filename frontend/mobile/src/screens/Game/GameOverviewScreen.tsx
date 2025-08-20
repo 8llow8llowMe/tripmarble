@@ -1,25 +1,17 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { GamePlayStackParamList } from '@/types/navigation/navigation';
 
 type Props = NativeStackScreenProps<GamePlayStackParamList, 'GameOverviewScreen'>;
 
-export default function GameOverviewScreen({ route, navigation }: Props) {
+export default function GameOverviewScreen({ route }: Props) {
   const { tripGameId } = route.params;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Board (Stub)</Text>
+      <Text style={styles.title}>게임 개요 스크린 (종료된 게임 스크린으로 씁니다.)</Text>
       <Text>gameId: {tripGameId}</Text>
-
-      <View style={styles.gap} />
-      <Button title="📍 위치로 인증 (modal)" />
-      <View style={styles.space} />
-      <Button title="📷 사진으로 인증 (modal)" />
-
-      <View style={styles.gap} />
-      <Button title="⬅︎ 뒤로가기" onPress={() => navigation.goBack()} />
     </View>
   );
 }
