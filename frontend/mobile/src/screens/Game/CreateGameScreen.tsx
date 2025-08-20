@@ -174,7 +174,7 @@ export default function CreateGameScreen() {
 
   // 진행중인 게임 스크린으로 이동
   const goToGameOngoingScreen = (tripGameId: number) => {
-    navigation.navigate('GamePlayStackNavigator', {
+    navigation.replace('GamePlayStackNavigator', {
       screen: 'OngoingGameScreen',
       params: { tripGameId },
     });
@@ -187,6 +187,7 @@ export default function CreateGameScreen() {
     });
   };
 
+  // 게임 생성 submit 함수
   const handleCreate = async () => {
     if (!isFormValid || creating) return;
 
@@ -196,21 +197,19 @@ export default function CreateGameScreen() {
       startedAt,
       endedAt,
       difficulty: level,
-      title: `${selectedRegionName} 여행`, // title은 임시로 넣고, 나중에 사용자가 수정하게 끔
+      title: `${selectedRegionName} 여행`, // TODO: title은 임시로 넣고, 나중에 사용자가 수정하게 끔
     };
 
     try {
-      console.log('🛠️ [CreateGame] 요청 바디:', body);
       const res = await createGame(body);
       const tripGameId = res.dataBody.tripGameId;
 
-      console.log('✅ [CreateGame] 성공 응답:', res);
       if (tripGameId) {
         console.log(`🎉🎉🎉 게임 생성 완료! tripGameId: ${tripGameId}`);
         goToGameOngoingScreen(tripGameId); // TODO: tripGameId=611073007951155200 진행중? 시작은 언제해주지?
+        // TODO: 나의 게임 목록 쿼리 무효화
       } else {
-        // 혹시 id가 없으면 Play 메인으로 fallback
-        console.log('⚠️⚠️⚠️ [CreateGame] 성공이지만 tripGameId 없음. PlayHome으로 이동');
+        console.log('⚠️⚠️⚠️ [CreateGame] 성공이지만 tripGameId 없음. PlayHome으로 이동'); // fallback
         goToPlayHomeScreen;
       }
     } catch (e: any) {
