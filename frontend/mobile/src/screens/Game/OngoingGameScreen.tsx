@@ -11,7 +11,7 @@ import Logo from 'assets/images/Logo.png';
 // import useGameStartQuery from '@/hooks/game/useGameStart';
 
 export default function OngoingGameScreen({ route }) {
-  const { id } = route.params || {};
+  const { tripGameId } = route.params || {};
   const navigation = useNavigation<any>();
 
   // 1) 먼저 시작 API 호출 (idempotent 가정)
@@ -20,7 +20,7 @@ export default function OngoingGameScreen({ route }) {
 
   // 2) 시작 완료 후에만 타일 조회 enabled
   // const { gameInfo } = useGetGameTilesQuery(id, gameStarted);
-  const { gameInfo } = useGetGameTilesQuery(id);
+  const { gameInfo } = useGetGameTilesQuery(tripGameId);
 
   // 배열만 안전하게 추출 (hook 반환이 배열인지/객체인지 둘 다 대응)
   const tiles: TripGameTileView[] =
@@ -43,7 +43,7 @@ export default function OngoingGameScreen({ route }) {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>진행중인</Text>
       </View>
-      <Text>ID: {id}</Text>
+      <Text>ID: {tripGameId}</Text>
       <Text style={{ textAlign: 'center', marginTop: 8 }}>
         현재 말 위치 인덱스: {currentIndexInParent}
       </Text>
