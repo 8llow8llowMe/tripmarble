@@ -1,6 +1,7 @@
+import { palette } from '@/constants/colors';
 import { TripGameTileView } from '@/hooks/game/useGetGameTiles';
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Image, StyleSheet, Pressable, Button } from 'react-native';
+import { View, Image, StyleSheet, Pressable, Button, TouchableOpacity, Text } from 'react-native';
 import Svg, { Rect, Text as SvgText, TSpan } from 'react-native-svg';
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
   onCellPress?: (tile: TripGameTileView, index: number) => void;
   pieceSource?: any; // require('.../Logo.png') 또는 { uri: ... }
   size?: number; // 한 칸 크기 (기본 80)
+  onIndexChange?: (index: number) => void;
 };
 
 // === 좌표 매핑(오른쪽 아래 시작, 시계방향) ===
@@ -43,7 +45,7 @@ function buildRenderPositions(count: number) {
 function getCellColors(type: string): [string, string] {
   switch (type) {
     case 'start-go':
-      return ['#d4f6da', '#0a8453'];
+      return ['#d4f6da', '#40C896'];
     case 'PHOTO':
       return ['#FCB6CB', '#C790A5'];
     case 'REVIEW':
@@ -60,7 +62,8 @@ export default function GameBoardNative({
   tiles,
   onCellPress,
   pieceSource,
-  size = 80, // kept for fallback, but parent size will be used when measured
+  size = 80,
+  onIndexChange,
 }: Props) {
   const PADDING_LEFT = 0;
   const [container, setContainer] = useState({ width: 0, height: 0 });
@@ -165,7 +168,9 @@ export default function GameBoardNative({
             );
           } else {
             setIsMoving(false);
-            setCurrentIndex(toIdx % logicalPositions.length);
+            const next = toIdx % logicalPositions.length;
+            setCurrentIndex(next);
+            if (typeof onIndexChange === 'function') onIndexChange(next); // 부모에 알림
           }
         }
       };
@@ -281,7 +286,7 @@ export default function GameBoardNative({
           return (
             <React.Fragment key={`${cell.row}-${cell.col}`}>
               {/* 메인 면 */}
-              <Rect x={x} y={y} width={CELL} height={CELL} rx={12} fill={main} />
+              <Rect x={x} y={y} width={CELL} height={CELL} rx={12} ry={12} fill={main} />
               {/* 아래 그림자 느낌 */}
               <Rect x={x} y={y + CELL - 8} width={CELL} height={8} fill={bottom} />
               {/* 텍스트 (GO 전용) */}
@@ -357,7 +362,17 @@ export default function GameBoardNative({
         />
       )}
 
-      <Button title="이동" onPress={() => animateMove(Math.floor(Math.random() * 6) + 1)} />
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          const steps = Math.floor(Math.random() * 6) + 1; // 기본: 랜덤 주사위
+          animateMove(steps);
+        }}
+        accessibilityRole="button"
+        accessibilityLabel="이동"
+      >
+        <Text style={styles.buttonText}>이동</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -367,5 +382,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     // debug:
     // backgroundColor: 'rgba(255,0,0,0.05)'
+  },
+  button: {
+    fontFamily: 'Pretendard700',
+    fontSize: 16,
+    width: '100%',
+    borderRadius: 4,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 20,
+    color: palette.white,
+    backgroundColor: palette.mainColor,
+  },
+  buttonText: {
+    fontFamily: 'Pretendard700',
+    fontSize: 16,
+    color: palette.white,
   },
 });
