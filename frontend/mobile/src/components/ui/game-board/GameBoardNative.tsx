@@ -1,7 +1,14 @@
 import { palette } from '@/constants/colors';
 import { TripGameTileView } from '@/hooks/game/useGetGameTiles';
-import React, { useEffect, useMemo, useState } from 'react';
-import { View, Image, StyleSheet, Pressable, Button, TouchableOpacity, Text } from 'react-native';
+import React, {
+  forwardRef,
+  Fragment,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from 'react';
+import { View, Image, StyleSheet, Pressable, TouchableOpacity, Text } from 'react-native';
 import Svg, { Rect, Text as SvgText, TSpan } from 'react-native-svg';
 
 type Props = {
@@ -56,15 +63,14 @@ function getCellColors(type: string): [string, string] {
       return ['#F7F7F8', '#BBBBBB'];
   }
 }
-
-export default function GameBoardNative({
-  count = 5,
-  tiles,
-  onCellPress,
-  pieceSource,
-  size = 80,
-  onIndexChange,
-}: Props) {
+export type GameBoardHandle = {
+  move: (steps: number) => void;
+  getIndex: () => number;
+};
+const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNative(
+  { count = 5, tiles, onCellPress, pieceSource, size = 80, onIndexChange }: Props,
+  ref,
+) {
   const PADDING_LEFT = 0;
   const [container, setContainer] = useState({ width: 0, height: 0 });
   const width = container.width || size * count + PADDING_LEFT;
@@ -255,6 +261,15 @@ export default function GameBoardNative({
     return lines;
   };
 
+  useImperativeHandle(
+    ref,
+    () => ({
+      move: (steps: number) => animateMove(steps),
+      getIndex: () => currentIndex,
+    }),
+    [currentIndex], // animateMove가 클로저면 포함
+  );
+
   return (
     <View
       style={{ width: '100%', height: '100%' }}
@@ -284,7 +299,7 @@ export default function GameBoardNative({
           const baseY = y + CELL / 2 + 4 - ((lines.length - 1) * lineHeight) / 2;
 
           return (
-            <React.Fragment key={`${cell.row}-${cell.col}`}>
+            <Fragment key={`${cell.row}-${cell.col}`}>
               {/* 메인 면 */}
               <Rect x={x} y={y} width={CELL} height={CELL} rx={12} ry={12} fill={main} />
               {/* 아래 그림자 느낌 */}
@@ -329,7 +344,7 @@ export default function GameBoardNative({
                   ))}
                 </SvgText>
               )}
-            </React.Fragment>
+            </Fragment>
           );
         })}
       </Svg>
@@ -361,21 +376,9 @@ export default function GameBoardNative({
           }}
         />
       )}
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          const steps = Math.floor(Math.random() * 6) + 1; // 기본: 랜덤 주사위
-          animateMove(steps);
-        }}
-        accessibilityRole="button"
-        accessibilityLabel="이동"
-      >
-        <Text style={styles.buttonText}>이동</Text>
-      </TouchableOpacity>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   hit: {
@@ -383,20 +386,6 @@ const styles = StyleSheet.create({
     // debug:
     // backgroundColor: 'rgba(255,0,0,0.05)'
   },
-  button: {
-    fontFamily: 'Pretendard700',
-    fontSize: 16,
-    width: '100%',
-    borderRadius: 4,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 20,
-    color: palette.white,
-    backgroundColor: palette.mainColor,
-  },
-  buttonText: {
-    fontFamily: 'Pretendard700',
-    fontSize: 16,
-    color: palette.white,
-  },
 });
+
+export default GameBoardNative;

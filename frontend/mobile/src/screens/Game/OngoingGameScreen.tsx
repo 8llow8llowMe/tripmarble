@@ -1,10 +1,10 @@
 import { palette } from '@/constants/colors';
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import GameBoardNative from '@/components/ui/game-board/GameBoardNative';
+import GameBoardNative, { GameBoardHandle } from '@/components/ui/game-board/GameBoardNative';
 import { gameInfoDummy } from '@/utils/gameInfoDummy';
 import useGetGameTilesQuery, { TripGameTileView } from '@/hooks/game/useGetGameTiles';
 import Logo from 'assets/images/Logo.png';
@@ -28,8 +28,9 @@ export default function OngoingGameScreen({ route }) {
     gameInfoDummy.dataBody.tripGameTileViews;
   // console.log(tiles);
   // 모달 상태 (setModalTile 사용하려면 필요)
-  const [modalTile, setModalTile] = React.useState<TripGameTileView | null>(null);
-  const [currentIndexInParent, setCurrentIndexInParent] = React.useState<number>(0);
+  const [modalTile, setModalTile] = useState<TripGameTileView | null>(null);
+  const [currentIndexInParent, setCurrentIndexInParent] = useState<number>(0);
+  const boardRef = useRef<GameBoardHandle>(null);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -45,6 +46,7 @@ export default function OngoingGameScreen({ route }) {
       </Text>
       <View style={styles.gameBoard}>
         <GameBoardNative
+          ref={boardRef}
           count={5}
           tiles={tiles}
           pieceSource={Logo} // 말 이미지
@@ -58,6 +60,18 @@ export default function OngoingGameScreen({ route }) {
           }}
         />
       </View>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          const steps = Math.floor(Math.random() * 6) + 1; // 기본: 랜덤 주사위
+          boardRef.current?.move(steps);
+        }}
+        accessibilityRole="button"
+        accessibilityLabel="이동"
+      >
+        <Text style={styles.buttonText}>이동</Text>
+      </TouchableOpacity>
+
       <Modal
         visible={!!modalTile}
         transparent
@@ -196,5 +210,21 @@ const styles = StyleSheet.create({
   actionSecondaryText: {
     color: '#334155',
     fontWeight: '700',
+  },
+  button: {
+    fontFamily: 'Pretendard700',
+    fontSize: 16,
+    width: '100%',
+    borderRadius: 4,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginTop: 20,
+    color: palette.white,
+    backgroundColor: palette.mainColor,
+  },
+  buttonText: {
+    fontFamily: 'Pretendard700',
+    fontSize: 16,
+    color: palette.white,
   },
 });
