@@ -1,4 +1,3 @@
-import { palette } from '@/constants/colors';
 import { TripGameTileView } from '@/hooks/game/useGetGameTiles';
 import React, {
   forwardRef,
@@ -8,8 +7,8 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { View, Image, StyleSheet, Pressable, TouchableOpacity, Text } from 'react-native';
-import Svg, { Rect, Text as SvgText, TSpan } from 'react-native-svg';
+import { View, Image, StyleSheet, Pressable } from 'react-native';
+import Svg, { Rect, Text as SvgText, TSpan, Defs, ClipPath } from 'react-native-svg';
 
 type Props = {
   count?: number; // 한 변 칸 수 (기본 5)
@@ -52,7 +51,7 @@ function buildRenderPositions(count: number) {
 function getCellColors(type: string): [string, string] {
   switch (type) {
     case 'start-go':
-      return ['#d4f6da', '#40C896'];
+      return ['#d4f6da', '#7edb8a'];
     case 'PHOTO':
       return ['#FCB6CB', '#C790A5'];
     case 'REVIEW':
@@ -272,7 +271,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
 
   return (
     <View
-      style={{ width: '100%', height: '100%' }}
+      style={{ width: '100%', height: '105%' }}
       onLayout={(e) => {
         const { width, height } = e.nativeEvent.layout;
         if (width !== container.width || height !== container.height) {
@@ -298,12 +297,44 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
           const baseX = x + CELL / 2;
           const baseY = y + CELL / 2 + 4 - ((lines.length - 1) * lineHeight) / 2;
 
+          const clipId = `clip-${cell.row}-${cell.col}`;
+          const bandH = 14;
+
           return (
             <Fragment key={`${cell.row}-${cell.col}`}>
-              {/* 메인 면 */}
-              <Rect x={x} y={y} width={CELL} height={CELL} rx={12} ry={12} fill={main} />
-              {/* 아래 그림자 느낌 */}
-              <Rect x={x} y={y + CELL - 8} width={CELL} height={8} fill={bottom} />
+              {/* 공통 클립패스: 동일한 라운드 코너 유지 */}
+              <Defs>
+                <ClipPath id={`main-${clipId}`}>
+                  <Rect x={x} y={y} width={CELL} height={CELL} rx={12} ry={12} />
+                </ClipPath>
+                <ClipPath id={`bottom-${clipId}`}>
+                  <Rect x={x} y={y} width={CELL} height={CELL + bandH} rx={12} ry={12} />
+                </ClipPath>
+              </Defs>
+
+              {/* 아래쪽 그림자 밴드 — 두껍게, 모서리 따라가게 */}
+              <Rect
+                x={x}
+                y={y}
+                width={CELL}
+                height={CELL + bandH}
+                fill={bottom}
+                opacity={0.53}
+                clipPath={`url(#bottom-${clipId})`}
+              />
+              {/* 메인 면 — 단색, 더 두드러진 라운드 */}
+              <Rect
+                x={x}
+                y={y}
+                width={CELL}
+                height={CELL}
+                rx={16}
+                ry={16}
+                fill={main}
+                opacity={0.8}
+                clipPath={`url(#main-${clipId})`}
+              />
+
               {/* 텍스트 (GO 전용) */}
               {cell.type === 'start-go' ? (
                 <>
