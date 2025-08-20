@@ -29,6 +29,7 @@ export default function OngoingGameScreen({ route }) {
   // console.log(tiles);
   // 모달 상태 (setModalTile 사용하려면 필요)
   const [modalTile, setModalTile] = React.useState<TripGameTileView | null>(null);
+  const [currentIndexInParent, setCurrentIndexInParent] = React.useState<number>(0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -39,6 +40,9 @@ export default function OngoingGameScreen({ route }) {
         <Text style={styles.headerTitle}>진행중인</Text>
       </View>
       <Text>ID: {id}</Text>
+      <Text style={{ textAlign: 'center', marginTop: 8 }}>
+        현재 말 위치 인덱스: {currentIndexInParent}
+      </Text>
       <View style={styles.gameBoard}>
         <GameBoardNative
           count={5}
@@ -47,6 +51,10 @@ export default function OngoingGameScreen({ route }) {
           onCellPress={(tile) => {
             // 모달 or 상세 표시
             setModalTile(tile);
+          }}
+          onIndexChange={(next) => {
+            // 말이 최종적으로 도착한 인덱스
+            setCurrentIndexInParent(next);
           }}
         />
       </View>
