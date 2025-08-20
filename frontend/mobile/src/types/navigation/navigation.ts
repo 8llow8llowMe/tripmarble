@@ -20,14 +20,14 @@ export type AppNavigatorParamList = {
   SearchScreen: undefined;
   CreateGameScreen: undefined;
   OngoingGameScreen: { id: number; title: string };
+  GamePlayStackNavigator: NavigatorScreenParams<GamePlayStackParamList>;
 };
 
 // === Bottom Tabs ===
 export type BottomTabParamList = {
   HomeTab: NavigatorScreenParams<HomeStackParamList>;
   ExploreTab: NavigatorScreenParams<ExploreStackParamList>;
-  PlayTab: NavigatorScreenParams<PlayStackParamList>;
-  HistoryTab: undefined;
+  PlayTab: undefined;
   ProfileTab: undefined;
 };
 
@@ -43,13 +43,12 @@ export type ExploreStackParamList = {
   SpotDetailScreen: undefined;
 };
 
-export type PlayStackParamList = {
-  PlayHomeScreen: undefined;
-  FinishedGameScreen: { id: number; title: string };
-};
-
 // === 각 스택 ===
-// SettingStackNavigator
 export type SettingsParamList = {
   SettingsHomeScreen: undefined;
+};
+
+export type GamePlayStackParamList = {
+  GameOverviewScreen: { tripGameId: number };
+  OngoingGameScreen: { tripGameId: number };
 };
