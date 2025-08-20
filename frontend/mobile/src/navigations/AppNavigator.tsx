@@ -5,7 +5,6 @@ import React from 'react';
 import BottomTabNavigator from '@/navigations/app/BottomTabNavigator';
 import SearchScreen from '@/screens/Explore/SearchScreen';
 import CreateGameScreen from '@/screens/Game/CreateGameScreen';
-import OngoingGameScreen from '@/screens/Game/OngoingGameScreen';
 import SettingStackNavigator from '@/navigations/app/SettingStackNavigator';
 import { AppNavigatorParamList } from '@/types/navigation/navigation';
 import GamePlayStackNavigator from '@/navigations/app/GamePlayStackNavigator';
