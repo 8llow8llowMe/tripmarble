@@ -113,6 +113,22 @@ export default function HomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
   const { nickname } = useAppSelector((state) => state.userReducer);
 
+  // 진행중인 게임 스크린으로 이동
+  const goToGameOngoingScreen = (tripGameId: number) => {
+    navigation.navigate('GamePlayStackNavigator', {
+      screen: 'OngoingGameScreen',
+      params: { tripGameId },
+    });
+  };
+
+  // 게임 목록 스크린으로 이동
+  const goToGameListScreen = (status?: 'WAITING' | 'ONGOING' | 'ENDED') => {
+    navigation.navigate('GamePlayStackNavigator', {
+      screen: 'GameListScreen',
+      params: status ? { status } : {},
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scroll}>
@@ -125,9 +141,7 @@ export default function HomeScreen() {
         {/* 여행 계속하기 */}
         <ContinueTripSection
           data={DUMMY_CONTINUE_TRIP}
-          // onContinue={() =>
-          // navigation.navigate('TripDetail' as never, { id: DUMMY_CONTINUE_TRIP.id } as never)
-          // }
+          onContinue={() => goToGameOngoingScreen(DUMMY_CONTINUE_TRIP.id)}
         />
 
         {/* 추천 여행지 */}
@@ -142,8 +156,8 @@ export default function HomeScreen() {
         <HistorySection
           title="내 기록"
           data={DUMMY_JOURNALS}
-          // onPressItem={(id) => navigation.nasvigate('JournalDetail' as never, { id } as never)}
-          onPressMore={() => navigation.navigate('JournalList' as never)}
+          // onPressItem={(id) => navigation.navigate('JournalDetail' as never, { id } as never)}
+          onPressMore={() => goToGameListScreen()}
         />
 
         {/* 랜덤 여행지 추천 */}
