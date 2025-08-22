@@ -6,10 +6,12 @@ import { palette } from '@/constants/colors';
 
 export function SectionHeader({
   title,
+  moreTitle,
   onPressMore,
   rightNode,
 }: {
   title: string;
+  moreTitle?: string;
   onPressMore?: () => void;
   rightNode?: React.ReactNode;
 }) {
@@ -23,7 +25,7 @@ export function SectionHeader({
       ) : onPressMore ? (
         <TouchableOpacity onPress={onPressMore} activeOpacity={0.85} style={styles.iconBtn}>
           <TextBox size={13} color={palette.gray600}>
-            더보기
+            {moreTitle ?? '더보기'}
           </TextBox>
           <Ionicons name="chevron-forward" size={14} color={palette.gray600} />
         </TouchableOpacity>
@@ -35,7 +37,6 @@ export function SectionHeader({
 }
 
 const styles = StyleSheet.create({
-  // Sections
   sectionHeader: {
     paddingHorizontal: 16,
     marginBottom: 10,
