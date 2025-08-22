@@ -2,7 +2,7 @@ import TextBox from '@/components/atom/TextBox';
 import React from 'react';
 import { FlatList, Image, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { palette } from '@/constants/colors';
-import { SectionHeader } from './SectionHeader';
+import { SectionHeader } from '@/components/layout/header/SectionHeader';
 
 const DUMMY_JOURNALS = [
   {

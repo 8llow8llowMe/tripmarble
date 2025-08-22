@@ -4,7 +4,7 @@ import React from 'react';
 import { ImageBackground, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
-import { SectionHeader } from './SectionHeader';
+import { SectionHeader } from '@/components/layout/header/SectionHeader';
 
 const DUMMY_RANDOM_PICK = {
   id: 777,

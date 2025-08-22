@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
-import { SectionHeader } from './SectionHeader';
+import { SectionHeader } from '@/components/layout/header/SectionHeader';
 
 const DUMMY_PLACES = [
   {
