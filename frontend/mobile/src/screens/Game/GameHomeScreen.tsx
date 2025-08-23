@@ -14,17 +14,16 @@ import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import { useMyGameLists } from '@/hooks/game/useMyGameList';
 import { LinearGradient } from 'expo-linear-gradient';
-// 종료된 게임 목록 데이터 (추후 API로 대체 가능)
-// const finishedGames = [
-//   { id: 2, title: '부산여행', month: 'May', day: '05' },
-//   { id: 3, title: '경주여행', month: 'Apr', day: '12' },
-// ];
+import CreateGameBanner from '@/components/common/banner/CreateGameBanner';
+import { SectionHeader } from '@/components/layout/header/SectionHeader';
+import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
 
 export default function GameHomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
   // const { myGameList } = useMyGameListQuery();
   const { waiting, ongoing, ended } = useMyGameLists();
-  // 게임 만들기 버튼 클릭 시
+
+  // 게임 생성 스크린으로 이동
   const goToGameCreateScreen = () => {
     navigation.navigate('CreateGameScreen');
   };
@@ -45,143 +44,170 @@ export default function GameHomeScreen() {
     });
   };
 
+  // 게임 목록 스크린으로 이동
+  const goToGameListScreen = (status?: 'WAITING' | 'ONGOING' | 'ENDED') => {
+    navigation.navigate('GamePlayStackNavigator', {
+      screen: 'GameListScreen',
+      params: status ? { status } : {},
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        <Text style={styles.title}>진행중인 게임</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.ongoingRow}
-        >
-          {(waiting.data?.data.dataBody.contents ?? []).map((game) => (
-            <TouchableOpacity
-              key={game.tripGameId}
-              onPress={() => goToGameOngoingScreen(game.tripGameId)}
-              activeOpacity={0.8}
-              style={styles.ongoingCardHorizontal}
-            >
-              <ImageBackground
-                source={
-                  game.representativeRegionImageUrl
-                    ? { uri: game.representativeRegionImageUrl }
-                    : ongoingImage
-                }
-                style={styles.ongoingImage}
-                resizeMode="cover"
-                imageStyle={{ borderRadius: 16 }}
-              >
-                <LinearGradient
-                  colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
-                  style={StyleSheet.absoluteFill}
-                />
-                <View style={styles.ongoingFooter}>
-                  <Text style={styles.ongoingText} numberOfLines={1}>
-                    {game.title || game.representativeRegionName}
-                  </Text>
-                </View>
-              </ImageBackground>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+      <ScrollView style={styles.scroll}>
+        <GameSummaryBanner counts={{ ongoing: 1, waiting: 0, ended: 2 }} />
 
-        <TouchableOpacity
-          style={styles.createGameButton}
-          onPress={goToGameCreateScreen}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.createGameButtonText}>게임 만들기</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.title}>시작전 게임</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.ongoingRow}
-        >
-          {(waiting.data?.data.dataBody.contents ?? []).map((game) => (
-            <TouchableOpacity
-              key={game.tripGameId}
-              onPress={() => goToGameOngoingScreen(game.tripGameId)}
-              activeOpacity={0.8}
-              style={styles.waitingCardHorizontal}
-            >
-              <ImageBackground
-                source={
-                  game.representativeRegionImageUrl
-                    ? { uri: game.representativeRegionImageUrl }
-                    : ongoingImage
-                }
-                style={styles.waitingImage}
-                resizeMode="cover"
-                imageStyle={{ borderRadius: 16 }}
-              >
-                <LinearGradient
-                  colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
-                  style={StyleSheet.absoluteFill}
-                />
-                <View style={styles.ongoingFooter}>
-                  <Text style={styles.ongoingText} numberOfLines={1}>
-                    {game.title || game.representativeRegionName}
-                  </Text>
-                </View>
-              </ImageBackground>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        <Text style={styles.title}>종료된 게임</Text>
-        {/* 종료된 게임 목록 */}
-        {(() => {
-          if (waiting.data?.data.dataBody === undefined) {
-            return (
-              <View style={[styles.endedCard, { justifyContent: 'center' }]}>
-                <View style={[styles.endedInfo, { alignItems: 'center' }]}>
-                  <Text style={styles.endedTitle}>종료된 게임이 없습니다</Text>
-                  <Text style={styles.endedDesc}>완료된 게임이 나타나면 이곳에 표시돼요</Text>
-                </View>
-              </View>
-            );
-          }
-          const list = waiting.data?.data.dataBody.contents ?? [];
-          return list.map((game) => {
-            const date = new Date(game.endedAt || game.startedAt);
-            const month = date.toLocaleString('en-US', { month: 'short' });
-            const day = String(date.getDate()).padStart(2, '0');
-            return (
+        {/* 진행중인 게임 목록 */}
+        <View style={{ marginVertical: 22 }}>
+          <SectionHeader title="진행중인 게임" />
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.ongoingRow}
+            style={{ marginLeft: 16 }}
+          >
+            {(waiting.data?.data.dataBody.contents ?? []).map((game) => (
               <TouchableOpacity
                 key={game.tripGameId}
+                onPress={() => goToGameOngoingScreen(game.tripGameId)}
                 activeOpacity={0.8}
-                onPress={() => goToGameEndedScreen(game.tripGameId)}
+                style={styles.ongoingCardHorizontal}
               >
-                <View style={styles.endedCard}>
-                  <View style={styles.endedDateBox}>
-                    <Text style={styles.endedDateMonth}>{month}</Text>
-                    <Text style={styles.endedDateDay}>{day}</Text>
-                  </View>
-                  <View style={styles.endedInfo}>
-                    <Text style={styles.endedTitle} numberOfLines={1}>
+                <ImageBackground
+                  source={
+                    game.representativeRegionImageUrl
+                      ? { uri: game.representativeRegionImageUrl }
+                      : ongoingImage
+                  }
+                  style={styles.ongoingImage}
+                  resizeMode="cover"
+                  imageStyle={{ borderRadius: 16 }}
+                >
+                  <LinearGradient
+                    colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <View style={styles.ongoingFooter}>
+                    <Text style={styles.ongoingText} numberOfLines={1}>
                       {game.title || game.representativeRegionName}
                     </Text>
-                    <Text style={styles.endedDesc}>종료된 게임</Text>
+                  </View>
+                </ImageBackground>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* 게임 생성 배너 */}
+        <CreateGameBanner onPress={goToGameCreateScreen} />
+
+        {/* 시작전 게임 목록 */}
+        <View style={{ marginTop: 22 }}>
+          <SectionHeader
+            title="시작전 게임"
+            moreTitle="전체보기"
+            onPressMore={() => goToGameListScreen('WAITING')}
+          />
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.ongoingRow}
+            style={{ marginLeft: 16 }}
+          >
+            {(waiting.data?.data.dataBody.contents ?? []).map((game) => (
+              <TouchableOpacity
+                key={game.tripGameId}
+                onPress={() => goToGameOngoingScreen(game.tripGameId)}
+                activeOpacity={0.8}
+                style={styles.waitingCardHorizontal}
+              >
+                <ImageBackground
+                  source={
+                    game.representativeRegionImageUrl
+                      ? { uri: game.representativeRegionImageUrl }
+                      : ongoingImage
+                  }
+                  style={styles.waitingImage}
+                  resizeMode="cover"
+                  imageStyle={{ borderRadius: 16 }}
+                >
+                  <LinearGradient
+                    colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
+                    style={StyleSheet.absoluteFill}
+                  />
+                  <View style={styles.ongoingFooter}>
+                    <Text style={styles.ongoingText} numberOfLines={1}>
+                      {game.title || game.representativeRegionName}
+                    </Text>
+                  </View>
+                </ImageBackground>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* 종료된 게임 목록 */}
+        <View style={{ marginTop: 22 }}>
+          <SectionHeader
+            title="종료된 게임"
+            moreTitle="전체보기"
+            onPressMore={() => goToGameListScreen('ENDED')}
+          />
+
+          {(() => {
+            if (waiting.data?.data.dataBody === undefined) {
+              return (
+                <View style={[styles.endedCard, { justifyContent: 'center' }]}>
+                  <View style={[styles.endedInfo, { alignItems: 'center' }]}>
+                    <Text style={styles.endedTitle}>종료된 게임이 없습니다</Text>
+                    <Text style={styles.endedDesc}>완료된 게임이 나타나면 이곳에 표시돼요</Text>
                   </View>
                 </View>
-              </TouchableOpacity>
-            );
-          });
-        })()}
+              );
+            }
+            const list = waiting.data?.data.dataBody.contents ?? [];
+            return list.map((game) => {
+              const date = new Date(game.endedAt || game.startedAt);
+              const month = date.toLocaleString('en-US', { month: 'short' });
+              const day = String(date.getDate()).padStart(2, '0');
+              return (
+                <TouchableOpacity
+                  key={game.tripGameId}
+                  activeOpacity={0.8}
+                  onPress={() => goToGameEndedScreen(game.tripGameId)}
+                  style={{ marginHorizontal: 16 }}
+                >
+                  <View style={styles.endedCard}>
+                    <View style={styles.endedDateBox}>
+                      <Text style={styles.endedDateMonth}>{month}</Text>
+                      <Text style={styles.endedDateDay}>{day}</Text>
+                    </View>
+                    <View style={styles.endedInfo}>
+                      <Text style={styles.endedTitle} numberOfLines={1}>
+                        {game.title || game.representativeRegionName}
+                      </Text>
+                      <Text style={styles.endedDesc}>종료된 게임</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            });
+          })()}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: { padding: 16 },
+  safeArea: { flex: 1, backgroundColor: palette.white },
+  scroll: { paddingBottom: 32 },
+
   title: {
     fontSize: 24,
     fontWeight: '600',
     marginVertical: 12,
   },
+
   ongoingCard: {
     backgroundColor: '#F5F6F8',
     borderRadius: 12,
@@ -190,6 +216,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#BCC2C8',
   },
+
   waitingImage: {
     width: 120,
     height: 120,
@@ -208,18 +235,7 @@ const styles = StyleSheet.create({
     color: palette.white,
     fontWeight: '700',
   },
-  createGameButton: {
-    backgroundColor: palette.mainColor,
-    borderRadius: 8,
-    paddingVertical: 12,
-    marginVertical: 20,
-    alignItems: 'center',
-  },
-  createGameButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-  },
+
   endedCard: {
     flexDirection: 'row',
     alignItems: 'center',
