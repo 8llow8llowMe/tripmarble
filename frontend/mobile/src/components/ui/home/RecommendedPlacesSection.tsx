@@ -127,20 +127,8 @@ function MiniTag({ text }: { text: string }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// 스타일
-// ─────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  // Sections
   section: { marginTop: 22 },
-  sectionHeader: {
-    paddingHorizontal: 16,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  iconBtn: { flexDirection: 'row', alignItems: 'center' },
 
   // Places
   placeCard: { borderRadius: 14, overflow: 'hidden' },
@@ -153,46 +141,5 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     backgroundColor: 'rgba(255,255,255,0.25)',
     borderRadius: 999,
-  },
-
-  // Journal
-  journalCard: {
-    backgroundColor: palette.white,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  journalPhoto: { width: '100%', height: 90 },
-
-  // Random
-  randomCard: { marginHorizontal: 16, borderRadius: 16, overflow: 'hidden' },
-  randomBG: { height: 150 },
-  randomInner: {
-    position: 'absolute',
-    bottom: 12,
-    left: 12,
-    right: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-
-  // Friends
-  friendsBanner: {
-    marginTop: 24,
-    marginHorizontal: 16,
-    padding: 14,
-    borderRadius: 16,
-    backgroundColor: '#2F80ED',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  avatar: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: '#fff' },
-  inviteBtn: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(255,255,255,0.22)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    alignItems: 'center',
   },
 });
