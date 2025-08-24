@@ -51,13 +51,13 @@ function buildRenderPositions(count: number) {
 function getCellColors(type: string): [string, string] {
   switch (type) {
     case 'start-go':
-      return ['#d4f6da', '#7edb8a'];
+      return ['#A6E9D7', '#D5F6ED'];
     case 'PHOTO':
-      return ['#FCB6CB', '#C790A5'];
+      return ['#D5C7FF', '#E2DBFA'];
     case 'REVIEW':
-      return ['#01C5D9', '#0296A4'];
+      return ['#C3E9FF', '#E0F3FE'];
     case 'CHECKIN_GPS':
-      return ['#40C896', '#2E936F'];
+      return ['#FFD2B3', '#FFE1CC'];
     default:
       return ['#F7F7F8', '#BBBBBB'];
   }
@@ -75,6 +75,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
   const width = container.width || size * count + PADDING_LEFT;
   const height = container.height || size * count + 15;
   const CELL = Math.max(1, Math.floor((width - PADDING_LEFT) / count));
+  const TILE_H = Math.floor(CELL * 1.3); // 타일 세로 길이(가로 대비 130%)
 
   // 그리기 순서와 논리 순서
   const renderPositions = useMemo(() => buildRenderPositions(count), [count]);
@@ -125,7 +126,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
   // 셀 중심 좌표 얻기
   const getCenterXY = (row: number, col: number) => ({
     x: col * CELL + CELL / 2 + PADDING_LEFT,
-    y: row * CELL + CELL / 2 + 30,
+    y: row * TILE_H + TILE_H * 0.75, // 타일 하단 쪽으로 약간 내림(기존 +30 보정 대체)
   });
 
   // 인덱스로 좌표 얻기(논리 순서 기준)
@@ -285,7 +286,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
         {/* 셀들 그리기 (3D 효과 대신 상/하 투톤) */}
         {boardData.map((cell) => {
           const x = cell.col * CELL + PADDING_LEFT;
-          const y = cell.row * CELL;
+          const y = cell.row * TILE_H;
           const [main, bottom] = getCellColors(cell.type);
 
           const fontSize = 12;
@@ -295,20 +296,20 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
 
           // 수직 가운데 정렬을 위해 첫 줄 y를 위로 조금 올림
           const baseX = x + CELL / 2;
-          const baseY = y + CELL / 2 + 4 - ((lines.length - 1) * lineHeight) / 2;
+          const baseY = y + TILE_H / 2 + 2 - ((lines.length - 1) * lineHeight) / 2;
 
           const clipId = `clip-${cell.row}-${cell.col}`;
-          const bandH = 14;
+          const bandH = Math.round(CELL * 0.18); // CELL=80 기준 약 14px
 
           return (
             <Fragment key={`${cell.row}-${cell.col}`}>
               {/* 공통 클립패스: 동일한 라운드 코너 유지 */}
               <Defs>
                 <ClipPath id={`main-${clipId}`}>
-                  <Rect x={x} y={y} width={CELL} height={CELL} rx={12} ry={12} />
+                  <Rect x={x} y={y} width={CELL} height={TILE_H} rx={12} ry={12} />
                 </ClipPath>
                 <ClipPath id={`bottom-${clipId}`}>
-                  <Rect x={x} y={y} width={CELL} height={CELL + bandH} rx={12} ry={12} />
+                  <Rect x={x} y={y} width={CELL} height={TILE_H + bandH} rx={12} ry={12} />
                 </ClipPath>
               </Defs>
 
@@ -317,7 +318,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
                 x={x}
                 y={y}
                 width={CELL}
-                height={CELL + bandH}
+                height={TILE_H + bandH}
                 fill={bottom}
                 opacity={0.53}
                 clipPath={`url(#bottom-${clipId})`}
@@ -327,7 +328,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
                 x={x}
                 y={y}
                 width={CELL}
-                height={CELL}
+                height={TILE_H}
                 rx={16}
                 ry={16}
                 fill={main}
@@ -340,7 +341,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
                 <>
                   <SvgText
                     x={x + CELL / 2}
-                    y={y + CELL / 2 - 6}
+                    y={y + TILE_H / 2 - 6}
                     fontSize={24}
                     fontWeight="800"
                     fill="#0a8453"
@@ -350,7 +351,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
                   </SvgText>
                   <SvgText
                     x={x + CELL / 2}
-                    y={y + CELL - 12}
+                    y={y + TILE_H - 12}
                     fontSize={12}
                     fontWeight="700"
                     fill="#0a8453"
@@ -383,12 +384,12 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
       {/* 타일 클릭 영역(Pressable) — SVG에도 onPress 있지만, 플랫폼 일관성을 위해 오버레이 뷰 사용 */}
       {boardData.map((cell) => {
         const x = cell.col * CELL + PADDING_LEFT;
-        const y = cell.row * CELL;
+        const y = cell.row * TILE_H;
         return (
           <Pressable
             key={`hit-${cell.row}-${cell.col}`}
             onPress={() => handleCellPress(cell)}
-            style={[styles.hit, { left: x, top: y, width: CELL, height: CELL }]}
+            style={[styles.hit, { left: x, top: y, width: CELL, height: TILE_H }]}
           />
         );
       })}
