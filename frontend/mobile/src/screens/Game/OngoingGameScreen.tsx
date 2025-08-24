@@ -1,6 +1,14 @@
 import { palette } from '@/constants/colors';
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Pressable } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Pressable,
+  ScrollView,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -21,7 +29,6 @@ export default function OngoingGameScreen({ route }) {
   // 2) 시작 완료 후에만 타일 조회 enabled
   // const { gameInfo } = useGetGameTilesQuery(id, gameStarted);
   const { gameInfo } = useGetGameTilesQuery(tripGameId);
-
   // 배열만 안전하게 추출 (hook 반환이 배열인지/객체인지 둘 다 대응)
   const tiles: TripGameTileView[] =
     (Array.isArray(gameInfo) ? gameInfo : gameInfo?.tripGameTileViews) ??
@@ -37,63 +44,91 @@ export default function OngoingGameScreen({ route }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={28} color="#555" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>진행중인</Text>
-      </View>
-      <Text>ID: {tripGameId}</Text>
-      <Text style={{ textAlign: 'center', marginTop: 8 }}>
-        현재 말 위치 인덱스: {currentIndexInParent}
-      </Text>
-      <View style={styles.gameBoard}>
-        <GameBoardNative
-          ref={boardRef}
-          count={5}
-          tiles={tiles}
-          pieceSource={Logo} // 말 이미지
-          onCellPress={(tile) => {
-            // 모달 or 상세 표시
-            setModalTile(tile);
-          }}
-          onIndexChange={(next) => {
-            setCurrentIndexInParent(next);
-            // 새 칸 도착 → 이동 버튼 숨기고 미션하기 버튼 노출
-            setCanMove(false);
-          }}
-        />
-      </View>
-      {canMove ? (
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            // 이동 시작: 이동 버튼 숨김(중복 클릭 방지)
-            setCanMove(false);
-            const steps = Math.floor(Math.random() * 6) + 1;
-            boardRef.current?.move(steps);
-          }}
-          accessibilityRole="button"
-          accessibilityLabel="이동"
-        >
-          <Text style={styles.buttonText}>이동</Text>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            // 현재 위치 타일 상세 보기 모달
-            if (currentTileIndex >= 0) {
-              setModalTile(tiles[currentTileIndex]);
-            }
-          }}
-          accessibilityRole="button"
-          accessibilityLabel="미션 인증"
-        >
-          <Text style={styles.buttonText}>미션 인증</Text>
-        </TouchableOpacity>
-      )}
+      <ScrollView style={styles.container}>
+        {/* header */}
+        <View style={styles.header}>
+          <TouchableOpacity style={styles.goBack} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={28} color="#555" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>@@ 여행</Text>
+        </View>
 
+        {/* game info */}
+        <View style={styles.content}>
+          <Text>현재 말 위치 인덱스: {currentIndexInParent}</Text>
+          <Text>
+            {`${gameInfoDummy.dataBody.tripGameView.startedAt} ~ ${gameInfoDummy.dataBody.tripGameView.endedAt}`}
+          </Text>
+        </View>
+
+        {/* game board */}
+        <View style={styles.gameBoard}>
+          <GameBoardNative
+            ref={boardRef}
+            count={5}
+            tiles={tiles}
+            pieceSource={Logo} // 말 이미지
+            onCellPress={(tile) => {
+              // 모달 or 상세 표시
+              setModalTile(tile);
+            }}
+            onIndexChange={(next) => {
+              setCurrentIndexInParent(next);
+              // 새 칸 도착 → 이동 버튼 숨기고 미션하기 버튼 노출
+              setCanMove(false);
+            }}
+          />
+        </View>
+
+        {/* button */}
+        {canMove ? (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              // 이동 시작: 이동 버튼 숨김(중복 클릭 방지)
+              setCanMove(false);
+              const steps = Math.floor(Math.random() * 6) + 1;
+              boardRef.current?.move(steps);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="이동"
+          >
+            <Text style={styles.buttonText}>주사위 던지기</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => {
+              // 현재 위치 타일 상세 보기 모달
+              if (currentTileIndex >= 0) {
+                setModalTile(tiles[currentTileIndex]);
+              }
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="미션 인증"
+          >
+            <Text style={styles.buttonText}>미션 인증</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* guide */}
+        <View style={styles.guideWrap}>
+          <Text style={styles.guideTitle}>게임 방법</Text>
+          <View style={styles.guideRow}>
+            <Text style={styles.guideStep}>step1</Text>
+            <Text style={styles.guideText}>주사위를 던져 나온 수만큼 말 이동</Text>
+          </View>
+          <View style={styles.guideRow}>
+            <Text style={styles.guideStep}>step2</Text>
+            <Text style={styles.guideText}>해당 칸의 미션 확인 후 미션 수행</Text>
+          </View>
+          <View style={styles.guideRow}>
+            <Text style={styles.guideStep}>step3</Text>
+            <Text style={styles.guideText}>한 바퀴 완주 시 게임 종료</Text>
+          </View>
+        </View>
+      </ScrollView>
+      {/* modal */}
       <Modal
         visible={!!modalTile}
         transparent
@@ -143,41 +178,54 @@ export default function OngoingGameScreen({ route }) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white },
+  container: { paddingHorizontal: 16 },
 
   header: {
     height: 52,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
     backgroundColor: palette.white,
+    zIndex: 10,
+    elevation: 2,
   },
-  headerTitle: { flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '700', color: '#0F172A' },
-
-  gameBoard: { width: '100%', aspectRatio: 1 },
-
-  createBtnText: {
-    color: palette.mainColor,
+  goBack: {
+    zIndex: 10,
+    elevation: 2,
+  },
+  headerTitle: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    fontSize: 18,
     fontWeight: '700',
-    fontSize: 16,
-  },
-  createBtnTextDisabled: {
-    color: '#D1D5DB', // 비활성화 시 회색
+    color: palette.gray800,
   },
 
+  content: {
+    flexDirection: 'row',
+    textAlign: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 18,
+  },
+
+  gameBoard: { width: '100%', aspectRatio: '0.75', paddingBottom: 8 },
+
+  // modal
   modalBackdrop: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: palette.backgrop,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modal: {
-    backgroundColor: '#fff',
+    backgroundColor: palette.white,
     borderRadius: 12,
     paddingVertical: 18,
     paddingHorizontal: 20,
@@ -194,20 +242,20 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: '700',
-    color: '#0F172A',
+    color: palette.gray800,
     paddingRight: 8,
   },
   modalClose: {
     fontSize: 20,
-    color: '#6B7280',
+    color: palette.gray500,
   },
   modalMeta: {
-    color: '#5d6b7b',
+    color: palette.gray550,
     marginBottom: 8,
   },
   modalId: {
     fontSize: 14,
-    color: '#111827',
+    color: palette.black,
   },
   modalActions: {
     flexDirection: 'row',
@@ -216,35 +264,63 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   actionPrimary: {
-    backgroundColor: '#0070f3',
+    backgroundColor: palette.mainColor,
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 8,
   },
   actionPrimaryText: {
-    color: '#fff',
+    color: palette.white,
     fontWeight: '700',
   },
   actionSecondary: {
-    backgroundColor: '#EEF2FF',
+    backgroundColor: palette.gray50,
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 8,
   },
   actionSecondaryText: {
-    color: '#334155',
+    color: palette.black,
     fontWeight: '700',
   },
+
   button: {
-    backgroundColor: palette.mainColor,
+    backgroundColor: palette.buttonColor,
     borderRadius: 8,
     paddingVertical: 12,
-    marginVertical: 20,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: palette.white,
     fontSize: 18,
     fontWeight: '700',
+  },
+  // guide section
+  guideWrap: {
+    marginVertical: 8,
+    paddingVertical: 12,
+  },
+  guideTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: palette.black,
+    marginBottom: 6,
+  },
+  guideRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 4,
+    gap: 8,
+  },
+  guideStep: {
+    width: 60,
+    fontSize: 16,
+    fontWeight: '700',
+    color: palette.mainColor,
+  },
+  guideText: {
+    fontSize: 16,
+    color: palette.black,
+    flexShrink: 1,
   },
 });

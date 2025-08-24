@@ -43,6 +43,7 @@ export const palette = {
   transparent: 'transparent',
   contentColor: '#E4E8EE',
   placeHolder: 'rgba(255, 255, 255, 0.6)',
+  backgrop: 'rgba(0,0,0, 0.35)',
   borderBottomColor: 'rgba(228, 232, 238, 0.20)',
   reportText: '#F97066',
 
@@ -52,4 +53,5 @@ export const palette = {
   green300: '#6CE9A6',
   blueLight300: '#7CD4FD',
   red300: '#FDA29B',
+  buttonColor: '#FF5700',
 };
