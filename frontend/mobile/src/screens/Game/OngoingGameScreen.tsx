@@ -1,14 +1,6 @@
 import { palette } from '@/constants/colors';
 import React, { useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  Pressable,
-  ScrollView,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -34,8 +26,6 @@ export default function OngoingGameScreen({ route }) {
     (Array.isArray(gameInfo) ? gameInfo : gameInfo?.tripGameTileViews) ??
     gameInfoDummy.dataBody.tripGameTileViews;
   // console.log(tiles);
-  // 모달 상태 (setModalTile 사용하려면 필요)
-  const [modalTile, setModalTile] = useState<TripGameTileView | null>(null);
   const [currentIndexInParent, setCurrentIndexInParent] = useState<number>(0);
   const boardRef = useRef<GameBoardHandle>(null);
   const [canMove, setCanMove] = useState<boolean>(true);
@@ -68,9 +58,12 @@ export default function OngoingGameScreen({ route }) {
             count={5}
             tiles={tiles}
             pieceSource={Logo} // 말 이미지
-            onCellPress={(tile) => {
-              // 모달 or 상세 표시
-              setModalTile(tile);
+            onCellPress={(tile, tabIndex) => {
+              navigation.navigate({
+                name: 'GameMissionAuthScreen',
+                params: { tile, tapIndex: tabIndex, currentIndex: currentTileIndex, tripGameId },
+                merge: true,
+              });
             }}
             onIndexChange={(next) => {
               setCurrentIndexInParent(next);
@@ -99,9 +92,17 @@ export default function OngoingGameScreen({ route }) {
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              // 현재 위치 타일 상세 보기 모달
               if (currentTileIndex >= 0) {
-                setModalTile(tiles[currentTileIndex]);
+                navigation.navigate({
+                  name: 'GameMissionAuthScreen',
+                  params: {
+                    tile: tiles[currentIndexInParent],
+                    tapIndex: currentTileIndex, // 사용자가 누른 것은 현재 칸
+                    currentIndex: currentTileIndex, // 현재 말 위치
+                    tripGameId,
+                  },
+                  merge: true,
+                });
               }
             }}
             accessibilityRole="button"
@@ -124,54 +125,10 @@ export default function OngoingGameScreen({ route }) {
           </View>
           <View style={styles.guideRow}>
             <Text style={styles.guideStep}>step3</Text>
-            <Text style={styles.guideText}>한 바퀴 완주 시 게임 종료</Text>
+            <Text style={styles.guideText}>한 바퀴 완주 시 게임 종료!</Text>
           </View>
         </View>
       </ScrollView>
-      {/* modal */}
-      <Modal
-        visible={!!modalTile}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setModalTile(null)}
-      >
-        <Pressable style={styles.modalBackdrop} onPress={() => setModalTile(null)}>
-          <Pressable style={styles.modal} onPress={(e) => e.stopPropagation()}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle} numberOfLines={2}>
-                {modalTile?.tripSpotName}
-              </Text>
-              <TouchableOpacity onPress={() => setModalTile(null)}>
-                <Text style={styles.modalClose}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.modalMeta}>단계: step{modalTile?.stepNo}</Text>
-            <Text style={styles.modalId}>tripSpotId: {modalTile?.tripSpotId}</Text>
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.actionSecondary}
-                onPress={() => {
-                  /* TODO: navigate to mission detail */
-                }}
-              >
-                <Text style={styles.actionSecondaryText}>미션 보기</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.actionPrimary}
-                onPress={() => {
-                  // 미션 완료 → 다시 이동 버튼 보이도록
-                  setCanMove(true);
-                  setModalTile(null);
-                }}
-              >
-                <Text style={styles.actionPrimaryText}>미션 인증</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </SafeAreaView>
   );
 }
@@ -213,77 +170,6 @@ const styles = StyleSheet.create({
 
   gameBoard: { width: '100%', aspectRatio: '0.75', paddingBottom: 8 },
 
-  // modal
-  modalBackdrop: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: palette.backgrop,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  modal: {
-    backgroundColor: palette.white,
-    borderRadius: 12,
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    width: '92%',
-    maxWidth: 520,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  modalTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: '700',
-    color: palette.gray800,
-    paddingRight: 8,
-  },
-  modalClose: {
-    fontSize: 20,
-    color: palette.gray500,
-  },
-  modalMeta: {
-    color: palette.gray550,
-    marginBottom: 8,
-  },
-  modalId: {
-    fontSize: 14,
-    color: palette.black,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-    marginTop: 16,
-  },
-  actionPrimary: {
-    backgroundColor: palette.mainColor,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-  },
-  actionPrimaryText: {
-    color: palette.white,
-    fontWeight: '700',
-  },
-  actionSecondary: {
-    backgroundColor: palette.gray50,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-  },
-  actionSecondaryText: {
-    color: palette.black,
-    fontWeight: '700',
-  },
-
   button: {
     backgroundColor: palette.buttonColor,
     borderRadius: 8,
@@ -295,6 +181,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
   },
+
   // guide section
   guideWrap: {
     marginVertical: 8,
