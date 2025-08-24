@@ -148,46 +148,49 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
   };
 
   // 이동 애니메이션 (웹과 동일: 스텝 수만큼 재귀)
-  const animateMove = useCallback((steps: number) => {
-    if (isMoving || !isLayoutReady || !pieceXY) return;
-    setIsMoving(true);
+  const animateMove = useCallback(
+    (steps: number) => {
+      if (isMoving || !isLayoutReady || !pieceXY) return;
+      setIsMoving(true);
 
-    let moved = 0;
-    const duration = 250;
+      let moved = 0;
+      const duration = 250;
 
-    const stepOnce = (fromIdx: number, toIdx: number) => {
-      const from = getXYByIndex(fromIdx);
-      const to = getXYByIndex(toIdx);
-      let start: number | null = null;
+      const stepOnce = (fromIdx: number, toIdx: number) => {
+        const from = getXYByIndex(fromIdx);
+        const to = getXYByIndex(toIdx);
+        let start: number | null = null;
 
-      const raf = (ts: number) => {
-        if (start == null) start = ts;
-        const t = Math.min((ts - start) / duration, 1);
-        const p = parabola(from.x, from.y, to.x, to.y, 50, t);
-        setPieceXY(p);
-        if (t < 1) {
-          requestAnimationFrame(raf);
-        } else {
-          moved += 1;
-          if (moved < steps) {
-            stepOnce(
-              (fromIdx + 1) % logicalPositions.length,
-              (toIdx + 1) % logicalPositions.length,
-            );
+        const raf = (ts: number) => {
+          if (start == null) start = ts;
+          const t = Math.min((ts - start) / duration, 1);
+          const p = parabola(from.x, from.y, to.x, to.y, 50, t);
+          setPieceXY(p);
+          if (t < 1) {
+            requestAnimationFrame(raf);
           } else {
-            setIsMoving(false);
-            const next = toIdx % logicalPositions.length;
-            setCurrentIndex(next);
-            if (typeof onIndexChange === 'function') onIndexChange(next);
+            moved += 1;
+            if (moved < steps) {
+              stepOnce(
+                (fromIdx + 1) % logicalPositions.length,
+                (toIdx + 1) % logicalPositions.length,
+              );
+            } else {
+              setIsMoving(false);
+              const next = toIdx % logicalPositions.length;
+              setCurrentIndex(next);
+              if (typeof onIndexChange === 'function') onIndexChange(next);
+            }
           }
-        }
+        };
+
+        requestAnimationFrame(raf);
       };
 
-      requestAnimationFrame(raf);
-    };
-
-    stepOnce(currentIndex, (currentIndex + 1) % logicalPositions.length);
-  }, [isMoving, isLayoutReady, pieceXY, currentIndex, logicalPositions, onIndexChange]);
+      stepOnce(currentIndex, (currentIndex + 1) % logicalPositions.length);
+    },
+    [isMoving, isLayoutReady, pieceXY, currentIndex, logicalPositions, onIndexChange],
+  );
 
   // 타일 클릭
   const handleCellPress = (cell: (typeof boardData)[number]) => {
@@ -361,7 +364,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
                     fill="#0a8453"
                     textAnchor="middle"
                   >
-                    {'<----------'}
+                    {'<--------'}
                   </SvgText>
                 </>
               ) : (
