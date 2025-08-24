@@ -18,7 +18,7 @@ import CreateGameBanner from '@/components/common/banner/CreateGameBanner';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
 import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
 
-export default function PlayHomeScreen() {
+export default function GameHomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
   // const { myGameList } = useMyGameListQuery();
   const { waiting, ongoing, ended } = useMyGameLists();
@@ -39,7 +39,7 @@ export default function PlayHomeScreen() {
   // 종료된 게임 스크린으로 이동
   const goToGameEndedScreen = (tripGameId: number) => {
     navigation.navigate('GamePlayStackNavigator', {
-      screen: 'GameEndedScreen',
+      screen: 'EndedGameScreen',
       params: { tripGameId },
     });
   };
