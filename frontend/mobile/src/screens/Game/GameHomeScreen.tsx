@@ -24,6 +24,7 @@ export default function GameHomeScreen() {
   const { waiting, ongoing, ended } = useMyGameLists();
 
   // 게임 생성 스크린으로 이동
+
   const goToGameCreateScreen = () => {
     navigation.navigate('CreateGameScreen');
   };
@@ -216,7 +217,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#BCC2C8',
   },
-
   waitingImage: {
     width: 120,
     height: 120,
@@ -235,7 +235,6 @@ const styles = StyleSheet.create({
     color: palette.white,
     fontWeight: '700',
   },
-
   endedCard: {
     flexDirection: 'row',
     alignItems: 'center',
