@@ -169,7 +169,6 @@ const styles = StyleSheet.create({
   },
 
   gameBoard: { width: '100%', aspectRatio: '0.75', paddingBottom: 8 },
-
   button: {
     backgroundColor: palette.buttonColor,
     borderRadius: 8,
@@ -181,7 +180,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
   },
-
   // guide section
   guideWrap: {
     marginVertical: 8,
