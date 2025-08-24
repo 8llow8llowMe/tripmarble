@@ -27,7 +27,7 @@ export type AppNavigatorParamList = {
 export type BottomTabParamList = {
   HomeTab: NavigatorScreenParams<HomeStackParamList>;
   ExploreTab: NavigatorScreenParams<ExploreStackParamList>;
-  PlayTab: undefined;
+  GameTab: undefined;
   ProfileTab: undefined;
 };
 
@@ -49,7 +49,8 @@ export type SettingsParamList = {
 };
 
 export type GamePlayStackParamList = {
-  GameEndedScreen: { tripGameId: number };
+  GameHomeScreen: undefined;
+  EndedGameScreen: { tripGameId: number };
   OngoingGameScreen: { tripGameId: number };
   GameListScreen: { status?: 'WAITING' | 'ONGOING' | 'ENDED' };
   GameMissionAuthScreen: undefined;

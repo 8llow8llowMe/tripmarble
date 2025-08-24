@@ -20,7 +20,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 //   { id: 3, title: '경주여행', month: 'Apr', day: '12' },
 // ];
 
-export default function PlayHomeScreen() {
+export default function GameHomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
   // const { myGameList } = useMyGameListQuery();
   const { waiting, ongoing, ended } = useMyGameLists();
@@ -40,7 +40,7 @@ export default function PlayHomeScreen() {
   // 종료된 게임 스크린으로 이동
   const goToGameEndedScreen = (tripGameId: number) => {
     navigation.navigate('GamePlayStackNavigator', {
-      screen: 'GameEndedScreen',
+      screen: 'EndedGameScreen',
       params: { tripGameId },
     });
   };

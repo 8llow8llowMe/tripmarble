@@ -11,7 +11,7 @@ import ExploreStackNavigator from '@/navigations/app/ExploreStackNavigator';
 import TabHeader from '@/components/layout/header/TabHeader';
 import { palette } from '@/constants/colors';
 import { BottomTabParamList } from '@/types/navigation/navigation';
-import PlayHomeScreen from '@/screens/Play/PlayHomeScreen';
+import GamePlayStackNavigator from '@/navigations/app/GamePlayStackNavigator';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -45,7 +45,7 @@ export default function BottomTabNavigator() {
             case 'ExploreTab':
               iconName = focused ? 'search' : 'search-outline';
               break;
-            case 'PlayTab':
+            case 'GameTab':
               iconName = focused ? 'game-controller' : 'game-controller-outline';
               break;
             case 'ProfileTab':
@@ -78,11 +78,11 @@ export default function BottomTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="PlayTab"
-        component={PlayHomeScreen}
+        name="GameTab"
+        component={GamePlayStackNavigator}
         options={{
           tabBarLabel: '게임',
-          header: () => <TabHeader type="PlayTab" />,
+          headerShown: false,
         }}
       />
       <Tab.Screen
