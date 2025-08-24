@@ -183,7 +183,7 @@ export default function CreateGameScreen() {
   // 게임 탭 메인 홈 스크린으로 이동
   const goToPlayHomeScreen = () => {
     navigation.navigate('BottomTabNavigator', {
-      screen: 'PlayTab',
+      screen: 'GameTab',
     });
   };
 

@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import useHeaderHeight from '@/hooks/useHeaderHeight';
 
-export type TabHeaderType = 'HomeTab' | 'PlayTab' | 'ProfileTab';
+export type TabHeaderType = 'HomeTab' | 'ProfileTab';
 
 interface TabHeaderProps {
   type: TabHeaderType;
@@ -23,8 +23,6 @@ const TabHeader = ({ type, showBorderBottom = false }: TabHeaderProps) => {
     switch (type) {
       case 'HomeTab':
         return '홈';
-      case 'PlayTab':
-        return '게임';
       case 'ProfileTab':
         return '프로필';
     }
