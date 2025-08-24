@@ -34,7 +34,12 @@ export default function GamePlayStackNavigator() {
       <GamePlayStack.Screen
         name="GameMissionAuthScreen"
         component={GameMissionAuthScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+          presentation: 'transparentModal',
+          animation: 'slide_from_bottom',
+          contentStyle: { backgroundColor: 'transparent' },
+        }}
       />
     </GamePlayStack.Navigator>
   );
