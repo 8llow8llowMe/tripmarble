@@ -6,6 +6,7 @@ import React, {
   useImperativeHandle,
   useMemo,
   useState,
+  useCallback,
 } from 'react';
 import { View, Image, StyleSheet, Pressable } from 'react-native';
 import Svg, { Rect, Text as SvgText, TSpan, Defs, ClipPath } from 'react-native-svg';
@@ -76,6 +77,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
   const height = container.height || size * count + 15;
   const CELL = Math.max(1, Math.floor((width - PADDING_LEFT) / count));
   const TILE_H = Math.floor(CELL * 1.3); // 타일 세로 길이(가로 대비 130%)
+  const [isLayoutReady, setIsLayoutReady] = useState(false);
 
   // 그리기 순서와 논리 순서
   const renderPositions = useMemo(() => buildRenderPositions(count), [count]);
@@ -120,13 +122,13 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
 
   // === 말 위치/이동 ===
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [pieceXY, setPieceXY] = useState({ x: width / 2, y: height / 2 }); // 시작값 임시
+  const [pieceXY, setPieceXY] = useState<{ x: number; y: number } | null>(null);
   const [isMoving, setIsMoving] = useState(false);
 
   // 셀 중심 좌표 얻기
   const getCenterXY = (row: number, col: number) => ({
     x: col * CELL + CELL / 2 + PADDING_LEFT,
-    y: row * TILE_H + TILE_H * 0.75, // 타일 하단 쪽으로 약간 내림(기존 +30 보정 대체)
+    y: row * TILE_H + TILE_H * 0.75, // 타일 하단 쪽으로 약간 내림
   });
 
   // 인덱스로 좌표 얻기(논리 순서 기준)
@@ -146,8 +148,8 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
   };
 
   // 이동 애니메이션 (웹과 동일: 스텝 수만큼 재귀)
-  const animateMove = (steps: number) => {
-    if (isMoving) return;
+  const animateMove = useCallback((steps: number) => {
+    if (isMoving || !isLayoutReady || !pieceXY) return;
     setIsMoving(true);
 
     let moved = 0;
@@ -176,15 +178,16 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
             setIsMoving(false);
             const next = toIdx % logicalPositions.length;
             setCurrentIndex(next);
-            if (typeof onIndexChange === 'function') onIndexChange(next); // 부모에 알림
+            if (typeof onIndexChange === 'function') onIndexChange(next);
           }
         }
       };
+
       requestAnimationFrame(raf);
     };
 
     stepOnce(currentIndex, (currentIndex + 1) % logicalPositions.length);
-  };
+  }, [isMoving, isLayoutReady, pieceXY, currentIndex, logicalPositions, onIndexChange]);
 
   // 타일 클릭
   const handleCellPress = (cell: (typeof boardData)[number]) => {
@@ -195,10 +198,10 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
 
   // 초기 말 위치 = 시작칸(오른쪽 아래) 중앙
   useEffect(() => {
+    if (!isLayoutReady || logicalPositions.length === 0) return;
     const start = logicalPositions[0];
     setPieceXY(getCenterXY(start.row, start.col));
-    setCurrentIndex(0);
-  }, [count, width, height]);
+  }, [isLayoutReady, logicalPositions]);
 
   // 한 글자 픽셀폭 추정: 한글/전각 ~ 0.95 * fontSize, ascii ~ 0.55 * fontSize
   const charWidth = (ch: string, fontSize: number) =>
@@ -267,7 +270,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
       move: (steps: number) => animateMove(steps),
       getIndex: () => currentIndex,
     }),
-    [currentIndex], // animateMove가 클로저면 포함
+    [animateMove, currentIndex],
   );
 
   return (
@@ -277,6 +280,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
         const { width, height } = e.nativeEvent.layout;
         if (width !== container.width || height !== container.height) {
           setContainer({ width, height });
+          setIsLayoutReady(true);
         }
       }}
     >
@@ -395,7 +399,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
       })}
 
       {/* 말(이미지) — 칸 너비 0.6배, 바닥 맞춤 */}
-      {!!pieceSource && (
+      {!!pieceSource && pieceXY && (
         <Image
           source={pieceSource}
           resizeMode="contain"
