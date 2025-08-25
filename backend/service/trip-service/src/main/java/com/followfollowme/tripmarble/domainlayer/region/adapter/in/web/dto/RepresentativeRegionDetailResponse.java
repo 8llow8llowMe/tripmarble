@@ -8,7 +8,7 @@ import lombok.Builder;
 public record RepresentativeRegionDetailResponse(
 
     @Schema(description = "대표 여행지 아이디", example = "1")
-    long representativeRegionId,
+    String representativeRegionId,
 
     @Schema(description = "대표 여행지 이름", example = "서울")
     String representativeRegionName,
