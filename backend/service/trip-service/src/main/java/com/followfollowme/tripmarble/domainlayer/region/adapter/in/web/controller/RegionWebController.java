@@ -29,8 +29,8 @@ public class RegionWebController {
     )
     @GetMapping
     public ResponseEntity<Response<List<RegionResponse>>> getAllRegions() {
-        List<RegionResponse> regionResponses = regionWebUseCase.getAllRegions();
-        return ResponseEntity.ok().body(Response.success(regionResponses));
+        List<RegionResponse> responses = regionWebUseCase.getAllRegions();
+        return ResponseEntity.ok().body(Response.success(responses));
     }
 
     @Operation(
@@ -38,8 +38,8 @@ public class RegionWebController {
         description = "해당 시도(regionId)에 속한 시군구 목록을 조회하는 기능입니다."
     )
     @GetMapping("/{regionId}/sigungus")
-    public ResponseEntity<Response<List<SigunguResponse>>> getSigungusByRegionId(@PathVariable long regionId) {
-        List<SigunguResponse> sigunguResponses = regionWebUseCase.getSigungusByRegionId(regionId);
-        return ResponseEntity.ok().body(Response.success(sigunguResponses));
+    public ResponseEntity<Response<List<SigunguResponse>>> getSigungusByRegionId(@PathVariable String regionId) {
+        List<SigunguResponse> responses = regionWebUseCase.getSigungusByRegionId(Long.parseLong(regionId));
+        return ResponseEntity.ok().body(Response.success(responses));
     }
 }
