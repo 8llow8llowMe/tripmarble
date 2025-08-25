@@ -14,7 +14,6 @@ import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -66,8 +67,8 @@ public class TripGameWebController {
     @PostMapping("/{tripGameId}/start")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<TripGameStartResponse>> startTripGame(
-        @PathVariable long tripGameId, @AuthenticationPrincipal MemberLoginActive loginActive) {
-        TripGameStartResponse response = tripGameWebUseCase.startTripGame(tripGameId, loginActive.id());
+        @PathVariable String tripGameId, @AuthenticationPrincipal MemberLoginActive loginActive) {
+        TripGameStartResponse response = tripGameWebUseCase.startTripGame(Long.parseLong(tripGameId), loginActive.id());
         return ResponseEntity.ok().body(Response.success(response));
     }
 
@@ -78,9 +79,9 @@ public class TripGameWebController {
     @GetMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<SliceResponse<MyTripGameResponse>>> getMyTripGames(
-        @AuthenticationPrincipal MemberLoginActive loginActive, @RequestParam(defaultValue = "0") long lastTripGameId,
+        @AuthenticationPrincipal MemberLoginActive loginActive, @RequestParam(defaultValue = "0") String lastTripGameId,
         @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) Status status) {
-        SliceResponse<MyTripGameResponse> response = tripGameWebUseCase.getMyTripGames(loginActive.id(), lastTripGameId, size, status);
+        SliceResponse<MyTripGameResponse> response = tripGameWebUseCase.getMyTripGames(loginActive.id(), Long.parseLong(lastTripGameId), size, status);
         return ResponseEntity.ok().body(Response.success(response));
     }
 }

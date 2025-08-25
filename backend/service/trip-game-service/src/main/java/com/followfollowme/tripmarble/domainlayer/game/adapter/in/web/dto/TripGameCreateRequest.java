@@ -6,6 +6,7 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -31,13 +32,13 @@ public record TripGameCreateRequest(
     @FutureOrPresent(message = "여행 종료일은 오늘 이후여야 합니다.")
     LocalDate endedAt,
 
-    @Schema(description = "대표 여행지 아이디", example = "10")
+    @Schema(description = "대표 여행지 아이디", type = "string", example = "10", pattern = "^[0-9]+$")
     @NotNull(message = "대표 여행지 선택은 필수입니다.")
-    long representativeRegionId,
+    String representativeRegionId,
 
-    @Schema(description = "여행 테마 아이디 목록", example = "[1, 2, 3, 4]")
+    @Schema(description = "여행 테마 아이디 목록", example = "[\"1\",\"2\",\"3\",\"4\"]")
     @NotEmpty(message = "여행 테마는 1개 이상 선택해야 합니다.")
-    List<Long> tripThemeIds
+    List<String> tripThemeIds
 ) {
 
 }

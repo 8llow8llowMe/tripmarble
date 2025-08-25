@@ -2,21 +2,22 @@ package com.followfollowme.tripmarble.domainlayer.theme.adapter.in.web.presenter
 
 import com.followfollowme.tripmarble.domainlayer.theme.adapter.in.web.dto.TripThemeResponse;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
-import java.util.List;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class TripThemePresenter {
 
-    public TripThemeResponse toResponse(TripTheme domain) {
+    public TripThemeResponse toResponse(TripTheme tripTheme) {
         return TripThemeResponse.builder()
-            .tripThemeId(domain.id())
-            .tripThemeName(domain.name())
+            .tripThemeId(String.valueOf(tripTheme.id()))
+            .tripThemeName(tripTheme.name())
             .build();
     }
 
-    public List<TripThemeResponse> toResponseList(List<TripTheme> domains) {
-        return domains.stream()
+    public List<TripThemeResponse> toResponseList(List<TripTheme> tripThemes) {
+        return tripThemes.stream()
             .map(this::toResponse)
             .toList();
     }

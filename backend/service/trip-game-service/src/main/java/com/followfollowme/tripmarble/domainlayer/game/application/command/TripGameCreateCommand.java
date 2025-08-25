@@ -24,8 +24,12 @@ public record TripGameCreateCommand(
             .difficulty(request.difficulty())
             .startedAt(request.startedAt())
             .endedAt(request.endedAt())
-            .representativeRegionId(request.representativeRegionId())
-            .tripThemeIds(request.tripThemeIds())
+            .representativeRegionId(Long.parseLong(request.representativeRegionId()))
+            .tripThemeIds(
+                request.tripThemeIds().stream()
+                    .map(Long::parseLong)
+                    .toList()
+            )
             .memberId(memberId)
             .build();
     }

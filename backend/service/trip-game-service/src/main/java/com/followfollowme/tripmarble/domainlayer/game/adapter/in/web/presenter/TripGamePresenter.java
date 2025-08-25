@@ -12,10 +12,11 @@ import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameS
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -23,7 +24,7 @@ public class TripGamePresenter {
 
     public TripGameCreateResponse toGameCreateResponseFrom(TripGameCreateInfo createInfo) {
         return TripGameCreateResponse.builder()
-            .tripGameId(createInfo.tripGame().id())
+            .tripGameId(String.valueOf(createInfo.tripGame().id()))
             .title(createInfo.tripGame().title())
             .gameStatus(createInfo.tripGame().status().name())
             .gameStatusDescription(createInfo.tripGame().status().getDescription())
@@ -42,7 +43,7 @@ public class TripGamePresenter {
         return SliceResponse.of(infoSlice.map(info -> {
             TripGame game = info.tripGame();
             return MyTripGameResponse.builder()
-                .tripGameId(game.id())
+                .tripGameId(String.valueOf(game.id()))
                 .gameStatus(game.status().name())
                 .gameStatusDescription(game.status().getDescription())
                 .difficultyCode(game.difficulty().name())
@@ -63,7 +64,7 @@ public class TripGamePresenter {
         TripGame game = startInfo.tripGame();
         List<TripGameStartMemberView> members = startInfo.members().stream()
             .map(m -> TripGameStartMemberView.builder()
-                .memberId(m.memberId())
+                .memberId(String.valueOf(m.memberId()))
                 .nickname(m.nickname())
                 .profileImage(m.profileImage())
                 .turnOrder(m.turnOrder())
@@ -72,7 +73,7 @@ public class TripGamePresenter {
             .toList();
 
         return TripGameStartResponse.builder()
-            .tripGameId(game.id())
+            .tripGameId(String.valueOf(game.id()))
             .gameStatusCode(game.status().name())
             .gameStatusDescription(game.status().getDescription())
             .members(members)
@@ -84,14 +85,14 @@ public class TripGamePresenter {
 
         List<TripGameStartMemberView> memberViews = info.members().stream()
             .map(m -> TripGameStartMemberView.builder()
-                .memberId(m.memberId())
+                .memberId(String.valueOf(m.memberId()))
                 .isHost(m.isHost())
                 .turnOrder(m.turnOrder())
                 .build()
             ).toList();
 
         return TripGameResumeResponse.builder()
-            .tripGameId(game.id())
+            .tripGameId(String.valueOf(game.id()))
             .title(game.title())
             .gameStatus(game.status().name())
             .gameStatusDescription(game.status().getDescription())
