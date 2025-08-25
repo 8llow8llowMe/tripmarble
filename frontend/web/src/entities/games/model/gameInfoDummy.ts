@@ -1,7 +1,7 @@
 import { ApiResponse } from "@/shared/types";
 
 export interface TripGameView {
-  tripGameId: number;
+  tripGameId: string;
   gameStatus: string;
   gameStatusDescription: string;
   difficultyCode: string;
@@ -15,8 +15,8 @@ export interface TripGameView {
 }
 
 export interface TripGameTileView {
-  tripGameTileId: number;
-  tripSpotId: number;
+  tripGameTileId: string;
+  tripSpotId: string;
   stepNo: number;
   missionTypeCode: string;
   missionTypeDescription: string;
@@ -36,7 +36,7 @@ export const gameInfoDummy: ApiResponse<GameInfoDataBody> = {
   },
   dataBody: {
     tripGameView: {
-      tripGameId: 609394784645287936,
+      tripGameId: "609394784645287936",
       gameStatus: "WAITING",
       gameStatusDescription: "게임 시작 전",
       difficultyCode: "EASY",
@@ -50,120 +50,120 @@ export const gameInfoDummy: ApiResponse<GameInfoDataBody> = {
     },
     tripGameTileViews: [
       {
-        tripGameTileId: 609394785194741760,
-        tripSpotId: 37558,
+        tripGameTileId: "609394785194741760",
+        tripSpotId: "37558",
         stepNo: 1,
         missionTypeCode: "START",
         missionTypeDescription: "출발점",
         tripSpotName: "종로 어디나 스테이지",
       },
       {
-        tripGameTileId: 609394785194741761,
-        tripSpotId: 15813,
+        tripGameTileId: "609394785194741761",
+        tripSpotId: "15813",
         stepNo: 2,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "반짝반짝 DDP (Twinkle DDP)",
       },
       {
-        tripGameTileId: 609394785194741762,
-        tripSpotId: 44611,
+        tripGameTileId: "609394785194741762",
+        tripSpotId: "44611",
         stepNo: 3,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "2025 코리아그랜드세일",
       },
       {
-        tripGameTileId: 609394785194741763,
-        tripSpotId: 45070,
+        tripGameTileId: "609394785194741763",
+        tripSpotId: "45070",
         stepNo: 4,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "2025 대한민국 미술축제",
       },
       {
-        tripGameTileId: 609394785194741764,
-        tripSpotId: 45031,
+        tripGameTileId: "609394785194741764",
+        tripSpotId: "45031",
         stepNo: 5,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "2024 청와대 뮤직 페스티벌",
       },
       {
-        tripGameTileId: 609394785194741765,
-        tripSpotId: 2126,
+        tripGameTileId: "609394785194741765",
+        tripSpotId: "2126",
         stepNo: 6,
         missionTypeCode: "MISSION",
         missionTypeDescription: "미션",
         tripSpotName: "경춘선 공릉숲길 커피축제",
       },
       {
-        tripGameTileId: 609394785194741766,
-        tripSpotId: 45243,
+        tripGameTileId: "609394785194741766",
+        tripSpotId: "45243",
         stepNo: 7,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "DDP 디자인&아트",
       },
       {
-        tripGameTileId: 609394785194741761,
-        tripSpotId: 15813,
+        tripGameTileId: "609394785194741761",
+        tripSpotId: "15813",
         stepNo: 2,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "반짝반짝 DDP (Twinkle DDP)",
       },
       {
-        tripGameTileId: 609394785194741768,
-        tripSpotId: 25075,
+        tripGameTileId: "609394785194741768",
+        tripSpotId: "25075",
         stepNo: 9,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "아시테지 국제여름축제",
       },
       {
-        tripGameTileId: 609394785194741764,
-        tripSpotId: 45031,
+        tripGameTileId: "609394785194741764",
+        tripSpotId: "45031",
         stepNo: 5,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "2024 청와대 뮤직 페스티벌",
       },
       {
-        tripGameTileId: 609394785194741765,
-        tripSpotId: 2126,
+        tripGameTileId: "609394785194741765",
+        tripSpotId: "2126",
         stepNo: 6,
         missionTypeCode: "MISSION",
         missionTypeDescription: "미션",
         tripSpotName: "경춘선 공릉숲길 커피축제",
       },
       {
-        tripGameTileId: 609394785194741766,
-        tripSpotId: 45243,
+        tripGameTileId: "609394785194741766",
+        tripSpotId: "45243",
         stepNo: 7,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "DDP 디자인&아트",
       },
       {
-        tripGameTileId: 609394785194741767,
-        tripSpotId: 30864,
+        tripGameTileId: "609394785194741767",
+        tripSpotId: "30864",
         stepNo: 8,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "외로움이의 집",
       },
       {
-        tripGameTileId: 609394785194741768,
-        tripSpotId: 25075,
+        tripGameTileId: "609394785194741768",
+        tripSpotId: "25075",
         stepNo: 9,
         missionTypeCode: "NORMAL",
         missionTypeDescription: "기본",
         tripSpotName: "아시테지 국제여름축제",
       },
       {
-        tripGameTileId: 609394785194741769,
-        tripSpotId: 44620,
+        tripGameTileId: "609394785194741769",
+        tripSpotId: "44620",
         stepNo: 10,
         missionTypeCode: "END",
         missionTypeDescription: "도착점",
