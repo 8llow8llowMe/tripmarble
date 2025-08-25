@@ -8,7 +8,7 @@ import lombok.Builder;
 public record TripSpotWithDetailViewResponse(
 
     @Schema(description = "여행지 정보 아이디", example = "1")
-    long tripSpotId,
+    String tripSpotId,
 
     @Schema(description = "여행지 정보 이름 (제목)", example = "가림상회")
     String tripSpotName,
