@@ -2,10 +2,12 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameResumeResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartMemberView;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDiceResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameResumeInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
@@ -22,7 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TripGamePresenter {
 
-    public TripGameCreateResponse toGameCreateResponseFrom(TripGameCreateInfo createInfo) {
+    public TripGameCreateResponse toGameCreateResponse(TripGameCreateInfo createInfo) {
         return TripGameCreateResponse.builder()
             .tripGameId(String.valueOf(createInfo.tripGame().id()))
             .title(createInfo.tripGame().title())
@@ -105,6 +107,17 @@ public class TripGamePresenter {
 //            .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
             .tripThemeNames(info.themeNames())
 //            .members(memberViews)
+            .build();
+    }
+
+    public TripGameDiceRollResponse toDiceRollResponse(TripGameDiceResultInfo info) {
+        return TripGameDiceRollResponse.builder()
+            .diceValue(info.diceValue())
+            .newStepNo(info.finalStepNo())
+            .isGameEnded(info.isGameEnded())
+            .landedTileId(String.valueOf(info.landedTile().id()))
+            .missionTypeCode(info.landedTile().missionType().name())
+            .missionTypeDescription(info.landedTile().missionType().getDescription())
             .build();
     }
 }
