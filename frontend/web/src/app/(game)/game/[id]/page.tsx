@@ -11,7 +11,7 @@ type Props = {
 };
 
 const GamePlayPage = ({ params }: Props) => {
-  const { data } = useGetGameTiles(Number(params.id));
+  const { data } = useGetGameTiles(String(params.id));
   const tileViews = data?.data?.dataBody?.slice(0, 15) ?? [];
 
   if (!tileViews.length) return null;

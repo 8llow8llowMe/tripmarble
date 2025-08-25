@@ -4,8 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 
 interface GameTileResponse {
-  tripGameTileId: number;
-  tripSpotId: number;
+  tripGameTileId: string;
+  tripSpotId: string;
   tripSpotName: string;
   stepNo: number;
   missionTypeCode: string;
@@ -13,10 +13,10 @@ interface GameTileResponse {
 }
 
 // 게임 타일 목록 조회
-export const fetchGetGameTiles = (tripGameId: number) =>
+export const fetchGetGameTiles = (tripGameId: string) =>
   apiClient.get(`/trip-games/${tripGameId}/tiles`);
 
-const useGetGameTiles = (tripGameId: number) => {
+const useGetGameTiles = (tripGameId: string) => {
   const { data, isLoading, isError, isSuccess } = useQuery<
     AxiosResponse<ApiResponse<GameTileResponse[]>, Error>
   >({
