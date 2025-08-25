@@ -8,13 +8,17 @@ import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.Verif
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import com.followfollowme.tripmarble.redis.exception.RedisInfraException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailVerificationProcessor {
@@ -33,7 +37,13 @@ public class MailVerificationProcessor {
         }
 
         String code = generateCode();
-        codeStorePort.save(email, code, EXPIRES_MIN);
+
+        try {
+            codeStorePort.save(email, code, EXPIRES_MIN);
+        } catch (RedisInfraException e) {
+            log.error("인증 코드 저장 실패 - email: {}, error: {}", email, e.getMessage());
+            throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_STORE_FAILURE);
+        }
 
         String subject = "[TripMarble] 일반 회원가입 이메일 인증 코드 안내";
         String body = renderTemplate(code, EXPIRES_MIN);
@@ -43,8 +53,14 @@ public class MailVerificationProcessor {
     }
 
     public void verifyCode(String email, String code) {
-        String stored = codeStorePort.find(email)
-            .orElseThrow(() -> new AuthException(AuthErrorCode.NOT_FOUND_VERIFICATION_CODE));
+        String stored;
+        try {
+            stored = codeStorePort.find(email)
+                .orElseThrow(() -> new AuthException(AuthErrorCode.NOT_FOUND_VERIFICATION_CODE));
+        } catch (RedisInfraException e) {
+            log.error("인증 코드 조회 실패 - email: {}, error: {}", email, e.getMessage());
+            throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_STORE_FAILURE);
+        }
 
         if (!stored.equals(code)) {
             throw new AuthException(AuthErrorCode.INVALID_VERIFICATION_CODE);
