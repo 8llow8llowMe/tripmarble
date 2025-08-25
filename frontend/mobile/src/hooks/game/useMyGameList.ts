@@ -37,19 +37,14 @@ export interface MyGameListParams {
 }
 
 // 나의 게임 목록 조회 (상태별 파라미터 지원)
-export const fetchMyGameList = async (params?: MyGameListParams) =>
-  await apiClient.get<GameListResponse>(END_POINTS.GAME.LIST_MY_GAMES, { params });
+export const fetchMyGameList = (params?: { status?: GameStatus }) =>
+  apiClient.get(END_POINTS.GAME.LIST_MY_GAMES, { params });
 
 // 단일 상태 리스트 훅
-export const useMyGameListQuery = (params?: MyGameListParams) => {
+export const useMyGameListQuery = (params?: { status?: GameStatus }) => {
   const { data, isLoading, isError, isSuccess } = useQuery({
     queryFn: () => fetchMyGameList(params),
-    queryKey: [
-      QUERY_KEY.GAME.MY_GAME_LIST,
-      params?.status ?? 'ALL',
-      params?.lastTripGameId ?? 0,
-      params?.size ?? 10,
-    ],
+    queryKey: [QUERY_KEY.GAME.MY_GAME_LIST, params?.status ?? 'ALL'],
   });
   return { myGameList: data, isLoading, isError, isSuccess };
 };
