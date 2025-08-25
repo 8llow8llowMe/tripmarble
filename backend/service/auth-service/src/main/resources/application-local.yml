@@ -79,8 +79,8 @@ management:
 mail:
   host: smtp.gmail.com
   port: 587
-  username: ENC(GoG9vwYwn0rz5Z2ukomZ2rKPvtPop4JTXb8r9cjz6f0=)
-  password: ENC(v/BdQ64+bRuu3Jenqhir7N6EW3bjIxZEfxCBGaAVsNc=)
+  username: ENC(6pqj0+W7IFQCv1dQmOkxMBzAgnO8NetYzaGxg7GjT2g=)
+  password: ENC(Orv+BO0qxBOtXE4k3ZB1AaA1RIBPJZHu2HAVtMGjgIw=)
   smtp-auth: true
   starttls-enable: true
 
