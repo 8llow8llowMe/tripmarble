@@ -2,16 +2,17 @@ package com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.presente
 
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.SigunguResponse;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.Sigungu;
-import java.util.List;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class SigunguPresenter {
 
     public SigunguResponse toResponse(Sigungu sigungu) {
         return SigunguResponse.builder()
-            .sigunguId(sigungu.id())
-            .sigunguCode(sigungu.sigunguCode())
+            .sigunguId(String.valueOf(sigungu.id()))
+            .sigunguCode(String.valueOf(sigungu.sigunguCode()))
             .sigunguName(sigungu.sigunguName())
             .build();
     }

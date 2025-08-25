@@ -2,16 +2,17 @@ package com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.presente
 
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RegionResponse;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.Region;
-import java.util.List;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class RegionPresenter {
 
     public RegionResponse toResponse(Region region) {
         return RegionResponse.builder()
-            .regionId(region.id())
-            .regionCode(region.regionCode())
+            .regionId(String.valueOf(region.id()))
+            .regionCode(String.valueOf(region.regionCode()))
             .regionName(region.regionName())
             .build();
     }

@@ -13,7 +13,7 @@ public class TripSpotPresenter {
 
     public TripSpotSimpleResponse toSimpleResponse(TripSpot tripSpot) {
         return TripSpotSimpleResponse.builder()
-            .tripSpotId(tripSpot.id())
+            .tripSpotId(String.valueOf(tripSpot.id()))
             .tripSpotName(tripSpot.title())
             .originalImageUrl(tripSpot.firstImage())
             .build();
@@ -25,7 +25,7 @@ public class TripSpotPresenter {
 
     public TripSpotWithDetailViewResponse toDetailViewResponse(TripSpot tripSpot, TripSpotDetail tripSpotDetail, String contentTypeName) {
         return TripSpotWithDetailViewResponse.builder()
-            .tripSpotId(tripSpot.id())
+            .tripSpotId(String.valueOf(tripSpot.id()))
             .tripSpotName(tripSpot.title())
             .contentTypeName(contentTypeName)
             .description(tripSpotDetail.overview())
