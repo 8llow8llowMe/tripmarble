@@ -28,6 +28,8 @@ public class JavaMailSenderAdapter implements MailSendPort {
             message.addRecipients(RecipientType.TO, to);
             message.setSubject(subject);
             message.setText(htmlBody, "utf-8", "html");
+            javaMailSender.send(message);
+            log.info("[MailSender] 메일 발송 성공 - to: {}, subject: {}", to, subject);
         } catch (Exception e) {
             log.error("[MailSender] 메일 발송 실패 - to: {}, message: {}", to, e.getMessage(), e);
         }
