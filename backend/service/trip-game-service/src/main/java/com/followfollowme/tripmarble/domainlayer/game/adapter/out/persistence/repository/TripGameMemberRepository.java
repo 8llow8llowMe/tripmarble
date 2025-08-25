@@ -2,10 +2,11 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.r
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity.TripGameMemberEntity;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.repository.custom.TripGameMemberCustomRepository;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
 
 public interface TripGameMemberRepository extends JpaRepository<TripGameMemberEntity, Long>, TripGameMemberCustomRepository {
 
@@ -29,4 +30,6 @@ public interface TripGameMemberRepository extends JpaRepository<TripGameMemberEn
               and m.memberId = :memberId
         """)
     List<TripGameMemberEntity> findAllByTripGameIdAndMemberId(List<Long> tripGameIds, long memberId);
+
+    Optional<TripGameMemberEntity> findByTripGame_IdAndMemberId(long tripGameId, long memberId);
 }
