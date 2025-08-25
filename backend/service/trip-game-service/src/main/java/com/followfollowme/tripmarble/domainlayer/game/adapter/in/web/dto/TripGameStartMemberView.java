@@ -8,7 +8,7 @@ import lombok.Builder;
 public record TripGameStartMemberView(
 
     @Schema(description = "참여자 회원 ID", example = "202507110001")
-    long memberId,
+    String memberId,
 
     @Schema(description = "참여자 닉네임", example = "여행왕동근")
     String nickname,
