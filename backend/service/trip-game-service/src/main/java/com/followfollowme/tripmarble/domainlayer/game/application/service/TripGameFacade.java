@@ -3,15 +3,18 @@ package com.followfollowme.tripmarble.domainlayer.game.application.service;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.DifficultyResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter.TripGamePresenter;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDiceResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameTileCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameCreateProcessor;
+import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameDiceProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameQueryProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameStartProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameTileCreateProcessor;
@@ -19,12 +22,13 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficu
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
-import java.util.Arrays;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +38,7 @@ public class TripGameFacade implements TripGameWebUseCase {
     private final TripGameTileCreateProcessor tripGameTileCreateProcessor;
     private final TripGameQueryProcessor tripGameQueryProcessor;
     private final TripGameStartProcessor tripGameStartProcessor;
+    private final TripGameDiceProcessor tripGameDiceProcessor;
     private final TripGamePresenter tripGamePresenter;
 
     @Override
@@ -60,7 +65,7 @@ public class TripGameFacade implements TripGameWebUseCase {
         );
 
         // 3. 응답용 DTO로 변환
-        return tripGamePresenter.toGameCreateResponseFrom(tripGameCreateInfo);
+        return tripGamePresenter.toGameCreateResponse(tripGameCreateInfo);
     }
 
     @Override
@@ -78,5 +83,12 @@ public class TripGameFacade implements TripGameWebUseCase {
 
         // 2. 응답용 DTO로 변환
         return tripGamePresenter.toGameStartResponse(tripGameStartInfo);
+    }
+
+    @Override
+    @Transactional
+    public TripGameDiceRollResponse rollDiceTripGame(long tripGameId, long memberId) {
+        TripGameDiceResultInfo tripGameDiceResultInfo = tripGameDiceProcessor.rollDiceTripGame(tripGameId, memberId);
+        return tripGamePresenter.toDiceRollResponse(tripGameDiceResultInfo);
     }
 }
