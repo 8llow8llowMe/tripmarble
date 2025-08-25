@@ -1,10 +1,7 @@
-import { ApiResponseBase } from '@/apis/base';
-import { END_POINTS } from '@/constants/apis';
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/apis/axiosClient';
-import { QUERY_KEY } from '@/constants/keys';
+import { apiClient } from "@/shared/lib/api/client";
+import { useQuery } from "@tanstack/react-query";
 
-export interface GameStartResponse extends ApiResponseBase {
+export interface GameStartResponse {
   dataBody: {
     tripGameId: number;
     gameStatusCode: string;
@@ -16,21 +13,25 @@ export interface GameStartResponse extends ApiResponseBase {
         profileImage: string;
         turnOrder: number;
         isHost: boolean;
-      },
+      }
     ];
   };
 }
 export const fetchGameStart = async (tripGameId: bigint | string | number) => {
-  const id = typeof tripGameId === 'bigint' ? tripGameId.toString() : String(tripGameId);
-  const { data } = await apiClient.post<GameStartResponse>(END_POINTS.GAME.START(id));
+  const id =
+    typeof tripGameId === "bigint" ? tripGameId.toString() : String(tripGameId);
+  const { data } = await apiClient.post<GameStartResponse>(
+    `/trip-games/${tripGameId}/start`
+  );
   return data;
 };
 
 const useGameStartQuery = (tripGameId: bigint | string | number) => {
-  const idKey = typeof tripGameId === 'bigint' ? tripGameId.toString() : String(tripGameId);
+  const idKey =
+    typeof tripGameId === "bigint" ? tripGameId.toString() : String(tripGameId);
   const { data, isLoading, isError, isSuccess, refetch } = useQuery({
+    queryKey: ["gameStart", idKey],
     queryFn: () => fetchGameStart(tripGameId),
-    queryKey: [QUERY_KEY.GAME.GAME_START, idKey],
   });
 
   return {
