@@ -9,14 +9,14 @@ import java.time.LocalDate;
 @Builder
 public record TripGame(
     long id,
+    long representativeRegionId,
     String title,
     Status status,
     Difficulty difficulty,
     LocalDate startedAt,
     LocalDate endedAt,
     int currentTurnOrder,
-    int currentStepNo,
-    long representativeRegionId
+    int currentStepNo
 ) {
 
     public TripGame start() {
@@ -24,6 +24,7 @@ public record TripGame(
 
         return TripGame.builder()
             .id(this.id)
+            .representativeRegionId(this.representativeRegionId)
             .title(this.title)
             .status(Status.ONGOING)
             .difficulty(this.difficulty)
@@ -31,7 +32,6 @@ public record TripGame(
             .endedAt(this.endedAt)
             .currentTurnOrder(this.currentTurnOrder)
             .currentStepNo(this.currentStepNo)
-            .representativeRegionId(this.representativeRegionId)
             .build();
     }
 
@@ -40,6 +40,7 @@ public record TripGame(
 
         return TripGame.builder()
             .id(this.id)
+            .representativeRegionId(this.representativeRegionId)
             .title(this.title)
             .status(Status.ENDED)
             .difficulty(this.difficulty)
@@ -47,13 +48,13 @@ public record TripGame(
             .endedAt(this.endedAt)
             .currentTurnOrder(this.currentTurnOrder)
             .currentStepNo(this.currentStepNo)
-            .representativeRegionId(this.representativeRegionId)
             .build();
     }
 
     public TripGame updateCurrentStepNo(int updatedStepNo) {
         return TripGame.builder()
             .id(this.id)
+            .representativeRegionId(this.representativeRegionId)
             .title(this.title)
             .status(this.status)
             .difficulty(this.difficulty)
@@ -61,13 +62,13 @@ public record TripGame(
             .endedAt(this.endedAt)
             .currentTurnOrder(this.currentTurnOrder)
             .currentStepNo(updatedStepNo)
-            .representativeRegionId(this.representativeRegionId)
             .build();
     }
 
     public TripGame updateTurnAndStep(int updatedStepNo, int nextTurnOrder) {
         return TripGame.builder()
             .id(this.id)
+            .representativeRegionId(this.representativeRegionId)
             .title(this.title)
             .status(this.status)
             .difficulty(this.difficulty)
@@ -75,7 +76,6 @@ public record TripGame(
             .endedAt(this.endedAt)
             .currentTurnOrder(nextTurnOrder)
             .currentStepNo(updatedStepNo)
-            .representativeRegionId(this.representativeRegionId)
             .build();
     }
 }
