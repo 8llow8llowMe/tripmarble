@@ -1,15 +1,16 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
 import lombok.Builder;
+
+import java.util.List;
 
 @Builder
 @Schema(description = "여행 게임 시작 응답 DTO")
 public record TripGameStartResponse(
 
     @Schema(description = "여행 게임 ID", example = "1001")
-    long tripGameId,
+    String tripGameId,
 
     @Schema(description = "게임 상태 코드", example = "ONGOING")
     String gameStatusCode,
