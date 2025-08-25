@@ -73,7 +73,7 @@ public class TripGameDiceProcessor {
     }
 
     private int calculateNextTurn(int current, int totalMembers) {
-        // 솔로 플레이인 경우: 턴은 계속 자기 자신 유기
+        // 솔로 플레이인 경우: 턴은 계속 자기 자신 유지
         if (totalMembers <= 1) {
             return current;
         }
