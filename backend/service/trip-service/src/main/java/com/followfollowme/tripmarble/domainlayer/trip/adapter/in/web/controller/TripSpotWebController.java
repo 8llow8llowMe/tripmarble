@@ -30,11 +30,11 @@ public class TripSpotWebController {
     )
     @GetMapping("/by-representative-region/{representativeRegionId}")
     public ResponseEntity<Response<SliceResponse<TripSpotSimpleResponse>>> getTripSpotsByRepresentativeRegionId(
-        @PathVariable long representativeRegionId, @RequestParam(defaultValue = "0") long lastTripSpotId,
+        @PathVariable long representativeRegionId, @RequestParam(defaultValue = "0") String lastTripSpotId,
         @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) Integer contentTypeId) {
 
         SliceResponse<TripSpotSimpleResponse> result = tripSpotWebUseCase.getTripSpotsByRepresentativeRegionId(
-            representativeRegionId, lastTripSpotId, size, contentTypeId);
+            representativeRegionId, Long.parseLong(lastTripSpotId), size, contentTypeId);
         return ResponseEntity.ok(Response.success(result));
     }
 
@@ -44,9 +44,9 @@ public class TripSpotWebController {
     )
     @GetMapping("/{tripSpotId}")
     public ResponseEntity<Response<TripSpotWithDetailViewResponse>> getTripSpotWithDetail(
-        @PathVariable long tripSpotId) {
+        @PathVariable String tripSpotId) {
 
-        TripSpotWithDetailViewResponse response = tripSpotWebUseCase.getTripSpotWithDetail(tripSpotId);
+        TripSpotWithDetailViewResponse response = tripSpotWebUseCase.getTripSpotWithDetail(Long.parseLong(tripSpotId));
         return ResponseEntity.ok().body(Response.success(response));
     }
 }

@@ -6,13 +6,14 @@ import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.Repre
 import com.followfollowme.tripmarble.domainlayer.region.application.port.in.RepresentativeRegionWebUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,9 +39,9 @@ public class RepresentativeRegionWebController {
     )
     @GetMapping("/{representativeRegionId}")
     public ResponseEntity<Response<RepresentativeRegionDetailResponse>> getRepresentativeRegionDetail(
-        @PathVariable long representativeRegionId) {
-        RepresentativeRegionDetailResponse response = representativeRegionWebUseCase.getRepresentativeRegionDetail(
-            representativeRegionId);
+        @PathVariable String representativeRegionId) {
+        RepresentativeRegionDetailResponse response =
+            representativeRegionWebUseCase.getRepresentativeRegionDetail(Long.parseLong(representativeRegionId));
         return ResponseEntity.ok().body(Response.success(response));
     }
 }
