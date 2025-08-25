@@ -11,7 +11,7 @@ public record AuthLoginResponse(
     String accessToken,
 
     @Schema(description = "회원 아이디", example = "1")
-    long memberId
+    String memberId
 ) {
 
 }
