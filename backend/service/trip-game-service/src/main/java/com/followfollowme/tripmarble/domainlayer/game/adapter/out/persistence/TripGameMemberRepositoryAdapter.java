@@ -8,10 +8,11 @@ import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripG
 import com.followfollowme.tripmarble.domainlayer.game.application.readmodel.TripGameMemberCount;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -66,5 +67,11 @@ public class TripGameMemberRepositoryAdapter implements TripGameMemberRepository
     public List<TripGameMember> findAllByTripGameIdAndMemberId(List<Long> tripGameIds, long memberId) {
         List<TripGameMemberEntity> entities = tripGameMemberRepository.findAllByTripGameIdAndMemberId(tripGameIds, memberId);
         return tripGameMemberMapper.toDomainListFromEntityList(entities);
+    }
+
+    @Override
+    public Optional<TripGameMember> findByTripGameIdAndMemberId(long tripGameId, long memberId) {
+        return tripGameMemberRepository.findByTripGame_IdAndMemberId(tripGameId, memberId)
+            .map(tripGameMemberMapper::toDomainFromEntity);
     }
 }
