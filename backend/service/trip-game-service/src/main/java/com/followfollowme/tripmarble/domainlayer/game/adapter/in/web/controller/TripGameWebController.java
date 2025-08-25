@@ -5,6 +5,7 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.Difficu
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateRequest;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameWebUseCase;
@@ -82,6 +83,18 @@ public class TripGameWebController {
         @AuthenticationPrincipal MemberLoginActive loginActive, @RequestParam(defaultValue = "0") String lastTripGameId,
         @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) Status status) {
         SliceResponse<MyTripGameResponse> response = tripGameWebUseCase.getMyTripGames(loginActive.id(), Long.parseLong(lastTripGameId), size, status);
+        return ResponseEntity.ok().body(Response.success(response));
+    }
+
+    @Operation(
+        summary = "주사위 굴리기",
+        description = "현재 턴의 사용자가 주사위를 굴리는 기능입니다."
+    )
+    @PostMapping("/{tripGameId}/dice")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<TripGameDiceRollResponse>> rollDiceTripGame(
+        @PathVariable String tripGameId, @AuthenticationPrincipal MemberLoginActive loginActive) {
+        TripGameDiceRollResponse response = tripGameWebUseCase.rollDiceTripGame(Long.parseLong(tripGameId), loginActive.id());
         return ResponseEntity.ok().body(Response.success(response));
     }
 }
