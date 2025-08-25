@@ -11,7 +11,6 @@ import Button from "@/shared/ui/common/Button/Button";
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
 // datas
 import { gamesDummy } from "@/entities/games/model/gamesDummy";
-import { myGamesDummy } from "@/entities/games/model/MyGamesDummy";
 // stores
 import { useAppSelector } from "@/entities/users/model";
 import useMyGameList from "@/entities/games/hooks/useMyGameList";
@@ -19,7 +18,7 @@ import useMyGameList from "@/entities/games/hooks/useMyGameList";
 export default function Game() {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const router = useRouter();
-  const user = useAppSelector((state) => state.user.user);
+  const user = useAppSelector((state) => state?.user.user);
 
   const handleCreateClick = () => {
     if (!user) {
@@ -30,13 +29,13 @@ export default function Game() {
     setCreateModalOpen(true);
   };
 
-  // 나의 게임 목록 호출
   const { data } = useMyGameList();
+  const games = data?.data.dataBody.contents;
 
   return (
     <div className={styles.mainContainer}>
       <div className={styles.titleAndButton}>
-        <div className={styles.sectionTitle}>다른 사람들이 한 게임 목록</div>
+        <div className={styles.sectionTitle}>모든 게임</div>
         <Button
           radius="md"
           bgColor="primary"
@@ -48,15 +47,15 @@ export default function Game() {
           게임 만들기
         </Button>
       </div>
-      <div className={styles.flexRow}>
-        <GameList games={gamesDummy} />
-      </div>
+      {games && (
+        <div className={styles.flexRow}>
+          <GameList games={games} />
+        </div>
+      )}
 
-      <MyGamesHorizontal
-        games={data?.data.dataBody.contents}
-        gameStatus="WAITING"
-      />
-      <MyGamesHorizontal games={myGamesDummy} gameStatus="ENDED" />
+      <MyGamesHorizontal type={"WAITING"} />
+      <MyGamesHorizontal type={"ONGOING"} />
+      <MyGamesHorizontal type={"ENDED"} />
 
       <CreateGameModal
         isOpen={isCreateModalOpen}
