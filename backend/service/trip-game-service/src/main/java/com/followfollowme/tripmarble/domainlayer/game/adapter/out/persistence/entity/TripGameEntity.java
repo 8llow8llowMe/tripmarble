@@ -9,13 +9,14 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -30,6 +31,10 @@ public class TripGameEntity extends BaseEntity {
     @Id
     @Comment("여행 게임(계획) 아이디")
     private Long id;
+
+    @Comment("대표 여행지 연관 외래키")
+    @Column(nullable = false)
+    private Long representativeRegionId;
 
     @Comment("여행 게임(계획) 제목")
     private String title;
@@ -59,8 +64,4 @@ public class TripGameEntity extends BaseEntity {
     @Column(nullable = false)
     @Comment("현재 말이 위치한 블럭 번호")
     private Integer currentStepNo;
-
-    @Comment("대표 여행지 연관 외래키")
-    @Column(nullable = false)
-    private Long representativeRegionId;
 }
