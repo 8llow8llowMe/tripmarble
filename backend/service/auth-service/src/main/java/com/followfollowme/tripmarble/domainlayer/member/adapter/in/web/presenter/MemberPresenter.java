@@ -9,7 +9,7 @@ public class MemberPresenter {
 
     public MemberMyInfoResponse toMyInfoResponse(Member member) {
         return MemberMyInfoResponse.builder()
-            .memberId(member.id())
+            .memberId(String.valueOf(member.id()))
             .email(member.email())
             .name(member.name())
             .nickname(member.nickname())

@@ -37,7 +37,7 @@ public class JwtTokenProcessor {
 
         return AuthLoginResponse.builder()
             .accessToken(accessToken)
-            .memberId(memberId)
+            .memberId(String.valueOf(memberId))
             .build();
     }
 

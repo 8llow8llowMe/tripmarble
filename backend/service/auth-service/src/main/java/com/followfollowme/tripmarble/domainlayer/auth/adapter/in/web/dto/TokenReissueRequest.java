@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record TokenReissueRequest(
 
     @Schema(description = "회원 아이디", example = "202507110001")
-    long memberId
+    String memberId
 ) {
 
 }

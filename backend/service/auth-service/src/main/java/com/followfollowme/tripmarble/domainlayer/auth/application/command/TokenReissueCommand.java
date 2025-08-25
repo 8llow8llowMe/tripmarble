@@ -10,7 +10,7 @@ public record TokenReissueCommand(
 
     public static TokenReissueCommand from(TokenReissueRequest request) {
         return TokenReissueCommand.builder()
-            .memberId(request.memberId())
+            .memberId(Long.parseLong(request.memberId()))
             .build();
     }
 }
