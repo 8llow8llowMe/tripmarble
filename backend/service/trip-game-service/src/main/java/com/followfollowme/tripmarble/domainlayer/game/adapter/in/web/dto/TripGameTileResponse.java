@@ -8,10 +8,10 @@ import lombok.Builder;
 public record TripGameTileResponse(
 
     @Schema(description = "타일(블록) 고유 ID", example = "20250731000123")
-    long tripGameTileId,
+    String tripGameTileId,
 
     @Schema(description = "해당 타일이 참조하는 여행지 ID", example = "134512")
-    long tripSpotId,
+    String tripSpotId,
 
     @Schema(description = "여행지 이름", example = "제주도민속촌")
     String tripSpotName,
