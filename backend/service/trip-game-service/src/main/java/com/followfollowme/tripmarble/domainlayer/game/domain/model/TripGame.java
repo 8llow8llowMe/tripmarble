@@ -2,8 +2,9 @@ package com.followfollowme.tripmarble.domainlayer.game.domain.model;
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
-import java.time.LocalDate;
 import lombok.Builder;
+
+import java.time.LocalDate;
 
 @Builder
 public record TripGame(
@@ -19,9 +20,8 @@ public record TripGame(
 ) {
 
     public TripGame start() {
-        if (this.status != Status.WAITING) {
-            throw new IllegalStateException("게임은 대기 상태에서만 시작할 수 있습니다.");
-        }
+        this.status.validateStartable(); // 상태에 위임
+
         return TripGame.builder()
             .id(this.id)
             .title(this.title)
@@ -36,9 +36,8 @@ public record TripGame(
     }
 
     public TripGame end() {
-        if (this.status != Status.ENDED) {
-            throw new IllegalStateException("이미 종료된 게임입니다.");
-        }
+        this.status.validateEndable(); // 상태에 위임
+
         return TripGame.builder()
             .id(this.id)
             .title(this.title)
