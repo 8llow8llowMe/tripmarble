@@ -12,7 +12,13 @@ import org.springframework.stereotype.Component;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -77,16 +83,19 @@ public class RegionJdbcAdapter implements RegionJdbcPort {
     }
 
     private Map<String, Long> fetchRegionIdMap(Set<String> regionCodes) {
-        if (regionCodes.isEmpty()) return Collections.emptyMap();
+        if (regionCodes.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
         String placeholders = String.join(",", Collections.nCopies(regionCodes.size(), "?"));
         String sql = "SELECT region_code, id FROM region WHERE region_code IN (" + placeholders + ")";
 
         List<Map.Entry<String, Long>> results = jdbcTemplate.query(
             sql,
-            regionCodes.toArray(),
-            regionRowMapper()
+            regionRowMapper(),
+            regionCodes.toArray()
         );
+
 
         Map<String, Long> map = new HashMap<>();
         for (Map.Entry<String, Long> entry : results) {
