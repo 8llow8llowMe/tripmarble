@@ -11,22 +11,33 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // 돋보기, 뒤로가기 아이콘
 import { useNavigation } from '@react-navigation/native';
+import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
+import { palette } from '@/constants/colors';
 
 const DUMMY_RECENT = [
-  { keyword: '경주', date: '10.31' },
-  { keyword: '창덕궁', date: '10.29' },
-  { keyword: '서평', date: '10.29' },
+  { name: '부산', representativeRegionId: 5, date: '10.31' },
+  { name: '제주도', representativeRegionId: 10, date: '10.29' },
+  { name: '강릉', representativeRegionId: 6, date: '10.29' },
+  { name: '경주', representativeRegionId: 8, date: '10.29' },
 ];
 
 export default function SearchScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<AppNavigatorNavigationProp>();
 
   const [searchText, setSearchText] = useState('');
   const [recent, setRecent] = useState(DUMMY_RECENT);
 
   const handleClearRecent = () => setRecent([]);
-  const handleRemoveRecent = (keyword: string) =>
-    setRecent((prev) => prev.filter((item) => item.keyword !== keyword));
+  const handleRemoveRecent = (name: string) =>
+    setRecent((prev) => prev.filter((item) => item.name !== name));
+
+  // 대표여행지 스크린으로 이동
+  const goToSpotListScreen = (representativeRegionId: number) => {
+    navigation.navigate('SpotStackNavigator', {
+      screen: 'SpotListScreen',
+      params: { representativeRegionId: representativeRegionId },
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -60,23 +71,29 @@ export default function SearchScreen() {
               <Text style={styles.clearBtn}>지우기</Text>
             </TouchableOpacity>
           </View>
+
           {recent.length === 0 ? (
             <Text style={styles.emptyRecent}>최근 검색어가 없습니다.</Text>
           ) : (
             recent.map((item) => (
-              <View style={styles.recentItem} key={item.keyword}>
+              <TouchableOpacity
+                key={item.name}
+                style={styles.recentItem}
+                activeOpacity={0.7}
+                onPress={() => goToSpotListScreen(item.representativeRegionId)}
+              >
                 <Ionicons
                   name="time-outline"
                   size={18}
                   color="#b0b0b0"
                   style={{ marginRight: 8 }}
                 />
-                <Text style={styles.keyword}>{item.keyword}</Text>
+                <Text style={styles.keyword}>{item.name}</Text>
                 <Text style={styles.date}>{item.date}</Text>
-                <TouchableOpacity onPress={() => handleRemoveRecent(item.keyword)}>
+                <TouchableOpacity onPress={() => handleRemoveRecent(item.name)}>
                   <Ionicons name="close" size={18} color="#aaa" />
                 </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             ))
           )}
         </View>
@@ -86,8 +103,8 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: { flex: 1, backgroundColor: '#fff', paddingHorizontal: 20, paddingTop: 0 },
+  safeArea: { flex: 1, backgroundColor: palette.white },
+  container: { flex: 1, backgroundColor: palette.white, paddingHorizontal: 20, paddingTop: 0 },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
