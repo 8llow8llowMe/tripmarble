@@ -13,12 +13,10 @@ import {
 import jejuImage from '@images/places/jeju2.png';
 import gyeongjuImage from '@images/places/gyeongju.png';
 
-import { CompositeScreenProps, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AppNavigatorParamList, ExploreStackParamList } from '@/types/navigation/navigation';
 
 const bgHeight = Dimensions.get('window').height * 0.5;
 const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 가능)

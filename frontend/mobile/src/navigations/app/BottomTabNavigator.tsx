@@ -6,12 +6,12 @@ import { useAppDispatch, useAppSelector } from '@/store/store';
 import { useEffect } from 'react';
 import { setUser } from '@/store/redux/user/user';
 import ProfileHomeScreen from '@/screens/Profile/ProfileHomeScreen';
-import HomeStackNavigator from '@/navigations/app/HomeStackNavigator';
 import TabHeader from '@/components/layout/header/TabHeader';
 import { palette } from '@/constants/colors';
 import { BottomTabParamList } from '@/types/navigation/navigation';
 import GamePlayStackNavigator from '@/navigations/app/GamePlayStackNavigator';
 import ExploreScreen from '@/screens/Explore/ExploreScreen';
+import HomeScreen from '@/screens/Home/HomeScreen';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -63,7 +63,7 @@ export default function BottomTabNavigator() {
     >
       <Tab.Screen
         name="HomeTab"
-        component={HomeStackNavigator}
+        component={HomeScreen}
         options={{
           tabBarLabel: '홈',
           headerShown: false,
