@@ -25,22 +25,10 @@ export type AppNavigatorParamList = {
 
 // === Bottom Tabs ===
 export type BottomTabParamList = {
-  HomeTab: NavigatorScreenParams<HomeStackParamList>;
+  HomeTab: undefined;
   ExploreTab: undefined;
   GameTab: undefined;
   ProfileTab: undefined;
-};
-
-export type HomeStackParamList = {
-  HomeScreen: undefined;
-  SpotListScreen: { representativeRegionId: number; regionName: string };
-  SpotDetailScreen: undefined;
-};
-
-export type ExploreStackParamList = {
-  ExploreScreen: undefined;
-  SpotListScreen: { representativeRegionId: number; regionName: string };
-  SpotDetailScreen: undefined;
 };
 
 // === 각 스택 ===
