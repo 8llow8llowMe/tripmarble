@@ -8,6 +8,7 @@ import CreateGameScreen from '@/screens/Game/CreateGameScreen';
 import SettingStackNavigator from '@/navigations/app/SettingStackNavigator';
 import { AppNavigatorParamList } from '@/types/navigation/navigation';
 import GamePlayStackNavigator from '@/navigations/app/GamePlayStackNavigator';
+import SpotStackNavigator from '@/navigations/app/SpotStackNavigator';
 
 const Stack = createNativeStackNavigator<AppNavigatorParamList>();
 
@@ -18,7 +19,6 @@ const AppNavigator = () => {
       <Stack.Screen name="SettingsNavigator" component={SettingStackNavigator} />
 
       <Stack.Screen name="SearchScreen" component={SearchScreen} />
-
       <Stack.Screen
         name="CreateGameScreen"
         component={CreateGameScreen}
@@ -28,6 +28,7 @@ const AppNavigator = () => {
       />
 
       <Stack.Screen name="GamePlayStackNavigator" component={GamePlayStackNavigator} />
+      <Stack.Screen name="SpotStackNavigator" component={SpotStackNavigator} />
     </Stack.Navigator>
   );
 };
