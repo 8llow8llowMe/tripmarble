@@ -23,13 +23,8 @@ import { AppNavigatorParamList, ExploreStackParamList } from '@/types/navigation
 const bgHeight = Dimensions.get('window').height * 0.5;
 const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 가능)
 
-// ExploreStack 안에서 ExploreScreen을 Props로 받을 때
-export type ExploreScreenProps = CompositeScreenProps<
-  NativeStackScreenProps<ExploreStackParamList, 'ExploreScreen'>,
-  NativeStackScreenProps<AppNavigatorParamList>
->;
-export default function ExploreScreen({ navigation }: ExploreScreenProps) {
-  // const navigation = useNavigation<AppNavigatorNavigationProp>();
+export default function ExploreScreen() {
+  const navigation = useNavigation<AppNavigatorNavigationProp>();
 
   const popularPlaces = [
     { name: '부산', image: gyeongjuImage, representativeRegionId: 5 },
@@ -37,6 +32,14 @@ export default function ExploreScreen({ navigation }: ExploreScreenProps) {
     { name: '강릉', image: gyeongjuImage, representativeRegionId: 6 },
     { name: '경주', image: gyeongjuImage, representativeRegionId: 8 },
   ];
+
+  // 대표여행지 스크린으로 이동
+  const goToSpotListScreen = (representativeRegionId: number) => {
+    navigation.navigate('SpotStackNavigator', {
+      screen: 'SpotListScreen',
+      params: { representativeRegionId: representativeRegionId },
+    });
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.white }}>
@@ -69,10 +72,7 @@ export default function ExploreScreen({ navigation }: ExploreScreenProps) {
               style={styles.placeItem}
               activeOpacity={0.7}
               onPress={() => {
-                navigation.navigate('SpotListScreen', {
-                  representativeRegionId: place.representativeRegionId,
-                  regionName: place.name,
-                });
+                goToSpotListScreen(place.representativeRegionId);
               }}
             >
               <View style={styles.placeCircle}>

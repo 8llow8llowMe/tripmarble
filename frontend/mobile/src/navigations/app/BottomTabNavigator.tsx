@@ -7,11 +7,11 @@ import { useEffect } from 'react';
 import { setUser } from '@/store/redux/user/user';
 import ProfileHomeScreen from '@/screens/Profile/ProfileHomeScreen';
 import HomeStackNavigator from '@/navigations/app/HomeStackNavigator';
-import ExploreStackNavigator from '@/navigations/app/ExploreStackNavigator';
 import TabHeader from '@/components/layout/header/TabHeader';
 import { palette } from '@/constants/colors';
 import { BottomTabParamList } from '@/types/navigation/navigation';
 import GamePlayStackNavigator from '@/navigations/app/GamePlayStackNavigator';
+import ExploreScreen from '@/screens/Explore/ExploreScreen';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
@@ -71,7 +71,7 @@ export default function BottomTabNavigator() {
       />
       <Tab.Screen
         name="ExploreTab"
-        component={ExploreStackNavigator}
+        component={ExploreScreen}
         options={{
           tabBarLabel: '떠나보기',
           headerShown: false,
