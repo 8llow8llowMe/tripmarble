@@ -19,14 +19,14 @@ export type AppNavigatorParamList = {
   SettingsNavigator: NavigatorScreenParams<SettingsParamList>;
   SearchScreen: undefined;
   CreateGameScreen: undefined;
-  OngoingGameScreen: { id: number; title: string };
   GamePlayStackNavigator: NavigatorScreenParams<GamePlayStackParamList>;
+  SpotStackNavigator: NavigatorScreenParams<SpotStackParamList>;
 };
 
 // === Bottom Tabs ===
 export type BottomTabParamList = {
   HomeTab: NavigatorScreenParams<HomeStackParamList>;
-  ExploreTab: NavigatorScreenParams<ExploreStackParamList>;
+  ExploreTab: undefined;
   GameTab: undefined;
   ProfileTab: undefined;
 };
@@ -54,4 +54,9 @@ export type GamePlayStackParamList = {
   OngoingGameScreen: { tripGameId: number };
   GameListScreen: { status?: 'WAITING' | 'ONGOING' | 'ENDED' };
   GameMissionAuthScreen: undefined;
+};
+
+export type SpotStackParamList = {
+  SpotListScreen: { representativeRegionId: number };
+  SpotDetailScreen: undefined;
 };
