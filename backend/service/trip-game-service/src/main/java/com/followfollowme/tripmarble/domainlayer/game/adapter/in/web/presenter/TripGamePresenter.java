@@ -3,22 +3,23 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameResumeResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartMemberView;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDiceResultInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameEndInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameResumeInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -118,6 +119,14 @@ public class TripGamePresenter {
             .landedTileId(String.valueOf(info.landedTile().id()))
             .missionTypeCode(info.landedTile().missionType().name())
             .missionTypeDescription(info.landedTile().missionType().getDescription())
+            .build();
+    }
+
+    public TripGameEndResponse toEndResponse(TripGameEndInfo info) {
+        return TripGameEndResponse.builder()
+            .tripGameId(String.valueOf(info.tripGameId()))
+            .gameStatusCode(info.status().name())
+            .gameStatusDescription(info.status().getDescription())
             .build();
     }
 }
