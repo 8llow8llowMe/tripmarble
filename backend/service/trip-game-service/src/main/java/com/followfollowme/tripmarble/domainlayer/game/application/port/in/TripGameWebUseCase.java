@@ -4,11 +4,11 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.Difficu
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
-
 import java.util.List;
 
 public interface TripGameWebUseCase {
@@ -22,4 +22,6 @@ public interface TripGameWebUseCase {
     TripGameStartResponse startTripGame(long tripGameId, long hostMemberId);
 
     TripGameDiceRollResponse rollDiceTripGame(long tripGameId, long memberId);
+
+    TripGameEndResponse endTripGame(long tripGameId);
 }
