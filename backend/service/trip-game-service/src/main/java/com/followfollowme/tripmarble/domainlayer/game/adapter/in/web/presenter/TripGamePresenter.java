@@ -127,6 +127,8 @@ public class TripGamePresenter {
             .tripGameId(String.valueOf(info.tripGameId()))
             .gameStatusCode(info.status().name())
             .gameStatusDescription(info.status().getDescription())
+            .endTypeCode(info.endType().name())
+            .endTypeDescription(info.endType().getDescription())
             .build();
     }
 }
