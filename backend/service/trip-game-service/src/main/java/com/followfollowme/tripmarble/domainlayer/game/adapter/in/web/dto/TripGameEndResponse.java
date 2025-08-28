@@ -14,7 +14,13 @@ public record TripGameEndResponse(
     String gameStatusCode,
 
     @Schema(description = "게임 상태 설명", example = "게임 종료됨")
-    String gameStatusDescription
+    String gameStatusDescription,
+
+    @Schema(description = "게임 종료 사유 상태", example = "NORMAL")
+    String endTypeCode,
+
+    @Schema(description = "게임 종료 사유 상태 설명", example = "정상 종료")
+    String endTypeDescription
 ) {
 
 }
