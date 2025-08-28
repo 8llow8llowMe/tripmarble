@@ -1,10 +1,10 @@
 package com.followfollowme.tripmarble.domainlayer.game.domain.model;
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.EndType;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
-import lombok.Builder;
-
 import java.time.LocalDate;
+import lombok.Builder;
 
 @Builder
 public record TripGame(
@@ -16,56 +16,51 @@ public record TripGame(
     LocalDate startedAt,
     LocalDate endedAt,
     int currentTurnOrder,
-    int currentStepNo
+    int currentStepNo,
+    EndType endType
 ) {
 
     public TripGame start() {
         this.status.validateStartable(); // 상태에 위임
-
-        return TripGame.builder()
-            .id(this.id)
-            .representativeRegionId(this.representativeRegionId)
-            .title(this.title)
-            .status(Status.ONGOING)
-            .difficulty(this.difficulty)
-            .startedAt(this.startedAt)
-            .endedAt(this.endedAt)
-            .currentTurnOrder(this.currentTurnOrder)
-            .currentStepNo(this.currentStepNo)
-            .build();
+        return withStatus(Status.ONGOING, null);
     }
 
-    public TripGame end() {
-        this.status.validateEndable(); // 상태에 위임
+    public void play() {
+        this.status.validatePlayable();
+    }
 
-        return TripGame.builder()
-            .id(this.id)
-            .representativeRegionId(this.representativeRegionId)
-            .title(this.title)
-            .status(Status.ENDED)
-            .difficulty(this.difficulty)
-            .startedAt(this.startedAt)
-            .endedAt(this.endedAt)
-            .currentTurnOrder(this.currentTurnOrder)
-            .currentStepNo(this.currentStepNo)
-            .build();
+    public TripGame normalEnd() {
+        return endInternal(EndType.NORMAL);
+    }
+
+    public TripGame forceEnd() {
+        return endInternal(EndType.FORCED);
     }
 
     public TripGame updateCurrentStepNo(int updatedStepNo) {
+        return withStepAndTurn(updatedStepNo, this.currentTurnOrder);
+    }
+
+    public TripGame updateTurnAndStep(int updatedStepNo, int nextTurnOrder) {
+        return withStepAndTurn(updatedStepNo, nextTurnOrder);
+    }
+
+    private TripGame withStatus(Status newStatus, EndType endType) {
         return TripGame.builder()
             .id(this.id)
             .representativeRegionId(this.representativeRegionId)
             .title(this.title)
-            .status(this.status)
+            .status(newStatus)
             .difficulty(this.difficulty)
             .startedAt(this.startedAt)
             .endedAt(this.endedAt)
             .currentTurnOrder(this.currentTurnOrder)
-            .currentStepNo(updatedStepNo)
+            .currentStepNo(this.currentStepNo)
+            .endType(endType)
             .build();
     }
 
-    public TripGame updateTurnAndStep(int updatedStepNo, int nextTurnOrder) {
+    private TripGame withStepAndTurn(int step, int turn) {
         return TripGame.builder()
             .id(this.id)
             .representativeRegionId(this.representativeRegionId)
@@ -74,8 +69,14 @@ public record TripGame(
             .difficulty(this.difficulty)
             .startedAt(this.startedAt)
             .endedAt(this.endedAt)
-            .currentTurnOrder(nextTurnOrder)
-            .currentStepNo(updatedStepNo)
+            .currentTurnOrder(turn)
+            .currentStepNo(step)
+            .endType(this.endType)
             .build();
+    }
+
+    private TripGame endInternal(EndType type) {
+        this.status.validateEndable();
+        return withStatus(Status.ENDED, type);
     }
 }
