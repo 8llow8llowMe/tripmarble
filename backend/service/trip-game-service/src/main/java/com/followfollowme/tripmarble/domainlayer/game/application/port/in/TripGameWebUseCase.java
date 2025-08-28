@@ -23,5 +23,7 @@ public interface TripGameWebUseCase {
 
     TripGameDiceRollResponse rollDiceTripGame(long tripGameId, long memberId);
 
-    TripGameEndResponse endTripGame(long tripGameId);
+    TripGameEndResponse normalEndTripGame(long tripGameId);
+
+    TripGameEndResponse forceEndTripGame(long tripGameId, long requesterId);
 }
