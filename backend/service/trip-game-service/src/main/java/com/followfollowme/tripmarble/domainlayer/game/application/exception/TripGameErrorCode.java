@@ -19,8 +19,9 @@ public enum TripGameErrorCode {
     MEMBER_NOT_PARTICIPANT("TRIP_GAME_009", "해당 게임에 참여하지 않은 회원입니다.", HttpStatus.FORBIDDEN),
     GAME_NOT_WAITING("TRIP_GAME_010", "게임은 대기 상태에서만 시작할 수 있습니다.", HttpStatus.BAD_REQUEST),
     GAME_NOT_ONGOING("TRIP_GAME_011", "게임은 진행 중일 때만 주사위를 굴릴 수 있습니다.", HttpStatus.BAD_REQUEST),
-    GAME_ALREADY_ENDED("TRIP_GAME_012", "이미 종료된 게임입니다.", HttpStatus.BAD_REQUEST);
-
+    GAME_ALREADY_ENDED("TRIP_GAME_012", "이미 종료된 게임입니다.", HttpStatus.BAD_REQUEST),
+    MOVE_LOG_NOT_FOUND("TRIP_GAME_013", "해당 게임 이동 로그를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    MISSION_ALREADY_PROCESSED("TRIP_GAME_014", "이미 처리된 미션입니다.", HttpStatus.BAD_REQUEST);
 
     private final String code;
     private final String errorMessage;
