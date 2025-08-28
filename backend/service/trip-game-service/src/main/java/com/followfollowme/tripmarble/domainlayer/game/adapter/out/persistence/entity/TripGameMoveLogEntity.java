@@ -50,6 +50,7 @@ public class TripGameMoveLogEntity extends BaseEntity {
     private Integer turnOrder;
 
     @Comment("미션 수행 결과 (성공/실패/스킵/대기중)")
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private MissionResult missionResult;
 }
