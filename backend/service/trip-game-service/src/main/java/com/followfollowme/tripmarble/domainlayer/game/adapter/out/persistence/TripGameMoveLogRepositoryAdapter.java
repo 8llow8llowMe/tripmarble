@@ -6,6 +6,7 @@ import com.followfollowme.tripmarble.domainlayer.game.application.mapper.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMoveLogRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMoveLog;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,5 +22,11 @@ public class TripGameMoveLogRepositoryAdapter implements TripGameMoveLogReposito
         TripGameMoveLogEntity entity = tripGameMoveLogMapper.toEntityFromDomain(tripGameMoveLog, tripGameTile);
         TripGameMoveLogEntity savedEntity = tripGameMoveLogRepository.save(entity);
         return tripGameMoveLogMapper.toDomainFromEntity(savedEntity);
+    }
+
+    @Override
+    public Optional<TripGameMoveLog> findById(long tripGameMoveLogId) {
+        return tripGameMoveLogRepository.findById(tripGameMoveLogId)
+            .map(tripGameMoveLogMapper::toDomainFromEntity);
     }
 }
