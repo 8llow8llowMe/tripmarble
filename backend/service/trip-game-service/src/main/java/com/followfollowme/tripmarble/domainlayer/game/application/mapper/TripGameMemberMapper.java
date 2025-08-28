@@ -18,8 +18,8 @@ public interface TripGameMemberMapper {
     List<TripGameMember> toDomainListFromEntityList(List<TripGameMemberEntity> entities);
 
     // 도메인 -> 엔티티
-    @Mapping(target = "tripGame", source = "tripGame")
     @Mapping(target = "id", source = "domain.id")
+    @Mapping(target = "tripGame", source = "tripGame")
     @Mapping(target = "memberId", source = "domain.memberId")
     @Mapping(target = "isReady", source = "domain.isReady")
     @Mapping(target = "isHost", source = "domain.isHost")
