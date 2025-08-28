@@ -9,11 +9,10 @@ import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripG
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -28,21 +27,22 @@ public class TripGameDiceProcessor {
         TripGame game = tripGameRepositoryPort.findById(tripGameId)
             .orElseThrow(() -> new TripGameException(TripGameErrorCode.GAME_NOT_FOUND));
 
-        // 1-1. 게임 상태별로 검증 (상태별로 자기 책임으로 검증)
-        game.status().validatePlayable();
-
-        // 2, 턴 검증
+        // 2. 참여자 검증
         TripGameMember me = tripGameMemberRepositoryPort.findByTripGameIdAndMemberId(tripGameId, memberId)
             .orElseThrow(() -> new TripGameException(TripGameErrorCode.MEMBER_NOT_PARTICIPANT));
 
+        // 3. 턴 검증
         if (me.turnOrder() != game.currentTurnOrder()) {
             throw new TripGameException(TripGameErrorCode.MEMBER_TURN_NOT_MATCH);
         }
 
-        // 3. 주사위 값 생성
+        // 4. 게임 플레이 가능 상태 검증
+        game.play();
+
+        // 4. 주사위 값 생성
         int diceValue = ThreadLocalRandom.current().nextInt(1, 7);
 
-        // 4. 새로운 위치 계산
+        // 5. 새로운 위치 계산
         List<TripGameTile> tiles = tripGameTileRepositoryPort.findAllByTripGameId(tripGameId);
         int maxStep = tiles.size();
         int newStep = game.currentStepNo() + diceValue;
@@ -60,14 +60,14 @@ public class TripGameDiceProcessor {
             return TripGameDiceResultInfo.of(diceValue, newStep, endedGame, landedTile, isGameEnded);
         }
 
-        // 5. 턴 순서 변경 (솔로 vs 멀티)
+        // 6. 턴 순서 변경 (솔로 vs 멀티)
         int totalMembers = tripGameMemberRepositoryPort.findAllByTripGameId(tripGameId).size();
         int nextTurnOrder = calculateNextTurn(game.currentTurnOrder(), totalMembers);
 
         TripGame updated = game.updateTurnAndStep(newStep, nextTurnOrder);
         tripGameRepositoryPort.save(updated);
 
-        // 6. 결과 반환
+        // 7. 결과 반환
         TripGameTile landedTile = tiles.get(newStep - 1);
         return TripGameDiceResultInfo.of(diceValue, newStep, updated, landedTile, isGameEnded);
     }
