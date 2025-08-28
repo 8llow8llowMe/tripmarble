@@ -41,4 +41,10 @@ public class TripGameTileRepositoryAdapter implements TripGameTileRepositoryPort
         List<TripGameTileEntity> entities = tripGameTileRepository.findAllByTripGameId(tripGameId);
         return tripGameTileMapper.toDomainListFromEntityList(entities);
     }
+
+    @Override
+    public Optional<TripGameTile> findById(long tripGameTileId) {
+        return tripGameTileRepository.findById(tripGameTileId)
+            .map(tripGameTileMapper::toDomainFromEntity);
+    }
 }

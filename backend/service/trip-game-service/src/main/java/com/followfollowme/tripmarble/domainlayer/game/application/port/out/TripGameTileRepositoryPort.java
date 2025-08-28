@@ -14,4 +14,6 @@ public interface TripGameTileRepositoryPort {
     Optional<TripGameTile> findByTripGameIdAndStepNo(long tripGameId, int stepNo);
 
     List<TripGameTile> findAllByTripGameId(long tripGameId);
+
+    Optional<TripGameTile> findById(long tripGameTileId);
 }
