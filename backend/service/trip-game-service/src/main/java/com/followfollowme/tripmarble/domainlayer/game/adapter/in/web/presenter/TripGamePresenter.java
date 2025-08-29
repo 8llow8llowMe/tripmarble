@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter;
 
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MissionResultResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
@@ -7,6 +8,7 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameResumeResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartMemberView;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.MissionResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDiceResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameEndInfo;
@@ -129,6 +131,15 @@ public class TripGamePresenter {
             .gameStatusDescription(info.status().getDescription())
             .endTypeCode(info.endType().name())
             .endTypeDescription(info.endType().getDescription())
+            .build();
+    }
+
+    public MissionResultResponse toMissionResultResponse(MissionResultInfo info) {
+        return MissionResultResponse.builder()
+            .tripGameMoveLogId(String.valueOf(info.tripGameMoveLogId()))
+            .tripGameTileId(String.valueOf(info.tripGameTileId()))
+            .missionResultCode(info.missionResult().name())
+            .missionResultDescription(info.missionResult().getDescription())
             .build();
     }
 }
