@@ -14,6 +14,7 @@ public class TripSpotPresenter {
     public TripSpotSimpleResponse toSimpleResponse(TripSpot tripSpot) {
         return TripSpotSimpleResponse.builder()
             .tripSpotId(String.valueOf(tripSpot.id()))
+            .contentId(String.valueOf(tripSpot.contentId()))
             .tripSpotName(tripSpot.title())
             .originalImageUrl(tripSpot.firstImage())
             .build();
