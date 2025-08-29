@@ -5,21 +5,21 @@ import { apiClient } from '@/apis/axiosClient';
 import { QUERY_KEY } from '@/constants/keys';
 
 interface Props {
-  representativeRegionId: number;
+  representativeRegionId: string;
   size?: number;
 }
 
 export interface TripSpotListRequest {
-  representativeRegionId: number;
-  lastTripSpotId?: number;
+  representativeRegionId: string;
+  lastTripSpotId?: string;
   size?: number;
 }
 
 export interface TripSpotListResponse extends ApiResponseBase {
   dataBody: {
     contents: {
-      tripSpotId: number;
-      contentId: number;
+      tripSpotId: string;
+      contentId: string;
       tripSpotName: string;
       originalImageUrl: string | null;
     }[];
@@ -32,7 +32,7 @@ export const getTripSpotList = async ({
   lastTripSpotId,
   size = 10,
 }: TripSpotListRequest) => {
-  const params: any = {};
+  const params: Record<string, string | number> = {};
   if (lastTripSpotId !== undefined) params.lastTripSpotId = lastTripSpotId;
   if (size !== undefined) params.size = size;
 
@@ -46,7 +46,7 @@ export const getTripSpotList = async ({
 
 const useTripSpotListInfiniteQuery = ({ representativeRegionId, size = 10 }: Props) => {
   return useInfiniteQuery({
-    queryFn: ({ pageParam }: { pageParam?: number }) =>
+    queryFn: ({ pageParam }: { pageParam?: string }) =>
       getTripSpotList({
         representativeRegionId,
         lastTripSpotId: pageParam,

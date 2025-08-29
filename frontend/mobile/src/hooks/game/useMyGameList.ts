@@ -7,7 +7,7 @@ import { useQuery, useQueries, UseQueryResult } from '@tanstack/react-query';
 export type GameStatus = 'WAITING' | 'ONGOING' | 'ENDED';
 
 export interface GameSummary {
-  tripGameId: number;
+  tripGameId: string;
   gameStatus: GameStatus;
   gameStatusDescription: '게임 시작 전' | '게임 진행 중' | '게임 종료';
   difficultyCode: 'EASY' | 'NORMAL' | 'HARD';
@@ -31,7 +31,7 @@ export interface GameListResponse extends ApiResponseBase {
 }
 
 export interface MyGameListParams {
-  lastTripGameId?: number; // default 0
+  lastTripGameId?: string; // default 0
   size?: number; // default 10
   status?: GameStatus; // WAITING | ONGOING | ENDED
 }

@@ -6,7 +6,7 @@ import { QUERY_KEY } from '@/constants/keys';
 
 export interface TripThemesListResponse extends ApiResponseBase {
   dataBody: {
-    tripThemeId: number;
+    tripThemeId: string;
     tripThemeName: string;
   }[];
 }

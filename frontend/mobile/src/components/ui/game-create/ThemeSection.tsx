@@ -17,12 +17,12 @@ export const themeIconMap: Record<string, IconName> = {
   음식점: 'restaurant-outline', // 맛집
 };
 
-type Theme = { tripThemeId: number; tripThemeName: string };
+type Theme = { tripThemeId: string; tripThemeName: string };
 type Props = {
   onLayout?: (e: any) => void;
   themes: Theme[]; // 8개 예상
-  selectedIds: number[];
-  onToggle: (id: number) => void;
+  selectedIds: string[];
+  onToggle: (id: string) => void;
   onNext?: () => void; // 첫 선택 시 다음 섹션 이동
   minHeight: number;
 };

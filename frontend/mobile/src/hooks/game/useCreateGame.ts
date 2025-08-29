@@ -8,13 +8,13 @@ export interface CreateGameRequest {
   difficulty: string;
   startedAt: string;
   endedAt: string;
-  representativeRegionId: number;
-  tripThemeIds: number[];
+  representativeRegionId: string;
+  tripThemeIds: string[];
 }
 
 export interface CreateGameResponse extends ApiResponseBase {
   dataBody: {
-    tripGameId: number;
+    tripGameId: string;
     title: string; // not null(front에서 디폴트로 값 지정)
     gameStatus: string; // WAITING
     gameStatusDescription: string; // 시작 전

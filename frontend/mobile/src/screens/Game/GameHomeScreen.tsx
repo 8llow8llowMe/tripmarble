@@ -29,7 +29,7 @@ export default function GameHomeScreen() {
   };
 
   // 진행중인 게임 스크린으로 이동
-  const goToGameOngoingScreen = (tripGameId: number) => {
+  const goToGameOngoingScreen = (tripGameId: string) => {
     navigation.navigate('GamePlayStackNavigator', {
       screen: 'OngoingGameScreen',
       params: { tripGameId },
@@ -37,7 +37,7 @@ export default function GameHomeScreen() {
   };
 
   // 종료된 게임 스크린으로 이동
-  const goToGameEndedScreen = (tripGameId: number) => {
+  const goToGameEndedScreen = (tripGameId: string) => {
     navigation.navigate('GamePlayStackNavigator', {
       screen: 'EndedGameScreen',
       params: { tripGameId },
