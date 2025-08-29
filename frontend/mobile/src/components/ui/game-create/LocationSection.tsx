@@ -6,7 +6,7 @@ import { palette } from '@/constants/colors';
 import NextFloatingButton from './NextFloatingButton';
 
 type Region = {
-  representativeRegionId: number;
+  representativeRegionId: string;
   representativeRegionName: string;
   imageUrl: string | null;
 };
@@ -15,8 +15,8 @@ type Props = {
   onLayout?: (e: any) => void;
   onNext?: () => void;
   regions: Region[];
-  selectedId: number | null;
-  onSelect: (id: number) => void;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
   minHeight: number;
 };
 

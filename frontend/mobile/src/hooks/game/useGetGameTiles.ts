@@ -5,7 +5,7 @@ import { apiClient } from '@/apis/axiosClient';
 import { QUERY_KEY } from '@/constants/keys';
 
 export interface TripGameView {
-  tripGameId: bigint;
+  tripGameId: string;
   gameStatus: string;
   gameStatusDescription: string;
   difficultyCode: string;
@@ -19,8 +19,8 @@ export interface TripGameView {
 }
 
 export interface TripGameTileView {
-  tripGameTileId: bigint;
-  tripSpotId: number;
+  tripGameTileId: string;
+  tripSpotId: string;
   stepNo: number;
   missionTypeCode: string;
   missionTypeDescription: string;
@@ -33,20 +33,15 @@ export interface GetTileResponse extends ApiResponseBase {
     tripGameTileViews: TripGameTileView[];
   };
 }
-export const fetchGetGameTiles = async (tripGameId: bigint | string | number) => {
-  const id = typeof tripGameId === 'bigint' ? tripGameId.toString() : String(tripGameId);
-  const { data } = await apiClient.get<GetTileResponse>(END_POINTS.GAME.TILES(id));
+export const fetchGetGameTiles = async (tripGameId: string) => {
+  const { data } = await apiClient.get<GetTileResponse>(END_POINTS.GAME.TILES(tripGameId));
   return data;
 };
 
-const useGetGameTilesQuery = (
-  tripGameId: bigint | string | number,
-  enableApiCall: boolean = true,
-) => {
-  const idKey = typeof tripGameId === 'bigint' ? tripGameId.toString() : String(tripGameId);
+const useGetGameTilesQuery = (tripGameId: string, enableApiCall: boolean = true) => {
   const { data, isLoading, isError, isSuccess, refetch } = useQuery({
     queryFn: () => fetchGetGameTiles(tripGameId),
-    queryKey: [QUERY_KEY.GAME.GET_GAME_TILES, idKey],
+    queryKey: [QUERY_KEY.GAME.GET_GAME_TILES, tripGameId],
     enabled: enableApiCall ?? true,
   });
 

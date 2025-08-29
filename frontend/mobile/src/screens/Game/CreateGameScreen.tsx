@@ -53,8 +53,8 @@ export default function CreateGameScreen() {
   const [activeStep, setActiveStep] = useState(0);
 
   // 선택값
-  const [regionId, setRegionId] = useState<number | null>(null); //representativeRegionId
-  const [themeIds, setThemeIds] = useState<number[]>([]); //tripThemeIds
+  const [regionId, setRegionId] = useState<string | null>(null); //representativeRegionId
+  const [themeIds, setThemeIds] = useState<string[]>([]); //tripThemeIds
   const [startedAt, setStartedAt] = useState<string | null>(null); //startedAt
   const [endedAt, setEndedAt] = useState<string | null>(null); //endedAt
   const [level, setLevel] = useState<string | null>(null); // difficulty
@@ -146,7 +146,7 @@ export default function CreateGameScreen() {
   };
 
   // 핸들러
-  const toggleTheme = (id: number) => {
+  const toggleTheme = (id: string) => {
     setThemeIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
@@ -173,7 +173,7 @@ export default function CreateGameScreen() {
   );
 
   // 진행중인 게임 스크린으로 이동
-  const goToGameOngoingScreen = (tripGameId: number) => {
+  const goToGameOngoingScreen = (tripGameId: string) => {
     navigation.replace('GamePlayStackNavigator', {
       screen: 'OngoingGameScreen',
       params: { tripGameId },
