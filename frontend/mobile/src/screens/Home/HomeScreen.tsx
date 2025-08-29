@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/home';
 
 const DUMMY_CONTINUE_TRIP = {
-  id: 101,
+  id: '101',
   title: '여수 2박 3일',
   day: 2,
   progress: 68,
@@ -33,7 +33,7 @@ const DUMMY_CONTINUE_TRIP = {
 
 const DUMMY_PLACES = [
   {
-    id: 1,
+    id: '1',
     name: '부산 해운대',
     image:
       'https://images.unsplash.com/photo-1517959105821-eaf2591984dd?q=80&w=1600&auto=format&fit=crop',
@@ -41,7 +41,7 @@ const DUMMY_PLACES = [
     score: 4.7,
   },
   {
-    id: 2,
+    id: '2',
     name: '강릉 안목해변',
     image:
       'https://images.unsplash.com/photo-1504604792257-22ebeb14f00a?q=80&w=1600&auto=format&fit=crop',
@@ -49,7 +49,7 @@ const DUMMY_PLACES = [
     score: 4.5,
   },
   {
-    id: 3,
+    id: '3',
     name: '제주 성산일출봉',
     image:
       'https://images.unsplash.com/photo-1607863680051-7e2d0d0e1a8f?q=80&w=1600&auto=format&fit=crop',
@@ -60,21 +60,21 @@ const DUMMY_PLACES = [
 
 const DUMMY_JOURNALS = [
   {
-    id: 901,
+    id: '901',
     photo:
       'https://images.unsplash.com/photo-1520975922215-230d7a36cd83?q=80&w=1600&auto=format&fit=crop',
     title: '부산 첫째 날 기록',
     date: '2025-08-03',
   },
   {
-    id: 902,
+    id: '902',
     photo:
       'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop',
     title: '카페 투어',
     date: '2025-08-04',
   },
   {
-    id: 903,
+    id: '903',
     photo:
       'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop',
     title: '야경 스팟',
@@ -83,7 +83,7 @@ const DUMMY_JOURNALS = [
 ];
 
 const DUMMY_RANDOM_PICK = {
-  id: 777,
+  id: '777',
   name: '속초 대포항',
   image:
     'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1600&auto=format&fit=crop',
@@ -114,7 +114,7 @@ export default function HomeScreen() {
   const { nickname } = useAppSelector((state) => state.userReducer);
 
   // 진행중인 게임 스크린으로 이동
-  const goToGameOngoingScreen = (tripGameId: number) => {
+  const goToGameOngoingScreen = (tripGameId: string) => {
     navigation.navigate('GamePlayStackNavigator', {
       screen: 'OngoingGameScreen',
       params: { tripGameId },

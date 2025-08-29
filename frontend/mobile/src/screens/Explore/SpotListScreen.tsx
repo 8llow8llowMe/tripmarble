@@ -14,7 +14,7 @@ import useTripSpotListInfiniteQuery from '@/hooks/trip/useSpotsList';
 import iconImage from '@images/icon.png';
 import { palette } from '@/constants/colors';
 import useRepresentativeRegionQuery from '@/hooks/trip/useRepresentativeRegion';
-import { Ionicons } from '@expo/vector-icons'; // 아이콘 라이브러리
+import { Ionicons } from '@expo/vector-icons';
 
 export default function SpotListScreen() {
   const route = useRoute<any>();

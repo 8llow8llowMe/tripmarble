@@ -25,14 +25,14 @@ export default function ExploreScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
 
   const popularPlaces = [
-    { name: '부산', image: gyeongjuImage, representativeRegionId: 5 },
-    { name: '제주도', image: gyeongjuImage, representativeRegionId: 10 },
-    { name: '강릉', image: gyeongjuImage, representativeRegionId: 6 },
-    { name: '경주', image: gyeongjuImage, representativeRegionId: 8 },
+    { name: '부산', image: gyeongjuImage, representativeRegionId: '5' },
+    { name: '제주도', image: gyeongjuImage, representativeRegionId: '10' },
+    { name: '강릉', image: gyeongjuImage, representativeRegionId: '6' },
+    { name: '경주', image: gyeongjuImage, representativeRegionId: '8' },
   ];
 
   // 대표여행지 스크린으로 이동
-  const goToSpotListScreen = (representativeRegionId: number) => {
+  const goToSpotListScreen = (representativeRegionId: string) => {
     navigation.navigate('SpotStackNavigator', {
       screen: 'SpotListScreen',
       params: { representativeRegionId: representativeRegionId },

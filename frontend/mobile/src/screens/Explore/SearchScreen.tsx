@@ -15,10 +15,10 @@ import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import { palette } from '@/constants/colors';
 
 const DUMMY_RECENT = [
-  { name: '부산', representativeRegionId: 5, date: '10.31' },
-  { name: '제주도', representativeRegionId: 10, date: '10.29' },
-  { name: '강릉', representativeRegionId: 6, date: '10.29' },
-  { name: '경주', representativeRegionId: 8, date: '10.29' },
+  { name: '부산', representativeRegionId: '5', date: '10.31' },
+  { name: '제주도', representativeRegionId: '10', date: '10.29' },
+  { name: '강릉', representativeRegionId: '6', date: '10.29' },
+  { name: '경주', representativeRegionId: '8', date: '10.29' },
 ];
 
 export default function SearchScreen() {
@@ -32,7 +32,7 @@ export default function SearchScreen() {
     setRecent((prev) => prev.filter((item) => item.name !== name));
 
   // 대표여행지 스크린으로 이동
-  const goToSpotListScreen = (representativeRegionId: number) => {
+  const goToSpotListScreen = (representativeRegionId: string) => {
     navigation.navigate('SpotStackNavigator', {
       screen: 'SpotListScreen',
       params: { representativeRegionId: representativeRegionId },

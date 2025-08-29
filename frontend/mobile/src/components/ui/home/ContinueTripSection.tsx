@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
 
 const DUMMY_CONTINUE_TRIP = {
-  id: 101,
+  id: '101',
   title: '여수 2박 3일',
   day: 2,
   progress: 68,
