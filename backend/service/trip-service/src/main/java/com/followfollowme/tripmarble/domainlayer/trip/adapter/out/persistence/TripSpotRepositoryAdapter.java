@@ -6,12 +6,11 @@ import com.followfollowme.tripmarble.domainlayer.trip.application.mapper.TripSpo
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.trip.application.readmodel.TripSpotWithContentTypeName;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
