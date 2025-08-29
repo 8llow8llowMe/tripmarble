@@ -7,7 +7,7 @@ import { palette } from '@/constants/colors';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
 
 const DUMMY_RANDOM_PICK = {
-  id: 777,
+  id: '777',
   name: '속초 대포항',
   image:
     'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1600&auto=format&fit=crop',

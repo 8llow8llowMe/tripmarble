@@ -14,7 +14,7 @@ import { SectionHeader } from '@/components/layout/header/SectionHeader';
 
 const DUMMY_PLACES = [
   {
-    id: 1,
+    id: '1',
     name: '부산 해운대',
     image:
       'https://images.unsplash.com/photo-1517959105821-eaf2591984dd?q=80&w=1600&auto=format&fit=crop',
@@ -22,7 +22,7 @@ const DUMMY_PLACES = [
     score: 4.7,
   },
   {
-    id: 2,
+    id: '2',
     name: '강릉 안목해변',
     image:
       'https://images.unsplash.com/photo-1504604792257-22ebeb14f00a?q=80&w=1600&auto=format&fit=crop',
@@ -30,7 +30,7 @@ const DUMMY_PLACES = [
     score: 4.5,
   },
   {
-    id: 3,
+    id: '3',
     name: '제주 성산일출봉',
     image:
       'https://images.unsplash.com/photo-1607863680051-7e2d0d0e1a8f?q=80&w=1600&auto=format&fit=crop',

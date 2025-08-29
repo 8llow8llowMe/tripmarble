@@ -5,16 +5,16 @@ import { apiClient } from '@/apis/axiosClient';
 import { QUERY_KEY } from '@/constants/keys';
 
 interface Props {
-  tripSpotId: number;
+  tripSpotId: string;
 }
 
 export interface TripSpotRequest {
-  tripSpotId: number;
+  tripSpotId: string;
 }
 
 export interface TripSpotResponse extends ApiResponseBase {
   dataBody: {
-    tripSpotId: number;
+    tripSpotId: string;
     tripSpotName: string;
     contentTypeName: string;
     description: string | null;

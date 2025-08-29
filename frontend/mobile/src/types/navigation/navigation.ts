@@ -38,13 +38,13 @@ export type SettingsParamList = {
 
 export type GamePlayStackParamList = {
   GameHomeScreen: undefined;
-  EndedGameScreen: { tripGameId: number };
-  OngoingGameScreen: { tripGameId: number };
+  EndedGameScreen: { tripGameId: string };
+  OngoingGameScreen: { tripGameId: string };
   GameListScreen: { status?: 'WAITING' | 'ONGOING' | 'ENDED' };
   GameMissionAuthScreen: undefined;
 };
 
 export type SpotStackParamList = {
-  SpotListScreen: { representativeRegionId: number };
+  SpotListScreen: { representativeRegionId: string };
   SpotDetailScreen: undefined;
 };

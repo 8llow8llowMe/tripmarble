@@ -5,16 +5,16 @@ import { apiClient } from '@/apis/axiosClient';
 import { QUERY_KEY } from '@/constants/keys';
 
 interface Props {
-  representativeRegionId: number;
+  representativeRegionId: string;
 }
 
 export interface RepresentativeRegionRequest {
-  representativeRegionId: number;
+  representativeRegionId: string;
 }
 
 export interface RepresentativeRegionResponse extends ApiResponseBase {
   dataBody: {
-    representativeRegionId: number;
+    representativeRegionId: string;
     representativeRegionName: string;
     imageUrl: string | null;
     description: string | null;

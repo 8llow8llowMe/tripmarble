@@ -14,17 +14,17 @@ const END_POINTS = {
   //TRIP
   TRIP: {
     // 여행지 정보
-    SPOT: (tripSpotId: number) => `/trip-spots/${tripSpotId}`,
-    LIST_SPOTS: (representativeRegionId: number) =>
+    SPOT: (tripSpotId: string) => `/trip-spots/${tripSpotId}`,
+    LIST_SPOTS: (representativeRegionId: string) =>
       `/trip-spots/by-representative-region/${representativeRegionId}`,
 
     // 지역
     LIST_REGIONS: '/regions',
-    LIST_SIGUNGUS_BY_REGION: (regionId: number) => `/regions/${regionId}/sigungus`,
+    LIST_SIGUNGUS_BY_REGION: (regionId: string) => `/regions/${regionId}/sigungus`,
 
     // 대표 여행지
     LIST_REPRESENTATIVE_REGIONS: '/regions/representative',
-    REPRESENTATIVE_REGION: (representativeRegionId: number) =>
+    REPRESENTATIVE_REGION: (representativeRegionId: string) =>
       `/regions/representative/${representativeRegionId}`,
 
     // 여행 콘텐츠 타입

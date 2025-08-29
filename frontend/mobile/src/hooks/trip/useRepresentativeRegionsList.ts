@@ -6,7 +6,7 @@ import { QUERY_KEY } from '@/constants/keys';
 
 export interface RepresentativeRegionsListResponse extends ApiResponseBase {
   dataBody: {
-    representativeRegionId: number;
+    representativeRegionId: string;
     representativeRegionName: string;
     imageUrl: string | null;
   }[];

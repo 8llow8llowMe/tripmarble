@@ -6,7 +6,7 @@ import { QUERY_KEY } from '@/constants/keys';
 
 export interface ContentTypesListResponse extends ApiResponseBase {
   dataBody: {
-    contentTypeId: number;
+    contentTypeId: string;
     contentTypeName: string;
   }[];
 }
