@@ -5,6 +5,7 @@ import lombok.Builder;
 @Builder
 public record MissionResultResponse(
     String tripGameMoveLogId,
+    String tripGameTileId,
     String missionResultCode,
     String missionResultDescription
 ) {
