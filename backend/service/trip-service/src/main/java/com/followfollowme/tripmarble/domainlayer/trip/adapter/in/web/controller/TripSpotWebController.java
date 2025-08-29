@@ -30,11 +30,12 @@ public class TripSpotWebController {
     )
     @GetMapping("/by-representative-region/{representativeRegionId}")
     public ResponseEntity<Response<SliceResponse<TripSpotSimpleResponse>>> getTripSpotsByRepresentativeRegionId(
-        @PathVariable long representativeRegionId, @RequestParam(defaultValue = "0") String lastTripSpotId,
-        @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) Integer contentTypeId) {
+        @PathVariable String representativeRegionId, @RequestParam(defaultValue = "0") String lastTripSpotId,
+        @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) String contentTypeId) {
+        Integer parsedContentTypeId = (contentTypeId != null) ? Integer.parseInt(contentTypeId) : null;
 
         SliceResponse<TripSpotSimpleResponse> result = tripSpotWebUseCase.getTripSpotsByRepresentativeRegionId(
-            representativeRegionId, Long.parseLong(lastTripSpotId), size, contentTypeId);
+            Long.parseLong(representativeRegionId), Long.parseLong(lastTripSpotId), size, parsedContentTypeId);
         return ResponseEntity.ok(Response.success(result));
     }
 
@@ -43,9 +44,7 @@ public class TripSpotWebController {
         description = "해당 여행지의 정보 및 상세 정보를 조회하는 기능입니다."
     )
     @GetMapping("/{tripSpotId}")
-    public ResponseEntity<Response<TripSpotWithDetailViewResponse>> getTripSpotWithDetail(
-        @PathVariable String tripSpotId) {
-
+    public ResponseEntity<Response<TripSpotWithDetailViewResponse>> getTripSpotWithDetail(@PathVariable String tripSpotId) {
         TripSpotWithDetailViewResponse response = tripSpotWebUseCase.getTripSpotWithDetail(Long.parseLong(tripSpotId));
         return ResponseEntity.ok().body(Response.success(response));
     }
