@@ -13,11 +13,12 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMoveL
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.MissionResult;
 import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +61,9 @@ public class TripGameDiceProcessor {
         TripGameTile landedTile = tiles.get(Math.min(newStep, maxStep) - 1);
 
         if (isGameEnded) {
+            // 게임 종료 어리
             updatedGame = game.normalEnd();
+
         } else {
             int totalMembers = tripGameMemberRepositoryPort.findAllByTripGameId(tripGameId).size();
             int nextTurnOrder = calculateNextTurn(game.currentTurnOrder(), totalMembers);
@@ -70,18 +73,10 @@ public class TripGameDiceProcessor {
         tripGameRepositoryPort.save(updatedGame);
 
         // 8. 이동 로그 기록
-        TripGameMoveLog moveLog = TripGameMoveLog.builder()
-            .id(snowflakeIdGenerator.generateId())
-            .tripGameTileId(landedTile.id())
-            .arrivedAt(LocalDateTime.now())
-            .dice(diceValue)
-            .turnOrder(game.currentTurnOrder()) // 내가 던진 당시 턴
-            .missionResult(MissionResult.PENDING)
-            .build();
-        tripGameMoveLogRepositoryPort.save(moveLog, landedTile);
+        TripGameMoveLog tripGameMoveLog = recordMoveLog(game, me, landedTile, diceValue, isGameEnded);
 
         // 9. 결과 반환
-        return TripGameDiceResultInfo.of(diceValue, newStep, updatedGame, landedTile, isGameEnded);
+        return TripGameDiceResultInfo.of(tripGameMoveLog, diceValue, newStep, updatedGame, landedTile, isGameEnded);
     }
 
     // 턴 계산 (솔로는 유지, 멀티는 순환 증가)
@@ -91,5 +86,24 @@ public class TripGameDiceProcessor {
             return current;
         }
         return (current % totalMembers) + 1; // 멀티플레이 -> 순서 순환
+    }
+
+    // 이동 로그를 생성 및 저장
+    private TripGameMoveLog recordMoveLog(TripGame game, TripGameMember member, TripGameTile landedTile,
+                                          int diceValue, boolean isGameEnded) {
+        MissionResult missionResult = isGameEnded ? MissionResult.GAME_END : MissionResult.PENDING;
+
+        TripGameMoveLog moveLog = TripGameMoveLog.builder()
+            .id(snowflakeIdGenerator.generateId())
+            .tripGameTileId(landedTile.id())
+            .tripGameMemberId(member.id()) // 누가 이동했는지 기록
+            .arrivedAt(LocalDateTime.now()) // 도착 시간
+            .dice(diceValue)
+            .turnOrder(game.currentTurnOrder()) // 주사위 던진 당시 턴 유지
+            .missionResult(missionResult) // 종료 여부에 따라 GAME_END or PENDING
+            .missionProcessedAt(null)
+            .build();
+
+        return tripGameMoveLogRepositoryPort.save(moveLog, landedTile, member);
     }
 }
