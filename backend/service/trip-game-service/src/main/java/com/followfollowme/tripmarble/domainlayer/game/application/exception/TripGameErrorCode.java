@@ -22,7 +22,8 @@ public enum TripGameErrorCode {
     GAME_ALREADY_ENDED("TRIP_GAME_012", "이미 종료된 게임입니다.", HttpStatus.BAD_REQUEST),
     MOVE_LOG_NOT_FOUND("TRIP_GAME_013", "해당 게임 이동 로그를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     MISSION_ALREADY_PROCESSED("TRIP_GAME_014", "이미 처리된 미션입니다.", HttpStatus.BAD_REQUEST),
-    INVALID_GAME_CONTEXT("TRIP_GAME_015", "요청한 게임과 이동 로그 정보가 일치하지 않습니다.", HttpStatus.BAD_REQUEST);
+    INVALID_GAME_CONTEXT("TRIP_GAME_015", "요청한 게임과 이동 로그 정보가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    MISSION_NOT_OWNER("TRIP_GAME_016", "본인의 미션만 처리할 수 있습니다.", HttpStatus.FORBIDDEN);
 
     private final String code;
     private final String errorMessage;
