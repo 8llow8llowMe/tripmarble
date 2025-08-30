@@ -6,7 +6,6 @@ import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameE
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,30 +17,37 @@ public class TripGameEndProcessor {
     private final TripGameMemberRepositoryPort tripGameMemberRepositoryPort;
 
     public TripGameEndInfo normalEndTripGame(long tripGameId) {
+        // 1. 게임 조회
         TripGame game = tripGameRepositoryPort.findById(tripGameId)
             .orElseThrow(() -> new TripGameException(TripGameErrorCode.GAME_NOT_FOUND));
 
+        // 2. 도메인에 위임하여 정상 종료 처리
         TripGame endedGame = game.normalEnd();
 
-        tripGameRepositoryPort.save(endedGame);
+        // 3. 종료 상태 저장
+        TripGame updateEndedGame = tripGameRepositoryPort.save(endedGame);
 
-        return TripGameEndInfo.of(endedGame);
+        // 4. 결과 반환
+        return TripGameEndInfo.of(updateEndedGame);
     }
 
 
     public TripGameEndInfo forceEndTripGame(long tripGameId, long requesterId) {
+        // 1. 게임 조회 및 검증
         TripGame game = tripGameRepositoryPort.findById(tripGameId)
             .orElseThrow(() -> new TripGameException(TripGameErrorCode.GAME_NOT_FOUND));
 
-        // 방장 여부 검증
-        TripGameMember hostMember = tripGameMemberRepositoryPort.findHostMemberInGame(game.id(), requesterId)
+        // 2. 방장 여부 검증
+        tripGameMemberRepositoryPort.findHostMemberInGame(game.id(), requesterId)
             .orElseThrow(() -> new TripGameException(TripGameErrorCode.NOT_HOST_MEMBER));
 
-        // 도메인에 위임 (강제 종료)
+        // 3. 도메인에 위임하여 강제 종료 처리
         TripGame endedGame = game.forceEnd();
 
-        tripGameRepositoryPort.save(endedGame);
+        // 4. 종료 상태 저장
+        TripGame updateEndedGame = tripGameRepositoryPort.save(endedGame);
 
-        return TripGameEndInfo.of(endedGame);
+        // 5. 결과 반환
+        return TripGameEndInfo.of(updateEndedGame);
     }
 }
