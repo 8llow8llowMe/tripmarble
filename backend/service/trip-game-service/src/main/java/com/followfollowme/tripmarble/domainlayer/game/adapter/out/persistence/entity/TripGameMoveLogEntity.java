@@ -11,13 +11,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -38,7 +39,13 @@ public class TripGameMoveLogEntity extends BaseEntity {
     @Comment("게임 내 블록 아이디")
     private TripGameTileEntity tripGameTile;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trip_game_member_id", nullable = false)
+    @Comment("해당 이동/미션을 수행한 게임 참여자")
+    private TripGameMemberEntity tripGameMember;
+
     @Comment("도착 시간 (게임 내 이동이 실제 일어난 시간)")
+    @Column(nullable = false)
     private LocalDateTime arrivedAt;
 
     @Comment("이번 턴에 굴린 주사위 값")
@@ -53,4 +60,7 @@ public class TripGameMoveLogEntity extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private MissionResult missionResult;
+
+    @Comment("미션 처리 완료 시간 (성공/실패/스킵 등 상태 변경 시간)")
+    private LocalDateTime missionProcessedAt;
 }
