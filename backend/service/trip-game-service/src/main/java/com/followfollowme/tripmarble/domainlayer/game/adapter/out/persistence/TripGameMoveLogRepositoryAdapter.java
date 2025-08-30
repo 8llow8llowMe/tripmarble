@@ -4,11 +4,13 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.en
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.repository.TripGameMoveLogRepository;
 import com.followfollowme.tripmarble.domainlayer.game.application.mapper.TripGameMoveLogMapper;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMoveLogRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMoveLog;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -18,8 +20,8 @@ public class TripGameMoveLogRepositoryAdapter implements TripGameMoveLogReposito
     private final TripGameMoveLogMapper tripGameMoveLogMapper;
 
     @Override
-    public TripGameMoveLog save(TripGameMoveLog tripGameMoveLog, TripGameTile tripGameTile) {
-        TripGameMoveLogEntity entity = tripGameMoveLogMapper.toEntityFromDomain(tripGameMoveLog, tripGameTile);
+    public TripGameMoveLog save(TripGameMoveLog tripGameMoveLog, TripGameTile tripGameTile, TripGameMember tripGameMember) {
+        TripGameMoveLogEntity entity = tripGameMoveLogMapper.toEntityFromDomain(tripGameMoveLog, tripGameTile, tripGameMember);
         TripGameMoveLogEntity savedEntity = tripGameMoveLogRepository.save(entity);
         return tripGameMoveLogMapper.toDomainFromEntity(savedEntity);
     }
