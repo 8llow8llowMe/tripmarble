@@ -31,6 +31,12 @@ public enum MissionResult {
         public void validateChangeable() {
             // 가능 -> 아무것도 안함
         }
+    },
+    GAME_END("게임 종료") {
+        @Override
+        public void validateChangeable() {
+            throw new TripGameException(TripGameErrorCode.MISSION_ALREADY_PROCESSED);
+        }
     };
 
     private final String description;
