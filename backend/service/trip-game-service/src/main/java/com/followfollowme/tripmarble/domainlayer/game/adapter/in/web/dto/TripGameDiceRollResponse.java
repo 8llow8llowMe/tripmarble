@@ -7,6 +7,9 @@ import lombok.Builder;
 @Schema(description = "여행 게임 주사위 결과 응답 DTO")
 public record TripGameDiceRollResponse(
 
+    @Schema(description = "게임 이동 로그 ID", example = "616881356269555712")
+    String tripGameMoveLogId,
+
     @Schema(description = "주사위 값", example = "2")
     int diceValue,
 
