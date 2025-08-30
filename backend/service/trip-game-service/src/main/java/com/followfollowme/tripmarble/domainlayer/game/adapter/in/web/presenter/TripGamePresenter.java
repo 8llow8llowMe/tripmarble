@@ -1,6 +1,5 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter;
 
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MissionResultResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
@@ -8,7 +7,6 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameResumeResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartMemberView;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
-import com.followfollowme.tripmarble.domainlayer.game.application.info.MissionResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDiceResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameEndInfo;
@@ -18,13 +16,12 @@ import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameS
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
-@RequiredArgsConstructor
 public class TripGamePresenter {
 
     public TripGameCreateResponse toGameCreateResponse(TripGameCreateInfo createInfo) {
@@ -115,6 +112,7 @@ public class TripGamePresenter {
 
     public TripGameDiceRollResponse toDiceRollResponse(TripGameDiceResultInfo info) {
         return TripGameDiceRollResponse.builder()
+            .tripGameMoveLogId(String.valueOf(info.tripGameMoveLogId()))
             .diceValue(info.diceValue())
             .newStepNo(info.finalStepNo())
             .isGameEnded(info.isGameEnded())
@@ -131,15 +129,6 @@ public class TripGamePresenter {
             .gameStatusDescription(info.status().getDescription())
             .endTypeCode(info.endType().name())
             .endTypeDescription(info.endType().getDescription())
-            .build();
-    }
-
-    public MissionResultResponse toMissionResultResponse(MissionResultInfo info) {
-        return MissionResultResponse.builder()
-            .tripGameMoveLogId(String.valueOf(info.tripGameMoveLogId()))
-            .tripGameTileId(String.valueOf(info.tripGameTileId()))
-            .missionResultCode(info.missionResult().name())
-            .missionResultDescription(info.missionResult().getDescription())
             .build();
     }
 }
