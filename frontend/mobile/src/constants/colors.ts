@@ -54,4 +54,5 @@ export const palette = {
   blueLight300: '#7CD4FD',
   red300: '#FDA29B',
   buttonColor: '#FF5700',
+  red600: '#ef4444',
 };

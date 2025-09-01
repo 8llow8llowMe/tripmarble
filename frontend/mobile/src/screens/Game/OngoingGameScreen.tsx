@@ -1,6 +1,15 @@
 import { palette } from '@/constants/colors';
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Animated,
+  Pressable,
+  Alert,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -10,11 +19,15 @@ import useGetGameTilesQuery, { TripGameTileView } from '@/hooks/game/useGetGameT
 import Logo from 'assets/images/Logo.png';
 import DiceView from '@/components/ui/dice/DiceView';
 import useGameDiceMutation from '@/hooks/game/useGameDice';
+import DotThree from '@assets/icons/dots-three';
+import useGameEndMutation from '@/hooks/game/useGameEnd';
 
 export default function OngoingGameScreen({ route }) {
   const { tripGameId } = route.params || {};
   const navigation = useNavigation<any>();
   const { mutateAsync: rollDice, isPending: isRolling } = useGameDiceMutation();
+
+  const { mutateAsync: endGame, isPending: isEnding } = useGameEndMutation();
 
   const { gameInfo } = useGetGameTilesQuery(tripGameId);
   // 배열만 안전하게 추출 (hook 반환이 배열인지/객체인지 둘 다 대응)
@@ -29,6 +42,48 @@ export default function OngoingGameScreen({ route }) {
 
   const [diceVisible, setDiceVisible] = useState(false);
   const [diceValue, setDiceValue] = useState<number | null>(null);
+
+  const [menuVisible, setMenuVisible] = useState(false);
+  const menuOpacity = useRef(new Animated.Value(0)).current;
+  const menuScale = useRef(new Animated.Value(0.96)).current;
+
+  const openMenu = () => {
+    setMenuVisible(true);
+    Animated.parallel([
+      Animated.timing(menuOpacity, { toValue: 1, duration: 140, useNativeDriver: true }),
+      Animated.spring(menuScale, { toValue: 1, useNativeDriver: true, friction: 7 }),
+    ]).start();
+  };
+  const closeMenu = () => {
+    Animated.parallel([
+      Animated.timing(menuOpacity, { toValue: 0, duration: 120, useNativeDriver: true }),
+      Animated.timing(menuScale, { toValue: 0.96, duration: 120, useNativeDriver: true }),
+    ]).start(({ finished }) => finished && setMenuVisible(false));
+  };
+
+  const confirmEndGame = () => {
+    closeMenu();
+    Alert.alert('게임 종료하기', '정말로 이 게임을 종료할까요?\n종료하면 되돌릴 수 없어요.', [
+      { text: '취소', style: 'cancel' },
+      {
+        text: '종료',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            // 메뉴 닫기
+            closeMenu();
+            // 게임 강제 종료 호출
+            const res = await endGame(tripGameId);
+            // 이전 목록으로 이동
+            navigation.goBack();
+          } catch (e) {
+            console.warn('게임 종료 실패', e);
+            Alert.alert('종료 실패', '게임 종료 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -47,10 +102,18 @@ export default function OngoingGameScreen({ route }) {
 
         {/* header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.goBack} onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={28} color="#555" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>@@ 여행</Text>
+
+          <TouchableOpacity
+            onPress={openMenu}
+            accessibilityRole="button"
+            accessibilityLabel="옵션 열기"
+          >
+            <DotThree width={24} height={24} />
+          </TouchableOpacity>
         </View>
 
         {/* game info */}
@@ -145,6 +208,34 @@ export default function OngoingGameScreen({ route }) {
             <Text style={styles.guideText}>한 바퀴 완주 시 게임 종료!</Text>
           </View>
         </View>
+        {menuVisible && (
+          <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+            {/* 배경 클릭으로 닫기 */}
+            <Pressable
+              style={styles.backdrop}
+              onPress={closeMenu}
+              accessibilityRole="button"
+              accessibilityLabel="메뉴 닫기"
+            />
+            {/* 메뉴 패널 */}
+            <Animated.View
+              style={[styles.menu, { opacity: menuOpacity, transform: [{ scale: menuScale }] }]}
+              accessible
+              accessibilityLabel="옵션 메뉴"
+            >
+              <TouchableOpacity
+                style={styles.menuItem}
+                onPress={confirmEndGame}
+                disabled={isEnding}
+                accessibilityRole="button"
+                accessibilityLabel="게임 종료하기"
+              >
+                <Ionicons name="flag-outline" size={18} color={palette.red600} />
+                <Text style={styles.menuText}>게임 종료하기</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -158,33 +249,24 @@ const styles = StyleSheet.create({
     height: 52,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
     backgroundColor: palette.white,
-    zIndex: 10,
-    elevation: 2,
-  },
-  goBack: {
-    zIndex: 10,
     elevation: 2,
   },
   headerTitle: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
     textAlign: 'center',
     fontSize: 18,
     fontWeight: '700',
     color: palette.gray800,
   },
-
   content: {
     flexDirection: 'row',
     textAlign: 'center',
     justifyContent: 'space-between',
     paddingVertical: 18,
   },
-
   gameBoard: { width: '100%', aspectRatio: '0.75', paddingBottom: 8 },
   button: {
     backgroundColor: palette.buttonColor,
@@ -224,5 +306,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: palette.black,
     flexShrink: 1,
+  },
+  // 드롭다운
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  menu: {
+    position: 'absolute',
+    top: 52 + 8, // 헤더 높이(52) + 여백
+    right: 0,
+    minWidth: 176,
+    paddingVertical: 8,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#EFF2F6',
+    // shadow (iOS)
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    // elevation (Android)
+    elevation: 10,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  menuText: {
+    fontSize: 15,
+    color: palette.gray800,
+    fontWeight: '600',
   },
 });
