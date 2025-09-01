@@ -40,6 +40,7 @@ const END_POINTS = {
     START: (tripGameId: string) => `/trip-games/${tripGameId}/start`,
     TILES: (tripGameId: string) => `/trip-games/${tripGameId}/tiles`,
     DICE: (tripGameId: string) => `/trip-games/${tripGameId}/dice`,
+    FORCE_END: (tripGameId: string) => `/trip-games/${tripGameId}/force-end`,
   },
 };
 
