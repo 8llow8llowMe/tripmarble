@@ -38,7 +38,7 @@ pipeline {
         MINIO_BUCKET = "${env.MINIO_BUCKET}"
         MINIO_PATH = "frontend/${params.SERVICE_GROUP}"
         SSH_CONFIG = 'storage server ssh'
-        NEXT_FORCE_SSR = '1'          
+        NEXT_TELEMETRY_DISABLED = '1'
     }
 
     stages {
@@ -114,15 +114,15 @@ pipeline {
             steps {
                 dir("${env.FS_PATH}") {
                     script {
-                        // 타겟 브랜치에 따라 환경 설정
+                        // Next.js 빌드는 항상 production 모드로 진행 (SSR 안정성 및 최적화)
+                        env.NODE_ENV = 'production'
                         if (params.TARGET_BRANCH == 'main') {
-                            env.NODE_ENV = 'production'
-                            echo "Building for production environment"
+                            env.NEXT_PUBLIC_RUNTIME_ENV = 'prod'
+                            echo "Building for production runtime"
                         } else {
-                            env.NODE_ENV = 'development'
-                            echo "Building for development environment"
+                            env.NEXT_PUBLIC_RUNTIME_ENV = 'dev'
+                            echo "Building for development runtime (build=production)"
                         }
-                        
                         sh 'rm -rf .next .turbo || true'
                         // Next.js 빌드
                         sh 'yarn build'
@@ -167,7 +167,7 @@ pipeline {
                     echo "Deploying ${params.SERVICE_NAME} to Production"
                     
                     // MinIO에 배포
-                    withCredentials([usernamePassword(credentialsId: '₩minio-credentials',
+                    withCredentials([usernamePassword(credentialsId: 'minio-credentials',
                                                       usernameVariable: 'MINIO_ACCESS_KEY',
                                                       passwordVariable: 'MINIO_SECRET_KEY')]) {
                         sh """
