@@ -1,0 +1,60 @@
+server:
+  port: ${TRIP_GAME_SERVICE_PORT}
+  shutdown: graceful
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    open-in-view: true
+    defer-datasource-initialization: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        show_sql: true
+        jdbc:
+          batch_size: 100
+        default_batch_fetch_size: 100
+
+eureka:
+  instance:
+    hostname: ${spring.application.name}
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    lease-renewal-interval-in-seconds: 5 # 인스턴스가 헬스 체크 전송하는 주기
+    lease-expiration-duration-in-seconds: 10 # 인스턴스 만료 대기 시간
+  client:
+    service-url:
+      defaultZone: http://${SERVICE_DISCOVERY_HOSTNAME}:${SERVICE_DISCOVERY_PORT}/eureka/
+    fetch-registry: true # 유레카 클라이언트가 유레카 서버로부터 인스턴스 레지스트리 주기적으로 받아올지 여부 (default: true)
+    registry-fetch-interval-seconds: 3 # 레지스트리 몇 초마다 가져올지
+    initial-instance-info-replication-interval-seconds: 5 # 유레카 서버에 처음 등록할 때까지 대기 시간
+
+# Snowflake
+snowflake:
+  datacenter-id: ${SNOWFLAKE_DATACENTER_ID}
+  worker-id: ${SNOWFLAKE_WORKER_ID}
+
+# Security Resource Server
+security:
+  oauth2:
+    resource-server:
+      jwt:
+        access-key: ${JWT_ACCESS_KEY}
+
+# Swagger
+swagger:
+  server-url: http://${TRIP_MARBLE_DOMAIN}:${API_GATEWAY_PORT}
+
+# Feign Client
+feign-client:
+  target-services:
+    trip-service: ${TRIP_SERVICE_APP_NAME}
+    auth-service: ${AUTH_SERVICE_APP_NAME}

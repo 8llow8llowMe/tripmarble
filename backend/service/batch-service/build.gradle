@@ -1,0 +1,9 @@
+dependencies {
+    implementation project(":core:common-core")
+    // WelFlux
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    // Spring Batch
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+    // MySQL JDBC
+    runtimeOnly 'com.mysql:mysql-connector-j'
+}

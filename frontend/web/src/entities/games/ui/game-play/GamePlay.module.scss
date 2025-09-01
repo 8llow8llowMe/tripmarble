@@ -1,0 +1,152 @@
+.detailWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #fafcff;
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(38, 153, 251, 0.07);
+  padding: 36px 32px 32px;
+  gap: 20px;
+  width: 100%;
+  height: 100%;
+  flex: 1 1 0%;
+}
+
+.header {
+  // display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 10px;
+}
+
+.title {
+  display: flex;
+  align-items: flex-end;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: #23272f;
+}
+
+.tripDate {
+  // float: right;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #7b8ea3;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  // flex: 1 1 0%;
+}
+
+.boardContainer {
+  width: 100%;
+  max-width: 600px;
+  height: 100%;
+  max-height: 600px;
+  aspect-ratio: 1;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.boardImage {
+  width: 90%;
+  max-width: 340px;
+  border-radius: 10px;
+  box-shadow: 0 1px 5px #52b4ff22;
+}
+
+.timelineBox {
+  width: 100%;
+  background: #f3f5fb;
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+
+.timelineTitle {
+  font-weight: 600;
+  font-size: 1.13rem;
+  margin-bottom: 12px;
+}
+
+.timelineList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.timelineItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.18s;
+  border-radius: 6px;
+
+  &:hover,
+  &.active {
+    background: #e6f0fe;
+  }
+}
+
+.timelineDot {
+  width: 12px;
+  height: 12px;
+  background: #55a8ff;
+  border-radius: 50%;
+  margin-right: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 0 2px #52b4ff99;
+}
+.timelineText {
+  font-size: 1.04rem;
+}
+
+.buttonRow {
+  margin-top: 18px;
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+.actionBtn,
+.actionBtnSecondary {
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 12px 30px;
+  transition: background 0.13s;
+  cursor: pointer;
+}
+.actionBtn {
+  background: linear-gradient(90deg, #45d8ff, #367fff 95%);
+  color: #fff;
+  box-shadow: 0 1px 4px #45d8ff33;
+}
+.actionBtnSecondary {
+  background: #d3eaff;
+  color: #368aff;
+}
+
+@media (max-width: 900px) {
+  .content {
+    flex-direction: column;
+    gap: 28px;
+  }
+}

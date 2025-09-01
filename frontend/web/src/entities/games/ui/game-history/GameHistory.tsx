@@ -1,0 +1,167 @@
+"use client";
+
+import React, { useMemo, useState } from "react";
+import GameBoard from "@/entities/games/ui/game-board/GameBoard";
+import Image from "next/image";
+import styles from "./GameHistory.module.scss";
+import { gameInfoDummy } from "@/entities/games/model/gameInfoDummy";
+import TileInfoModal from "@/entities/games/ui/tile-info-modal/TileInfoModal";
+
+type TimelineItem = {
+  index: number;
+  title: string;
+  date?: string;
+  mission?: string;
+  reviewImageUrl?: string;
+  reviewContent?: string;
+  isSelected?: boolean;
+};
+
+type Props = {
+  gameId: string;
+  boardImageUrl?: string;
+  timeline: TimelineItem[];
+  selectedBlock?: TimelineItem;
+  onBlockSelect?: (item: TimelineItem) => void;
+};
+
+const GameHistory = ({
+  gameId,
+  timeline,
+  selectedBlock,
+  onBlockSelect,
+}: Props) => {
+  const [activeTab, setActiveTab] = useState<"timeline" | "detail">("timeline");
+
+  const { tripGameView, tripGameTileViews } = gameInfoDummy.dataBody;
+  const [activeStep, setActiveStep] = useState<number>(1);
+  const activeTile = useMemo(
+    () =>
+      tripGameTileViews.find((t) => t.stepNo === activeStep) ??
+      tripGameTileViews[0],
+    [activeStep, tripGameTileViews]
+  );
+
+  const [modalTile, setModalTile] = useState<
+    (typeof tripGameTileViews)[number] | null
+  >(null);
+
+  return (
+    <div className={styles.detailWrapper}>
+      <div className={styles.header}>종료된 게임</div>
+      {/* 보드판 이미지 */}
+      <div className={styles.boardContainer}>
+        <GameBoard
+          count={5}
+          tiles={tripGameTileViews}
+          onCellClick={(tile) => {
+            setActiveStep(tile.stepNo);
+            setModalTile(tile);
+          }}
+        />
+      </div>
+      {modalTile && (
+        <TileInfoModal
+          tile={modalTile}
+          isOpen={modalTile !== null}
+          onClose={() => setModalTile(null)}
+        />
+      )}
+
+      {/* 탭 바 */}
+      <div className={styles.tabBar}>
+        <button
+          className={`${styles.tab} ${
+            activeTab === "timeline" ? styles.activeTab : ""
+          }`}
+          onClick={() => setActiveTab("timeline")}
+          type="button"
+        >
+          타임라인
+        </button>
+        <button
+          className={`${styles.tab} ${
+            activeTab === "detail" ? styles.activeTab : ""
+          }`}
+          onClick={() => setActiveTab("detail")}
+          type="button"
+        >
+          상세 정보
+        </button>
+      </div>
+      {/* 탭 컨텐츠 */}
+      <div className={styles.tabContent}>
+        {activeTab === "timeline" && (
+          <div className={styles.timelineTabContent}>
+            <div className={styles.timelineBox}>
+              <div className={styles.timelineTitle}>타임라인</div>
+              <ul className={styles.timelineList}>
+                {timeline.map((item) => (
+                  <li
+                    key={item.index}
+                    className={`${styles.timelineItem} ${
+                      item.isSelected ? styles.active : ""
+                    }`}
+                    onClick={() => onBlockSelect && onBlockSelect(item)}
+                  >
+                    <span className={styles.timelineDot} />
+                    <span className={styles.timelineText}>{item.title}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
+        {activeTab === "detail" && (
+          <div className={styles.detailTabContent}>
+            <div className={styles.blockDetailWrapper}>
+              {selectedBlock ? (
+                <div className={styles.blockDetail}>
+                  <div className={styles.blockHeader}>
+                    <div className={styles.blockTitle}>
+                      {selectedBlock.title}
+                      <span className={styles.blockBadge}>미션 인증여부</span>
+                    </div>
+                    <div className={styles.blockDate}>{selectedBlock.date}</div>
+                  </div>
+                  <div className={styles.blockMission}>
+                    {selectedBlock.mission}
+                  </div>
+                  <div className={styles.reviewSection}>
+                    <div className={styles.reviewImage}>
+                      {selectedBlock.reviewImageUrl ? (
+                        <Image
+                          src={selectedBlock.reviewImageUrl}
+                          alt="리뷰 이미지"
+                        />
+                      ) : (
+                        <div className={styles.noImage}>리뷰 이미지</div>
+                      )}
+                    </div>
+                    <div className={styles.reviewContent}>
+                      {selectedBlock.reviewContent || (
+                        <span className={styles.placeholder}>리뷰 내용 글</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.buttonRow}>
+                    <button className={styles.actionBtn}>다시 떠나기</button>
+                    <button className={styles.actionBtnSecondary}>
+                      공유하기
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.blockDetailEmpty}>
+                  타임라인에서 미션을 선택해 상세 내용을 확인해보세요.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default GameHistory;

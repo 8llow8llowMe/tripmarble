@@ -1,0 +1,200 @@
+pipeline {
+    agent any
+
+    // 파라미터
+    parameters {
+        string(
+            name: 'SERVICE_GROUP',
+            defaultValue: 'web',
+            description: '상위 모듈 디렉터리'
+        )
+        string(
+            name: 'SERVICE_NAME',
+            defaultValue: 'web',
+            description: '서비스 이름'
+        )
+        string(
+            name: 'TARGET_BRANCH',
+            defaultValue: 'develop',
+            description: 'PR 타겟 브랜치 (배포 환경 결정용)'
+        )
+        string(
+            name: 'PR_SHA',
+            defaultValue: '',
+            description: 'PR 커밋 SHA (빌드할 코드)'
+        )
+        string(
+            name: 'PR_NUMBER',
+            defaultValue: '',
+            description: 'PR 번호'
+        )
+    }
+
+    // 공통 환경 변수
+    environment {
+        MODULE_PATH = "frontend/${params.SERVICE_GROUP}"
+        FS_PATH = "frontend/${params.SERVICE_GROUP}"
+        MINIO_ENDPOINT = "${env.MINIO_ENDPOINT}"
+        MINIO_BUCKET = "${env.MINIO_BUCKET}"
+        MINIO_PATH = "frontend/${params.SERVICE_GROUP}"
+        SSH_CONFIG = 'storage server ssh'
+        NEXT_TELEMETRY_DISABLED = '1'
+    }
+
+    stages {
+
+        stage('Environment Info') {
+            steps {
+                script {
+                    echo "=== Build Information ==="
+                    echo "Branch: ${env.BRANCH_NAME}"
+                    echo "Service: ${params.SERVICE_NAME}"
+                    echo "Target Branch: ${params.TARGET_BRANCH}"
+                    echo "PR SHA: ${params.PR_SHA ?: 'Not provided'}"
+                    echo "PR Number: ${params.PR_NUMBER ?: 'Not provided'}"
+                    
+                    // 타겟 브랜치 기준으로 배포 환경 결정
+                    if (params.TARGET_BRANCH == 'main') {
+                        env.DEPLOY_ENV = 'prod'
+                        echo "Deploy Target: Production (based on target branch)"
+                    } else if (params.TARGET_BRANCH == 'develop') {
+                        env.DEPLOY_ENV = 'dev'
+                        echo "Deploy Target: Development (based on target branch)"
+                    } else {
+                        env.DEPLOY_ENV = 'none'
+                        echo "Deploy Target: None"
+                    }
+                    echo "========================="
+                }
+            }
+        }
+
+        stage('Checkout Code') {
+            steps {
+                script {
+                    // PR SHA가 있으면 해당 커밋 체크아웃, 없으면 브랜치 HEAD 사용
+                    if (params.PR_SHA && params.PR_SHA != '') {
+                        echo "Checking out PR commit: ${params.PR_SHA}"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: params.PR_SHA]],
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                            extensions: [
+                                [$class: 'SubmoduleOption',
+                                 recursiveSubmodules: true,
+                                 parentCredentials: true]
+                            ]
+                        ])
+                    } else {
+                        echo "Using PR branch code (Jenkins 멀티브랜치가 자동으로 PR 브랜치 체크아웃)"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: scm.branches,
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                            extensions: [
+                                [$class: 'SubmoduleOption',
+                                 recursiveSubmodules: true,
+                                 parentCredentials: true]
+                            ]
+                        ])
+                    }
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                dir("${env.FS_PATH}") {
+                    sh 'yarn install --frozen-lockfile'
+                }
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                dir("${env.FS_PATH}") {
+                    script {
+                        // Next.js 빌드는 항상 production 모드로 진행 (SSR 안정성 및 최적화)
+                        env.NODE_ENV = 'production'
+                        if (params.TARGET_BRANCH == 'main') {
+                            env.NEXT_PUBLIC_RUNTIME_ENV = 'prod'
+                            echo "Building for production runtime"
+                        } else {
+                            env.NEXT_PUBLIC_RUNTIME_ENV = 'dev'
+                            echo "Building for development runtime (build=production)"
+                        }
+                        sh 'rm -rf .next .turbo || true'
+                        // Next.js 빌드
+                        sh 'yarn build'
+                    }
+                }
+            }
+            post {
+                success {
+                    sh "cp -R ${env.FS_PATH}/public ${env.FS_PATH}/.next/standalone/public || true"
+                    archiveArtifacts allowEmptyArchive: true, artifacts: """
+                    ${env.FS_PATH}/.next/standalone/**
+                    ${env.FS_PATH}/.next/static/**
+                    ${env.FS_PATH}/public/**
+                    ${env.FS_PATH}/package.json
+                    """
+                }
+            }
+        }
+
+        stage('Deploy to Dev') {
+            when {
+                // 타겟 브랜치가 develop인 경우 dev 환경에 배포
+                expression { params.TARGET_BRANCH == 'develop' }
+            }
+            steps {
+                script {
+                    echo "Deploying ${params.SERVICE_NAME} to Development"
+                    
+                    // 개발 환경 배포 로직 (필요시 추가)
+                    echo "Development deployment completed"
+                }
+            }
+        }
+
+        stage('Deploy to Prod') {
+            when {
+                // 타겟 브랜치가 main인 경우 prod 환경에 배포
+                expression { params.TARGET_BRANCH == 'main' }
+            }
+            steps {
+                script {
+                    echo "Deploying ${params.SERVICE_NAME} to Production"
+                    
+                    // MinIO에 배포
+                    withCredentials([usernamePassword(credentialsId: 'minio-credentials',
+                                                      usernameVariable: 'MINIO_ACCESS_KEY',
+                                                      passwordVariable: 'MINIO_SECRET_KEY')]) {
+                        sh """
+                            # MinIO Client 설정
+                            mc alias set minio ${MINIO_ENDPOINT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
+                            
+                            # 기존 파일 삭제 (버킷 경로 전체)
+                            mc rm --recursive --force minio/${MINIO_BUCKET}/${MINIO_PATH} || true
+                            
+                            # SSR 산출물 업로드 (.next/standalone, .next/static, public)
+                            mc cp --recursive ${env.FS_PATH}/.next/standalone/ minio/${MINIO_BUCKET}/${MINIO_PATH}/.next/standalone/
+                            mc cp --recursive ${env.FS_PATH}/.next/static/     minio/${MINIO_BUCKET}/${MINIO_PATH}/.next/static/
+                            mc cp --recursive ${env.FS_PATH}/public/           minio/${MINIO_BUCKET}/${MINIO_PATH}/public/
+                            mc cp ${env.FS_PATH}/package.json                  minio/${MINIO_BUCKET}/${MINIO_PATH}/package.json
+                            
+                            echo "Production deployment completed: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${MINIO_PATH}"
+                            echo "Note: SSR requires running Node with .next/standalone/server.js on your runtime host. MinIO stores the build artifacts only."
+                        """
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}

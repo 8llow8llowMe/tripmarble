@@ -1,0 +1,65 @@
+x-auth-service-environment: &auth_service_environment
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+  TIME_ZONE: ${TIME_ZONE}
+  SPRING_APPLICATION_NAME: ${AUTH_SERVICE_APP_NAME}
+  AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+  DB_URL: ${DB_URL}
+  DB_USERNAME: ${DB_USERNAME}
+  DB_PASSWORD: ${DB_PASSWORD}
+  REDIS_HOST: ${REDIS_HOST}
+  REDIS_PORT: ${REDIS_PORT}
+  JWT_ACCESS_KEY: ${JWT_ACCESS_KEY}
+  JWT_REFRESH_KEY: ${JWT_REFRESH_KEY}
+  JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
+  JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+  MINIO_INTERNAL_URL: ${MINIO_INTERNAL_URL}
+  MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL}
+  MINIO_BUCKET_PREFIX: ${MINIO_BUCKET_PREFIX}
+  MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+  MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+  SNOWFLAKE_DATACENTER_ID: ${SNOWFLAKE_DATACENTER_ID}
+  SNOWFLAKE_WORKER_ID: ${SNOWFLAKE_WORKER_ID}
+  MAIL_HOST: ${MAIL_HOST}
+  MAIL_PORT: ${MAIL_PORT}
+  MAIL_USERNAME: ${MAIL_USERNAME}
+  MAIL_PASSWORD: ${MAIL_PASSWORD}
+  MAIL_SMTP_AUTH: ${MAIL_SMTP_AUTH}
+  MAIL_STARTTLS_ENABLE: ${MAIL_STARTTLS_ENABLE}
+  OAUTH_KAKAO_CLIENT_ID: ${OAUTH_KAKAO_CLIENT_ID}
+  OAUTH_KAKAO_CLIENT_SECRET: ${OAUTH_KAKAO_CLIENT_SECRET}
+  OAUTH_KAKAO_REDIRECT_URI: ${OAUTH_KAKAO_REDIRECT_URI}
+  SERVICE_DISCOVERY_HOSTNAME: ${SERVICE_DISCOVERY_HOSTNAME}
+  SERVICE_DISCOVERY_PORT: ${SERVICE_DISCOVERY_PORT}
+
+
+services:
+  auth-service-dev:
+    container_name: auth-service-dev
+    build:
+      context: .
+      dockerfile: auth-service.Dockerfile
+    ports:
+      - "${AUTH_SERVICE_PORT_DEV}:${AUTH_SERVICE_PORT}" # host:container
+    environment:
+      <<: *auth_service_environment
+      TRIP_MARBLE_DOMAIN: ${TRIP_MARBLE_DOMAIN_DEV}
+      AUTH_SERVICE_PORT_DEV: ${AUTH_SERVICE_PORT_DEV}
+    networks:
+      - 8llow8llowme-net
+
+  auth-service-prod:
+    container_name: auth-service-prod
+    build:
+      context: .
+      dockerfile: auth-service.Dockerfile
+    ports:
+      - "${AUTH_SERVICE_PORT_PROD}:${AUTH_SERVICE_PORT}" # host:container
+    environment:
+      <<: *auth_service_environment
+    networks:
+      - 8llow8llowme-net
+
+networks:
+  8llow8llowme-net:
+    name: 8llow8llowme-net
+    driver: bridge

@@ -1,0 +1,97 @@
+server:
+  port: 8081
+  shutdown: graceful
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/tripmarble?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true       # 데이터베이스 URL
+    username: ENC(OL9lhGYuBl819xoaLMPAxuTVlN8pJ3GE)
+    password: ENC(Q7kGpk90tMWOMI0Eoa6+xqjXROMGqmTxIiKQvkZldzw=)
+
+  jpa:
+    open-in-view: true
+    defer-datasource-initialization: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        show_sql: true
+        jdbc:
+          batch_size: 100
+        default_batch_fetch_size: 100
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# log 관리
+logging:
+  level:
+    org.hibernate:
+      type.descriptor.sql: trace
+      org.hibernate.SQLQuery: debug
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+# snowflake
+snowflake:
+  datacenter-id: 1
+  worker-id: 1
+
+# JWT
+jwt:
+  access-key: ENC(YDO9DGO7lP8iCqeTNW/SXWCv0697ep+bbGvMnjoJfMDEtWy1Zq/yfZDsovoggEcmLLOtZfHSpLYoRO0YEUlrOl3CvD5KWXo55haCMx7cZMg=)
+  refresh-key: ENC(mWLDPbHV38tl17kR0HbB8vmA1AZ/GKmjRmGFoI5IkOyWMIJPIHj91lFxCPLnmOHTPe4O/ZsVG0UKVd3YJuzkDyCuS7lMS1NjFeJOfs3y5ks=)
+  access-expiration: PT420M
+  refresh-expiration: PT10080M
+
+# minio
+minio:
+  internal-url: http://localhost:9000
+  public-url: http://localhost:9000
+  bucket-prefix: tripmarble
+  access-key: ENC(fkrxtIidUHN1LoxCucgcFpBXqSh22NiO)
+  secret-key: ENC(gyy+d4BkG2lphHopsii2hNLjUHutcbZNZcev8D90M08=)
+
+# Swagger
+swagger:
+  server-url: http://localhost:8081
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info" # 해당 actuator endpoint 노출
+  endpoint:
+    health:
+      show-details: ALWAYS # SBA에서 상세 health 정보까지 보기 위함
+
+# Mail
+mail:
+  host: smtp.gmail.com
+  port: 587
+  username: ENC(6pqj0+W7IFQCv1dQmOkxMBzAgnO8NetYzaGxg7GjT2g=)
+  password: ENC(Orv+BO0qxBOtXE4k3ZB1AaA1RIBPJZHu2HAVtMGjgIw=)
+  smtp-auth: true
+  starttls-enable: true
+
+# OAUTH 2.0
+oauth:
+  kakao:
+    client-id: ENC(4dbiYUmQjEXC1pxBXOqA/skIkz2pUG8E97iyy3uNYH7yv9ixfsWVIcrJnCsWB/EK) # Rest API 키
+    client-secret: ENC(g3937mPP6h8A5fkrm4gLo7x9uCSjHtYOk9IfX6V2OCvjWnBk3sWODYS/BgssysnF)
+    redirect-uri: http://localhost:8080/auth/callback/kakao
+    scope:
+      - profile_nickname
+      - profile_image
+      - account_email
+      - name

@@ -1,0 +1,74 @@
+.regionStepWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.regionGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 120px); /* 고정 칸 너비 */
+  grid-template-rows: repeat(3, 130px); /* 3줄 고정 */
+  gap: 0 30px;
+  max-width: calc(3 * 130px + 24px * 2);
+  max-height: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  padding-bottom: 5px;
+}
+
+.regionGrid::-webkit-scrollbar {
+  height: 12px; /* 스크롤바 높이 */
+}
+
+.regionGrid::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3); /* 스크롤바 색 */
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+// .regionGrid {
+//   display: grid;
+//   grid-template-columns: repeat(3, 1fr);
+//   gap: 28px 24px;
+//   max-height: calc(3 * 160px);
+//   overflow-y: auto; /* 스크롤바 투명/숨김 */
+//   scrollbar-width: thin;
+//   scrollbar-color: transparent transparent;
+// }
+
+// .regionGrid::-webkit-scrollbar {
+//   width: 0 !important;
+//   background: transparent !important;
+// }
+
+.regionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+
+  .circle {
+    width: 90px;
+    height: 90px;
+    background: #f3f5f7;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    margin-bottom: 6px;
+    transition: border 0.2s, box-shadow 0.2s;
+  }
+
+  .regionName {
+    font-size: 1.05rem;
+    color: #222;
+    margin-top: 2px;
+  }
+}
+
+.selected .circle {
+  border: 3px solid #38bdf8;
+  box-shadow: 0 0 0 2px #bae6fd;
+  background: #e0f7fa;
+}

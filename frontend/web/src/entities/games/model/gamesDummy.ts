@@ -1,0 +1,42 @@
+export const gamesDummy = [
+  {
+    id: "1",
+    title: "부산 광안리 투어 게임",
+    description: "광안대교를 건너며 팀 대항 미션에 도전하세요!",
+    tag: "BUDGET TRAVEL",
+    imageUrl: "/images/no-image.png",
+    date: "2024-07-15 · 15명 참여",
+  },
+  {
+    id: "2",
+    title: "서울 숨은 명소 스탬프랠리",
+    description: "서울 곳곳의 명소를 찾아 인증샷을 남겨보세요.",
+    tag: "FAMILY TRAVEL",
+    imageUrl: "/images/no-image.png",
+    date: "2024-07-11 · 8명 참여",
+  },
+  {
+    id: "3",
+    title: "제주 자연 탐험 게임",
+    description: "제주의 아름다운 자연 속에서 미션을 해결하세요.",
+    tag: "NATURE ADVENTURE",
+    imageUrl: "/images/no-image.png",
+    date: "2024-07-10 · 20명 참여",
+  },
+  {
+    id: "4",
+    title: "인천 역사 골든벨",
+    description: "인천의 역사 유적지를 돌며 퀴즈를 풀어보세요.",
+    tag: "HISTORY QUIZ",
+    imageUrl: "/images/no-image.png",
+    date: "2024-07-09 · 12명 참여",
+  },
+  {
+    id: "5",
+    title: "강릉 바다 미션런",
+    description: "강릉 바닷가에서 팀 미션을 완수해보세요.",
+    tag: "SEA ADVENTURE",
+    imageUrl: "/images/no-image.png",
+    date: "2024-07-08 · 17명 참여",
+  },
+];

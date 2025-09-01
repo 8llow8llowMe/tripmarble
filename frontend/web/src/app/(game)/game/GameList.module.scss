@@ -1,0 +1,32 @@
+.mainContainer {
+  padding: 0 32px;
+  background: #fafbfc;
+}
+
+.titleAndButton {
+  display: flex;
+  flex-direction: row;
+  // justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+
+  @media (max-width: 700px) {
+    margin-top: 32px;
+    flex-direction: column-reverse;
+    align-items: start;
+    gap: 15px;
+  }
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-block: 32px;
+  letter-spacing: -0.01em;
+}
+
+.flexRow {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}

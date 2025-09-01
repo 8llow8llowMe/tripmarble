@@ -1,0 +1,119 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: transparent;
+  font-weight: 600;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  z-index: 100;
+}
+
+.header.scrolled {
+  // background-color: #ffffff;
+  color: #333;
+  // border-bottom: 1px solid #eaeaea;
+  // box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.nav.scrolled a,
+.header.scrolled {
+  color: #333;
+}
+
+.logo {
+  padding: 0.5rem 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #0070f3;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.logo a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav {
+  display: flex;
+  // gap: 1.5rem;
+  border: #eee solid 1px;
+  background-color: #ffffff;
+  padding: 0.2rem;
+  border-radius: 99px;
+}
+
+.nav a {
+  padding: 0.5rem 1rem;
+  border-radius: 1.8rem;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease-in-out;
+}
+
+.nav a:hover,
+.hamburger:hover {
+  color: #0070f3;
+  background-color: rgba(0, 112, 243, 0.1);
+}
+
+.hamburger {
+  font-size: 32px;
+  display: none;
+  cursor: pointer;
+}
+
+.mobileMenu {
+  display: none;
+}
+
+.nav a.active {
+  color: #0070f3;
+  background-color: rgba(0, 112, 243, 0.1);
+  font-weight: bold;
+  // border-bottom: 2px solid #0070f3;
+}
+
+@media (max-width: 684px) {
+  .nav {
+    display: none;
+  }
+  .hamburger {
+    display: block;
+  }
+
+  .mobileMenu {
+    display: flex;
+    position: absolute;
+    top: 80px;
+    right: 0;
+    width: 150px;
+    background: #fff;
+    border: 1px solid #eaeaea;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    flex-direction: column;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .mobileMenu a {
+    text-align: center;
+    padding: 0.5rem;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    border-radius: 8px;
+  }
+  .mobileMenu a:hover {
+    background-color: #f0f0f0;
+    color: #0070f3;
+    font-weight: 600;
+  }
+}

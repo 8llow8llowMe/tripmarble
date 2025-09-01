@@ -1,0 +1,54 @@
+.wrapper {
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.arrowButtons {
+  display: flex;
+  gap: 4px;
+}
+
+.arrow {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+.scrollContainer {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+  scroll-behavior: smooth;
+
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+}
+
+.scrollContainer.active {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.itemWrapper {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}

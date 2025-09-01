@@ -1,0 +1,25 @@
+/* Container Layout */
+.container {
+  flex: 1;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+}
+
+.section {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  gap: 2rem;
+}
+
+/* Typography */
+.subTitle {
+  font-size: 2rem;
+  font-weight: 600;
+}

@@ -1,0 +1,35 @@
+x-service-discovery-environment: &service_discovery_environment
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+  TIME_ZONE: ${TIME_ZONE}
+  SPRING_APPLICATION_NAME: ${SERVICE_DISCOVERY_APP_NAME}
+  SERVICE_DISCOVERY_PORT: ${SERVICE_DISCOVERY_PORT}
+
+services:
+  service-discovery-dev:
+    container_name: service-discovery-dev
+    build:
+      context: .
+      dockerfile: service-discovery.Dockerfile
+    ports:
+      - "${SERVICE_DISCOVERY_PORT_DEV}:${SERVICE_DISCOVERY_PORT}" # host:container
+    environment:
+      <<: *service_discovery_environment
+    networks:
+      - 8llow8llowme-net
+
+  service-discovery-prod:
+    container_name: service-discovery-prod
+    build:
+      context: .
+      dockerfile: service-discovery.Dockerfile
+    ports:
+      - "${SERVICE_DISCOVERY_PORT_PROD}:${SERVICE_DISCOVERY_PORT}" # host:container
+    environment:
+      <<: *service_discovery_environment
+    networks:
+      - 8llow8llowme-net
+
+networks:
+  8llow8llowme-net:
+    name: 8llow8llowme-net
+    driver: bridge

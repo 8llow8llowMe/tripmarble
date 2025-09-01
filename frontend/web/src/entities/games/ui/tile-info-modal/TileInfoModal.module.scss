@@ -1,0 +1,117 @@
+.blockDetail {
+  width: calc(100% - 1rem);
+  background: #f6f8fa;
+  border-radius: 14px;
+  margin: 1rem;
+  padding: 24px 28px;
+  border: 2px solid #bbdbff;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.blockHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.blockTitle {
+  font-weight: 600;
+  font-size: 1.13rem;
+}
+.blockBadge {
+  margin-left: 12px;
+  background: #ddefff;
+  color: #368aff;
+  font-size: 0.94rem;
+  padding: 3px 12px;
+  border-radius: 10px;
+}
+.blockDate {
+  color: #222;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.blockMission {
+  color: #444;
+  font-size: 1.04rem;
+  margin-bottom: 6px;
+  margin-top: -7px;
+}
+
+.reviewSection {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+}
+
+.reviewImage {
+  width: 120px;
+  min-width: 120px;
+  height: 90px;
+  background: #e9f2fa;
+  border-radius: 7px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 7px;
+  }
+  .noImage {
+    color: #aaa;
+    font-size: 0.93rem;
+    text-align: center;
+  }
+}
+
+.reviewContent {
+  flex: 1;
+  min-height: 90px;
+  background: #eef7ff;
+  border-radius: 7px;
+  padding: 16px 18px;
+  font-size: 1.03rem;
+  color: #1a2230;
+  display: flex;
+  align-items: center;
+}
+
+.placeholder {
+  color: #b5b5b5;
+}
+
+.buttonRow {
+  margin-top: 18px;
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+.actionBtn,
+.actionBtnSecondary {
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 12px 30px;
+  transition: background 0.13s;
+  cursor: pointer;
+}
+.actionBtn {
+  background: linear-gradient(90deg, #45d8ff, #367fff 95%);
+  color: #fff;
+  box-shadow: 0 1px 4px #45d8ff33;
+}
+.actionBtnSecondary {
+  background: #d3eaff;
+  color: #368aff;
+}

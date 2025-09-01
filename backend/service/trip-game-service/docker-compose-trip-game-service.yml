@@ -1,0 +1,47 @@
+x-trip-game-service-environment: &trip_game_service_environment
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+  TIME_ZONE: ${TIME_ZONE}
+  SPRING_APPLICATION_NAME: ${TRIP_GAME_SERVICE_APP_NAME}
+  TRIP_GAME_SERVICE_PORT: ${TRIP_GAME_SERVICE_PORT}
+  DB_URL: ${DB_URL}
+  DB_USERNAME: ${DB_USERNAME}
+  DB_PASSWORD: ${DB_PASSWORD}
+  SERVICE_DISCOVERY_HOSTNAME: ${SERVICE_DISCOVERY_HOSTNAME}
+  SERVICE_DISCOVERY_PORT: ${SERVICE_DISCOVERY_PORT}
+  SNOWFLAKE_DATACENTER_ID: ${SNOWFLAKE_DATACENTER_ID}
+  SNOWFLAKE_WORKER_ID: ${SNOWFLAKE_WORKER_ID}
+  JWT_ACCESS_KEY: ${JWT_ACCESS_KEY}
+  TRIP_SERVICE_APP_NAME: ${TRIP_SERVICE_APP_NAME}
+  AUTH_SERVICE_APP_NAME: ${AUTH_SERVICE_APP_NAME}
+
+services:
+  trip-game-service-dev:
+    container_name: trip-game-service-dev
+    build:
+      context: .
+      dockerfile: trip-game-service.Dockerfile
+    ports:
+      - "${TRIP_GAME_SERVICE_PORT_DEV}:${TRIP_GAME_SERVICE_PORT}" # host:container
+    environment:
+      <<: *trip_game_service_environment
+      TRIP_MARBLE_DOMAIN: ${TRIP_MARBLE_DOMAIN_DEV}
+      API_GATEWAY_PORT: ${API_GATEWAY_PORT_DEV}
+    networks:
+      - 8llow8llowme-net
+
+  trip-game-service-prod:
+    container_name: trip-game-service-prod
+    build:
+      context: .
+      dockerfile: trip-game-service.Dockerfile
+    ports:
+      - "${TRIP_GAME_SERVICE_PORT_PROD}:${TRIP_GAME_SERVICE_PORT}" # host:container
+    environment:
+      <<: *trip_game_service_environment
+    networks:
+      - 8llow8llowme-net
+
+networks:
+  8llow8llowme-net:
+    name: 8llow8llowme-net
+    driver: bridge

@@ -1,0 +1,38 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext"],
+    "jsx": "react-native",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@constants/*": ["./src/constants/*"],
+      "@assets/*": ["assets/*"],
+      "@icons/*": ["assets/icons/*"],
+      "@images/*": ["assets/images/*"],
+      "@fonts/*": ["assets/fonts/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@store/*": ["./src/store/*"],
+      "@components/*": ["src/components/*"],
+      "@navigations/*": ["./src/navigations/*"],
+      "@screens/*": ["./src/screens/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@types/*": ["./src/types/*"]
+    },
+    "types": ["react", "react-native", "node"]
+  },
+  "include": ["src", "App.tsx", "index.tsx", "declarations.d.ts", "assets"],
+  "exclude": ["node_modules"]
+}

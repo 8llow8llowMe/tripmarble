@@ -1,0 +1,42 @@
+server:
+  port: 8090
+  shutdown: graceful
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/tripmarble?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true       # 데이터베이스 URL
+    username: ENC(OL9lhGYuBl819xoaLMPAxuTVlN8pJ3GE)
+    password: ENC(Q7kGpk90tMWOMI0Eoa6+xqjXROMGqmTxIiKQvkZldzw=)
+
+tourapi:
+  service-key: ENC(FbAofRjn3s74FsQJDjQ5BASbkmx6QtzSQynZ2TOqEptNHCD6+u5yNN+IXUmDULCFLfLZSJX95nkEGDHpjass4duq1cjqgoFZDmqQ3ctoCUY+Q47QsxQNYFtyGNAvWufVYTcuVjTqlYo=)
+  default-params:
+    numOfRows: 100
+    pageNo: 1
+    mobileOS: WEB
+    mobileApp: tripmarble
+    _type: JSON
+  categories:
+    ldong-code2:
+      apis:
+        # 법정동코드 조회 API (시도코드 기반)
+        region-code:
+          url: ENC(KtXU464b0bi4g+tXsOHfRgnClqov9+BmDScMaUYRxVmdNpVPHbeBBNQrdQUsBJRsE6JF5PlI4fclHQxOCI4P+Q==)
+          params: { }
+        # 법정동코드 조회 API (시군구코드 기반)
+        sigungu-code:
+          url: ENC(KtXU464b0bi4g+tXsOHfRgnClqov9+BmDScMaUYRxVmdNpVPHbeBBNQrdQUsBJRsE6JF5PlI4fclHQxOCI4P+Q==)
+          params:
+            lDongRegnCd: 11
+            lDongListYn: Y
+    area-based-list2:
+      apis:
+        # 지역기반 관광정보 조회 API (여행지 정보 목록 조회)
+        region-based-trip-spot-list:
+          url: ENC(AaFjBGv9o0yE0+DqOUM+oCZpf/idDAi/I3wpsz/qCC+JnZtqqsIALzd1k1w+p0Sj/hV6bB9R0tEgdSpZkFyAfbxCs2MNDg5X)
+    detail-common2:
+      apis:
+        # 공통정보 조회 API (여행지 정보 상세 조회)
+        common-trip-spot-detail:
+          url: ENC(amRej+bu31XTt5J6Q75ZVjE1mHNiKbaJhLvTS5jlazWwmRvnijW+55XqwP1HvGAuNTMYO41LAJimjImoh/c7lnZ8aMMB1pfn)

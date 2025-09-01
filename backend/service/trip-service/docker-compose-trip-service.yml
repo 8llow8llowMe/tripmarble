@@ -1,0 +1,42 @@
+x-trip-service-environment: &trip_service_environment
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+  TIME_ZONE: ${TIME_ZONE}
+  SPRING_APPLICATION_NAME: ${TRIP_SERVICE_APP_NAME}
+  TRIP_SERVICE_PORT: ${TRIP_SERVICE_PORT}
+  DB_URL: ${DB_URL}
+  DB_USERNAME: ${DB_USERNAME}
+  DB_PASSWORD: ${DB_PASSWORD}
+  SERVICE_DISCOVERY_HOSTNAME: ${SERVICE_DISCOVERY_HOSTNAME}
+  SERVICE_DISCOVERY_PORT: ${SERVICE_DISCOVERY_PORT}
+
+services:
+  trip-service-dev:
+    container_name: trip-service-dev
+    build:
+      context: .
+      dockerfile: trip-service.Dockerfile
+    ports:
+      - "${TRIP_SERVICE_PORT_DEV}:${TRIP_SERVICE_PORT}" # host:container
+    environment:
+      <<: *trip_service_environment
+      TRIP_MARBLE_DOMAIN: ${TRIP_MARBLE_DOMAIN_DEV}
+      API_GATEWAY_PORT: ${API_GATEWAY_PORT_DEV}
+    networks:
+      - 8llow8llowme-net
+
+  trip-service-prod:
+    container_name: trip-service-prod
+    build:
+      context: .
+      dockerfile: trip-service.Dockerfile
+    ports:
+      - "${TRIP_SERVICE_PORT_PROD}:${TRIP_SERVICE_PORT}" # host:container
+    environment:
+      <<: *trip_service_environment
+    networks:
+      - 8llow8llowme-net
+
+networks:
+  8llow8llowme-net:
+    name: 8llow8llowme-net
+    driver: bridge

@@ -1,0 +1,75 @@
+server:
+  port: ${API_GATEWAY_PORT}
+  shutdown: graceful
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # Swagger 문서용 라우트
+        - id: auth-service-docs
+          uri: lb://AUTH-SERVICE-PROD
+          predicates:
+            - Path=/auth-service/** # /auth-service/v3/api-docs 로 들어오면
+          filters:
+            - StripPrefix=1 # /v3/api-docs 로 잘라서 전달
+        - id: trip-service-docs
+          uri: lb://TRIP-SERVICE-PROD
+          predicates:
+            - Path=/trip-service/**
+          filters:
+            - StripPrefix=1
+        - id: trip-game-service-docs
+          uri: lb://TRIP-GAME-SERVICE-PROD
+          predicates:
+            - Path=/trip-game-service/**
+          filters:
+            - StripPrefix=1
+        # 기존 API 라우트
+        - id: trip-service
+          uri: lb://TRIP-SERVICE-PROD
+          predicates:
+            - Path=/api/v1/regions/**, /api/v1/trip-spots/**, /api/v1/trip-content-types/**
+        - id: trip-game-service
+          uri: lb://TRIP-GAME-SERVICE-PROD
+          predicates:
+            - Path=/api/v1/trip-themes/**, /api/v1/trip-games/**
+
+eureka:
+  instance:
+    hostname: ${spring.application.name}
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    lease-renewal-interval-in-seconds: 30 # 인스턴스가 헬스 체크 전송하는 주기 (안정적 갱신 주기, default: true)
+    lease-expiration-duration-in-seconds: 90 # 인스턴스 만료 대기 시간 (운영에서는 너무 빠르게 내려가지 않도록)
+  client:
+    service-url:
+      defaultZone: http://${SERVICE_DISCOVERY_HOSTNAME}:${SERVICE_DISCOVERY_PORT}/eureka/
+    fetch-registry: true # 유레카 클라이언트가 유레카 서버로부터 인스턴스 레지스트리 주기적으로 받아올지 여부 (default: true)
+    registry-fetch-interval-seconds: 30 # 레지스트리 몇 초마다 가져올지 (부하 줄이기, default: 30)
+    initial-instance-info-replication-interval-seconds: 5 # 유레카 서버에 처음 등록할 때까지 대기 시간
+
+jwt:
+  access-key: ${JWT_ACCESS_KEY}
+
+springdoc:
+  swagger-ui:
+    # Swagger UI 활성화 여부
+    enabled: true
+    # Swagger UI 접근 경로
+    path: /swagger-ui.html
+    # Swagger UI 구성에 대한 URL
+    config-url: /v3/api-docs/swagger-config
+    # 각 서비스의 OpenAPI 문서 URL 목록
+    urls:
+      - name: 회원 서비스 및 인증/인가 관련 API
+        url: /auth-service/v3/api-docs
+      - name: 지역 및 여행 서비스 관련 API
+        url: /trip-service/v3/api-docs
+      - name: 여행 게임(계획) 서비스 관련 API
+        url: /trip-game-service/v3/api-docs
+    operationsSorter: none # API 정렬 기준 없음
+    displayRequestDuration: true # 각 API 요청의 응답시간(ms) 표시

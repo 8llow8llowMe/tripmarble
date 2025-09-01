@@ -1,0 +1,37 @@
+x-api-gateway-environment: &api_gateway_environment
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+  TIME_ZONE: ${TIME_ZONE}
+  SPRING_APPLICATION_NAME: ${API_GATEWAY_APP_NAME}
+  API_GATEWAY_PORT: ${API_GATEWAY_PORT}
+  SERVICE_DISCOVERY_HOSTNAME: ${SERVICE_DISCOVERY_HOSTNAME}
+  SERVICE_DISCOVERY_PORT: ${SERVICE_DISCOVERY_PORT}
+
+services:
+  api-gateway-dev:
+    container_name: api-gateway-dev
+    build:
+      context: .
+      dockerfile: api-gateway.Dockerfile
+    ports:
+      - "${API_GATEWAY_PORT_DEV}:${API_GATEWAY_PORT}" # host:container
+    environment:
+      <<: *api_gateway_environment
+    networks:
+      - 8llow8llowme-net
+
+  api-gateway-prod:
+    container_name: api-gateway-prod
+    build:
+      context: .
+      dockerfile: api-gateway.Dockerfile
+    ports:
+      - "${API_GATEWAY_PORT_PROD}:${API_GATEWAY_PORT}" # host:container
+    environment:
+      <<: *api_gateway_environment
+    networks:
+      - 8llow8llowme-net
+
+networks:
+  8llow8llowme-net:
+    name: 8llow8llowme-net
+    driver: bridge
