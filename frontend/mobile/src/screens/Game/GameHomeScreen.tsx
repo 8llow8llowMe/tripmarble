@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   SafeAreaView,
   View,
@@ -9,18 +9,19 @@ import {
   ImageBackground,
 } from 'react-native';
 import ongoingImage from '@images/places/gyeongju.png';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import { useMyGameLists } from '@/hooks/game/useMyGameList';
 import { LinearGradient } from 'expo-linear-gradient';
+import { fetchGameStart } from '@/hooks/game/useGameStart';
 import CreateGameBanner from '@/components/common/banner/CreateGameBanner';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
 import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
 
 export default function GameHomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
-  // const { myGameList } = useMyGameListQuery();
+
   const { waiting, ongoing, ended } = useMyGameLists();
 
   // 게임 생성 스크린으로 이동
@@ -29,7 +30,10 @@ export default function GameHomeScreen() {
   };
 
   // 진행중인 게임 스크린으로 이동
-  const goToGameOngoingScreen = (tripGameId: string) => {
+  const goToGameOngoingScreen = async (tripGameId: string, isWaiting: boolean = false) => {
+    if (isWaiting) {
+      await fetchGameStart(tripGameId);
+    }
     navigation.navigate('GamePlayStackNavigator', {
       screen: 'OngoingGameScreen',
       params: { tripGameId },
@@ -43,6 +47,15 @@ export default function GameHomeScreen() {
       params: { tripGameId },
     });
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      waiting.refetch();
+      ongoing.refetch();
+      ended.refetch();
+      return undefined;
+    }, [waiting.refetch, ongoing.refetch, ended.refetch]),
+  );
 
   // 게임 목록 스크린으로 이동
   const goToGameListScreen = (status?: 'WAITING' | 'ONGOING' | 'ENDED') => {
@@ -66,7 +79,7 @@ export default function GameHomeScreen() {
             contentContainerStyle={styles.ongoingRow}
             style={{ marginLeft: 16 }}
           >
-            {(waiting.data?.data.dataBody.contents ?? []).map((game) => (
+            {(ongoing.data?.data.dataBody.contents ?? []).map((game) => (
               <TouchableOpacity
                 key={game.tripGameId}
                 onPress={() => goToGameOngoingScreen(game.tripGameId)}
@@ -117,7 +130,7 @@ export default function GameHomeScreen() {
             {(waiting.data?.data.dataBody.contents ?? []).map((game) => (
               <TouchableOpacity
                 key={game.tripGameId}
-                onPress={() => goToGameOngoingScreen(game.tripGameId)}
+                onPress={() => goToGameOngoingScreen(game.tripGameId, true)}
                 activeOpacity={0.8}
                 style={styles.waitingCardHorizontal}
               >
@@ -155,7 +168,7 @@ export default function GameHomeScreen() {
           />
 
           {(() => {
-            if (waiting.data?.data.dataBody === undefined) {
+            if (ended.data?.data.dataBody === undefined) {
               return (
                 <View style={[styles.endedCard, { justifyContent: 'center' }]}>
                   <View style={[styles.endedInfo, { alignItems: 'center' }]}>
