@@ -6,6 +6,8 @@ import { useCanvasInitialScroll } from "@/entities/games/ui/game-board/useCanvas
 import { drawPiece } from "@/entities/games/ui/game-board/drawPiece";
 import { getCustomPosition } from "@/entities/games/ui/game-board/getCustomPosition";
 import type { TripGameTileView } from "@/entities/games/model/gameInfoDummy";
+import Piece from "@/shared/assets/images/Piece.png";
+import type { StaticImageData } from "next/image";
 
 const CELL_SIZE = 100;
 
@@ -18,6 +20,31 @@ type Props = {
 export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pieceImageRef = useRef<HTMLImageElement | null>(null);
+  const [imgReadyTick, setImgReadyTick] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (pieceImageRef.current) return; // 이미 생성됨
+
+    const img = new Image() as HTMLImageElement;
+    img.src = (Piece as StaticImageData).src;
+
+    const onReady = () => setImgReadyTick((t) => t + 1);
+
+    if ("decode" in img && typeof (img as any).decode === "function") {
+      (img as any)
+        .decode()
+        .then(onReady)
+        .catch(() => {
+          img.addEventListener("load", onReady, { once: true });
+        });
+    } else {
+      img.addEventListener("load", onReady, { once: true });
+    }
+
+    pieceImageRef.current = img;
+  }, []);
 
   // --- Build two position lists ---
   // 1) renderPositions: row-major border order (good for painter's algorithm / overlaps)
@@ -83,7 +110,7 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
   // Finally, build boardData in the SAFE render order, but pulling tile info by coordinate
   const boardData = renderPositions.map((pos) => {
     const payload = coordToTile.get(toKey(pos));
-    console.log(payload?.type);
+    // console.log(payload?.type);
     return {
       index: payload?.index ?? -1,
       row: pos.row,
@@ -126,10 +153,29 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#ecf1fe";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    console.log(boardData);
     drawGameBoard3D(ctx, boardData, count, CELL_SIZE);
-    drawPiece(ctx, piecePos.x, piecePos.y, CELL_SIZE);
-  }, [boardData, count, piecePos]);
+
+    // === 말(스프라이트/원) 그리는 함수 ===
+    drawPiece(
+      ctx,
+      piecePos.x,
+      piecePos.y,
+      CELL_SIZE,
+      pieceImageRef.current as HTMLImageElement
+    );
+  }, [boardData, count, piecePos, imgReadyTick]);
+
+  // 초기 말 위치 설정 (최초 1회 혹은 count/currentIndex 변경 시)
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    // 이미 설정되어 있으면 스킵 (0,0은 초기값으로 간주)
+    if (piecePos.x !== 0 || piecePos.y !== 0) return;
+
+    const start = getCustomPosition(currentIndex, count);
+    const x = start.customX * CELL_SIZE + CELL_SIZE / 2 + 10;
+    const y = start.customY * CELL_SIZE + CELL_SIZE / 2 + 30;
+    setPiecePos({ x, y });
+  }, [count, currentIndex, piecePos.x, piecePos.y]);
 
   function getParabolaPoint(
     startX: number,

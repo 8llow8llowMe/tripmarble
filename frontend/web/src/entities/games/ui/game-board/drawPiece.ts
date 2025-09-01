@@ -1,17 +1,11 @@
-import Piece from "@/shared/assets/images/Piece.png";
-import type { StaticImageData } from "next/image";
-
-// === 말(스프라이트/원) 그리는 함수 ===
-const pieceImage = new Image();
-pieceImage.src = (Piece as StaticImageData).src;
-
 export function drawPiece(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
-  cellSize: number
+  cellSize: number,
+  pieceImage: HTMLImageElement | null
 ) {
-  const imgToUse = pieceImage;
+  const imgToUse = pieceImage || null;
   // 이미지가 준비돼 있으면 이미지로 렌더 (바닥 중앙 정렬)
   if (imgToUse && imgToUse.complete) {
     ctx.save();
