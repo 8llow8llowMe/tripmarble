@@ -28,6 +28,7 @@ const QUERY_KEY = {
     GAME_START: 'gameStart',
     MY_GAME_LIST: 'myGameList',
     GAME_DICE: 'dice',
+    GAME_FORCE_END: 'force-end',
   },
 };
 
