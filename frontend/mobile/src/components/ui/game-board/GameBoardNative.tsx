@@ -92,9 +92,11 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
     const startPos = logicalPositions[0];
     map.set(toKey(startPos.row, startPos.col), { index: -1, type: 'start-go', title: 'GO' });
 
+    const available = logicalPositions.slice(1);
+    const len = Math.min(tiles.length, available.length);
     // +1 offset 시계방향 배치
-    for (let i = 0; i < tiles.length; i++) {
-      const pos = logicalPositions[(i + 1) % logicalPositions.length];
+    for (let i = 0; i < len; i++) {
+      const pos = available[i];
       const t = tiles[i];
       const type =
         t.missionTypeCode === 'PHOTO'
@@ -179,7 +181,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
               setIsMoving(false);
               const next = toIdx % logicalPositions.length;
               setCurrentIndex(next);
-              if (typeof onIndexChange === 'function') onIndexChange(next);
+              if (typeof onIndexChange === 'function') onIndexChange(next - 1);
             }
           }
         };
