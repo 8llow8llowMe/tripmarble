@@ -8,6 +8,7 @@ import GameBoardNative, { GameBoardHandle } from '@/components/ui/game-board/Gam
 import { gameInfoDummy } from '@/utils/gameInfoDummy';
 import useGetGameTilesQuery, { TripGameTileView } from '@/hooks/game/useGetGameTiles';
 import Logo from 'assets/images/Logo.png';
+import DiceView from '@/components/ui/dice/DiceView';
 // import useGameStartQuery from '@/hooks/game/useGameStart';
 
 export default function OngoingGameScreen({ route }) {
@@ -25,16 +26,31 @@ export default function OngoingGameScreen({ route }) {
   const tiles: TripGameTileView[] =
     (Array.isArray(gameInfo) ? gameInfo : gameInfo?.tripGameTileViews) ??
     gameInfoDummy.dataBody.tripGameTileViews;
-  // console.log(tiles);
+
   const [currentIndexInParent, setCurrentIndexInParent] = useState<number>(0);
   const boardRef = useRef<GameBoardHandle>(null);
   const [canMove, setCanMove] = useState<boolean>(true);
   const currentTileIndex =
     currentIndexInParent === 0 ? -1 : (currentIndexInParent - 1) % tiles.length;
 
+  const [diceVisible, setDiceVisible] = useState(false);
+  const [diceValue, setDiceValue] = useState<number | null>(null);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
+        <DiceView
+          visible={diceVisible}
+          value={diceValue}
+          onFinish={(v) => {
+            setDiceVisible(false);
+            // 애니메이션 종료 후 말 이동
+            if (v) {
+              boardRef.current?.move(v);
+            }
+          }}
+        />
+
         {/* header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.goBack} onPress={() => navigation.goBack()}>
@@ -78,10 +94,10 @@ export default function OngoingGameScreen({ route }) {
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              // 이동 시작: 이동 버튼 숨김(중복 클릭 방지)
               setCanMove(false);
               const steps = Math.floor(Math.random() * 6) + 1;
-              boardRef.current?.move(steps);
+              setDiceValue(steps);
+              setDiceVisible(true);
             }}
             accessibilityRole="button"
             accessibilityLabel="이동"
