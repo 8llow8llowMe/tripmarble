@@ -9,18 +9,13 @@ import { gameInfoDummy } from '@/utils/gameInfoDummy';
 import useGetGameTilesQuery, { TripGameTileView } from '@/hooks/game/useGetGameTiles';
 import Logo from 'assets/images/Logo.png';
 import DiceView from '@/components/ui/dice/DiceView';
-// import useGameStartQuery from '@/hooks/game/useGameStart';
+import useGameDiceMutation from '@/hooks/game/useGameDice';
 
 export default function OngoingGameScreen({ route }) {
   const { tripGameId } = route.params || {};
   const navigation = useNavigation<any>();
+  const { mutateAsync: rollDice, isPending: isRolling } = useGameDiceMutation();
 
-  // 1) 먼저 시작 API 호출 (idempotent 가정)
-  // const { data: startData, isSuccess: startSuccess } = useGameStartQuery(id);
-  // const gameStarted = !!(startSuccess && startData?.dataHeader?.success);
-
-  // 2) 시작 완료 후에만 타일 조회 enabled
-  // const { gameInfo } = useGetGameTilesQuery(id, gameStarted);
   const { gameInfo } = useGetGameTilesQuery(tripGameId);
   // 배열만 안전하게 추출 (hook 반환이 배열인지/객체인지 둘 다 대응)
   const tiles: TripGameTileView[] =
@@ -30,8 +25,7 @@ export default function OngoingGameScreen({ route }) {
   const [currentIndexInParent, setCurrentIndexInParent] = useState<number>(0);
   const boardRef = useRef<GameBoardHandle>(null);
   const [canMove, setCanMove] = useState<boolean>(true);
-  const currentTileIndex =
-    currentIndexInParent === 0 ? -1 : (currentIndexInParent - 1) % tiles.length;
+  const currentTileIndex = currentIndexInParent === 0 ? -1 : currentIndexInParent % tiles.length;
 
   const [diceVisible, setDiceVisible] = useState(false);
   const [diceValue, setDiceValue] = useState<number | null>(null);
@@ -61,7 +55,7 @@ export default function OngoingGameScreen({ route }) {
 
         {/* game info */}
         <View style={styles.content}>
-          <Text>현재 말 위치 인덱스: {currentIndexInParent}</Text>
+          <Text>현재 말 위치 인덱스: {currentIndexInParent + 1}</Text>
           <Text>
             {`${gameInfoDummy.dataBody.tripGameView.startedAt} ~ ${gameInfoDummy.dataBody.tripGameView.endedAt}`}
           </Text>
@@ -93,11 +87,18 @@ export default function OngoingGameScreen({ route }) {
         {canMove ? (
           <TouchableOpacity
             style={styles.button}
-            onPress={() => {
-              setCanMove(false);
-              const steps = Math.floor(Math.random() * 6) + 1;
-              setDiceValue(steps);
-              setDiceVisible(true);
+            onPress={async () => {
+              try {
+                setCanMove(false);
+                // 서버에 주사위 굴리기 요청
+                const res = await rollDice(tripGameId);
+                const serverSteps = res?.dataBody?.diceValue ?? Math.floor(Math.random() * 6) + 1;
+                setDiceValue(serverSteps);
+                setDiceVisible(true);
+              } catch (e) {
+                // 에러 시 다시 버튼 활성화
+                setCanMove(true);
+              }
             }}
             accessibilityRole="button"
             accessibilityLabel="이동"
