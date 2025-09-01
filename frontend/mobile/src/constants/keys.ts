@@ -27,6 +27,7 @@ const QUERY_KEY = {
     GET_GAME_TILES: 'getGameTiles',
     GAME_START: 'gameStart',
     MY_GAME_LIST: 'myGameList',
+    GAME_DICE: 'dice',
   },
 };
 
