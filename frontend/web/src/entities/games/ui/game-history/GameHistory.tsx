@@ -61,7 +61,11 @@ const GameHistory = ({
         />
       </div>
       {modalTile && (
-        <TileInfoModal tile={modalTile} onClose={() => setModalTile(null)} />
+        <TileInfoModal
+          tile={modalTile}
+          isOpen={modalTile !== null}
+          onClose={() => setModalTile(null)}
+        />
       )}
 
       {/* 탭 바 */}

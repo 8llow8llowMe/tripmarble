@@ -1,8 +1,8 @@
-import { MyGame } from "@/widgets/my-games-horizontal/MyGamesHorizontal";
+import { GameSummary } from "@/entities/games/hooks/useMyGameList";
 
-export const myGamesDummy: MyGame[] = [
+export const myGamesDummy: GameSummary[] = [
   {
-    tripGameId: 611541051487948800,
+    tripGameId: "611541051487948800",
     gameStatus: "ONGOING",
     gameStatusDescription: "게임 진행 중",
     difficultyCode: "NORMAL",
@@ -17,7 +17,7 @@ export const myGamesDummy: MyGame[] = [
     isReady: true,
   },
   {
-    tripGameId: 611539779464597504,
+    tripGameId: "611539779464597504",
     gameStatus: "WAITING",
     gameStatusDescription: "게임 시작 전",
     difficultyCode: "EASY",
@@ -32,7 +32,7 @@ export const myGamesDummy: MyGame[] = [
     isReady: true,
   },
   {
-    tripGameId: 609394784645287936,
+    tripGameId: "609394784645287936",
     gameStatus: "WAITING",
     gameStatusDescription: "게임 시작 전",
     difficultyCode: "EASY",
@@ -47,7 +47,7 @@ export const myGamesDummy: MyGame[] = [
     isReady: true,
   },
   {
-    tripGameId: 607898286812172288,
+    tripGameId: "607898286812172288",
     gameStatus: "WAITING",
     gameStatusDescription: "게임 시작 전",
     difficultyCode: "EASY",
@@ -62,7 +62,7 @@ export const myGamesDummy: MyGame[] = [
     isReady: true,
   },
   {
-    tripGameId: 607893924220112896,
+    tripGameId: "607893924220112896",
     gameStatus: "WAITING",
     gameStatusDescription: "게임 시작 전",
     difficultyCode: "HARD",
@@ -77,7 +77,7 @@ export const myGamesDummy: MyGame[] = [
     isReady: true,
   },
   {
-    tripGameId: 606737436579598336,
+    tripGameId: "606737436579598336",
     gameStatus: "WAITING",
     gameStatusDescription: "게임 시작 전",
     difficultyCode: "EASY",
@@ -92,7 +92,7 @@ export const myGamesDummy: MyGame[] = [
     isReady: true,
   },
   {
-    tripGameId: 606737091170275328,
+    tripGameId: "606737091170275328",
     gameStatus: "WAITING",
     gameStatusDescription: "게임 시작 전",
     difficultyCode: "NORMAL",
