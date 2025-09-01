@@ -39,6 +39,7 @@ const END_POINTS = {
     CREATE: '/trip-games',
     START: (tripGameId: string) => `/trip-games/${tripGameId}/start`,
     TILES: (tripGameId: string) => `/trip-games/${tripGameId}/tiles`,
+    DICE: (tripGameId: string) => `/trip-games/${tripGameId}/dice`,
   },
 };
 
