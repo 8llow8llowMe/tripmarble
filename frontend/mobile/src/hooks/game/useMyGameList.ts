@@ -31,7 +31,7 @@ export interface GameListResponse extends ApiResponseBase {
 }
 
 export interface MyGameListParams {
-  lastTripGameId?: string; // default 0
+  lastTripGameId?: string;
   size?: number; // default 10
   status?: GameStatus; // WAITING | ONGOING | ENDED
 }
