@@ -1,0 +1,16 @@
+services:
+  web-ssr:
+    container_name: web-ssr
+    build:
+      context: .
+      dockerfile: web.Dockerfile
+    ports:
+      - '${WEB_PORT}:${WEB_PORT}' # host:container
+    command: ['node', 'server.js']
+    networks:
+      - 8llow8llowme-net
+
+networks:
+  8llow8llowme-net:
+    name: 8llow8llowme-net
+    driver: bridge
