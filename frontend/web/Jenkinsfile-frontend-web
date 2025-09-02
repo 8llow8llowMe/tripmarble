@@ -34,9 +34,11 @@ pipeline {
     environment {
         MODULE_PATH = "frontend/${params.SERVICE_GROUP}"
         FS_PATH = "frontend/${params.SERVICE_GROUP}"
-        MINIO_ENDPOINT = "${env.MINIO_ENDPOINT}"
-        MINIO_BUCKET = "${env.MINIO_BUCKET}"
-        MINIO_PATH = "frontend/${params.SERVICE_GROUP}"
+        DOCKERFILE = "${params.SERVICE_NAME}.Dockerfile"
+        COMPOSE_FILE = "docker-compose-${params.SERVICE_NAME}.yml"
+        ENV_SUBMODULE = 'frontend/web/env'
+        PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-${params.SERVICE_NAME}-ssr-prod"
+        REMOTE_DIR = "deploy/tripmarble/frontend-${params.SERVICE_NAME}"
         SSH_CONFIG = 'storage server ssh'
         NEXT_TELEMETRY_DISABLED = '1'
     }
@@ -151,8 +153,8 @@ pipeline {
                 script {
                     echo "Deploying ${params.SERVICE_NAME} to Development"
                     
-                    // 개발 환경 배포 로직 (필요시 추가)
-                    echo "Development deployment completed"
+                    // 개발 환경에서는 빌드만 확인하고 배포하지 않음
+                    echo "Development deployment skipped - build verification only"
                 }
             }
         }
@@ -166,27 +168,49 @@ pipeline {
                 script {
                     echo "Deploying ${params.SERVICE_NAME} to Production"
                     
-                    // MinIO에 배포
-                    withCredentials([usernamePassword(credentialsId: 'minio-credentials',
-                                                      usernameVariable: 'MINIO_ACCESS_KEY',
-                                                      passwordVariable: 'MINIO_SECRET_KEY')]) {
-                        sh """
-                            # MinIO Client 설정
-                            mc alias set minio ${MINIO_ENDPOINT} ${MINIO_ACCESS_KEY} ${MINIO_SECRET_KEY}
-                            
-                            # 기존 파일 삭제 (버킷 경로 전체)
-                            mc rm --recursive --force minio/${MINIO_BUCKET}/${MINIO_PATH} || true
-                            
-                            # SSR 산출물 업로드 (.next/standalone, .next/static, public)
-                            mc cp --recursive ${env.FS_PATH}/.next/standalone/ minio/${MINIO_BUCKET}/${MINIO_PATH}/.next/standalone/
-                            mc cp --recursive ${env.FS_PATH}/.next/static/     minio/${MINIO_BUCKET}/${MINIO_PATH}/.next/static/
-                            mc cp --recursive ${env.FS_PATH}/public/           minio/${MINIO_BUCKET}/${MINIO_PATH}/public/
-                            mc cp ${env.FS_PATH}/package.json                  minio/${MINIO_BUCKET}/${MINIO_PATH}/package.json
-                            
-                            echo "Production deployment completed: ${MINIO_ENDPOINT}/${MINIO_BUCKET}/${MINIO_PATH}"
-                            echo "Note: SSR requires running Node with .next/standalone/server.js on your runtime host. MinIO stores the build artifacts only."
-                        """
-                    }
+                    // Storage 서버에 SSH 연결하여 도커 컴포즈로 배포
+                    sshPublisher publishers: [sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [sshTransfer(
+                            sourceFiles: "${PROD_ENV_FILE}",
+                            removePrefix: 'frontend/web/env',
+                            remoteDirectory: REMOTE_DIR
+                        )],
+                        verbose: true
+                    )]
+                    
+                    sshPublisher publishers: [sshPublisherDesc(
+                        configName: SSH_CONFIG,
+                        transfers: [sshTransfer(
+                            sourceFiles: """
+                                ${env.FS_PATH}/.next/standalone/**,
+                                ${env.FS_PATH}/.next/static/**,
+                                ${env.FS_PATH}/public/**,
+                                ${env.FS_PATH}/package.json,
+                                ${env.FS_PATH}/${DOCKERFILE},
+                                ${env.FS_PATH}/${COMPOSE_FILE}
+                            """.trim(),
+                            removePrefix: "${env.FS_PATH}",
+                            remoteDirectory: REMOTE_DIR,
+                            execCommand: """
+                                set -x
+                                cd ~/${REMOTE_DIR}
+                                mkdir -p env
+                                mv .env-web-ssr-prod env/.env-web-ssr-prod
+                                
+                                # 기존 컨테이너 중지 및 제거
+                                docker compose -f ${COMPOSE_FILE} down || true
+                                
+                                # 도커 이미지 빌드 및 컨테이너 실행
+                                docker compose -f ${COMPOSE_FILE} \\
+                                    --env-file env/.env-web-ssr-prod \\
+                                    up -d --build
+                                
+                                echo "Frontend web SSR deployment completed successfully"
+                            """.stripIndent()
+                        )],
+                        verbose: true
+                    )]
                 }
             }
         }
