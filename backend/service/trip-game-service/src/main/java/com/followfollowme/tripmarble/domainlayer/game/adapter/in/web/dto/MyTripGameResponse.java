@@ -1,10 +1,9 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-
 import java.time.LocalDate;
 import java.util.List;
+import lombok.Builder;
 
 @Builder
 @Schema(description = "내가 참여한 여행 게임 응답 DTO")
@@ -19,7 +18,7 @@ public record MyTripGameResponse(
     @Schema(description = "게임 상태 설명", example = "시작 전")
     String gameStatusDescription,
 
-    @Schema(description = "게임 난이도", example = "NORMAL")
+    @Schema(description = "게임 난이도 코드", example = "NORMAL")
     String difficultyCode,
 
     @Schema(description = "게임 난이도 설명", example = "보통")
