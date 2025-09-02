@@ -8,7 +8,7 @@ import lombok.Builder;
 public record TripGameMemberWithProfileInfo(
     long memberId,
     String nickname,
-    String profileImage,
+    String profileImageUrl,
     int turnOrder,
     boolean isHost
 ) {
@@ -17,7 +17,7 @@ public record TripGameMemberWithProfileInfo(
         return TripGameMemberWithProfileInfo.builder()
             .memberId(member.memberId())
             .nickname(profile.nickname())
-            .profileImage(profile.profileImage())
+            .profileImageUrl(profile.profileImageUrl())
             .turnOrder(member.turnOrder())
             .isHost(member.isHost())
             .build();
