@@ -3,6 +3,7 @@ package com.followfollowme.tripmarble.domainlayer.game.application.port.in;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.DifficultyResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDetailResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
@@ -26,4 +27,6 @@ public interface TripGameWebUseCase {
     TripGameEndResponse normalEndTripGame(long tripGameId);
 
     TripGameEndResponse forceEndTripGame(long tripGameId, long requesterId);
+
+    TripGameDetailResponse getTripGameDetail(long tripGameId);
 }
