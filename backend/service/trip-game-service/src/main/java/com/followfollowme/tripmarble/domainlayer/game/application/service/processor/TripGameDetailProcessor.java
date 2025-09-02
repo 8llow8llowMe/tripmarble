@@ -66,7 +66,7 @@ public class TripGameDetailProcessor {
                 return TripGameMemberInfo.of(
                     m,
                     profile.nickname(),
-                    profile.profileImage()
+                    profile.profileImageUrl()
                 );
             })
             .toList();
