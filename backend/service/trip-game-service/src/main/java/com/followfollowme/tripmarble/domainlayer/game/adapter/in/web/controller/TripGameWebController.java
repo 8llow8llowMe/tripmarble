@@ -129,8 +129,7 @@ public class TripGameWebController {
     )
     @GetMapping("/{tripGameId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Response<TripGameDetailResponse>> getTripGameDetail(
-        @PathVariable String tripGameId, @AuthenticationPrincipal MemberLoginActive loginActive) {
+    public ResponseEntity<Response<TripGameDetailResponse>> getTripGameDetail(@PathVariable String tripGameId) {
         TripGameDetailResponse response = tripGameWebUseCase.getTripGameDetail(Long.parseLong(tripGameId));
         return ResponseEntity.ok().body(Response.success(response));
     }
