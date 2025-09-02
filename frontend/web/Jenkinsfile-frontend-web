@@ -133,13 +133,8 @@ pipeline {
             }
             post {
                 success {
+                    // public 리소스를 standalone 경로에도 복사 (SSR 서버 실행에 필요)
                     sh "cp -R ${env.FS_PATH}/public ${env.FS_PATH}/.next/standalone/public || true"
-                    archiveArtifacts allowEmptyArchive: true, artifacts: """
-                    ${env.FS_PATH}/.next/standalone/**
-                    ${env.FS_PATH}/.next/static/**
-                    ${env.FS_PATH}/public/**
-                    ${env.FS_PATH}/package.json
-                    """
                 }
             }
         }
@@ -167,22 +162,12 @@ pipeline {
             steps {
                 script {
                     echo "Deploying ${params.SERVICE_NAME} to Production"
-                    
-                    // Storage 서버에 SSH 연결하여 도커 컴포즈로 배포
-                    sshPublisher publishers: [sshPublisherDesc(
-                        configName: SSH_CONFIG,
-                        transfers: [sshTransfer(
-                            sourceFiles: "${PROD_ENV_FILE}",
-                            removePrefix: 'frontend/web/env',
-                            remoteDirectory: REMOTE_DIR
-                        )],
-                        verbose: true
-                    )]
-                    
+
                     sshPublisher publishers: [sshPublisherDesc(
                         configName: SSH_CONFIG,
                         transfers: [sshTransfer(
                             sourceFiles: """
+                                ${PROD_ENV_FILE},
                                 ${env.FS_PATH}/.next/standalone/**,
                                 ${env.FS_PATH}/.next/static/**,
                                 ${env.FS_PATH}/public/**,
@@ -197,15 +182,9 @@ pipeline {
                                 cd ~/${REMOTE_DIR}
                                 mkdir -p env
                                 mv .env-web-ssr-prod env/.env-web-ssr-prod
-                                
-                                # 기존 컨테이너 중지 및 제거
-                                docker compose -f ${COMPOSE_FILE} down || true
-                                
-                                # 도커 이미지 빌드 및 컨테이너 실행
-                                docker compose -f ${COMPOSE_FILE} \\
-                                    --env-file env/.env-web-ssr-prod \\
-                                    up -d --build
-                                
+            
+                                docker compose -f ${COMPOSE_FILE} --env-file env/.env-web-ssr-prod up -d --build
+            
                                 echo "Frontend web SSR deployment completed successfully"
                             """.stripIndent()
                         )],
