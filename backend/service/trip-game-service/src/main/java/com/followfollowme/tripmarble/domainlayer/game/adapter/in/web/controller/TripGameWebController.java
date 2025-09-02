@@ -5,6 +5,7 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.Difficu
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateRequest;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDetailResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
@@ -119,6 +120,18 @@ public class TripGameWebController {
     public ResponseEntity<Response<TripGameEndResponse>> forceEndTripGame(
         @PathVariable String tripGameId, @AuthenticationPrincipal MemberLoginActive loginActive) {
         TripGameEndResponse response = tripGameWebUseCase.forceEndTripGame(Long.parseLong(tripGameId), loginActive.id());
+        return ResponseEntity.ok().body(Response.success(response));
+    }
+
+    @Operation(
+        summary = "여행 게임 상세 정보 조회",
+        description = "특정 여행 게임의 상세 정보를 조회합니다. 대표 지역, 테마, 참여자, 현재 턴 순서 등을 포함합니다."
+    )
+    @GetMapping("/{tripGameId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<TripGameDetailResponse>> getTripGameDetail(
+        @PathVariable String tripGameId, @AuthenticationPrincipal MemberLoginActive loginActive) {
+        TripGameDetailResponse response = tripGameWebUseCase.getTripGameDetail(Long.parseLong(tripGameId));
         return ResponseEntity.ok().body(Response.success(response));
     }
 }
