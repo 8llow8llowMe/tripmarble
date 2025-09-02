@@ -14,7 +14,7 @@ public record TripGameStartMemberView(
     String nickname,
 
     @Schema(description = "참여자 프로필 이미지 URL", example = "https://cdn.tripmarble.com/profile/101.png")
-    String profileImage,
+    String profileImageUrl,
 
     @Schema(description = "게임 내 순서 (턴 순서)", example = "1")
     int turnOrder,
