@@ -2,12 +2,14 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDetailResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameResumeResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartMemberView;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDetailInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDiceResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameEndInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
@@ -16,10 +18,9 @@ import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameS
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
+import java.util.List;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class TripGamePresenter {
@@ -129,6 +130,37 @@ public class TripGamePresenter {
             .gameStatusDescription(info.status().getDescription())
             .endTypeCode(info.endType().name())
             .endTypeDescription(info.endType().getDescription())
+            .build();
+    }
+
+    public TripGameDetailResponse toDetailResponse(TripGameDetailInfo info) {
+        List<TripGameStartMemberView> memberViews = info.members().stream()
+            .map(m -> TripGameStartMemberView.builder()
+                .memberId(String.valueOf(m.memberId()))
+                .nickname(m.nickname())
+                .profileImage(m.profileImageUrl())
+                .turnOrder(m.turnOrder())
+                .isHost(m.isHost())
+                .build()
+            ).toList();
+
+        return TripGameDetailResponse.builder()
+            .tripGameId(String.valueOf(info.tripGameId()))
+            .representativeRegionImageUrl(info.representativeRegionInfo().imageUrl())
+            .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
+            .tripThemeNames(info.tripThemeNames())
+            .gameStatusCode(info.status().name())
+            .gameStatusDescription(info.status().getDescription())
+            .difficultyCode(info.difficulty().name())
+            .difficultyDescription(info.difficulty().getDescription())
+            .title(info.title())
+            .startedAt(info.startedAt())
+            .endedAt(info.endedAt())
+            .currentTurnOrder(info.currentTurnOrder())
+            .currentStepNo(info.currentStepNo())
+            .endTypeCode(info.endType() != null ? info.endType().name() : null)
+            .endTypeDescription(info.endType() != null ? info.endType().getDescription() : null)
+            .members(memberViews)
             .build();
     }
 }
