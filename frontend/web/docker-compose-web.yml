@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: web.Dockerfile
     ports:
-      - '${WEB_PORT}:${WEB_PORT}' # host:container
+      - '${WEB_PORT}:3000' # host:container
     command: ['node', 'server.js']
     networks:
       - 8llow8llowme-net
