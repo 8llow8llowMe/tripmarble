@@ -1,11 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service.processor;
 
-import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.MemberProfileInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.exception.TripGameErrorCode;
 import com.followfollowme.tripmarble.domainlayer.game.application.exception.TripGameException;
-import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameMemberWithProfileInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
-import com.followfollowme.tripmarble.domainlayer.game.application.port.out.MemberClientPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
@@ -13,8 +10,6 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMembe
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +20,6 @@ public class TripGameStartProcessor {
 
     private final TripGameRepositoryPort tripGameRepositoryPort;
     private final TripGameMemberRepositoryPort tripGameMemberRepositoryPort;
-    private final MemberClientPort memberClientPort;
 
     public TripGameStartInfo startGame(long tripGameId, long hostMemberId) {
         // 1. 게임 정보 조회
@@ -55,28 +49,12 @@ public class TripGameStartProcessor {
             .toList();
 
         // 5. 참여자 저장 (턴 순서 반영)
-        List<TripGameMember> updatedMembers = tripGameMemberRepositoryPort.saveAll(membersWithTurnOrder, tripGame);
+        tripGameMemberRepositoryPort.saveAll(membersWithTurnOrder, tripGame);
 
         // 6. 게임 상태 변경 및 저장
         TripGame updatedTripGame = tripGameRepositoryPort.save(tripGame.start());
 
-        // 7. 회원 ID 기준 프로필 조회
-        List<Long> memberIds = updatedMembers.stream().map(TripGameMember::memberId).toList();
-        List<MemberProfileInternalResponse> memberProfiles = memberClientPort.getMemberProfiles(memberIds);
-
-        // 8. memberId 기준으로 매핑
-        Map<Long, MemberProfileInternalResponse> profileMap = memberProfiles.stream()
-            .collect(Collectors.toMap(MemberProfileInternalResponse::memberId, profile -> profile));
-
-        // 9. 도메인 속성과 외부 프로필 정보를 통합한 DTO 생성
-        List<TripGameMemberWithProfileInfo> membersWithProfile = updatedMembers.stream()
-            .map(member -> {
-                MemberProfileInternalResponse profile = profileMap.get(member.memberId());
-                return TripGameMemberWithProfileInfo.of(member, profile);
-            })
-            .toList();
-
         // 10. 응답 생성 및 반환
-        return TripGameStartInfo.of(updatedTripGame, membersWithProfile);
+        return TripGameStartInfo.of(updatedTripGame);
     }
 }
