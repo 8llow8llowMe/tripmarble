@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 @Schema(description = "게임 참여자 정보 View DTO")
-public record TripGameStartMemberView(
+public record TripGameMemberView(
 
     @Schema(description = "참여자 회원 ID", example = "202507110001")
     String memberId,
