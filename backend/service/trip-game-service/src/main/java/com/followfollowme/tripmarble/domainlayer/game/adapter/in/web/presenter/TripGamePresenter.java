@@ -5,8 +5,8 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDetailResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameMemberView;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameResumeResponse;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartMemberView;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDetailInfo;
@@ -64,30 +64,18 @@ public class TripGamePresenter {
     }
 
     public TripGameStartResponse toGameStartResponse(TripGameStartInfo startInfo) {
-        TripGame game = startInfo.tripGame();
-        List<TripGameStartMemberView> members = startInfo.members().stream()
-            .map(m -> TripGameStartMemberView.builder()
-                .memberId(String.valueOf(m.memberId()))
-                .nickname(m.nickname())
-                .profileImageUrl(m.profileImageUrl())
-                .turnOrder(m.turnOrder())
-                .isHost(m.isHost())
-                .build())
-            .toList();
-
         return TripGameStartResponse.builder()
-            .tripGameId(String.valueOf(game.id()))
-            .gameStatusCode(game.status().name())
-            .gameStatusDescription(game.status().getDescription())
-            .members(members)
+            .tripGameId(String.valueOf(startInfo.tripGameId()))
+            .gameStatusCode(startInfo.status().name())
+            .gameStatusDescription(startInfo.status().getDescription())
             .build();
     }
 
     public TripGameResumeResponse toResumeResponse(TripGameResumeInfo info) {
         TripGame game = info.tripGame();
 
-        List<TripGameStartMemberView> memberViews = info.members().stream()
-            .map(m -> TripGameStartMemberView.builder()
+        List<TripGameMemberView> memberViews = info.members().stream()
+            .map(m -> TripGameMemberView.builder()
                 .memberId(String.valueOf(m.memberId()))
                 .isHost(m.isHost())
                 .turnOrder(m.turnOrder())
@@ -134,8 +122,8 @@ public class TripGamePresenter {
     }
 
     public TripGameDetailResponse toDetailResponse(TripGameDetailInfo info) {
-        List<TripGameStartMemberView> memberViews = info.members().stream()
-            .map(m -> TripGameStartMemberView.builder()
+        List<TripGameMemberView> memberViews = info.members().stream()
+            .map(m -> TripGameMemberView.builder()
                 .memberId(String.valueOf(m.memberId()))
                 .nickname(m.nickname())
                 .profileImageUrl(m.profileImageUrl())
