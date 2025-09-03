@@ -10,10 +10,9 @@ public record TripGameStartInfo(
     List<TripGameMemberWithProfileInfo> members
 ) {
 
-    public static TripGameStartInfo of(TripGame tripGame, List<TripGameMemberWithProfileInfo> members) {
+    public static TripGameStartInfo of(TripGame tripGame) {
         return TripGameStartInfo.builder()
             .tripGame(tripGame)
-            .members(members)
             .build();
     }
 }
