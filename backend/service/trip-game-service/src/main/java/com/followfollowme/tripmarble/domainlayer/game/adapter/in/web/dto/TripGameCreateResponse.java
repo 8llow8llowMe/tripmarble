@@ -1,10 +1,9 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-
 import java.time.LocalDate;
 import java.util.List;
+import lombok.Builder;
 
 @Builder
 @Schema(description = "여행 게임 생성 응답 DTO")
