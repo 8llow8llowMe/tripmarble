@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import GameBoard from "@/entities/games/ui/game-board/GameBoard";
+import React, { useMemo, useState, useRef } from "react";
+import GameBoard, {
+  GameBoardHandle,
+} from "@/entities/games/ui/game-board/GameBoard";
 import styles from "./GamePlay.module.scss";
 import {
   TripGameTileView,
   TripGameView,
 } from "@/entities/games/model/gameInfoDummy";
 import TileInfoModal from "@/entities/games/ui/tile-info-modal/TileInfoModal";
+import useGameDiceMutation from "@/entities/games/hooks/useGameDice";
 
 type Props = {
   tripGameView: TripGameView;
@@ -28,6 +31,7 @@ const formatDate = (d?: string) => {
 };
 
 const GamePlay = ({ tripGameView, tripGameTileViews }: Props) => {
+  const { mutateAsync: rollDice, isPending: isRolling } = useGameDiceMutation();
   const dateRange = useMemo(
     () =>
       `${formatDate(tripGameView.startedAt)} - ${formatDate(
@@ -50,12 +54,33 @@ const GamePlay = ({ tripGameView, tripGameTileViews }: Props) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const boardRef = useRef<GameBoardHandle | null>(null);
+  const [diceValue, setDiceValue] = useState<number | null>(null);
+
   const handleModProfile = () => {
     setIsModalOpen(true);
   };
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setModalTile(null);
+  };
+
+  const handleRollDice = async () => {
+    const audio = document.getElementById(
+      "mouse-click"
+    ) as HTMLAudioElement | null;
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play();
+    }
+
+    const res = await rollDice(tripGameView.tripGameId);
+    console.log(res);
+    const steps = res?.dataBody?.diceValue ?? Math.floor(Math.random() * 6) + 1;
+    // 4초 후에 이동 시작
+    setTimeout(() => {
+      boardRef.current?.animateMove(steps);
+    }, 4000);
   };
 
   return (
@@ -73,8 +98,10 @@ const GamePlay = ({ tripGameView, tripGameTileViews }: Props) => {
         {/* Board */}
         <div className={styles.boardContainer}>
           <GameBoard
+            ref={boardRef}
             count={5}
             tiles={tripGameTileViews}
+            onDiceChange={setDiceValue}
             onCellClick={(tile) => {
               setActiveStep(tile.stepNo);
               setModalTile(tile);
@@ -93,8 +120,21 @@ const GamePlay = ({ tripGameView, tripGameTileViews }: Props) => {
 
         {/* CTA Buttons */}
         <div className={styles.buttonRow}>
-          <button className={styles.actionBtn}>미션을 인증해주세요!</button>
-          <button className={styles.actionBtnSecondary}>주사위 던지기</button>
+          <div className={styles.boardText}>
+            {diceValue !== null
+              ? `주사위 결과: ${diceValue}`
+              : "주사위를 굴려주세요"}
+          </div>
+          <audio
+            id="mouse-click"
+            src="/sounds/mouse-click.mp3"
+            preload="auto"
+          />
+          <button className={styles.moveButton} onClick={handleRollDice}>
+            이동
+          </button>
+          {/* <button className={styles.actionBtn}>미션을 인증해주세요!</button>
+          <button className={styles.actionBtnSecondary}>주사위 던지기</button> */}
         </div>
 
         {/* Timeline */}
