@@ -21,12 +21,6 @@ public record TripGameDetailResponse(
     @Schema(description = "여행 테마 이름들", example = "[\"관광\", \"전시\", \"축제/공연\"]")
     List<String> tripThemeNames,
 
-    @Schema(description = "게임 상태 코드", example = "ONGOING")
-    String gameStatusCode,
-
-    @Schema(description = "게임 상태 설명", example = "게임 진행 중")
-    String gameStatusDescription,
-
     @Schema(description = "게임 난이도 코드", example = "EASY")
     String difficultyCode,
 
