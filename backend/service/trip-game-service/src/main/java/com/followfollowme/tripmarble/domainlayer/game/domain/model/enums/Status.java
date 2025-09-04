@@ -20,6 +20,11 @@ public enum Status {
         }
 
         @Override
+        public void validateResumable() {
+
+        }
+
+        @Override
         public void validateEndable() {
             throw new TripGameException(TripGameErrorCode.GAME_NOT_ONGOING);
         }
@@ -36,8 +41,13 @@ public enum Status {
         }
 
         @Override
+        public void validateResumable() {
+
+        }
+
+        @Override
         public void validateEndable() {
-            
+
         }
     },
     ENDED("게임 종료됨") {
@@ -52,6 +62,11 @@ public enum Status {
         }
 
         @Override
+        public void validateResumable() {
+            throw new TripGameException(TripGameErrorCode.GAME_ALREADY_ENDED);
+        }
+
+        @Override
         public void validateEndable() {
             throw new TripGameException(TripGameErrorCode.GAME_ALREADY_ENDED);
         }
@@ -62,6 +77,8 @@ public enum Status {
     public abstract void validatePlayable();
 
     public abstract void validateStartable();
+
+    public abstract void validateResumable();
 
     public abstract void validateEndable();
 }
