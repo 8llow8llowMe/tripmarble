@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import styles from "./Header.module.scss";
 import { useAppSelector } from "@/entities/users/model";
+import { toast } from "react-toastify";
 
 const Header = () => {
   const pathname = usePathname();
@@ -40,6 +41,19 @@ const Header = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  const router = useRouter();
+
+  // 게임 목록 클릭 핸들러
+  const handleGameClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast.info("로그인 후 이용해보세요!");
+      router.push("/login");
+    } else {
+      router.push("/game");
+    }
+  };
 
   // useEffect(() => {
   //   if (pathname !== "/") {
@@ -80,9 +94,14 @@ const Header = () => {
         <Link href="/spots" className={isActive("/spots")}>
           여행지 목록
         </Link>
-        <Link href="/game" className={isActive("/game")}>
+        <a
+          href="/game"
+          onClick={handleGameClick}
+          className={isActive("/game")}
+          style={{ cursor: "pointer" }}
+        >
           게임 목록
-        </Link>
+        </a>
         {user ? (
           <Link href="/profile" className={isActive("/profile")}>
             마이페이지
@@ -110,9 +129,14 @@ const Header = () => {
           <Link href="/spots" className={isActive("/spots")}>
             여행지 목록
           </Link>
-          <Link href="/game" className={isActive("/game")}>
+          <a
+            href="/game"
+            onClick={handleGameClick}
+            className={isActive("/game")}
+            style={{ cursor: "pointer" }}
+          >
             게임 목록
-          </Link>
+          </a>
           {user ? (
             <Link href="/profile" className={isActive("/profile")}>
               마이페이지
