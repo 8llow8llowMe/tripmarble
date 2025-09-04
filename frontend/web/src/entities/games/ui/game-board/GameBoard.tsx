@@ -1,4 +1,10 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import styles from "./GameBoard.module.scss";
 import { useCanvasDrag } from "@/entities/games/ui/game-board/useCanvasDrag";
 import { drawGameBoard3D } from "@/entities/games/ui/game-board/drawGameBoard3D";
@@ -8,6 +14,7 @@ import { getCustomPosition } from "@/entities/games/ui/game-board/getCustomPosit
 import type { TripGameTileView } from "@/entities/games/model/gameInfoDummy";
 import Piece from "@/shared/assets/images/Piece.png";
 import type { StaticImageData } from "next/image";
+import DiceView from "@/entities/games/ui/game-board/diceView";
 
 const CELL_SIZE = 100;
 
@@ -15,9 +22,17 @@ type Props = {
   count?: number;
   tiles: TripGameTileView[];
   onCellClick?: (tile: TripGameTileView, index: number) => void;
+  onDiceChange?: (value: number | null) => void;
 };
 
-export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
+export type GameBoardHandle = {
+  animateMove: (steps: number) => void;
+};
+
+const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
+  { count = 5, tiles, onCellClick, onDiceChange }: Props,
+  ref
+) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pieceImageRef = useRef<HTMLImageElement | null>(null);
@@ -124,6 +139,11 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMoving, setIsMoving] = useState(false);
   const [diceValue, setDiceValue] = useState<number | null>(null);
+  const [diceVisible, setDiceVisible] = useState(false);
+
+  useEffect(() => {
+    onDiceChange?.(diceValue);
+  }, [diceValue, onDiceChange]);
 
   useCanvasInitialScroll(canvasRef, wrapperRef);
   useCanvasDrag(canvasRef, wrapperRef);
@@ -198,6 +218,7 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
     if (isMoving) return;
     setIsMoving(true);
     setDiceValue(steps);
+    setDiceVisible(true);
 
     let currentStep = 0;
     const ctx = canvasRef.current?.getContext("2d");
@@ -249,6 +270,10 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
     animateStep(currentIndex, (currentIndex + 1) % boardData.length);
   };
 
+  useImperativeHandle(ref, () => ({
+    animateMove,
+  }));
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -281,27 +306,13 @@ export default function GameBoard({ count = 5, tiles, onCellClick }: Props) {
           className={styles.canvas}
         />
       </div>
-      <div className={styles.boardText}>
-        {diceValue !== null
-          ? `주사위 결과: ${diceValue}`
-          : "주사위를 굴려주세요"}
-      </div>
-      <audio id="mouse-click" src="/sounds/mouse-click.mp3" preload="auto" />
-      <button
-        className={styles.moveButton}
-        onClick={() => {
-          const audio = document.getElementById(
-            "mouse-click"
-          ) as HTMLAudioElement | null;
-          if (audio) {
-            audio.currentTime = 0; // 반복 클릭도 항상 처음부터
-            audio.play();
-          }
-          animateMove(Math.floor(Math.random() * 6) + 1);
-        }}
-      >
-        이동
-      </button>
+      <DiceView
+        visible={diceVisible}
+        value={diceValue}
+        onFinish={() => setDiceVisible(false)}
+      />
     </>
   );
-}
+});
+
+export default GameBoard;
