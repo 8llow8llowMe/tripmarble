@@ -72,30 +72,10 @@ public class TripGamePresenter {
     }
 
     public TripGameResumeResponse toResumeResponse(TripGameResumeInfo info) {
-        TripGame game = info.tripGame();
-
-        List<TripGameMemberView> memberViews = info.members().stream()
-            .map(m -> TripGameMemberView.builder()
-                .memberId(String.valueOf(m.memberId()))
-                .isHost(m.isHost())
-                .turnOrder(m.turnOrder())
-                .build()
-            ).toList();
-
         return TripGameResumeResponse.builder()
-            .tripGameId(String.valueOf(game.id()))
-            .title(game.title())
-            .gameStatus(game.status().name())
-            .gameStatusDescription(game.status().getDescription())
-            .difficultyCode(game.difficulty().name())
-            .difficultyDescription(game.difficulty().getDescription())
-            .startedAt(game.startedAt())
-            .endedAt(game.endedAt())
-            .currentTurnOrder(game.currentTurnOrder())
-            .currentStepNo(game.currentStepNo())
-//            .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
-            .tripThemeNames(info.themeNames())
-//            .members(memberViews)
+            .tripGameId(String.valueOf(info.tripGameId()))
+            .gameStatus(info.status().name())
+            .gameStatusDescription(info.status().getDescription())
             .build();
     }
 
@@ -137,8 +117,6 @@ public class TripGamePresenter {
             .representativeRegionImageUrl(info.representativeRegionInfo().imageUrl())
             .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
             .tripThemeNames(info.tripThemeNames())
-            .gameStatusCode(info.status().name())
-            .gameStatusDescription(info.status().getDescription())
             .difficultyCode(info.difficulty().name())
             .difficultyDescription(info.difficulty().getDescription())
             .title(info.title())
