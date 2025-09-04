@@ -16,8 +16,7 @@ public record TripGameCreateInfo(
 ) {
 
     public static TripGameCreateInfo of(
-        TripGame game, TripGameMember member, List<TripTheme> themes, RepresentativeRegionInfoInternalResponse info
-    ) {
+        TripGame game, TripGameMember member, List<TripTheme> themes, RepresentativeRegionInfoInternalResponse info) {
         return TripGameCreateInfo.builder()
             .tripGame(game)
             .tripGameMember(member)
