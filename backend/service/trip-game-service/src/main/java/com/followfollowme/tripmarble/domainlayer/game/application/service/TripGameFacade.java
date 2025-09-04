@@ -63,6 +63,7 @@ public class TripGameFacade implements TripGameWebUseCase {
     public TripGameCreateResponse crateTripGame(TripGameCreateCommand command) {
         // 1. 여행 게임(계획) 및 관련 엔티티 생성
         TripGameCreateInfo tripGameCreateInfo = tripGameCreateProcessor.createGame(command);
+
         // 2. 게임 내 블록(말판) 생성
         TripGameTileCreateInfo tripGameTileCreateInfo = tripGameTileCreateProcessor.createTilesForGame(
             tripGameCreateInfo.tripGame(),
