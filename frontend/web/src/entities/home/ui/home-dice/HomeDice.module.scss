@@ -87,9 +87,6 @@
 }
 
 .boardLayerWrapper {
-  --piece-w: clamp(280px, 30vw, 520px);
-  --col: calc(var(--piece-w) / 2);
-
   position: fixed;
   inset: 0;
   top: 65vh;
