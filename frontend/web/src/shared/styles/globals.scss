@@ -1,6 +1,9 @@
 :root {
   --background: #f5f5f5;
   --foreground: #171717;
+
+  --piece-w: clamp(280px, 30vw, 520px);
+  --col: calc(var(--piece-w) / 2);
 }
 
 // @media (prefers-color-scheme: dark) {
