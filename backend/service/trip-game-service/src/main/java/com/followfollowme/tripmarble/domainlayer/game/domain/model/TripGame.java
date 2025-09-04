@@ -29,6 +29,10 @@ public record TripGame(
         this.status.validatePlayable();
     }
 
+    public void resume() {
+        this.status.validateResumable();
+    }
+
     public TripGame normalEnd() {
         return endInternal(EndType.NORMAL);
     }
