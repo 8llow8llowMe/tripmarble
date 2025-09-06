@@ -5,8 +5,11 @@ import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendo
 import com.followfollowme.tripmarble.domainlayer.auth.application.exception.AuthErrorCode;
 import com.followfollowme.tripmarble.domainlayer.auth.application.exception.AuthException;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.OAuthMemberFetcher;
+import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
+import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
+import com.followfollowme.tripmarble.domainlayer.member.domain.model.enums.MemberStatus;
 import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
 import com.followfollowme.tripmarble.security.common.enums.SecurityRole;
 import lombok.RequiredArgsConstructor;
@@ -24,12 +27,21 @@ public class OAuthLoginProcessor {
     public AuthLoginResponse login(OAuthProvider provider, String authCode) {
         Member oAuthMember = oAuthMemberFetcher.fetchMember(provider, authCode);
         Member member = findOrCreateMember(provider, oAuthMember);
+
         return jwtTokenProcessor.issueTokens(member.id(), member.role());
     }
 
     private Member findOrCreateMember(OAuthProvider provider, Member oAuthMember) {
         return memberRepositoryPort.findByEmail(oAuthMember.email())
-            .map(existing -> validateExistingProvider(existing, provider))
+            .map(existing -> {
+                // 상태 먼저 확인
+                switch (existing.status()) {
+                    case WITHDRAWN -> throw new MemberException(MemberErrorCode.MEMBER_ALREADY_WITHDRAWN, oAuthMember.email());
+                    case SUSPENDED -> throw new MemberException(MemberErrorCode.MEMBER_SUSPENDED, oAuthMember.email());
+                }
+                // 소셜 로그인 제공업체 검증
+                return validateExistingProvider(existing, provider);
+            })
             .orElseGet(() -> createNewOAuthMember(oAuthMember));
     }
 
@@ -43,6 +55,7 @@ public class OAuthLoginProcessor {
             .profileImageUrl(oAuthMember.profileImageUrl())
             .role(SecurityRole.USER)
             .provider(oAuthMember.provider())
+            .status(MemberStatus.ACTIVE)
             .build();
 
         return memberRepositoryPort.save(newMember);
