@@ -16,22 +16,6 @@ public class TripGameEndProcessor {
     private final TripGameRepositoryPort tripGameRepositoryPort;
     private final TripGameMemberRepositoryPort tripGameMemberRepositoryPort;
 
-    public TripGameEndInfo normalEndTripGame(long tripGameId) {
-        // 1. 게임 조회
-        TripGame game = tripGameRepositoryPort.findById(tripGameId)
-            .orElseThrow(() -> new TripGameException(TripGameErrorCode.GAME_NOT_FOUND));
-
-        // 2. 도메인에 위임하여 정상 종료 처리
-        TripGame endedGame = game.normalEnd();
-
-        // 3. 종료 상태 저장
-        TripGame updateEndedGame = tripGameRepositoryPort.save(endedGame);
-
-        // 4. 결과 반환
-        return TripGameEndInfo.of(updateEndedGame);
-    }
-
-
     public TripGameEndInfo forceEndTripGame(long tripGameId, long requesterId) {
         // 1. 게임 조회 및 검증
         TripGame game = tripGameRepositoryPort.findById(tripGameId)
