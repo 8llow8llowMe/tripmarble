@@ -1,6 +1,5 @@
 package com.followfollowme.tripmarble.storage.init;
 
-import com.followfollowme.tripmarble.storage.bucket.MinioBucket;
 import com.followfollowme.tripmarble.storage.properties.MinioProperties;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
@@ -21,28 +20,30 @@ public class MinioInitializer {
 
     @EventListener(ApplicationReadyEvent.class)
     public void initBuckets() {
-        for (MinioBucket bucket : MinioBucket.values()) {
-            String bucketName = bucket.fullName(minioProperties.bucketPrefix());
+        // 단일 메인 버킷만 생성
+        String bucketName = minioProperties.bucketPrefix();
 
-            try {
-                boolean exists = minioClient.bucketExists(
-                    BucketExistsArgs.builder()
+        try {
+            boolean exists = minioClient.bucketExists(
+                BucketExistsArgs.builder()
+                    .bucket(bucketName)
+                    .build()
+            );
+
+            if (!exists) {
+                log.info("메인 버킷 생성 시도: {}", bucketName);
+                minioClient.makeBucket(
+                    MakeBucketArgs.builder()
                         .bucket(bucketName)
                         .build()
                 );
-
-                if (!exists) {
-                    log.info("버킷이 존재하지 않음. 생성 시도: {}", bucketName);
-                    minioClient.makeBucket(
-                        MakeBucketArgs.builder()
-                            .bucket(bucketName)
-                            .build()
-                    );
-                }
-
-            } catch (Exception e) {
-                log.error("MinIO 버킷 초기화 실패 (서비스는 계속 실행): {}", bucketName, e);
+                log.info("메인 버킷 생성 완료: {}", bucketName);
+            } else {
+                log.info("메인 버킷이 이미 존재: {}", bucketName);
             }
+
+        } catch (Exception e) {
+            log.error("MinIO 메인 버킷 초기화 실패 (서비스는 계속 실행): {}", bucketName, e);
         }
     }
 }
