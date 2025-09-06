@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.member.application.service;
 
+import com.followfollowme.tripmarble.domainlayer.auth.application.service.processor.JwtTokenProcessor;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberMyInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
@@ -8,6 +9,7 @@ import com.followfollowme.tripmarble.domainlayer.member.application.port.in.Memb
 import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.MemberInfoProcessor;
 import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.MemberSignupProcessor;
 import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.MemberUpdateProcessor;
+import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.MemberWithdrawProcessor;
 import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.ProfileImageProcessor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ public class MemberFacade implements MemberWebUseCase {
     private final MemberInfoProcessor memberInfoProcessor;
     private final ProfileImageProcessor profileImageProcessor;
     private final MemberUpdateProcessor memberUpdateProcessor;
+    private final MemberWithdrawProcessor memberWithdrawProcessor;
+    private final JwtTokenProcessor jwtTokenProcessor;
 
     @Override
     @Transactional
@@ -44,5 +48,12 @@ public class MemberFacade implements MemberWebUseCase {
     @Transactional
     public void updateMyInfo(MemberUpdateCommand command) {
         memberUpdateProcessor.update(command);
+    }
+
+    @Override
+    @Transactional
+    public void withdrawMember(long memberId) {
+        memberWithdrawProcessor.withdraw(memberId);
+        jwtTokenProcessor.revoke(memberId);
     }
 }

@@ -14,5 +14,7 @@ public interface MemberWebUseCase {
 
     MemberProfileUploadResponse uploadProfileImage(MultipartFile imageFile);
 
-    public void updateMyInfo(MemberUpdateCommand command);
+    void updateMyInfo(MemberUpdateCommand command);
+
+    void withdrawMember(long memberId);
 }
