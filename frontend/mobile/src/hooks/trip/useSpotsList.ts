@@ -7,12 +7,14 @@ import { QUERY_KEY } from '@/constants/keys';
 interface Props {
   representativeRegionId: string;
   size?: number;
+  contentTypeId?: string;
 }
 
 export interface TripSpotListRequest {
   representativeRegionId: string;
   lastTripSpotId?: string;
   size?: number;
+  contentTypeId?: string;
 }
 
 export interface TripSpotListResponse extends ApiResponseBase {
@@ -31,10 +33,12 @@ export const getTripSpotList = async ({
   representativeRegionId,
   lastTripSpotId,
   size = 10,
+  contentTypeId,
 }: TripSpotListRequest) => {
   const params: Record<string, string | number> = {};
   if (lastTripSpotId !== undefined) params.lastTripSpotId = lastTripSpotId;
   if (size !== undefined) params.size = size;
+  if (contentTypeId) params.contentTypeId = contentTypeId;
 
   const { data } = await apiClient.get<TripSpotListResponse>(
     END_POINTS.TRIP.LIST_SPOTS(representativeRegionId),
@@ -44,15 +48,20 @@ export const getTripSpotList = async ({
   return data;
 };
 
-const useTripSpotListInfiniteQuery = ({ representativeRegionId, size = 10 }: Props) => {
+const useTripSpotListInfiniteQuery = ({
+  representativeRegionId,
+  size = 10,
+  contentTypeId,
+}: Props) => {
   return useInfiniteQuery({
     queryFn: ({ pageParam }: { pageParam?: string }) =>
       getTripSpotList({
         representativeRegionId,
         lastTripSpotId: pageParam,
         size,
+        contentTypeId,
       }),
-    queryKey: [QUERY_KEY.TRIP.SPOT, representativeRegionId],
+    queryKey: [QUERY_KEY.TRIP.SPOT, representativeRegionId, contentTypeId ?? 'ALL'],
     enabled: !!representativeRegionId,
     getNextPageParam: (lastPage) => {
       const { dataBody } = lastPage || {};
