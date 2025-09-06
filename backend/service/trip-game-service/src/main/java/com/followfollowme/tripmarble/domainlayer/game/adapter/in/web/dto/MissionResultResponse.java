@@ -19,7 +19,7 @@ public record MissionResultResponse(
     String tripGameMemberId,
 
     @Schema(description = "주사위 값", example = "5")
-    int dice,
+    int diceValue,
 
     @Schema(description = "턴 순서 (당시)", example = "2")
     int turnOrder,
