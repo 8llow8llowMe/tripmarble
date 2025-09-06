@@ -5,13 +5,13 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import lombok.Builder;
 
 @Builder
-public record TripGameResumeInfo(
+public record TripGameRejoinInfo(
     long tripGameId,
     Status status
 ) {
 
-    public static TripGameResumeInfo of(TripGame tripGame) {
-        return TripGameResumeInfo.builder()
+    public static TripGameRejoinInfo of(TripGame tripGame) {
+        return TripGameRejoinInfo.builder()
             .tripGameId(tripGame.id())
             .status(tripGame.status())
             .build();
