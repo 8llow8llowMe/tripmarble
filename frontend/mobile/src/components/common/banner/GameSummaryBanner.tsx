@@ -16,7 +16,7 @@ export default function GameSummaryBanner({ counts }: any) {
   //['#4BA1FD', '#EAF4FF']
 
   return (
-    <LinearGradient colors={['#4BA1FD', '#A7D8FF']} style={styles.container}>
+    <LinearGradient colors={['#4BA1FD', '#7BA9FF']} style={styles.container}>
       <View style={{ flex: 1 }}>
         <Text style={styles.date}>{dateText}</Text>
         <Text style={styles.title}>{nickname}님,</Text>
@@ -48,9 +48,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  date: { color: '#9CA3AF', fontSize: 13, marginBottom: 6 },
+  date: { color: '#E5E7EB', fontSize: 13, marginBottom: 6, fontWeight: '600' },
   title: { color: palette.white, fontSize: 18, fontWeight: '800', lineHeight: 26 },
-  small: { color: '#9CA3AF', fontSize: 12, marginTop: 6 },
+  small: { color: '#E5E7EB', fontSize: 12, marginTop: 6, fontWeight: '600' },
 
   row: { flexDirection: 'row', gap: 8, marginTop: 10 },
   pill: {

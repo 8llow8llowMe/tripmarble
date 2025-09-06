@@ -291,7 +291,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
     >
       <Svg width={width} height={height}>
         {/* 배경 */}
-        <Rect x={0} y={0} width={width} height={height} fill="#ecf1fe" />
+        <Rect x={0} y={0} width={width} height={height} fill="#fff" />
         {/* 셀들 그리기 (3D 효과 대신 상/하 투톤) */}
         {boardData.map((cell) => {
           const x = cell.col * CELL + PADDING_LEFT;
