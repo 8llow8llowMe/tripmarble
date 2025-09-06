@@ -14,6 +14,7 @@ public class RepresentativeRegionPresenter {
         return RepresentativeRegionSummaryResponse.builder()
             .representativeRegionId(String.valueOf(representativeRegion.id()))
             .representativeRegionName(representativeRegion.name())
+            .representativeRegionImageUrl(representativeRegion.imageUrl())
             .build();
     }
 
