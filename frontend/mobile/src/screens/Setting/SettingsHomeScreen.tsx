@@ -4,14 +4,18 @@ import ServiceTermsSheet from '@/components/bottomSheet/ServiceTermsSheet';
 import Divider from '@/components/common/Divider';
 import { palette } from '@/constants/colors';
 import { useBottomSheetBase } from '@/hooks/useBottomSheetBase';
+import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { useNavigation } from '@react-navigation/native';
 
 import React from 'react';
 import { SafeAreaView, TouchableOpacity } from 'react-native';
 import { View, StyleSheet, ScrollView } from 'react-native';
 
 const SettingsHomeScreen = () => {
+  const navigation = useNavigation<AppNavigatorNavigationProp>();
+
   const {
     bottomSheetRef: serviceTermsBottomSheetRef,
     openSheet: openServiceTermsSheet,
@@ -32,6 +36,12 @@ const SettingsHomeScreen = () => {
       appearsOnIndex={0} // 시작 지점에서도 배경이 나타나도록 설정
     />
   );
+
+  const goToLicenseScreen = () => {
+    navigation.navigate('SettingsNavigator', {
+      screen: 'LicenseScreen',
+    });
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -88,7 +98,7 @@ const SettingsHomeScreen = () => {
             </TextBox>
           </View>
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={goToLicenseScreen}>
             <View style={styles.row}>
               <TextBox size={15}>오픈소스 라이선스</TextBox>
               <Ionicons name="chevron-forward" size={18} color={palette.gray300} />
@@ -97,6 +107,7 @@ const SettingsHomeScreen = () => {
         </View>
       </ScrollView>
 
+      {/* 약관 및 정책 바텀시트 */}
       <BottomSheetModal
         ref={serviceTermsBottomSheetRef}
         handleStyle={{
