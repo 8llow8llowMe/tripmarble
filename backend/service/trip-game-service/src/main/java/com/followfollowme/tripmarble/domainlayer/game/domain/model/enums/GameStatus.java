@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum Status {
+public enum GameStatus {
     WAITING("게임 시작 전") {
         @Override
         public void validatePlayable() {
