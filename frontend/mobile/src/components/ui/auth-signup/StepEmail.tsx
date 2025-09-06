@@ -106,7 +106,7 @@ export default function StepEmail({ onNext }: { onNext: () => void }) {
       <View style={styles.inputRow}>
         <TextInput
           style={styles.inputWithBtn}
-          placeholder="아이디(이메일)을 입력해주세요."
+          placeholder="이메일을 입력해주세요."
           value={email}
           onChangeText={(v) => setValue('email', v)}
           autoCapitalize="none"
@@ -191,7 +191,7 @@ export default function StepEmail({ onNext }: { onNext: () => void }) {
   );
 }
 const styles = StyleSheet.create({
-  container: { justifyContent: 'center', alignItems: 'flex-start', paddingHorizontal: 24 },
+  container: { justifyContent: 'center', alignItems: 'flex-start', paddingHorizontal: 16 },
   title: { marginBottom: 32 },
   inputRow: {
     flexDirection: 'row',
