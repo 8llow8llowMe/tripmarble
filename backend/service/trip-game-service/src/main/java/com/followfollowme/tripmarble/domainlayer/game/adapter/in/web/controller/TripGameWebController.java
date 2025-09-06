@@ -12,7 +12,7 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameWebUseCase;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
@@ -84,7 +84,7 @@ public class TripGameWebController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<SliceResponse<MyTripGameResponse>>> getMyTripGames(
         @AuthenticationPrincipal MemberLoginActive loginActive, @RequestParam(defaultValue = "0") String lastTripGameId,
-        @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) Status status) {
+        @RequestParam(defaultValue = "10") int size, @RequestParam(required = false) GameStatus status) {
         SliceResponse<MyTripGameResponse> response = tripGameWebUseCase.getMyTripGames(loginActive.id(), Long.parseLong(lastTripGameId),
             size, status);
         return ResponseEntity.ok().body(Response.success(response));

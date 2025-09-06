@@ -9,7 +9,7 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameRejoinResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public interface TripGameWebUseCase {
 
     TripGameCreateResponse crateTripGame(TripGameCreateCommand command);
 
-    SliceResponse<MyTripGameResponse> getMyTripGames(long memberId, long lastTripGameId, int size, Status status);
+    SliceResponse<MyTripGameResponse> getMyTripGames(long memberId, long lastTripGameId, int size, GameStatus status);
 
     TripGameStartResponse startTripGame(long tripGameId, long hostMemberId);
 

@@ -3,16 +3,17 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.r
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity.QTripGameEntity;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity.QTripGameMemberEntity;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.entity.TripGameEntity;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -21,7 +22,7 @@ public class TripGameCustomRepositoryImpl implements TripGameCustomRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Slice<TripGameEntity> findMyGamesNoOffset(long memberId, long lastTripGameId, int size, Status status) {
+    public Slice<TripGameEntity> findMyGamesNoOffset(long memberId, long lastTripGameId, int size, GameStatus status) {
         QTripGameEntity game = QTripGameEntity.tripGameEntity;
         QTripGameMemberEntity gameMember = QTripGameMemberEntity.tripGameMemberEntity;
 

@@ -28,7 +28,7 @@ import com.followfollowme.tripmarble.domainlayer.game.application.service.proces
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameStartProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameTileCreateProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import lombok.RequiredArgsConstructor;
@@ -82,7 +82,7 @@ public class TripGameFacade implements TripGameWebUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public SliceResponse<MyTripGameResponse> getMyTripGames(long memberId, long lastTripGameId, int size, Status status) {
+    public SliceResponse<MyTripGameResponse> getMyTripGames(long memberId, long lastTripGameId, int size, GameStatus status) {
         Slice<TripGameQueryInfo> infoSlice = tripGameQueryProcessor.getMyTripGames(memberId, lastTripGameId, size, status);
         return tripGamePresenter.toMyGameSliceResponse(infoSlice);
     }
