@@ -36,26 +36,31 @@ export interface MyGameListParams {
   status?: GameStatus; // WAITING | ONGOING | ENDED
 }
 
-// 나의 게임 목록 조회 (상태별 파라미터 지원)
-export const fetchMyGameList = (params?: { status?: GameStatus }) =>
-  apiClient.get(END_POINTS.GAME.LIST_MY_GAMES, { params });
+// 게임 목록 조회 (상태별 파라미터 지원)
+export const fetchGameList = (params?: { status?: GameStatus }) =>
+  apiClient.get(END_POINTS.GAME.LIST_GAMES_INFO, { params });
 
 // 단일 상태 리스트 훅
-export const useMyGameListQuery = (params?: { status?: GameStatus }) => {
+export const useGameListQuery = (params?: { status?: GameStatus }) => {
   const { data, isLoading, isError, isSuccess } = useQuery({
-    queryFn: () => fetchMyGameList(params),
-    queryKey: [QUERY_KEY.GAME.MY_GAME_LIST, params?.status ?? 'ALL'],
+    queryFn: () => fetchGameList(params),
+    queryKey: [QUERY_KEY.GAME.GAME_LIST_INFO, params?.status ?? 'ALL'],
   });
   return { myGameList: data, isLoading, isError, isSuccess };
 };
 
 // 상태 3종 병렬 조회 훅 (WAITING/ONGOING/ENDED)
-export const useMyGameLists = (base?: Omit<MyGameListParams, 'status'>) => {
+export const useGameLists = (base?: Omit<MyGameListParams, 'status'>) => {
   const statuses: GameStatus[] = ['WAITING', 'ONGOING', 'ENDED'];
   const results = useQueries({
     queries: statuses.map((status) => ({
-      queryKey: [QUERY_KEY.GAME.MY_GAME_LIST, status, base?.lastTripGameId ?? 0, base?.size ?? 10],
-      queryFn: () => fetchMyGameList({ ...base, status }),
+      queryKey: [
+        QUERY_KEY.GAME.GAME_LIST_INFO,
+        status,
+        base?.lastTripGameId ?? 0,
+        base?.size ?? 10,
+      ],
+      queryFn: () => fetchGameList({ ...base, status }),
     })),
   }) as [
     UseQueryResult<GameListResponse>,
@@ -75,4 +80,4 @@ export const useMyGameLists = (base?: Omit<MyGameListParams, 'status'>) => {
   };
 };
 
-export default useMyGameListQuery;
+export default useGameListQuery;
