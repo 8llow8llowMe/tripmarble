@@ -13,11 +13,12 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Mission
 import com.followfollowme.tripmarble.domainlayer.theme.application.port.out.TripThemeContentTypeMappingRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripThemeContentTypeMapping;
 import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
-import java.util.List;
-import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Service
@@ -31,7 +32,7 @@ public class TripGameTileCreateProcessor {
     private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     public TripGameTileCreateInfo createTilesForGame(TripGame tripGame, List<Long> tripThemeIds,
-        Difficulty difficulty) {
+                                                     Difficulty difficulty) {
         // 1. 난이도에 따른 말판 개수 결정
         int tileCount = determineTileCount(difficulty);
 
@@ -80,9 +81,9 @@ public class TripGameTileCreateProcessor {
 
     private int determineTileCount(Difficulty difficulty) {
         return switch (difficulty) {
-            case EASY -> 10;
-            case NORMAL -> 20;
-            case HARD -> 30;
+            case EASY -> 11;
+            case NORMAL -> 15;
+            case HARD -> 19;
         };
     }
 
