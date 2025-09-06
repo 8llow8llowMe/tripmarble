@@ -18,7 +18,7 @@ export default function SignUpHeader({
   return (
     <View style={styles.wrap}>
       <TouchableOpacity onPress={onPrev} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={28} color={palette.gray800} />
+        <Ionicons name="chevron-back" size={28} color={palette.gray600} />
       </TouchableOpacity>
       <View style={styles.lineWrap}>
         <View style={[styles.lineBlack, { flex: progress }]} />
@@ -31,7 +31,7 @@ export default function SignUpHeader({
 const styles = StyleSheet.create({
   wrap: {
     backgroundColor: palette.white,
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingBottom: 2,
   },
   backButton: {
