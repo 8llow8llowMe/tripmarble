@@ -7,6 +7,8 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring", uses = {TripGameTileMapper.class, TripGameMemberMapper.class})
 public interface TripGameMoveLogMapper {
 
@@ -26,4 +28,6 @@ public interface TripGameMoveLogMapper {
     @Mapping(target = "turnOrder", source = "domain.turnOrder")
     @Mapping(target = "missionResult", source = "domain.missionResult")
     TripGameMoveLogEntity toEntityFromDomain(TripGameMoveLog domain, TripGameTile tripGameTile, TripGameMember tripGameMember);
+
+    List<TripGameMoveLog> toDomainListFromEntityList(List<TripGameMoveLogEntity> entities);
 }
