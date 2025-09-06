@@ -2,16 +2,17 @@ package com.followfollowme.tripmarble.domainlayer.game.domain.model;
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.EndType;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
-import java.time.LocalDate;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
 import lombok.Builder;
+
+import java.time.LocalDate;
 
 @Builder
 public record TripGame(
     long id,
     long representativeRegionId,
     String title,
-    Status status,
+    GameStatus status,
     Difficulty difficulty,
     LocalDate startedAt,
     LocalDate endedAt,
@@ -22,7 +23,7 @@ public record TripGame(
 
     public TripGame start() {
         this.status.validateStartable(); // 상태에 위임
-        return withStatus(Status.ONGOING, null);
+        return withStatus(GameStatus.ONGOING, null);
     }
 
     public void play() {
@@ -49,7 +50,7 @@ public record TripGame(
         return withStepAndTurn(updatedStepNo, nextTurnOrder);
     }
 
-    private TripGame withStatus(Status newStatus, EndType endType) {
+    private TripGame withStatus(GameStatus newStatus, EndType endType) {
         return TripGame.builder()
             .id(this.id)
             .representativeRegionId(this.representativeRegionId)
@@ -81,6 +82,6 @@ public record TripGame(
 
     private TripGame endInternal(EndType type) {
         this.status.validateEndable();
-        return withStatus(Status.ENDED, type);
+        return withStatus(GameStatus.ENDED, type);
     }
 }

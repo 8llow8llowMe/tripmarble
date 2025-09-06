@@ -10,15 +10,16 @@ import com.followfollowme.tripmarble.domainlayer.game.application.readmodel.Trip
 import com.followfollowme.tripmarble.domainlayer.game.application.readmodel.TripGameThemeNames;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +30,7 @@ public class TripGameQueryProcessor {
     private final TripGameThemeMappingRepositoryPort tripGameThemeMappingRepositoryPort;
     private final RepresentativeRegionClientPort representativeRegionClientPort;
 
-    public Slice<TripGameQueryInfo> getMyTripGames(long memberId, long lastTripGameId, int size, Status status) {
+    public Slice<TripGameQueryInfo> getMyTripGames(long memberId, long lastTripGameId, int size, GameStatus status) {
         // 1. 내 게임 목록 조회
         Slice<TripGame> gameSlice = tripGameRepositoryPort
             .findMyGameNoOffset(memberId, lastTripGameId, size, status);
