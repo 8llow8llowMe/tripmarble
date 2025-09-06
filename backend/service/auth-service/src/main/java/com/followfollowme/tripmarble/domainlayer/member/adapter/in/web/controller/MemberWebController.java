@@ -81,4 +81,15 @@ public class MemberWebController {
         memberWebUseCase.updateMyInfo(MemberUpdateCommand.from(loginActive.id(), request));
         return ResponseEntity.ok().body(Response.success());
     }
+
+    @Operation(
+        summary = "회원 탈퇴",
+        description = "로그인한 사용자가 회원 탈퇴(비활성화)하는 기능입니다."
+    )
+    @PostMapping("/me/withdraw")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<Void>> withdrawMember(@AuthenticationPrincipal MemberLoginActive loginActive) {
+        memberWebUseCase.withdrawMember(loginActive.id());
+        return ResponseEntity.ok().body(Response.success());
+    }
 }
