@@ -77,7 +77,7 @@ export default function SpotListScreen() {
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
       <Hero
-        imageUrl={representativeRegion?.dataBody.imageUrl}
+        imageUrl={representativeRegion?.dataBody.representativeRegionImageUrl}
         title={representativeRegion?.dataBody.representativeRegionName ?? ''}
         desc={representativeRegion?.dataBody.description ?? ''}
         onBack={() => navigation.goBack()}
