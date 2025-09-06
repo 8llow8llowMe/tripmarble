@@ -14,6 +14,7 @@ import Svg, { Rect, Text as SvgText, TSpan, Defs, ClipPath } from 'react-native-
 type Props = {
   count?: number; // 한 변 칸 수 (기본 5)
   tiles: TripGameTileView[];
+  initialIndex: number;
   onCellPress?: (tile: TripGameTileView, index: number) => void;
   pieceSource?: any; // require('.../Logo.png') 또는 { uri: ... }
   size?: number; // 한 칸 크기 (기본 80)
@@ -68,7 +69,7 @@ export type GameBoardHandle = {
   getIndex: () => number;
 };
 const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNative(
-  { count = 5, tiles, onCellPress, pieceSource, size = 80, onIndexChange }: Props,
+  { count = 5, initialIndex, tiles, onCellPress, pieceSource, size = 80, onIndexChange }: Props,
   ref,
 ) {
   const PADDING_LEFT = 0;
@@ -201,12 +202,15 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
     }
   };
 
-  // 초기 말 위치 = 시작칸(오른쪽 아래) 중앙
+  // 초기 말 위치
   useEffect(() => {
     if (!isLayoutReady || logicalPositions.length === 0) return;
-    const start = logicalPositions[0];
+    // guard: keep index in range
+    const safe = Math.max(0, Math.min(initialIndex, logicalPositions.length - 1));
+    const start = logicalPositions[safe];
+    setCurrentIndex(safe);
     setPieceXY(getCenterXY(start.row, start.col));
-  }, [isLayoutReady, logicalPositions]);
+  }, [isLayoutReady, logicalPositions, initialIndex]);
 
   // 한 글자 픽셀폭 추정: 한글/전각 ~ 0.95 * fontSize, ascii ~ 0.55 * fontSize
   const charWidth = (ch: string, fontSize: number) =>
