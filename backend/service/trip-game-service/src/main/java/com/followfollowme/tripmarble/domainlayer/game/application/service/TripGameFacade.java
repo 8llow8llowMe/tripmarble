@@ -106,13 +106,6 @@ public class TripGameFacade implements TripGameWebUseCase {
 
     @Override
     @Transactional
-    public TripGameEndResponse normalEndTripGame(long tripGameId) {
-        TripGameEndInfo tripGameEndInfo = tripGameEndProcessor.normalEndTripGame(tripGameId);
-        return tripGamePresenter.toEndResponse(tripGameEndInfo);
-    }
-
-    @Override
-    @Transactional
     public TripGameEndResponse forceEndTripGame(long tripGameId, long requesterId) {
         TripGameEndInfo tripGameEndInfo = tripGameEndProcessor.forceEndTripGame(tripGameId, requesterId);
         return tripGamePresenter.toEndResponse(tripGameEndInfo);
