@@ -20,45 +20,30 @@ public record Member(
 
     public Member withdraw() {
         this.status.validateWithdrawable();
-        return Member.builder()
-            .id(this.id)
-            .email(this.email)
-            .password(this.password)
-            .name("탈퇴회원")
-            .nickname("탈퇴회원")
-            .profileImageUrl(null)
-            .role(this.role)
-            .provider(this.provider)
-            .status(MemberStatus.WITHDRAWN)
-            .build();
+        return withStatus(MemberStatus.WITHDRAWN, this.email, this.password, "탈퇴회원", "탈퇴회원", null);
     }
 
     public Member restore(String newName, String newNickname) {
         this.status.validateRestorable();
-        return Member.builder()
-            .id(this.id)
-            .email(this.email)
-            .password(this.password)
-            .name(newName)
-            .nickname(newNickname)
-            .profileImageUrl(this.profileImageUrl)
-            .role(this.role)
-            .provider(this.provider)
-            .status(MemberStatus.ACTIVE)
-            .build();
+        return withStatus(MemberStatus.ACTIVE, this.email, this.password, newName, newNickname, this.profileImageUrl);
     }
 
     public Member suspend() {
+        return withStatus(MemberStatus.SUSPENDED, this.email, this.password, this.name, this.nickname, this.profileImageUrl);
+    }
+
+    private Member withStatus(
+        MemberStatus newStatus, String email, String password, String name, String nickname, String profileImageUrl) {
         return Member.builder()
             .id(this.id)
-            .email(this.email)
-            .password(this.password)
-            .name(this.name)
-            .nickname(this.nickname)
-            .profileImageUrl(this.profileImageUrl)
+            .email(email)
+            .password(password)
+            .name(name)
+            .nickname(nickname)
+            .profileImageUrl(profileImageUrl)
             .role(this.role)
             .provider(this.provider)
-            .status(MemberStatus.SUSPENDED)
+            .status(newStatus)
             .build();
     }
 }
