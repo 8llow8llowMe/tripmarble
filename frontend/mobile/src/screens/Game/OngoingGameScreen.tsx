@@ -21,12 +21,34 @@ import DiceView from '@/components/ui/dice/DiceView';
 import useGameDiceMutation from '@/hooks/game/useGameDice';
 import DotThree from '@assets/icons/dots-three';
 import useGameEndMutation from '@/hooks/game/useGameEnd';
+import useGameDetailQuery from '@/hooks/game/useGameDetail';
+import useMoveLogsQuery from '@/hooks/game/useMoveLogs';
 
 export default function OngoingGameScreen({ route }) {
   const { tripGameId } = route.params || {};
   const navigation = useNavigation<any>();
-  const { mutateAsync: rollDice, isPending: isRolling } = useGameDiceMutation();
+  const { gameDetail, isLoading: gameDetailIsLoading } = useGameDetailQuery(tripGameId);
+  // 안전 추출: gameDetail가 훅에서 어떤 형태로 오든 대응
+  const detail = (gameDetail as any)?.data?.dataBody ?? (gameDetail as any)?.dataBody ?? undefined;
+  const titleFromDetail: string | undefined = detail?.title ?? detail?.representativeRegionName;
+  const startedAtFromDetail: string | undefined = detail?.startedAt;
+  const endedAtFromDetail: string | undefined = detail?.endedAt;
+  const currentTurnOrderFromDetail: number | undefined = detail?.currentTurnOrder;
+  const currentStepNoFromDetail: number | undefined = detail?.currentStepNo;
+  const difficultyCodeFromDetail: 'EASY' | 'NORMAL' | 'HARD' | undefined = detail?.difficultyCode;
+  const themesFromDetail: string[] = detail?.tripThemeNames ?? [];
+  const difficultyDescFromDetail: string | undefined = detail?.difficultyDescription;
 
+  const { moveLogs, isLoading: moveLogsIsLoading } = useMoveLogsQuery(tripGameId);
+
+  // 최근 이동 로그(가장 마지막 항목)
+  const lastMoveLog = (moveLogs as any)?.dataBody?.[
+    Math.max(0, ((moveLogs as any)?.dataBody?.length || 1) - 1)
+  ];
+  const isPendingMission = lastMoveLog?.missionResultCode === 'PENDING';
+  const isGameEnd = lastMoveLog?.missionResultCode === 'GAME_END';
+
+  const { mutateAsync: rollDice } = useGameDiceMutation();
   const { mutateAsync: endGame, isPending: isEnding } = useGameEndMutation();
 
   const { gameInfo } = useGetGameTilesQuery(tripGameId);
@@ -35,15 +57,53 @@ export default function OngoingGameScreen({ route }) {
     (Array.isArray(gameInfo) ? gameInfo : gameInfo?.tripGameTileViews) ??
     gameInfoDummy.dataBody.tripGameTileViews;
 
-  const [currentIndexInParent, setCurrentIndexInParent] = useState<number>(0);
+  // 보드 칸 수: 난이도 기반 (EASY=4, NORMAL=5, HARD=6)
+  const boardCount =
+    difficultyCodeFromDetail === 'EASY'
+      ? 4
+      : difficultyCodeFromDetail === 'NORMAL'
+        ? 5
+        : difficultyCodeFromDetail === 'HARD'
+          ? 6
+          : tiles.length === 11
+            ? 4
+            : tiles.length === 16
+              ? 5
+              : 6;
+
+  // 부모에서 관리하는 현재 타일 인덱스 (-1이면 GO)
+  const initialParentIndex = Math.max(-1, (currentStepNoFromDetail ?? 0) - 1);
+  const [currentIndexInParent, setCurrentIndexInParent] = useState<number>(initialParentIndex);
   const boardRef = useRef<GameBoardHandle>(null);
   const [canMove, setCanMove] = useState<boolean>(true);
-  const currentTileIndex = currentIndexInParent === 0 ? -1 : currentIndexInParent % tiles.length;
+  // currentIndexInParent: -1이면 GO, 0~tiles.length-1이면 해당 타일
+  const currentTileIndex = currentIndexInParent;
 
   const [diceVisible, setDiceVisible] = useState(false);
   const [diceValue, setDiceValue] = useState<number | null>(null);
 
   const [menuVisible, setMenuVisible] = useState(false);
+
+  // 현재 선택(혹은 도착)한 타일 (GO(-1)일 때는 null)
+  const currentTile = currentTileIndex >= 0 ? (tiles[currentTileIndex] as any) : null;
+  // 서버 로그의 tripGameTileId 와 현재 타일의 tripSpotId 가 같은지 여부
+  const isSameTileForAuth = Boolean(
+    lastMoveLog?.tripGameTileId &&
+      currentTile?.tripSpotId &&
+      lastMoveLog.tripGameTileId === currentTile.tripSpotId,
+  );
+  // console.log(lastMoveLog?.missionResultCode);
+  // detail이 갱신되거나 다른 게임으로 진입했을 때 초기 인덱스 동기화
+  React.useEffect(() => {
+    const next = Math.max(-1, (currentStepNoFromDetail ?? 0) - 1);
+    setCurrentIndexInParent(next);
+  }, [currentStepNoFromDetail]);
+
+  // 아래 조건이면 `미션 인증` 버튼을 강제로 노출
+  const forceShowMissionButton = Boolean(isPendingMission || isSameTileForAuth);
+
+  // 탭 (정보 / 방법)
+  const [activeTab, setActiveTab] = useState<'timeline' | 'guide'>('guide');
   const menuOpacity = useRef(new Animated.Value(0)).current;
   const menuScale = useRef(new Animated.Value(0.96)).current;
 
@@ -73,7 +133,7 @@ export default function OngoingGameScreen({ route }) {
             // 메뉴 닫기
             closeMenu();
             // 게임 강제 종료 호출
-            const res = await endGame(tripGameId);
+            await endGame(tripGameId);
             // 이전 목록으로 이동
             navigation.goBack();
           } catch (e) {
@@ -85,6 +145,19 @@ export default function OngoingGameScreen({ route }) {
     ]);
   };
 
+  const bothReady = !gameDetailIsLoading && !moveLogsIsLoading && !!detail && !!moveLogs?.dataBody;
+
+  if (!bothReady) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView style={styles.container}>
+          <View style={{ paddingVertical: 28, alignItems: 'center' }}>
+            <Text style={{ fontSize: 16, color: '#6B7280' }}>불러오는 중…</Text>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -105,7 +178,9 @@ export default function OngoingGameScreen({ route }) {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={28} color="#555" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>@@ 여행</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {titleFromDetail ?? '@@ 여행'}
+          </Text>
 
           <TouchableOpacity
             onPress={openMenu}
@@ -116,19 +191,40 @@ export default function OngoingGameScreen({ route }) {
           </TouchableOpacity>
         </View>
 
-        {/* game info */}
-        <View style={styles.content}>
-          <Text>현재 말 위치 인덱스: {currentIndexInParent + 1}</Text>
-          <Text>
-            {`${gameInfoDummy.dataBody.tripGameView.startedAt} ~ ${gameInfoDummy.dataBody.tripGameView.endedAt}`}
-          </Text>
+        {/* info */}
+        <View>
+          <View style={styles.infoRow}>
+            <Text style={styles.turnText}>
+              {currentTurnOrderFromDetail ? `${currentTurnOrderFromDetail}번째 턴` : '-'}
+            </Text>
+            <Text style={styles.dateTextStyled}>
+              {startedAtFromDetail && endedAtFromDetail
+                ? `${startedAtFromDetail} ~ ${endedAtFromDetail}`
+                : '-'}
+            </Text>
+          </View>
+
+          {(themesFromDetail.length > 0 || !!difficultyDescFromDetail) && (
+            <View style={styles.metaRow}>
+              <Text style={styles.themesText} numberOfLines={1}>
+                {themesFromDetail.join(' · ')}
+              </Text>
+              {!!difficultyDescFromDetail && (
+                <View style={styles.difficultyPill}>
+                  <Text style={styles.difficultyText}>{difficultyDescFromDetail}</Text>
+                </View>
+              )}
+            </View>
+          )}
         </View>
 
         {/* game board */}
         <View style={styles.gameBoard}>
           <GameBoardNative
+            key={`${tripGameId}-${boardCount}`}
             ref={boardRef}
-            count={5}
+            count={boardCount}
+            initialIndex={Math.max(0, currentStepNoFromDetail ?? 0)}
             tiles={tiles}
             pieceSource={Logo} // 말 이미지
             onCellPress={(tile, tabIndex) => {
@@ -147,67 +243,92 @@ export default function OngoingGameScreen({ route }) {
         </View>
 
         {/* button */}
-        {canMove ? (
+        {!isGameEnd &&
+          (canMove && !forceShowMissionButton ? (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={async () => {
+                try {
+                  setCanMove(false);
+                  const res = await rollDice(tripGameId);
+                  const serverSteps = res?.dataBody?.diceValue ?? Math.floor(Math.random() * 6) + 1;
+                  setDiceValue(serverSteps);
+                  setDiceVisible(true);
+                } catch (e) {
+                  setCanMove(true);
+                }
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="이동"
+            >
+              <Text style={styles.buttonText}>주사위 던지기</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => {
+                if (currentTileIndex >= 0) {
+                  navigation.navigate({
+                    name: 'GameMissionAuthScreen',
+                    params: {
+                      tile: currentTile ?? tiles[0],
+                      tapIndex: currentTileIndex,
+                      currentIndex: currentTileIndex,
+                      tripGameId,
+                    },
+                    merge: true,
+                  });
+                }
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="미션 인증"
+            >
+              <Text style={styles.buttonText}>미션 인증</Text>
+            </TouchableOpacity>
+          ))}
+
+        {/* Tabs: 게임 정보 / 게임 방법 */}
+        <View style={styles.tabBar}>
           <TouchableOpacity
-            style={styles.button}
-            onPress={async () => {
-              try {
-                setCanMove(false);
-                // 서버에 주사위 굴리기 요청
-                const res = await rollDice(tripGameId);
-                const serverSteps = res?.dataBody?.diceValue ?? Math.floor(Math.random() * 6) + 1;
-                setDiceValue(serverSteps);
-                setDiceVisible(true);
-              } catch (e) {
-                // 에러 시 다시 버튼 활성화
-                setCanMove(true);
-              }
-            }}
-            accessibilityRole="button"
-            accessibilityLabel="이동"
+            style={[styles.tabItem, activeTab === 'guide' && styles.tabItemActive]}
+            onPress={() => setActiveTab('guide')}
           >
-            <Text style={styles.buttonText}>주사위 던지기</Text>
+            <Text style={[styles.tabText, activeTab === 'guide' && styles.tabTextActive]}>
+              게임 방법
+            </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabItem, activeTab === 'timeline' && styles.tabItemActive]}
+            onPress={() => setActiveTab('timeline')}
+          >
+            <Text style={[styles.tabText, activeTab === 'timeline' && styles.tabTextActive]}>
+              타임 라인
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {activeTab === 'timeline' ? (
+          <View style={{ paddingVertical: 12 }}>
+            <Text style={styles.turnText}>타임라인 제작</Text>
+          </View>
         ) : (
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => {
-              if (currentTileIndex >= 0) {
-                navigation.navigate({
-                  name: 'GameMissionAuthScreen',
-                  params: {
-                    tile: tiles[currentIndexInParent],
-                    tapIndex: currentTileIndex, // 사용자가 누른 것은 현재 칸
-                    currentIndex: currentTileIndex, // 현재 말 위치
-                    tripGameId,
-                  },
-                  merge: true,
-                });
-              }
-            }}
-            accessibilityRole="button"
-            accessibilityLabel="미션 인증"
-          >
-            <Text style={styles.buttonText}>미션 인증</Text>
-          </TouchableOpacity>
+          <View style={styles.guideWrap}>
+            <Text style={styles.guideTitle}>게임 방법</Text>
+            <View style={styles.guideRow}>
+              <Text style={styles.guideStep}>step1</Text>
+              <Text style={styles.guideText}>주사위를 던져 나온 수만큼 말 이동</Text>
+            </View>
+            <View style={styles.guideRow}>
+              <Text style={styles.guideStep}>step2</Text>
+              <Text style={styles.guideText}>해당 칸의 미션 확인 후 미션 수행</Text>
+            </View>
+            <View style={styles.guideRow}>
+              <Text style={styles.guideStep}>step3</Text>
+              <Text style={styles.guideText}>한 바퀴 완주 시 게임 종료!</Text>
+            </View>
+          </View>
         )}
 
-        {/* guide */}
-        <View style={styles.guideWrap}>
-          <Text style={styles.guideTitle}>게임 방법</Text>
-          <View style={styles.guideRow}>
-            <Text style={styles.guideStep}>step1</Text>
-            <Text style={styles.guideText}>주사위를 던져 나온 수만큼 말 이동</Text>
-          </View>
-          <View style={styles.guideRow}>
-            <Text style={styles.guideStep}>step2</Text>
-            <Text style={styles.guideText}>해당 칸의 미션 확인 후 미션 수행</Text>
-          </View>
-          <View style={styles.guideRow}>
-            <Text style={styles.guideStep}>step3</Text>
-            <Text style={styles.guideText}>한 바퀴 완주 시 게임 종료!</Text>
-          </View>
-        </View>
         {menuVisible && (
           <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
             {/* 배경 클릭으로 닫기 */}
@@ -245,6 +366,50 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white },
   container: { paddingHorizontal: 16 },
 
+  tabBar: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  tabItem: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#F9FAFB',
+    alignItems: 'center',
+  },
+  tabItemActive: {
+    backgroundColor: '#EEF2FF',
+    borderColor: '#C7D2FE',
+  },
+  tabText: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '600',
+  },
+  tabTextActive: {
+    color: '#374151',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+  },
+  turnText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  dateTextStyled: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '600',
+  },
+
   header: {
     height: 52,
     flexDirection: 'row',
@@ -267,7 +432,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 18,
   },
-  gameBoard: { width: '100%', aspectRatio: '0.75', paddingBottom: 8 },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginTop: -6,
+    marginBottom: 8,
+    paddingBottom: 4,
+  },
+  themesText: {
+    flex: 1,
+    color: '#6B7280',
+    fontSize: 13,
+  },
+  difficultyPill: {
+    backgroundColor: '#F2F5FA',
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  difficultyText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#374151',
+  },
+  gameBoard: { width: '100%', aspectRatio: '0.75', paddingBottom: 12, marginBottom: 12 },
   button: {
     backgroundColor: palette.buttonColor,
     borderRadius: 8,
