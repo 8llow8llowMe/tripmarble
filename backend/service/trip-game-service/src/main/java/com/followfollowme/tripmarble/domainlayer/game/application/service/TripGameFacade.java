@@ -6,6 +6,7 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDetailResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameRejoinResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter.TripGamePresenter;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
@@ -14,6 +15,7 @@ import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameD
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDiceResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameEndInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameRejoinInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameTileCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameWebUseCase;
@@ -22,18 +24,20 @@ import com.followfollowme.tripmarble.domainlayer.game.application.service.proces
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameDiceProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameEndProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameQueryProcessor;
+import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameRejoinProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameStartProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameTileCreateProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
-import java.util.Arrays;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +50,7 @@ public class TripGameFacade implements TripGameWebUseCase {
     private final TripGameDiceProcessor tripGameDiceProcessor;
     private final TripGameEndProcessor tripGameEndProcessor;
     private final TripGameDetailProcessor tripGameDetailProcessor;
+    private final TripGameRejoinProcessor tripGameRejoinProcessor;
     private final TripGamePresenter tripGamePresenter;
 
     @Override
@@ -118,5 +123,12 @@ public class TripGameFacade implements TripGameWebUseCase {
     public TripGameDetailResponse getTripGameDetail(long tripGameId) {
         TripGameDetailInfo tripGameDetailInfo = tripGameDetailProcessor.getTripGameDetail(tripGameId);
         return tripGamePresenter.toDetailResponse(tripGameDetailInfo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TripGameRejoinResponse regionTripGame(long tripGameId, long memberId) {
+        TripGameRejoinInfo tripGameRejoinInfo = tripGameRejoinProcessor.rejoinTripGame(tripGameId, memberId);
+        return tripGamePresenter.toReJoinResponse(tripGameRejoinInfo);
     }
 }
