@@ -11,7 +11,7 @@ public record MissionResultInfo(
     long tripGameMoveLogId,
     long tripGameTileId,
     long tripGameMemberId,
-    int dice,
+    int diceValue,
     int turnOrder,
     LocalDateTime arrivedAt,
     MissionResult missionResult,
@@ -23,7 +23,7 @@ public record MissionResultInfo(
             .tripGameMoveLogId(log.id())
             .tripGameTileId(log.tripGameTileId())
             .tripGameMemberId(log.tripGameMemberId())
-            .dice(log.dice())
+            .diceValue(log.dice())
             .turnOrder(log.turnOrder())
             .arrivedAt(log.arrivedAt())
             .missionResult(log.missionResult())
