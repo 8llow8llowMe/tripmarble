@@ -103,17 +103,6 @@ public class TripGameWebController {
     }
 
     @Operation(
-        summary = "여행 게임 정상 종료",
-        description = "게임 규칙에 따라 정상적으로 종료하는 기능입니다."
-    )
-    @PostMapping("/{tripGameId}/end")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Response<TripGameEndResponse>> normalEndTripGame(@PathVariable String tripGameId) {
-        TripGameEndResponse response = tripGameWebUseCase.normalEndTripGame(Long.parseLong(tripGameId));
-        return ResponseEntity.ok().body(Response.success(response));
-    }
-
-    @Operation(
         summary = "여행 게임 강제 종료",
         description = "방장 권한으로 게임을 강제로 종료하는 기능입니다."
     )
