@@ -22,17 +22,18 @@ import useRepresentativeRegions from "@/entities/trips/hooks/useRepresentativeRe
 
 export default function Spots() {
   const { data } = useRepresentativeRegions();
+
   const representativeRegions = useMemo(() => {
     if (!data?.data?.dataBody) return [];
     return data.data.dataBody.map(
       (region: {
         representativeRegionId: number;
         representativeRegionName: string;
-        imageUrl: string | StaticImageData | null;
+        representativeRegionImageUrl: string | StaticImageData | null;
       }) => ({
         id: region.representativeRegionId,
         name: region.representativeRegionName,
-        imgUrl: region.imageUrl || noImage,
+        imgUrl: region.representativeRegionImageUrl || noImage,
       })
     );
   }, [data]);
