@@ -11,31 +11,19 @@ import {
 } from "@/entities/games/model/gameInfoDummy";
 import TileInfoModal from "@/entities/games/ui/tile-info-modal/TileInfoModal";
 import useGameDiceMutation from "@/entities/games/hooks/useGameDice";
+import formatDate from "@/shared/hooks/formatDate";
 
 type Props = {
   tripGameView: TripGameView;
   tripGameTileViews: TripGameTileView[];
 };
 
-const formatDate = (d?: string) => {
-  if (!d) return "";
-  try {
-    const date = new Date(d);
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${y}.${m}.${day}`;
-  } catch {
-    return d;
-  }
-};
-
 const GamePlay = ({ tripGameView, tripGameTileViews }: Props) => {
   const { mutateAsync: rollDice, isPending: isRolling } = useGameDiceMutation();
   const dateRange = useMemo(
     () =>
-      `${formatDate(tripGameView.startedAt)} - ${formatDate(
-        tripGameView.endedAt
+      `${formatDate(new Date(tripGameView.startedAt))} - ${formatDate(
+        new Date(tripGameView.endedAt)
       )}`,
     [tripGameView.startedAt, tripGameView.endedAt]
   );
