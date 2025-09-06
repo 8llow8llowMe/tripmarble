@@ -5,6 +5,7 @@ import com.followfollowme.tripmarble.domainlayer.member.application.exception.Me
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
+import com.followfollowme.tripmarble.domainlayer.member.domain.model.enums.MemberStatus;
 import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
 import com.followfollowme.tripmarble.security.common.enums.SecurityRole;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +21,14 @@ public class MemberSignupProcessor {
     private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     public void signup(MemberSignupCommand command) {
-        if (memberRepositoryPort.existByEmail(command.email())) {
-            throw new MemberException(MemberErrorCode.EXIST_MEMBER_EMAIL, command.email());
-        }
+        memberRepositoryPort.findByEmail(command.email())
+            .ifPresent(existing -> {
+                switch (existing.status()) {
+                    case ACTIVE -> throw new MemberException(MemberErrorCode.EXIST_MEMBER_EMAIL, command.email());
+                    case WITHDRAWN -> throw new MemberException(MemberErrorCode.MEMBER_ALREADY_WITHDRAWN, command.email());
+                    case SUSPENDED -> throw new MemberException(MemberErrorCode.MEMBER_SUSPENDED, command.email());
+                }
+            });
 
         Member member = Member.builder()
             .id(snowflakeIdGenerator.generateId())
@@ -33,6 +39,7 @@ public class MemberSignupProcessor {
             .profileImageUrl(null)
             .role(SecurityRole.USER)
             .provider(null)
+            .status(MemberStatus.ACTIVE)
             .build();
 
         memberRepositoryPort.save(member);
