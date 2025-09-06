@@ -6,21 +6,22 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameMemberView;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameResumeResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameRejoinResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDetailInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDiceResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameEndInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
-import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameResumeInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameRejoinInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
-import java.util.List;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class TripGamePresenter {
@@ -71,8 +72,8 @@ public class TripGamePresenter {
             .build();
     }
 
-    public TripGameResumeResponse toResumeResponse(TripGameResumeInfo info) {
-        return TripGameResumeResponse.builder()
+    public TripGameRejoinResponse toReJoinResponse(TripGameRejoinInfo info) {
+        return TripGameRejoinResponse.builder()
             .tripGameId(String.valueOf(info.tripGameId()))
             .gameStatus(info.status().name())
             .gameStatusDescription(info.status().getDescription())
