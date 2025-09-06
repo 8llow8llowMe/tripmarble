@@ -2,27 +2,21 @@ package com.followfollowme.tripmarble.domainlayer.game.application.service.proce
 
 import com.followfollowme.tripmarble.domainlayer.game.application.exception.TripGameErrorCode;
 import com.followfollowme.tripmarble.domainlayer.game.application.exception.TripGameException;
-import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameResumeInfo;
-import com.followfollowme.tripmarble.domainlayer.game.application.port.out.MemberClientPort;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameRejoinInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMemberRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameRepositoryPort;
-import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameThemeMappingRepositoryPort;
-import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameTileRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class TripGameResumeProcessor {
+public class TripGameRejoinProcessor {
 
     private final TripGameRepositoryPort tripGameRepositoryPort;
     private final TripGameMemberRepositoryPort tripGameMemberRepositoryPort;
-    private final TripGameTileRepositoryPort tripGameTileRepositoryPort;
-    private final TripGameThemeMappingRepositoryPort tripGameThemeMappingRepositoryPort;
-    private final MemberClientPort memberClientPort;
 
-    public TripGameResumeInfo resumeGame(long tripGameId, long memberId) {
+    public TripGameRejoinInfo rejoinTripGame(long tripGameId, long memberId) {
         // 1. 게임 조회
         TripGame tripGame = tripGameRepositoryPort.findById(tripGameId)
             .orElseThrow(() -> new TripGameException(TripGameErrorCode.GAME_NOT_FOUND));
@@ -37,6 +31,6 @@ public class TripGameResumeProcessor {
         }
 
         // 4. Info 반환
-        return TripGameResumeInfo.of(tripGame);
+        return TripGameRejoinInfo.of(tripGame);
     }
 }
