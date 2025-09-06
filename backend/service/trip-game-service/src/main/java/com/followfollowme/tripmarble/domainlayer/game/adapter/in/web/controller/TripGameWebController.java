@@ -8,6 +8,7 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDetailResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameRejoinResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameWebUseCase;
@@ -17,7 +18,6 @@ import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -131,6 +133,18 @@ public class TripGameWebController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<TripGameDetailResponse>> getTripGameDetail(@PathVariable String tripGameId) {
         TripGameDetailResponse response = tripGameWebUseCase.getTripGameDetail(Long.parseLong(tripGameId));
+        return ResponseEntity.ok().body(Response.success(response));
+    }
+
+    @Operation(
+        summary = "야헹 게임 재입장",
+        description = "사용자가 진행 중인 게임에 재입장하는 기능입니다."
+    )
+    @PostMapping("/{tripGameId}/rejoin")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<TripGameRejoinResponse>> rejoinTripGame(
+        @PathVariable String tripGameId, @AuthenticationPrincipal MemberLoginActive loginActive) {
+        TripGameRejoinResponse response = tripGameWebUseCase.regionTripGame(Long.parseLong(tripGameId), loginActive.id());
         return ResponseEntity.ok().body(Response.success(response));
     }
 }
