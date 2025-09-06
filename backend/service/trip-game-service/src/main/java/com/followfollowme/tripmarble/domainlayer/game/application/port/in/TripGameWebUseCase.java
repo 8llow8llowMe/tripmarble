@@ -6,10 +6,12 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDetailResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameRejoinResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.command.TripGameCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
+
 import java.util.List;
 
 public interface TripGameWebUseCase {
@@ -29,4 +31,6 @@ public interface TripGameWebUseCase {
     TripGameEndResponse forceEndTripGame(long tripGameId, long requesterId);
 
     TripGameDetailResponse getTripGameDetail(long tripGameId);
+
+    TripGameRejoinResponse regionTripGame(long tripGameId, long memberId);
 }
