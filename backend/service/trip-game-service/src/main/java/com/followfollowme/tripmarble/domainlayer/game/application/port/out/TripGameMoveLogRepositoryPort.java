@@ -4,6 +4,7 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMembe
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMoveLog;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TripGameMoveLogRepositoryPort {
@@ -11,4 +12,6 @@ public interface TripGameMoveLogRepositoryPort {
     TripGameMoveLog save(TripGameMoveLog tripGameMoveLog, TripGameTile tripGameTile, TripGameMember tripGameMember);
 
     Optional<TripGameMoveLog> findById(long tripGameMoveLogId);
+
+    List<TripGameMoveLog> findAllByTripGameId(long tripGameId);
 }
