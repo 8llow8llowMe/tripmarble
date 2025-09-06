@@ -34,6 +34,7 @@ export type BottomTabParamList = {
 // === 각 스택 ===
 export type SettingsParamList = {
   SettingsHomeScreen: undefined;
+  LicenseScreen: undefined;
 };
 
 export type GamePlayStackParamList = {
