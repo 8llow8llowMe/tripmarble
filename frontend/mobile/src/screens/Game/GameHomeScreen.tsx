@@ -13,18 +13,20 @@ import ongoingImage from '@images/places/gyeongju.png';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
-import { useMyGameLists } from '@/hooks/game/useMyGameList';
 import { LinearGradient } from 'expo-linear-gradient';
+// hooks
 import { fetchGameStart } from '@/hooks/game/useGameStart';
+import { useGameLists } from '@/hooks/game/useGameList';
+// components
 import CreateGameBanner from '@/components/common/banner/CreateGameBanner';
-import { SectionHeader } from '@/components/layout/header/SectionHeader';
 import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
+import { SectionHeader } from '@/components/layout/header/SectionHeader';
 import EmptyListCard from '@/components/common/card/EmptyListCard';
 
 export default function GameHomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
 
-  const { waiting, ongoing, ended } = useMyGameLists();
+  const { waiting, ongoing, ended } = useGameLists();
 
   // 게임 생성 스크린으로 이동
   const goToGameCreateScreen = () => {
@@ -45,7 +47,7 @@ export default function GameHomeScreen() {
   // 종료된 게임 스크린으로 이동
   const goToGameEndedScreen = (tripGameId: string) => {
     navigation.navigate('GamePlayStackNavigator', {
-      screen: 'EndedGameScreen',
+      screen: 'OngoingGameScreen',
       params: { tripGameId },
     });
   };
