@@ -10,6 +10,7 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameTile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -30,5 +31,11 @@ public class TripGameMoveLogRepositoryAdapter implements TripGameMoveLogReposito
     public Optional<TripGameMoveLog> findById(long tripGameMoveLogId) {
         return tripGameMoveLogRepository.findById(tripGameMoveLogId)
             .map(tripGameMoveLogMapper::toDomainFromEntity);
+    }
+
+    @Override
+    public List<TripGameMoveLog> findAllByTripGameId(long tripGameId) {
+        List<TripGameMoveLogEntity> entities = tripGameMoveLogRepository.findAllByTripGameId(tripGameId);
+        return tripGameMoveLogMapper.toDomainListFromEntityList(entities);
     }
 }
