@@ -31,8 +31,7 @@ public class TripGameTileCreateProcessor {
     private final TripContentTypeClientPort tripContentTypeClientPort;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
 
-    public TripGameTileCreateInfo createTilesForGame(TripGame tripGame, List<Long> tripThemeIds,
-                                                     Difficulty difficulty) {
+    public TripGameTileCreateInfo createTilesForGame(TripGame tripGame, List<Long> tripThemeIds, Difficulty difficulty) {
         // 1. 난이도에 따른 말판 개수 결정
         int tileCount = determineTileCount(difficulty);
 
