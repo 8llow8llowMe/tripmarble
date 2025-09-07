@@ -270,8 +270,8 @@ export default function GameHomeScreen() {
   );
 }
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: palette.white },
-  scroll: { paddingBottom: 32 },
+  safeArea: { flex: 1, backgroundColor: palette.white, height: 'auto' },
+  scroll: { paddingVertical: 32 },
 
   title: {
     fontSize: 24,
