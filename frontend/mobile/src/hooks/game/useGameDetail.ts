@@ -51,7 +51,7 @@ export const fetchGameDetail = async (tripGameId: string) => {
 export const useGameDetailQuery = (tripGameId: string) => {
   const { data, isLoading, isError, isSuccess } = useQuery({
     queryFn: () => fetchGameDetail(tripGameId),
-    queryKey: [QUERY_KEY.GAME.GAME_DETAIL_INFO],
+    queryKey: [QUERY_KEY.GAME.GAME_DETAIL_INFO, tripGameId],
   });
   return { gameDetail: data, isLoading, isError, isSuccess };
 };

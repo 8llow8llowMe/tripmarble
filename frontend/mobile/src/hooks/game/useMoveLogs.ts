@@ -36,11 +36,11 @@ export const fetchMoveLogs = async (tripGameId: string) => {
 
 // 단일 상태 리스트 훅
 export const useMoveLogsSuccessQuery = (tripGameId: string) => {
-  const { data, isLoading, isError, isSuccess } = useQuery({
+  const { data, isLoading, isError, isSuccess, refetch } = useQuery({
     queryFn: () => fetchMoveLogs(tripGameId),
-    queryKey: [QUERY_KEY.GAME.MOVE_LOGS],
+    queryKey: [QUERY_KEY.GAME.MOVE_LOGS, tripGameId],
   });
-  return { moveLogs: data, isLoading, isError, isSuccess };
+  return { moveLogs: data, isLoading, isError, isSuccess, refetch };
 };
 
 export default useMoveLogsSuccessQuery;
