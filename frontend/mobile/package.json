@@ -27,6 +27,7 @@
     "axios": "^1.10.0",
     "dayjs": "^1.11.13",
     "expo": "^53.0.20",
+    "expo-image-picker": "~16.1.4",
     "expo-linear-gradient": "~14.1.5",
     "expo-status-bar": "~2.2.3",
     "lottie-react-native": "7.2.2",
