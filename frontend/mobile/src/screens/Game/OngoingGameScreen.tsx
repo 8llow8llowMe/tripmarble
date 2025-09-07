@@ -1,28 +1,30 @@
 import { palette } from '@/constants/colors';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Animated,
   Pressable,
   Alert,
+  SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import GameBoardNative, { GameBoardHandle } from '@/components/ui/game-board/GameBoardNative';
 import { gameInfoDummy } from '@/utils/gameInfoDummy';
 import useGetGameTilesQuery, { TripGameTileView } from '@/hooks/game/useGetGameTiles';
 import Logo from 'assets/images/Logo.png';
-import DiceView from '@/components/ui/dice/DiceView';
+import DiceView from '@/components/ui/lottie/DiceView';
 import useGameDiceMutation from '@/hooks/game/useGameDice';
 import DotThree from '@assets/icons/dots-three';
 import useGameEndMutation from '@/hooks/game/useGameEnd';
 import useGameDetailQuery from '@/hooks/game/useGameDetail';
 import useMoveLogsQuery from '@/hooks/game/useMoveLogs';
+import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { GameMissionAuthSheetContent } from '@/components/ui/game/GameMissionAuthSheetContent';
+import CongratulationView from '@/components/ui/lottie/CongratulationsView';
 
 export default function OngoingGameScreen({ route }) {
   const { tripGameId } = route.params || {};
@@ -39,13 +41,43 @@ export default function OngoingGameScreen({ route }) {
   const themesFromDetail: string[] = detail?.tripThemeNames ?? [];
   const difficultyDescFromDetail: string | undefined = detail?.difficultyDescription;
 
-  const { moveLogs, isLoading: moveLogsIsLoading } = useMoveLogsQuery(tripGameId);
+  const {
+    moveLogs,
+    isLoading: moveLogsIsLoading,
+    refetch: refetchMoveLogs,
+  } = useMoveLogsQuery(tripGameId);
 
-  // 최근 이동 로그(가장 마지막 항목)
-  const lastMoveLog = (moveLogs as any)?.dataBody?.[
-    Math.max(0, ((moveLogs as any)?.dataBody?.length || 1) - 1)
-  ];
-  const isPendingMission = lastMoveLog?.missionResultCode === 'PENDING';
+  // 이동 로그 목록과 최근/대기중 로그 계산
+  const moveLogList = ((moveLogs as any)?.dataBody ?? []) as any[];
+  const lastMoveLog = moveLogList.length > 0 ? moveLogList[moveLogList.length - 1] : undefined;
+
+  // 가장 최근의 'PENDING' 상태 로그를 찾아 사용 (목록이 오래된 순이라 가정하고 역순 탐색)
+  const pendingLog = [...moveLogList]
+    .reverse()
+    .find((log: any) => log?.missionResultCode === 'PENDING');
+
+  // 대기중 미션 여부 및 ID
+  const isPendingMission = Boolean(pendingLog);
+  const pendingMoveLogId: string | undefined = pendingLog?.tripGameMoveLogId;
+  const pendingTileId: string | undefined = pendingLog?.tripGameTileId;
+
+  // Helper: refetch move logs and get the latest pending id
+  const ensureLatestPendingId = async (): Promise<string | undefined> => {
+    try {
+      const res = await refetchMoveLogs();
+      const freshList = ((res.data as any)?.dataBody ??
+        (res.data as any)?.data?.dataBody ??
+        []) as any[];
+      const freshPending = [...freshList]
+        .reverse()
+        .find((log) => log?.missionResultCode === 'PENDING');
+      return freshPending?.tripGameMoveLogId;
+    } catch (_) {
+      return pendingMoveLogId; // fall back to current
+    }
+  };
+
+  // 게임 종료 여부는 "마지막 로그" 기준
   const isGameEnd = lastMoveLog?.missionResultCode === 'GAME_END';
 
   const { mutateAsync: rollDice } = useGameDiceMutation();
@@ -76,11 +108,24 @@ export default function OngoingGameScreen({ route }) {
   const [currentIndexInParent, setCurrentIndexInParent] = useState<number>(initialParentIndex);
   const boardRef = useRef<GameBoardHandle>(null);
   const [canMove, setCanMove] = useState<boolean>(true);
+
+  useEffect(() => {
+    // PENDING 로그가 있으면 이동 불가, 없으면 이동 가능
+    setCanMove(!isPendingMission);
+  }, [isPendingMission]);
+
+  useEffect(() => {
+    if (!isPendingMission && !isGameEnd) {
+      setCanMove(true);
+    }
+  }, [isPendingMission, isGameEnd]);
+
   // currentIndexInParent: -1이면 GO, 0~tiles.length-1이면 해당 타일
   const currentTileIndex = currentIndexInParent;
 
   const [diceVisible, setDiceVisible] = useState(false);
   const [diceValue, setDiceValue] = useState<number | null>(null);
+  const [confettiVisible, setConfettiVisible] = useState(false);
 
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -92,7 +137,6 @@ export default function OngoingGameScreen({ route }) {
       currentTile?.tripSpotId &&
       lastMoveLog.tripGameTileId === currentTile.tripSpotId,
   );
-  // console.log(lastMoveLog?.missionResultCode);
   // detail이 갱신되거나 다른 게임으로 진입했을 때 초기 인덱스 동기화
   React.useEffect(() => {
     const next = Math.max(-1, (currentStepNoFromDetail ?? 0) - 1);
@@ -145,22 +189,40 @@ export default function OngoingGameScreen({ route }) {
     ]);
   };
 
+  const missionSheetRef = useRef<BottomSheetModal>(null);
+  const [missionParams, setMissionParams] = useState<{
+    tile: any;
+    tapIndex: number;
+    currentIndex: number;
+    canMove: boolean;
+    allowMission: boolean;
+  } | null>(null);
+
+  const renderMissionBackdrop = (props: any) => (
+    <BottomSheetBackdrop
+      {...props}
+      pressBehavior="close"
+      disappearsOnIndex={-1}
+      appearsOnIndex={0}
+    />
+  );
+
   const bothReady = !gameDetailIsLoading && !moveLogsIsLoading && !!detail && !!moveLogs?.dataBody;
 
   if (!bothReady) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView style={styles.container}>
+        <View style={styles.container}>
           <View style={{ paddingVertical: 28, alignItems: 'center' }}>
             <Text style={{ fontSize: 16, color: '#6B7280' }}>불러오는 중…</Text>
           </View>
-        </ScrollView>
+        </View>
       </SafeAreaView>
     );
   }
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
+      <View style={styles.container}>
         <DiceView
           visible={diceVisible}
           value={diceValue}
@@ -172,6 +234,14 @@ export default function OngoingGameScreen({ route }) {
             }
           }}
         />
+        {confettiVisible && (
+          <CongratulationView
+            visible={diceVisible}
+            onFinish={() => {
+              setConfettiVisible(false);
+            }}
+          />
+        )}
 
         {/* header */}
         <View style={styles.header}>
@@ -224,68 +294,99 @@ export default function OngoingGameScreen({ route }) {
             key={`${tripGameId}-${boardCount}`}
             ref={boardRef}
             count={boardCount}
-            initialIndex={Math.max(0, currentStepNoFromDetail ?? 0)}
+            initialIndex={isGameEnd ? 0 : Math.max(0, currentStepNoFromDetail ?? 0)}
             tiles={tiles}
             pieceSource={Logo} // 말 이미지
-            onCellPress={(tile, tabIndex) => {
-              navigation.navigate({
-                name: 'GameMissionAuthScreen',
-                params: { tile, tapIndex: tabIndex, currentIndex: currentTileIndex, tripGameId },
-                merge: true,
-              });
+            onCellPress={(tile, tapIndex) => {
+              const isCurrent = tapIndex === currentTileIndex;
+              const sameTile =
+                pendingTileId && tile?.tripGameTileId && pendingTileId === tile.tripGameTileId;
+              const allowMissionForTap = Boolean(!canMove && isCurrent && sameTile);
+
+              const open = async () => {
+                let latestId = pendingMoveLogId;
+                if (allowMissionForTap && !latestId) {
+                  latestId = await ensureLatestPendingId();
+                }
+                setMissionParams({
+                  tile,
+                  tapIndex,
+                  currentIndex: currentTileIndex,
+                  canMove: canMove,
+                  allowMission: allowMissionForTap,
+                  pendingMoveLogId: latestId,
+                } as any);
+                requestAnimationFrame(() => missionSheetRef.current?.present());
+              };
+              open();
             }}
             onIndexChange={(next) => {
               setCurrentIndexInParent(next);
               // 새 칸 도착 → 이동 버튼 숨기고 미션하기 버튼 노출
               setCanMove(false);
+              refetchMoveLogs();
             }}
           />
         </View>
 
-        {/* button */}
-        {!isGameEnd &&
-          (canMove && !forceShowMissionButton ? (
-            <TouchableOpacity
-              style={styles.button}
-              onPress={async () => {
-                try {
-                  setCanMove(false);
-                  const res = await rollDice(tripGameId);
-                  const serverSteps = res?.dataBody?.diceValue ?? Math.floor(Math.random() * 6) + 1;
-                  setDiceValue(serverSteps);
-                  setDiceVisible(true);
-                } catch (e) {
-                  setCanMove(true);
+        {/* button / ended message */}
+        {isGameEnd ? (
+          <View
+            style={[styles.button, { backgroundColor: '#FFE8D5' }]}
+            accessibilityRole="text"
+            accessibilityLabel="게임이 종료되었습니다"
+          >
+            <Text style={[styles.buttonText, { color: '#EA580C' }]}>게임이 종료되었습니다</Text>
+          </View>
+        ) : canMove && !forceShowMissionButton ? (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={async () => {
+              try {
+                setCanMove(false);
+                const res = await rollDice(tripGameId);
+                const serverSteps = res?.dataBody?.diceValue ?? Math.floor(Math.random() * 6) + 1;
+                const endedByServer = Boolean(res?.dataBody?.isGameEnded);
+                setDiceValue(serverSteps);
+                setDiceVisible(true);
+                if (endedByServer) {
+                  setConfettiVisible(true);
                 }
-              }}
-              accessibilityRole="button"
-              accessibilityLabel="이동"
-            >
-              <Text style={styles.buttonText}>주사위 던지기</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                if (currentTileIndex >= 0) {
-                  navigation.navigate({
-                    name: 'GameMissionAuthScreen',
-                    params: {
-                      tile: currentTile ?? tiles[0],
-                      tapIndex: currentTileIndex,
-                      currentIndex: currentTileIndex,
-                      tripGameId,
-                    },
-                    merge: true,
-                  });
+              } catch (e) {
+                setCanMove(true);
+              }
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="이동"
+          >
+            <Text style={styles.buttonText}>주사위 던지기</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.button}
+            onPress={async () => {
+              if (currentTileIndex >= 0) {
+                let latestId = pendingMoveLogId;
+                if (!latestId) {
+                  latestId = await ensureLatestPendingId();
                 }
-              }}
-              accessibilityRole="button"
-              accessibilityLabel="미션 인증"
-            >
-              <Text style={styles.buttonText}>미션 인증</Text>
-            </TouchableOpacity>
-          ))}
+                setMissionParams({
+                  tile: currentTile ?? tiles[0],
+                  tapIndex: currentTileIndex,
+                  currentIndex: currentTileIndex,
+                  canMove: canMove,
+                  allowMission: true,
+                  pendingMoveLogId: latestId,
+                } as any);
+                requestAnimationFrame(() => missionSheetRef.current?.present());
+              }
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="미션 인증"
+          >
+            <Text style={styles.buttonText}>미션 인증</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Tabs: 게임 정보 / 게임 방법 */}
         <View style={styles.tabBar}>
@@ -357,15 +458,57 @@ export default function OngoingGameScreen({ route }) {
             </Animated.View>
           </View>
         )}
-      </ScrollView>
+      </View>
+      <BottomSheetModal
+        ref={missionSheetRef}
+        handleStyle={{
+          backgroundColor: palette.white,
+          borderTopLeftRadius: 12,
+          borderTopRightRadius: 12,
+          marginBottom: 16,
+        }}
+        index={1}
+        snapPoints={['20%', '85%']}
+        enablePanDownToClose={false}
+        backdropComponent={renderMissionBackdrop}
+        onDismiss={() => setMissionParams(null)}
+      >
+        {missionParams && (
+          <GameMissionAuthSheetContent
+            tile={missionParams.tile}
+            tapIndex={missionParams.tapIndex}
+            currentIndex={missionParams.currentIndex}
+            tripGameId={tripGameId}
+            pendingMoveLogId={(missionParams as any)?.pendingMoveLogId ?? pendingMoveLogId}
+            allowMissionOverride={missionParams.allowMission}
+            onMissionSucceeded={() => {
+              // 낙관적으로 이동 가능 상태로 전환하고 시트 닫기
+              setCanMove(true);
+              missionSheetRef.current?.dismiss();
+              setMissionParams(null);
+            }}
+            onRequestClose={() => missionSheetRef.current?.dismiss()}
+            canMove={missionParams.canMove}
+          />
+        )}
+      </BottomSheetModal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white },
-  container: { paddingHorizontal: 16 },
-
+  container: { flex: 1, paddingHorizontal: 16 },
+  overlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 20,
+  },
   tabBar: {
     flexDirection: 'row',
     gap: 8,
