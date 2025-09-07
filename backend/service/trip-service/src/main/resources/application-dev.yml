@@ -40,3 +40,15 @@ eureka:
 # Swagger
 swagger:
   server-url: http://${TRIP_MARBLE_DOMAIN}:${API_GATEWAY_PORT}
+
+# Snowflake
+snowflake:
+  datacenter-id: ${SNOWFLAKE_DATACENTER_ID}
+  worker-id: ${SNOWFLAKE_WORKER_ID}
+
+# Security Resource Server
+security:
+  oauth2:
+    resource-server:
+      jwt:
+        access-key: ${JWT_ACCESS_KEY}
