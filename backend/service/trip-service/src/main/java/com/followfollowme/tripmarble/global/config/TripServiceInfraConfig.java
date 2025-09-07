@@ -3,6 +3,7 @@ package com.followfollowme.tripmarble.global.config;
 import com.followfollowme.tripmarble.common.config.JasyptConfig;
 import com.followfollowme.tripmarble.persistence.config.JpaAuditConfig;
 import com.followfollowme.tripmarble.persistence.config.QuerydslConfig;
+import com.followfollowme.tripmarble.persistence.config.SnowflakeConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -10,7 +11,8 @@ import org.springframework.context.annotation.Import;
 @Import({
     JasyptConfig.class,
     JpaAuditConfig.class,
-    QuerydslConfig.class
+    QuerydslConfig.class,
+    SnowflakeConfig.class
 })
 public class TripServiceInfraConfig {
 
