@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/trip-content-types")
-@Tag(name = "여행 콘텐츠 타입 (관광 타입)", description = "여행 콘텐츠 타입 (관광 타입) 관련 API 입니다.")
+@Tag(name = "여행 콘텐츠 타입 (관광 타입)", description = "여행 콘텐츠 타입 (관광 타입) 관련 클라이언트 전용 API 입니다.")
 public class TripContentTypeWebController {
 
     private final TripContentTypeWebUseCase tripContentTypeWebUseCase;

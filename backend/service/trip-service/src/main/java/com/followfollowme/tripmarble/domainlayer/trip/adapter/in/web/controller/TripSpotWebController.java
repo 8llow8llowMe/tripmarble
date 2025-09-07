@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/trip-spots")
-@Tag(name = "여행지 정보", description = "여행지 정보 관련 API 입니다.")
+@Tag(name = "여행지 정보", description = "여행지 정보 관련 클라이언트 전용 API 입니다.")
 public class TripSpotWebController {
 
     private final TripSpotWebUseCase tripSpotWebUseCase;
