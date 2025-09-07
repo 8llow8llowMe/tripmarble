@@ -51,6 +51,20 @@ export default function OngoingGameScreen({ route }) {
   const moveLogList = ((moveLogs as any)?.dataBody ?? []) as any[];
   const lastMoveLog = moveLogList.length > 0 ? moveLogList[moveLogList.length - 1] : undefined;
 
+  // 방문 순서/상태 맵 구성 (arrivedAt 오름차순 기준)
+  const orderedLogs = [...moveLogList]
+    .filter(
+      (l) => l?.tripGameTileId && ['SUCCESS', 'PENDING', 'FAIL'].includes(l?.missionResultCode),
+    )
+    .sort((a, b) => new Date(a.arrivedAt).getTime() - new Date(b.arrivedAt).getTime());
+  const visits: Record<string, { order: number; status: 'SUCCESS' | 'PENDING' | 'FAIL' }> = {};
+  orderedLogs.forEach((log, idx) => {
+    visits[log.tripGameTileId] = {
+      order: idx + 1,
+      status: log.missionResultCode as 'SUCCESS' | 'PENDING' | 'FAIL',
+    };
+  });
+
   // 가장 최근의 'PENDING' 상태 로그를 찾아 사용 (목록이 오래된 순이라 가정하고 역순 탐색)
   const pendingLog = [...moveLogList]
     .reverse()
@@ -296,6 +310,7 @@ export default function OngoingGameScreen({ route }) {
             count={boardCount}
             initialIndex={isGameEnd ? 0 : Math.max(0, currentStepNoFromDetail ?? 0)}
             tiles={tiles}
+            visits={visits}
             pieceSource={Logo} // 말 이미지
             onCellPress={(tile, tapIndex) => {
               const isCurrent = tapIndex === currentTileIndex;
