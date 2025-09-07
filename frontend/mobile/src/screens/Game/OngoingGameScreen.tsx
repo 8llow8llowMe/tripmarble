@@ -9,6 +9,7 @@ import {
   Pressable,
   Alert,
   SafeAreaView,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -221,6 +222,38 @@ export default function OngoingGameScreen({ route }) {
     />
   );
 
+  // 로그 + 타일 정보 조인 → 타임라인 표시용 엔트리
+  const timelineEntries = React.useMemo(
+    () =>
+      orderedLogs.map((log, idx) => {
+        const tileInfo = tiles.find((t: any) => t?.tripGameTileId === log?.tripGameTileId);
+        return {
+          id: log?.tripGameMoveLogId ?? `${idx}`,
+          order: idx + 1,
+          spotName: tileInfo?.tripSpotName ?? '-',
+          mission: tileInfo?.missionTypeDescription ?? '-', // PHOTO/REVIEW/CHECKIN_GPS 설명
+          status: (log?.missionResultCode ?? 'PENDING') as
+            | 'SUCCESS'
+            | 'PENDING'
+            | 'FAIL'
+            | 'GAME_END',
+          arrivedAt: log?.arrivedAt as string | undefined,
+        };
+      }),
+    [orderedLogs, tiles],
+  );
+
+  const formatDT = (iso?: string) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const yy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const HH = String(d.getHours()).padStart(2, '0');
+    const MM = String(d.getMinutes()).padStart(2, '0');
+    return `${yy}.${mm}.${dd} ${HH}:${MM}`;
+  };
+
   const bothReady = !gameDetailIsLoading && !moveLogsIsLoading && !!detail && !!moveLogs?.dataBody;
 
   if (!bothReady) {
@@ -236,7 +269,7 @@ export default function OngoingGameScreen({ route }) {
   }
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <DiceView
           visible={diceVisible}
           value={diceValue}
@@ -424,8 +457,44 @@ export default function OngoingGameScreen({ route }) {
         </View>
 
         {activeTab === 'timeline' ? (
-          <View style={{ paddingVertical: 12 }}>
-            <Text style={styles.turnText}>타임라인 제작</Text>
+          <View style={styles.timelineWrap}>
+            {timelineEntries.length === 0 ? (
+              <Text style={styles.timelineEmpty}>아직 이동 기록이 없어요</Text>
+            ) : (
+              timelineEntries.map((it, i) => {
+                const tint =
+                  it.status === 'SUCCESS'
+                    ? '#10B981'
+                    : it.status === 'PENDING'
+                      ? '#F59E0B'
+                      : it.status === 'FAIL'
+                        ? '#EF4444'
+                        : '#6B7280';
+                const showLine = i < timelineEntries.length - 1;
+
+                return (
+                  <View key={it.id} style={styles.timelineRow}>
+                    {/* 좌측 점/세로 라인 */}
+                    <View style={styles.timelineLeft}>
+                      <View style={[styles.timelineDot, { backgroundColor: tint }]} />
+                      {showLine && (
+                        <View style={[styles.timelineLine, { borderColor: '#E5E7EB' }]} />
+                      )}
+                    </View>
+                    {/* 오른쪽 내용 */}
+                    <View style={styles.timelineContent}>
+                      <Text style={styles.timelineTitle} numberOfLines={1}>
+                        {`${it.order}. ${it.spotName}`}
+                      </Text>
+                      <Text style={styles.timelineMeta} numberOfLines={2}>
+                        {it.mission}
+                        {it.arrivedAt ? ` · ${formatDT(it.arrivedAt)}` : ''}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })
+            )}
           </View>
         ) : (
           <View style={styles.guideWrap}>
@@ -473,7 +542,7 @@ export default function OngoingGameScreen({ route }) {
             </Animated.View>
           </View>
         )}
-      </View>
+      </ScrollView>
       <BottomSheetModal
         ref={missionSheetRef}
         handleStyle={{
@@ -513,7 +582,7 @@ export default function OngoingGameScreen({ route }) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white },
-  container: { flex: 1, paddingHorizontal: 16 },
+  container: { paddingHorizontal: 16 },
   overlay: {
     position: 'absolute',
     left: 0,
@@ -688,5 +757,49 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: palette.gray800,
     fontWeight: '600',
+  },
+  timelineWrap: {
+    paddingVertical: 12,
+  },
+  timelineEmpty: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+    paddingVertical: 16,
+  },
+  timelineRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    paddingVertical: 10,
+  },
+  timelineLeft: {
+    width: 20,
+    alignItems: 'center',
+  },
+  timelineDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginTop: 4,
+  },
+  timelineLine: {
+    flex: 1,
+    width: 1,
+    borderLeftWidth: 1,
+    marginTop: 4,
+  },
+  timelineContent: {
+    flex: 1,
+  },
+  timelineTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#111827',
+    marginBottom: 2,
+  },
+  timelineMeta: {
+    fontSize: 13,
+    color: '#6B7280',
   },
 });
