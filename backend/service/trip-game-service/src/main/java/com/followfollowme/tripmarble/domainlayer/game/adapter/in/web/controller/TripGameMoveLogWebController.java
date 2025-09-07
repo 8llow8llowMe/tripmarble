@@ -6,6 +6,7 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGam
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameMoveLogWebUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/trip-games/{tripGameId}/move-logs")
+@Tag(name = "게임 이동 로그 (타임라인)", description = "게임 이동 로그 (타임라인) 관련 클라이언트 전용 API 입니다.")
 public class TripGameMoveLogWebController {
 
     private final TripGameMoveLogWebUseCase tripGameMoveLogWebUseCase;
