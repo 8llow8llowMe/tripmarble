@@ -2,9 +2,8 @@ package com.followfollowme.tripmarble.domainlayer.game.application.info;
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMoveLog;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.MissionResult;
-import lombok.Builder;
-
 import java.time.LocalDateTime;
+import lombok.Builder;
 
 @Builder
 public record TripGameMoveLogQueryInfo(
@@ -15,7 +14,8 @@ public record TripGameMoveLogQueryInfo(
     int diceValue,
     int turnOrder,
     MissionResult missionResult,
-    LocalDateTime missionProcessedAt
+    LocalDateTime missionProcessedAt,
+    Long missionReferenceId
 ) {
 
     public static TripGameMoveLogQueryInfo of(TripGameMoveLog log) {
@@ -28,6 +28,7 @@ public record TripGameMoveLogQueryInfo(
             .turnOrder(log.turnOrder())
             .missionResult(log.missionResult())
             .missionProcessedAt(log.missionProcessedAt())
+            .missionReferenceId(log.missionReferenceId())
             .build();
     }
 }
