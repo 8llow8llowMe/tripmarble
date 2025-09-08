@@ -47,5 +47,5 @@ export type GamePlayStackParamList = {
 
 export type SpotStackParamList = {
   SpotListScreen: { representativeRegionId: string };
-  SpotDetailScreen: undefined;
+  SpotDetailScreen: { tripSpotId: string };
 };
