@@ -11,14 +11,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -63,4 +62,7 @@ public class TripGameMoveLogEntity extends BaseEntity {
 
     @Comment("미션 처리 완료 시간 (성공/실패/스킵 등 상태 변경 시간)")
     private LocalDateTime missionProcessedAt;
+
+    @Comment("미션 관련 참조 ID (리뷰 ID 등, 미션 타입에 따라 다름)")
+    private Long missionReferenceId;
 }
