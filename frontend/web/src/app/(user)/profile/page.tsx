@@ -7,7 +7,7 @@ import { spotsData } from "@/shared/constants/spots";
 
 export default function Profile() {
   return (
-    <div className={styles.profileWrapper}>
+    <div className={`appPage ${styles.profileWrapper}`}>
       <ProfileInfo />
       <div className={styles.lists}>
         <HorizontalList

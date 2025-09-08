@@ -44,7 +44,7 @@ export default function MyGameListPage() {
   };
 
   return (
-    <div className={styles.pageWrapper}>
+    <div className={`${styles.pageWrapper} appPage`}>
       <div className={styles.headerRow}>
         <h1 className={styles.title}>{statusLabel(validStatus)}</h1>
         <button

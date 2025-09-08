@@ -32,7 +32,7 @@ export default function Game() {
   const games = data?.data.dataBody.contents;
 
   return (
-    <div className={styles.mainContainer}>
+    <div className={`${styles.mainContainer} appPage`}>
       <div className={styles.titleAndButton}>
         <div className={styles.sectionTitle}>모든 게임</div>
         <Button
