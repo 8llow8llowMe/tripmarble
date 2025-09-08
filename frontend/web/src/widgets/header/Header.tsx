@@ -9,8 +9,9 @@ import { toast } from "react-toastify";
 const Header = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  // const [scrolled, setScrolled] = useState(pathname !== "/");
-  const [scrolled, setScrolled] = useState(true);
+  const [scrolled, setScrolled] = useState(
+    pathname !== "/" && pathname !== "/spots"
+  );
   const menuRef = useRef<HTMLDivElement>(null);
   const hamburgerRef = useRef<HTMLDivElement>(null);
   const user = useAppSelector((state) => state.user.user);
@@ -55,35 +56,27 @@ const Header = () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (pathname !== "/") {
-  //     setScrolled(true);
-  //     return;
-  //   }
-  //   if (window.scrollY === 0) {
-  //     setScrolled(false);
-  //   } else {
-  //     setScrolled(true);
-  //   }
-  //   const handleScroll = () => {
-  //     if (window.scrollY > 0) {
-  //       setScrolled(true);
-  //     } else {
-  //       setScrolled(false);
-  //     }
-  //   };
-
-  //   window.addEventListener("scroll", handleScroll);
-  //   return () => {
-  //     window.removeEventListener("scroll", handleScroll);
-  //   };
-  // }, [pathname]);
+  useEffect(() => {
+    if (pathname !== "/" && pathname !== "/spots") {
+      setScrolled(true);
+      return;
+    }
+    // 초기 상태 동기화
+    setScrolled(window.scrollY > 0);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 0);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [pathname]);
 
   const isActive = (path: string) => (pathname === path ? styles.active : "");
 
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ""}`}>
-      <div className={styles.logo}>
+      <div className={`${styles.logo} ${scrolled ? styles.scrolled : ""}`}>
         <Link href="/">TripMarble</Link>
       </div>
 

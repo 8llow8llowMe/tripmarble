@@ -33,11 +33,18 @@
   color: #0070f3;
   text-decoration: none;
   cursor: pointer;
+  border-radius: 24px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .logo a {
   text-decoration: none;
   color: inherit;
+}
+
+.logo.scrolled {
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(20, 40, 80, 0.06);
 }
 
 .nav {
@@ -52,7 +59,7 @@
 .nav a {
   padding: 0.5rem 1rem;
   border-radius: 1.8rem;
-  color: #ffffff;
+  color: #333333;
   text-decoration: none;
   font-weight: 500;
   transition: color 0.2s ease-in-out;
