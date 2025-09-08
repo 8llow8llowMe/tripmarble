@@ -2,11 +2,15 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.controller
 
 import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MissionResultResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.ReviewMissionRequest;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameMoveLogResponse;
+import com.followfollowme.tripmarble.domainlayer.game.application.command.ReviewMissionCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameMoveLogWebUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -14,10 +18,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,6 +29,18 @@ import java.util.List;
 public class TripGameMoveLogWebController {
 
     private final TripGameMoveLogWebUseCase tripGameMoveLogWebUseCase;
+
+    @Operation(summary = "리뷰 미션 처리", description = "리뷰 작성 미션을 성공 처리합니다.")
+    @PostMapping("/{tripGameMoveLogId}/review")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<MissionResultResponse>> processReviewMission(
+        @PathVariable String tripGameId, @PathVariable String tripGameMoveLogId,
+        @AuthenticationPrincipal MemberLoginActive loginActive, @RequestBody @Valid ReviewMissionRequest request) {
+        MissionResultResponse response =
+            tripGameMoveLogWebUseCase.processReviewMission(Long.parseLong(tripGameId), Long.parseLong(tripGameMoveLogId),
+                loginActive.id(), ReviewMissionCommand.from(request));
+        return ResponseEntity.ok().body(Response.success(response));
+    }
 
     @Operation(
         summary = "미션 스킵",
@@ -37,19 +52,6 @@ public class TripGameMoveLogWebController {
         @PathVariable String tripGameId, @PathVariable String tripGameMoveLogId, @AuthenticationPrincipal MemberLoginActive loginActive) {
         MissionResultResponse response =
             tripGameMoveLogWebUseCase.skipMission(Long.parseLong(tripGameId), Long.parseLong(tripGameMoveLogId), loginActive.id());
-        return ResponseEntity.ok().body(Response.success(response));
-    }
-
-    @Operation(
-        summary = "미션 성공",
-        description = "해당 이동 로그의 미션을 성공 처리합니다."
-    )
-    @PostMapping("/{tripGameMoveLogId}/success")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Response<MissionResultResponse>> successMission(
-        @PathVariable String tripGameId, @PathVariable String tripGameMoveLogId, @AuthenticationPrincipal MemberLoginActive loginActive) {
-        MissionResultResponse response
-            = tripGameMoveLogWebUseCase.successMission(Long.parseLong(tripGameId), Long.parseLong(tripGameMoveLogId), loginActive.id());
         return ResponseEntity.ok().body(Response.success(response));
     }
 
