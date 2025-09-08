@@ -4,13 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-// import Autoplay from "embla-carousel-autoplay";
 
 import styles from "./HorizontalList.module.scss";
 import {
   HorizontalListItem,
   HorizontalListProps,
 } from "@/shared/ui/common/HorizontalList/types";
+import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets/icons";
 
 export default function HorizontalList<T>({
   title,
@@ -40,10 +40,10 @@ export default function HorizontalList<T>({
           {<h2 className={styles.title}>{title}</h2>}
           <div className={styles.arrowButtons}>
             <button onClick={scrollPrev} className={styles.arrow}>
-              &lt;
+              <ArrowLeftIcon />
             </button>
             <button onClick={scrollNext} className={styles.arrow}>
-              &gt;
+              <ArrowRightIcon />
             </button>
           </div>
         </div>
