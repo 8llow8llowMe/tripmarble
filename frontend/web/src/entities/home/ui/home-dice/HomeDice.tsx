@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/entities/users/model";
@@ -18,7 +17,10 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "./HomeDice.module.scss";
 // components
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
-import LiquidButton from "@/shared/ui/common/LiquidButton/LiquidButton";
+// import LiquidButton from "@/shared/ui/common/LiquidButton/LiquidButton";
+import PolaroidStack from "./PolaroidStack";
+import useRepresentativeRegions from "@/entities/trips/hooks/useRepresentativeRegions";
+import noImage from "/public/images/no-image.png";
 
 export default function HomeDicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,20 +32,36 @@ export default function HomeDicePage() {
     setLoadedCount((count) => count + 1);
   };
 
-  useEffect(() => {
-    if (loadedCount === 5 && boardRef.current) {
-      gsap.to(boardRef.current, {
-        autoAlpha: 1,
-        duration: 0.5,
-        ease: "power2.out",
-      });
-    }
-  }, [loadedCount]);
+  // Prefetch representative regions early to avoid delay
+  const { data: regionsData } = useRepresentativeRegions();
+  const polaroidItems = (regionsData?.data?.dataBody || [])
+    .slice(0, 5)
+    .map((r: any) => ({
+      id: r.representativeRegionId,
+      name: r.representativeRegionName,
+      imgUrl: r.representativeRegionImageUrl || (noImage as any).src,
+    }));
 
   useEffect(() => {
     window.scrollTo(0, 0);
     gsap.registerPlugin(ScrollTrigger);
     if (!containerRef.current) return;
+    if (polaroidItems.length === 0) return;
+
+    // if (loadedCount === 5 && boardRef.current) {
+    gsap.to(boardRef.current, {
+      autoAlpha: 1,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+    // }
+
+    // Ensure initial hidden state for polaroid stack before timeline runs
+    gsap.set(".polaroid-container", { opacity: 0, pointerEvents: "none" });
+    // Hide cards and set initial transform so fromTo works consistently
+    gsap.set("[data-polaroid-card]", { autoAlpha: 0, y: 180, scale: 0.96 });
+    // Reset bodies (avoid inheriting transforms if hot reloaded)
+    gsap.set("[data-polaroid-body]", { x: 0, y: 0, rotate: 0 });
 
     /** 1) three 기본 세팅 */
     const scene = new THREE.Scene();
@@ -127,6 +145,12 @@ export default function HomeDicePage() {
     };
     gsap.ticker.add(ticker);
 
+    gsap.to(boardRef.current, {
+      autoAlpha: 1,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: ".ux-trigger",
@@ -197,23 +221,58 @@ export default function HomeDicePage() {
 
     tl.to({}, { duration: 1 }); // pause for 1 second at time = 4.2
 
+    // 버튼 페이드아웃 이후 폴라로이드 등장 + 스택 쌓기
     tl.to(
       ".button-container",
-      {
-        opacity: 1,
-        duration: 0.8,
-        ease: "power2.out",
-      },
-      4.2
-    ).to(
-      ".button-container",
-      {
-        opacity: 0,
-        duration: 0.8,
-        ease: "power2.in",
-      },
+      { opacity: 0, duration: 0.8, ease: "power2.in" },
       5.2
-    );
+    )
+      .set(".polaroid-container", { opacity: 1, pointerEvents: "auto" }, 5.3)
+
+      // 1) 카드 자체를 아래에서 위로 하나씩 등장
+      .fromTo(
+        "[data-polaroid-card]",
+        { autoAlpha: 0, y: 180, scale: 0.96 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.6,
+          ease: "power3.out",
+          // 아래에서 위로 차례대로 올라오게
+          stagger: { each: 0.28, from: "end" }, // 마지막 카드가 먼저, 처음 카드가 맨 위로 오게 하려면 "start"
+        },
+        5.35
+      )
+
+      // 2) 중앙에 “겹치듯” 정렬 (약간의 오프셋/회전만)
+      .to(
+        "[data-polaroid-body]",
+        {
+          x: 0,
+          // 카드 수에 따라 얕은 y 오프셋 분포 (위로 갈수록 조금씩 -y)
+          y: gsap.utils.distribute({ base: 0, amount: -40 }), // 총 -40px 범위에서 균등 분배
+          // 좌우로 살짝 펼쳐진 느낌의 회전
+          rotate: gsap.utils.distribute({ base: -6, amount: 12 }), // -6deg ~ +6deg
+          duration: 0.55,
+          ease: "power2.out",
+          stagger: 0.22,
+        },
+        ">-0.25" // 1)과 살짝 겹치게 시작
+      )
+
+      // 3) 맨 위 카드만 살짝 튕겨주는 맛 (선택)
+      .to(
+        "[data-polaroid-card]:last-child [data-polaroid-body]",
+        {
+          y: "-=6",
+          duration: 0.18,
+          yoyo: true,
+          repeat: 1,
+          ease: "power1.inOut",
+        },
+        ">"
+      );
 
     // 텍스트 애니메이션
 
@@ -290,20 +349,20 @@ export default function HomeDicePage() {
         }
       });
     };
-  }, []);
+  }, [polaroidItems.length, loadedCount]);
 
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const router = useRouter();
   const user = useAppSelector((state) => state.user.user);
 
-  const handleCreateClick = () => {
-    if (!user) {
-      toast.info("로그인 후 게임을 만들 수 있습니다.");
-      router.push("/login");
-      return;
-    }
-    setCreateModalOpen(true);
-  };
+  // const handleCreateClick = () => {
+  //   if (!user) {
+  //     toast.info("로그인 후 게임을 만들 수 있습니다.");
+  //     router.push("/login");
+  //     return;
+  //   }
+  //   setCreateModalOpen(true);
+  // };
 
   return (
     <>
@@ -375,7 +434,7 @@ export default function HomeDicePage() {
           />
         </div>
         {/* 버튼 */}
-        <div className={`button-container ${styles.buttonContainer}`}>
+        {/* <div className={`button-container ${styles.buttonContainer}`}>
           <Link href="/recommend">
             <LiquidButton
               width="100%"
@@ -399,6 +458,10 @@ export default function HomeDicePage() {
           >
             게임 만들기
           </LiquidButton>
+        </div> */}
+        {/* 폴라로이드 스택 */}
+        <div className={`polaroid-container ${styles.polaroidContainer}`}>
+          <PolaroidStack items={polaroidItems} />
         </div>
         <CreateGameModal
           isOpen={isCreateModalOpen}
