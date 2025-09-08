@@ -41,7 +41,7 @@ export default function Spots() {
   return (
     <>
       {/* <div className={styles.spotsWrapper}> */}
-      <div className={styles.container}>
+      <div className={styles.hero}>
         <div className={styles.section}>
           <div className={styles.subTitle}>여행지 목록</div>
           <div>지금 떠나기 좋은 추천 여행지를 확인해보세요.</div>
