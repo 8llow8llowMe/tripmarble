@@ -1,13 +1,16 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto;
 
-import lombok.Builder;
+import java.util.List;
 
-@Builder
 public record TripSpotReviewCreateInternalResponse(
     long tripSpotReviewId,
     long tripSpotId,
     long memberId,
     String content,
-    double rating
+    double rating,
+    String reviewSourceTypeCode,
+    String reviewSourceTypeDescription,
+    List<String> photoUrls
 ) {
+
 }
