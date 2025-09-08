@@ -9,6 +9,7 @@ const END_POINTS = {
   //USER
   USER: {
     INFO: `/members/me`,
+    WITHDRAW: `/members/me/withdraw`,
   },
 
   //TRIP
