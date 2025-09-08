@@ -64,12 +64,35 @@ pipeline {
             }
         }
 
+        stage('Verify Environment') {
+            steps {
+                dir("${env.FS_PATH}") {
+                    script {
+                        echo "Verifying environment variables..."
+                        sh '''
+                            echo "Checking env files:"
+                            ls -la env/
+                            echo "Development env content:"
+                            cat env/.env-frontend-mobile-dev || echo "Dev env file not found"
+                            echo "Production env content:"
+                            cat env/.env-frontend-mobile-prod || echo "Prod env file not found"
+                        '''
+                    }
+                }
+            }
+        }
+
         stage('Prebuild Android') {
             steps {
                 dir("${env.FS_PATH}") {
                     script {
                         echo "Running expo prebuild (Managed Workflow)"
                         sh 'npx expo prebuild --platform android --clean'
+                        
+                        // prebuild 성공 확인
+                        sh 'ls -la android/'
+                        sh 'test -f android/gradlew && echo "gradlew found" || echo "gradlew NOT found"'
+                        sh 'chmod +x android/gradlew'
                     }
                 }
             }
@@ -107,6 +130,10 @@ pipeline {
             steps {
                 dir("${env.FS_PATH}/android") {
                     script {
+                        // gradlew 파일 존재 확인
+                        sh 'test -f gradlew || (echo "gradlew not found, listing directory:" && ls -la && exit 1)'
+                        sh 'chmod +x gradlew'
+                        
                         if (params.TARGET_BRANCH == 'main') {
                             echo "Building signed AAB"
                             sh './gradlew clean bundleRelease'
