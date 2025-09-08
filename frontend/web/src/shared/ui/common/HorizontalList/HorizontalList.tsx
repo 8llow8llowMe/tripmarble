@@ -75,22 +75,27 @@ export default function HorizontalList<T>({
                   }
                 }}
               >
-                <Image
-                  className={styles.image}
-                  src={item.imgUrl}
-                  alt={item.name}
-                  width={itemWidth}
-                  height={itemHeight}
-                  style={{
-                    objectFit: "cover",
-                    borderRadius: 8,
-                    border: "2px solid #eeeeee",
-                  }}
-                />
-                <div className={styles.itemTitle}>{item.name}</div>
-                {item.subtitle && (
-                  <div className={styles.itemSubtitle}>{item.subtitle}</div>
-                )}
+                <div
+                  className={styles.itemThumb}
+                  style={{ height: itemHeight }}
+                >
+                  <Image
+                    src={item.imgUrl}
+                    alt={item.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 240px"
+                    style={{ objectFit: "cover" }}
+                  />
+                  <div className={styles.thumbOverlay} />
+                  <div className={styles.textOverlay}>
+                    <div className={styles.thumbTitle}>{item.name}</div>
+                    {item.subtitle && (
+                      <div className={styles.thumbSubtitle}>
+                        {item.subtitle}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             );
 
