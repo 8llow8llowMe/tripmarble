@@ -5,7 +5,7 @@ import { StaticImageData } from "next/image";
 type SpotItem = {
   id: number;
   name: string;
-  imgUrl: StaticImageData;
+  imgUrl: string | StaticImageData;
 };
 
 type CircleListProps = {
