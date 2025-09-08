@@ -12,14 +12,6 @@ import { spotsData } from "@/shared/constants/spots";
 // api
 import useRepresentativeRegions from "@/entities/trips/hooks/useRepresentativeRegions";
 
-// import type { Metadata } from "next";
-
-// export const metadata: Metadata = {
-//   title: "여행지 목록",
-//   description:
-//     "대한민국의 다양한 여행지를 둘러보세요. 인기 지역부터 숨겨진 명소까지!",
-// };
-
 export default function Spots() {
   const { data } = useRepresentativeRegions();
 
@@ -50,21 +42,21 @@ export default function Spots() {
       <div className={styles.lists}>
         <HorizontalList
           title="대한민국 여행지"
-          items={representativeRegions}
+          items={[...representativeRegions, ...representativeRegions]}
           baseHref="/spots"
-          itemWidth={250}
-          itemHeight={250}
+          itemWidth={240}
+          itemHeight={360}
         />
         <HorizontalList
           title="추천 여행지"
-          items={spotsData}
+          items={[...spotsData, ...spotsData]}
           baseHref="/spots"
           itemWidth={300}
           itemHeight={180}
         />
         <HorizontalList
           title="여기저기"
-          items={spotsData}
+          items={[...spotsData, ...spotsData]}
           baseHref="/spots"
           itemWidth={250}
           itemHeight={300}
