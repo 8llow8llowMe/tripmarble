@@ -63,6 +63,6 @@ public class TripGameMoveLogEntity extends BaseEntity {
     @Comment("미션 처리 완료 시간 (성공/실패/스킵 등 상태 변경 시간)")
     private LocalDateTime missionProcessedAt;
 
-    @Comment("미션 관련 참조 ID (리뷰 ID 등, 미션 타입에 따라 다름)")
+    @Comment("미션 관련 참조 ID (리뷰 ID 등)")
     private Long missionReferenceId;
 }
