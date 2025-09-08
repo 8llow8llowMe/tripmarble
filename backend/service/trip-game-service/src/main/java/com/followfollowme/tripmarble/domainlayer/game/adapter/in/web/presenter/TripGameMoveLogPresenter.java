@@ -4,9 +4,8 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.Mission
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameMoveLogResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.MissionResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameMoveLogQueryInfo;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 @Component
 public class TripGameMoveLogPresenter {
@@ -22,6 +21,7 @@ public class TripGameMoveLogPresenter {
             .missionResultCode(info.missionResult().name())
             .missionResultDescription(info.missionResult().getDescription())
             .missionProcessedAt(info.missionProcessedAt() != null ? info.missionProcessedAt() : null)
+            .missionReferenceId(info.missionReferenceId() != null ? String.valueOf(info.missionReferenceId()) : null)
             .build();
     }
 
@@ -36,6 +36,7 @@ public class TripGameMoveLogPresenter {
             .missionResultCode(info.missionResult().name())
             .missionResultDescription(info.missionResult().getDescription())
             .missionProcessedAt(info.missionProcessedAt() != null ? info.missionProcessedAt() : null)
+            .missionReferenceId(info.missionReferenceId() != null ? String.valueOf(info.missionReferenceId()) : null)
             .build();
     }
 
