@@ -1,5 +1,5 @@
 "use client";
-import type { Metadata } from "next";
+// import type { Metadata } from "next";
 // styles
 import styles from "./Search.module.scss";
 // components
