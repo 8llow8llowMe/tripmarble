@@ -61,10 +61,16 @@ export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
 
   const orderedLogs = [...moveLogList]
     .filter(
-      (l) => l?.tripGameTileId && ['SUCCESS', 'PENDING', 'FAIL'].includes(l?.missionResultCode),
+      (l) =>
+        l?.tripGameTileId &&
+        ['SUCCESS', 'PENDING', 'SKIPPED', 'FAIL'].includes(l?.missionResultCode),
     )
     .sort((a, b) => new Date(a.arrivedAt).getTime() - new Date(b.arrivedAt).getTime());
-  const visits: Record<string, { order: number; status: 'SUCCESS' | 'PENDING' | 'FAIL' }> = {};
+  const visits: Record<
+    string,
+    { order: number; status: 'SUCCESS' | 'PENDING' | 'SKIPPED' | 'FAIL' }
+  > = {};
+  console.log(moveLogList);
   orderedLogs.forEach((log, idx) => {
     visits[log.tripGameTileId] = { order: idx + 1, status: log.missionResultCode as any };
   });
