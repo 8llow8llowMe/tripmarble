@@ -1,3 +1,4 @@
+import { palette } from '@/constants/colors';
 import { TripGameTileView } from '@/hooks/game/useGetGameTiles';
 import React, {
   forwardRef,
@@ -387,8 +388,8 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
                         height={TILE_H}
                         rx={16}
                         ry={16}
-                        fill={tint}
-                        opacity={0.5}
+                        fill={palette.mainColor}
+                        opacity={1}
                         clipPath={`url(#main-${clipId})`}
                       />
                       {/* 순서 배지 */}
@@ -403,11 +404,11 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
                         opacity={0.85}
                       />
                       <SvgText
-                        x={x + 15}
+                        x={x + 14.5}
                         y={y + 19}
                         fontSize={12}
                         fontWeight="800"
-                        fill="#ffffff"
+                        fill={palette.white}
                         textAnchor="middle"
                       >
                         {String(visit.order)}
