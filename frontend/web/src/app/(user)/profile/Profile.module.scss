@@ -1,14 +1,21 @@
 .profileWrapper {
+  flex: 1;
+  margin-inline: auto;
+  width: 100%;
+  max-width: 1516px;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem;
   gap: 3rem;
+  background-color: white;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
 }
 
 .lists {
   width: 100%;
-  max-width: 1024px;
+  max-width: 1516px;
   display: flex;
   flex-direction: column;
   gap: 3rem;
