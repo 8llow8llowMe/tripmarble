@@ -4,68 +4,153 @@ import {
   Text,
   Image,
   StyleSheet,
-  ActivityIndicator,
   SafeAreaView,
   TouchableOpacity,
   Dimensions,
+  Linking,
+  ScrollView,
+  ActivityIndicator,
 } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import { palette } from '@/constants/colors';
 import useTripSpotQuery from '@/hooks/trip/useSpot';
 import iconImage from '@images/icon.png';
-import { Ionicons } from '@expo/vector-icons';
-import calendarIcon from '@images/icon.png'; // 달력 아이콘 대체로 사용
-import { palette } from '@/constants/colors';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { SpotStackParamList } from '@/types/navigation/navigation';
+import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
+
+type Props = NativeStackScreenProps<SpotStackParamList, 'SpotDetailScreen'>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-export default function SpotDetailScreen() {
-  const route = useRoute<any>();
-  const navigation = useNavigation<any>();
-  const { tripSpotId } = route.params || {};
+export default function SpotDetailScreen({ route }: Props) {
+  const { tripSpotId } = route.params;
+  const navigation = useNavigation<AppNavigatorNavigationProp>();
 
-  const { tripSpot, isLoading, isError } = useTripSpotQuery({ tripSpotId });
+  const { tripSpot, isLoading, isError, refetch } = useTripSpotQuery({ tripSpotId });
 
-  // if (isLoading) return <ActivityIndicator size="large" style={{ flex: 1 }} />;
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.safeArea, styles.center]}>
+        <ActivityIndicator />
+      </SafeAreaView>
+    );
+  }
 
-  // if (isError || !tripSpot?.dataBody)
-  //   return <Text style={{ color: 'red', padding: 20 }}>상세 정보를 불러올 수 없습니다.</Text>;
+  if (isError) {
+    return (
+      <SafeAreaView style={[styles.safeArea, styles.center]}>
+        <Text style={{ color: '#e34d4d' }}>데이터를 불러올 수 없습니다.</Text>
+        <TouchableOpacity style={styles.retry} onPress={() => refetch()}>
+          <Text style={styles.retryText}>다시 시도</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
-  // const { tripSpotName, address, description, thumbnailImageUrl } = tripSpot.dataBody;
-  const tripSpotName = '제주';
-  const address = '임시주소';
-  const description = '임시소개글';
-  const thumbnailImageUrl = 'http://tong.visitkorea.or.kr/cms/resource/55/2595455_image2_1.jpg';
+  const data = tripSpot?.dataBody || {
+    tripSpotName: '제주',
+    contentTypeName: '관광지',
+    description: '임시소개글',
+    homepageUrl: 'http://korean.visitkorea.or.kr',
+    phoneNumber: '010-1234-5678',
+    address: '제주특별자치도 제주시',
+    addressDetail: '임시주소',
+    imageUrl: null,
+    thumbnailImageUrl: 'http://tong.visitkorea.or.kr/cms/resource/55/2595455_image2_1.jpg',
+  };
+
+  const openLink = (url: string | null) => {
+    if (url) Linking.openURL(url);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* 헤더 - 뒤로가기 */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Ionicons name="chevron-back" size={28} color="#222" />
         </TouchableOpacity>
       </View>
 
-      {/* 상단 배경 이미지 */}
-      <Image
-        source={thumbnailImageUrl ? { uri: thumbnailImageUrl } : iconImage}
-        style={styles.backgroundImage}
-        resizeMode="cover"
-      />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Background Image */}
+        <Image
+          source={data.thumbnailImageUrl ? { uri: data.thumbnailImageUrl } : iconImage}
+          style={styles.backgroundImage}
+          resizeMode="cover"
+        />
 
-      {/* 바텀시트 느낌의 내용 영역 */}
-      <View style={styles.bottomSheet}>
-        <Text style={styles.sectionLabel}>여행지</Text>
-        <Text style={styles.name}>{tripSpotName}</Text>
-        <View style={styles.row}>
-          <Ionicons name="location-outline" size={17} color="#6096eb" style={{ marginRight: 4 }} />
-          <Text style={styles.address}>{address}</Text>
+        {/* Content */}
+        <View style={styles.bottomSheet}>
+          {/* Title */}
+          <Text style={styles.tripSpotName}>{data.tripSpotName}</Text>
+          {data.contentTypeName && (
+            <Text style={styles.contentTypeName}>{data.contentTypeName}</Text>
+          )}
+
+          {/* Info Section */}
+          <View style={styles.infoCard}>
+            {data.address && (
+              <View style={styles.row}>
+                <Ionicons
+                  name="location-outline"
+                  size={18}
+                  color={palette.mainColor}
+                  style={styles.icon}
+                />
+                <Text style={styles.infoText}>
+                  {data.address} {data.addressDetail || ''}
+                </Text>
+              </View>
+            )}
+            {data.phoneNumber && (
+              <View style={styles.row}>
+                <Ionicons
+                  name="call-outline"
+                  size={18}
+                  color={palette.mainColor}
+                  style={styles.icon}
+                />
+                <Text style={styles.infoText}>{data.phoneNumber}</Text>
+              </View>
+            )}
+            {data.homepageUrl && (
+              <TouchableOpacity style={styles.row} onPress={() => openLink(data.homepageUrl)}>
+                <Ionicons
+                  name="globe-outline"
+                  size={18}
+                  color={palette.mainColor}
+                  style={styles.icon}
+                />
+                <Text style={[styles.infoText, { color: palette.mainColor }]}>
+                  홈페이지 바로가기
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Description */}
+          {data.description && (
+            <>
+              <Text style={styles.sectionLabel}>상세정보</Text>
+              <Text style={styles.desc}>{data.description}</Text>
+            </>
+          )}
+
+          {/* CTA Button */}
+          {/* <TouchableOpacity style={styles.button}>
+            <Text style={styles.buttonText}>일정 만들기</Text>
+            <Ionicons name="calendar-outline" size={20} color={palette.white} />
+          </TouchableOpacity> */}
+
+          {/* Placeholder: 리뷰/지도 */}
+          {/* <View style={{ marginTop: 40, padding: 16 }}>
+            <Text style={styles.placeholder}>📍 지도 & 리뷰는 추후 제공 예정</Text>
+          </View> */}
         </View>
-        <Text style={styles.descLabel}>상세정보</Text>
-        <Text style={styles.desc}>{description}</Text>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>일정 만들기</Text>
-          <Image source={calendarIcon} style={styles.buttonIcon} />
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -75,6 +160,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: palette.white,
   },
+  center: { alignItems: 'center', justifyContent: 'center' },
+  empty: { padding: 24, textAlign: 'center', color: palette.gray600 },
+  retry: {
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#eef1f6',
+  },
+  retryText: { color: palette.gray800, fontWeight: '600' },
+
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -97,41 +193,43 @@ const styles = StyleSheet.create({
   },
   bottomSheet: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: palette.white,
     marginTop: -36,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: 24,
     paddingTop: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
   },
-  sectionLabel: {
-    color: '#bbb',
-    fontSize: 13,
-    marginBottom: 3,
-    marginLeft: 1,
-  },
-  name: {
+  tripSpotName: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#222',
-    marginBottom: 7,
+    marginBottom: 8,
+  },
+  contentTypeName: {
+    fontSize: 15,
+    color: '#888',
+    marginBottom: 16,
+  },
+  infoCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 24,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 18,
+    marginBottom: 10,
   },
-  address: {
-    color: '#6096eb',
-    fontWeight: '500',
+  icon: {
+    marginRight: 6,
+  },
+  infoText: {
     fontSize: 14,
+    color: '#333',
   },
-  descLabel: {
+  sectionLabel: {
     marginBottom: 6,
     color: '#666',
     fontWeight: '700',
@@ -146,22 +244,22 @@ const styles = StyleSheet.create({
   },
   button: {
     flexDirection: 'row',
-    backgroundColor: '#2176ff',
+    backgroundColor: palette.mainColor,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 13,
-    marginTop: 16,
+    marginTop: 8,
   },
   buttonText: {
-    color: '#fff',
+    color: palette.white,
     fontSize: 17,
     fontWeight: '700',
     marginRight: 9,
   },
-  buttonIcon: {
-    width: 20,
-    height: 20,
-    tintColor: '#fff',
+  placeholder: {
+    textAlign: 'center',
+    color: '#aaa',
+    fontSize: 13,
   },
 });
