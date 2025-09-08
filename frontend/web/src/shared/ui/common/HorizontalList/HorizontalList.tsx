@@ -7,7 +7,10 @@ import useEmblaCarousel from "embla-carousel-react";
 // import Autoplay from "embla-carousel-autoplay";
 
 import styles from "./HorizontalList.module.scss";
-import { HorizontalListProps } from "@/shared/ui/common/HorizontalList/types";
+import {
+  HorizontalListItem,
+  HorizontalListProps,
+} from "@/shared/ui/common/HorizontalList/types";
 
 export default function HorizontalList<T>({
   title,
@@ -16,13 +19,15 @@ export default function HorizontalList<T>({
   itemWidth = 160,
   itemHeight = 160,
   gap = 12,
+  onItemClick,
 }: HorizontalListProps<T>) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: false,
     align: "start",
-    // slidesToScroll: 1,
+    slidesToScroll: "auto",
     containScroll: "trimSnaps",
-    dragFree: false,
+    dragFree: true,
+    skipSnaps: true,
   });
 
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
@@ -30,17 +35,19 @@ export default function HorizontalList<T>({
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.titleRow}>
-        {title && <h2 className={styles.title}>{title}</h2>}
-        <div className={styles.arrowButtons}>
-          <button onClick={scrollPrev} className={styles.arrow}>
-            &lt;
-          </button>
-          <button onClick={scrollNext} className={styles.arrow}>
-            &gt;
-          </button>
+      {(title || true) && (
+        <div className={styles.titleRow}>
+          {<h2 className={styles.title}>{title}</h2>}
+          <div className={styles.arrowButtons}>
+            <button onClick={scrollPrev} className={styles.arrow}>
+              &lt;
+            </button>
+            <button onClick={scrollNext} className={styles.arrow}>
+              &gt;
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* viewport: gap 변수 주입 (패딩과 트랙 간격을 동기화) */}
       <div
@@ -50,19 +57,21 @@ export default function HorizontalList<T>({
       >
         {/* track */}
         <div className={styles.emblaContainer}>
-          {([...items, ...items] as any[]).map((item: any, index: number) => (
-            <Link key={`slide-${index}`} href={`${baseHref}/${item.id}`}>
+          {items.map((item: HorizontalListItem, index: number) => {
+            const CardInner = (
               <div
                 className={styles.itemWrapper}
-                style={{
-                  width: itemWidth,
-                  flex: `0 0 ${itemWidth}px`,
-                }}
+                style={{ width: itemWidth, flex: `0 0 ${itemWidth}px` }}
                 onClick={(e) => {
                   const clickAllowed = (emblaApi as any)?.clickAllowed?.();
                   if (clickAllowed === false) {
                     e.preventDefault();
                     e.stopPropagation();
+                    return;
+                  }
+                  if (onItemClick) {
+                    e.preventDefault();
+                    onItemClick(item);
                   }
                 }}
               >
@@ -79,9 +88,20 @@ export default function HorizontalList<T>({
                   }}
                 />
                 <div className={styles.itemTitle}>{item.name}</div>
+                {item.subtitle && (
+                  <div className={styles.itemSubtitle}>{item.subtitle}</div>
+                )}
               </div>
-            </Link>
-          ))}
+            );
+
+            return baseHref ? (
+              <Link key={`slide-${index}`} href={`${baseHref}/${item.id}`}>
+                {CardInner}
+              </Link>
+            ) : (
+              <div key={`slide-${index}`}>{CardInner}</div>
+            );
+          })}
         </div>
       </div>
     </div>
