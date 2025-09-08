@@ -5,6 +5,8 @@ import useMyGameList, {
 import { useRouter } from "next/navigation";
 import { fetchGameStart } from "@/entities/games/hooks/useGameStart";
 import HorizontalList from "@/shared/ui/common/HorizontalList/HorizontalList";
+import Image from "next/image";
+import { NoGame } from "@/shared/assets/images";
 
 export function GameListHorizontal({ type }: { type: GameStatus }) {
   const router = useRouter();
@@ -57,7 +59,21 @@ export function GameListHorizontal({ type }: { type: GameStatus }) {
           onItemClick={(item) => handleClick(String(item.id))}
         />
       ) : (
-        <div className={styles.emptyState}>현재 표시할 게임이 없어요.</div>
+        <div className={styles.emptyState} role="status" aria-live="polite">
+          <div className={styles.emptyImageWrapper}>
+            <Image
+              src={NoGame}
+              alt="표시할 게임이 없음"
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 520px"
+              style={{ objectFit: "cover" }}
+            />
+            <div className={styles.emptyOverlay}>
+              <div className={styles.emptyText}>현재 표시할 게임이 없어요.</div>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
