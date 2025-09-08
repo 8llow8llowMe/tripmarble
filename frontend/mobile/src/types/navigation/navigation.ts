@@ -40,7 +40,7 @@ export type SettingsParamList = {
 export type GamePlayStackParamList = {
   GameHomeScreen: undefined;
   EndedGameScreen: { tripGameId: string };
-  OngoingGameScreen: { tripGameId: string };
+  GameDetailScreen: { tripGameId: string };
   GameListScreen: { status?: 'WAITING' | 'ONGOING' | 'ENDED' };
   GameMissionAuthScreen: undefined;
 };
