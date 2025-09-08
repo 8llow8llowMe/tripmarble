@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-// style
+import { useCallback } from "react";
+import useEmblaCarousel from "embla-carousel-react";
+// import Autoplay from "embla-carousel-autoplay";
+
 import styles from "./HorizontalList.module.scss";
-// type
 import { HorizontalListProps } from "@/shared/ui/common/HorizontalList/types";
 
 export default function HorizontalList<T>({
@@ -16,79 +17,57 @@ export default function HorizontalList<T>({
   itemHeight = 160,
   gap = 12,
 }: HorizontalListProps<T>) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: false,
+    align: "start",
+    // slidesToScroll: 1,
+    containScroll: "trimSnaps",
+    dragFree: false,
+  });
 
-  const visibleItems = [...items, ...items];
-
-  // 마우스 드래그 스크롤 이벤트
-  const isDown = useRef(false);
-  const startX = useRef(0);
-  const scrollLeft = useRef(0);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDown.current = true;
-    scrollRef.current?.classList.add(styles.active);
-    startX.current = e.pageX - (scrollRef.current?.offsetLeft ?? 0);
-    scrollLeft.current = scrollRef.current?.scrollLeft ?? 0;
-  };
-
-  const handleMouseLeave = () => {
-    isDown.current = false;
-    scrollRef.current?.classList.remove(styles.active);
-  };
-  const handleMouseUp = () => {
-    isDown.current = false;
-    scrollRef.current?.classList.remove(styles.active);
-  };
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDown.current || !scrollRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX.current) * 1; // Multiply for sensitivity
-    scrollRef.current.scrollLeft = scrollLeft.current - walk;
-  };
-
-  const scrollByAmount = itemWidth + gap;
-
-  const scrollLeftByOne = () => {
-    scrollRef.current?.scrollBy({ left: -scrollByAmount, behavior: "smooth" });
-  };
-
-  const scrollRightByOne = () => {
-    scrollRef.current?.scrollBy({ left: scrollByAmount, behavior: "smooth" });
-  };
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
 
   return (
     <div className={styles.wrapper}>
       <div className={styles.titleRow}>
         {title && <h2 className={styles.title}>{title}</h2>}
         <div className={styles.arrowButtons}>
-          <button onClick={scrollLeftByOne} className={styles.arrow}>
+          <button onClick={scrollPrev} className={styles.arrow}>
             &lt;
           </button>
-          <button onClick={scrollRightByOne} className={styles.arrow}>
+          <button onClick={scrollNext} className={styles.arrow}>
             &gt;
           </button>
         </div>
       </div>
+
+      {/* viewport: gap 변수 주입 (패딩과 트랙 간격을 동기화) */}
       <div
-        ref={scrollRef}
-        className={styles.scrollContainer}
-        style={{ gap: `${gap}px` }}
-        onMouseDown={handleMouseDown}
-        onMouseLeave={handleMouseLeave}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        onDragStart={(e) => e.preventDefault()}
+        className={styles.embla}
+        ref={emblaRef}
+        style={{ ["--embla-gap" as any]: `${gap}px` }}
       >
-        {visibleItems.map((item, index) => (
-          <Link key={index} href={`${baseHref}/${item.id}`}>
-            <div
-              className={styles.itemWrapper}
-              style={{ minWidth: itemWidth, minHeight: itemHeight }}
-            >
-              <div>
+        {/* track */}
+        <div className={styles.emblaContainer}>
+          {([...items, ...items] as any[]).map((item: any, index: number) => (
+            <Link key={`slide-${index}`} href={`${baseHref}/${item.id}`}>
+              <div
+                className={styles.itemWrapper}
+                style={{
+                  width: itemWidth,
+                  flex: `0 0 ${itemWidth}px`,
+                }}
+                onClick={(e) => {
+                  const clickAllowed = (emblaApi as any)?.clickAllowed?.();
+                  if (clickAllowed === false) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }
+                }}
+              >
                 <Image
+                  className={styles.image}
                   src={item.imgUrl}
                   alt={item.name}
                   width={itemWidth}
@@ -99,13 +78,11 @@ export default function HorizontalList<T>({
                     border: "2px solid #eeeeee",
                   }}
                 />
-                <div style={{ textAlign: "left", marginTop: 4 }}>
-                  {item.name}
-                </div>
+                <div className={styles.itemTitle}>{item.name}</div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
