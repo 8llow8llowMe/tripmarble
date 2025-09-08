@@ -12,7 +12,6 @@ import { Ionicons } from '@expo/vector-icons';
 
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
-import { useAppSelector } from '@/store/store';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import {
   ContinueTripSection,
@@ -21,6 +20,8 @@ import {
   RandomPickSection,
   RecommendedPlacesSection,
 } from '@/components/ui/home';
+import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
+import { useGameLists } from '@/hooks/game/useGameList';
 
 const DUMMY_CONTINUE_TRIP = {
   id: '101',
@@ -111,7 +112,9 @@ const shadow = Platform.select({
 
 export default function HomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
-  const { nickname } = useAppSelector((state) => state.userReducer);
+  // const { nickname } = useAppSelector((state) => state.userReducer);
+
+  const { waiting, ongoing, ended } = useGameLists();
 
   // 진행중인 게임 스크린으로 이동
   const goToGameOngoingScreen = (tripGameId: string) => {
@@ -133,7 +136,16 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* 헤더 */}
-        <HeaderSection nickname={nickname} />
+        {/* <HeaderSection nickname={nickname} /> */}
+        <View style={styles.headerBanner}>
+          <GameSummaryBanner
+            counts={{
+              ongoing: ongoing.data?.data.dataBody.contents.length,
+              waiting: waiting.data?.data.dataBody.contents.length,
+              ended: ended.data?.data.dataBody.contents.length,
+            }}
+          />
+        </View>
 
         {/* 검색 */}
         <SearchSection onPress={() => navigation.navigate('SearchScreen')} />
@@ -182,18 +194,18 @@ export default function HomeScreen() {
   );
 }
 
-function HeaderSection({ nickname }: { nickname?: string }) {
-  return (
-    <View style={styles.headerWrapper}>
-      <TextBox size={14} color={palette.gray400}>
-        반가워요
-      </TextBox>
-      <TextBox size={22} fontsName="Pretendard800" color={palette.gray800}>
-        {nickname ? `${nickname} 님` : '여행자 님'}
-      </TextBox>
-    </View>
-  );
-}
+// function HeaderSection({ nickname }: { nickname?: string }) {
+//   return (
+//     <View style={styles.headerWrapper}>
+//       <TextBox size={14} color={palette.gray400}>
+//         반가워요
+//       </TextBox>
+//       <TextBox size={22} fontsName="Pretendard800" color={palette.gray800}>
+//         {nickname ? `${nickname} 님` : '여행자 님'}
+//       </TextBox>
+//     </View>
+//   );
+// }
 
 function SearchSection({ onPress }: { onPress: () => void }) {
   return (
@@ -209,6 +221,10 @@ function SearchSection({ onPress }: { onPress: () => void }) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white },
   scroll: { paddingBottom: 32 },
+  headerBanner: {
+    marginTop: 6,
+    marginBottom: 14,
+  },
 
   // Header
   headerWrapper: {
