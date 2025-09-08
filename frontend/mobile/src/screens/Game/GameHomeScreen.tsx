@@ -91,7 +91,11 @@ export default function GameHomeScreen() {
 
         {/* 진행중인 게임 목록 */}
         <View style={{ marginBottom: 22 }}>
-          <SectionHeader title="진행중인 게임" />
+          <SectionHeader
+            title="진행중인 게임"
+            moreTitle="전체보기"
+            onPressMore={() => goToGameListScreen('ONGOING')}
+          />
 
           {(ongoing.data?.data.dataBody.contents?.length ?? 0) === 0 ? (
             <EmptyListCard
