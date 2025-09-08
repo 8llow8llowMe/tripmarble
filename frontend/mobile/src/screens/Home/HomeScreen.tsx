@@ -148,7 +148,7 @@ export default function HomeScreen() {
         </View>
 
         {/* 검색 */}
-        <SearchSection onPress={() => navigation.navigate('SearchScreen')} />
+        {/* <SearchSection onPress={() => navigation.navigate('SearchScreen')} /> */}
 
         {/* 여행 계속하기 */}
         <ContinueTripSection
@@ -207,23 +207,22 @@ export default function HomeScreen() {
 //   );
 // }
 
-function SearchSection({ onPress }: { onPress: () => void }) {
-  return (
-    <TouchableOpacity style={[styles.searchBox, shadow]} activeOpacity={0.8} onPress={onPress}>
-      <Ionicons name="search" size={18} color={palette.gray400} />
-      <TextBox size={15} color={palette.gray400} style={{ marginLeft: 8 }}>
-        여행지를 검색해보세요
-      </TextBox>
-    </TouchableOpacity>
-  );
-}
+// function SearchSection({ onPress }: { onPress: () => void }) {
+//   return (
+//     <TouchableOpacity style={[styles.searchBox, shadow]} activeOpacity={0.8} onPress={onPress}>
+//       <Ionicons name="search" size={18} color={palette.gray400} />
+//       <TextBox size={15} color={palette.gray400} style={{ marginLeft: 8 }}>
+//         여행지를 검색해보세요
+//       </TextBox>
+//     </TouchableOpacity>
+//   );
+// }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white },
   scroll: { paddingBottom: 32 },
   headerBanner: {
     marginTop: 6,
-    marginBottom: 14,
   },
 
   // Header
