@@ -32,6 +32,7 @@ const useGameListInfinite = (params?: {
 }) => {
   const status = params?.status;
   const size = params?.size ?? 10;
+  const isBrowser = typeof window !== "undefined";
 
   return useInfiniteQuery<
     AxiosResponse<ApiResponse<GameListPageResponse>>,
@@ -52,6 +53,7 @@ const useGameListInfinite = (params?: {
       if (!hasNext || contents.length === 0) return undefined;
       return contents[contents.length - 1].tripGameId;
     },
+    enabled: false,
   });
 };
 

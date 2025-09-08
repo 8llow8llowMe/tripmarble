@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import styles from "./GameListPage.module.scss";
@@ -13,7 +13,7 @@ const statusLabel = (status?: GameStatus) => {
   return "내 게임";
 };
 
-export default function MyGameListPage() {
+const GameListPageInner = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const status = searchParams.get("status") as GameStatus | null;
@@ -91,5 +91,13 @@ export default function MyGameListPage() {
         <p className={styles.end}>더 이상 표시할 항목이 없어요.</p>
       )}
     </div>
+  );
+};
+
+export default function GameListPage() {
+  return (
+    <Suspense fallback={<div className="appPage">로딩중…</div>}>
+      <GameListPageInner />
+    </Suspense>
   );
 }
