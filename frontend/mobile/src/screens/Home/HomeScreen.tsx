@@ -1,14 +1,6 @@
 import React from 'react';
-import {
-  View,
-  SafeAreaView,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Platform,
-} from 'react-native';
+import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons } from '@expo/vector-icons';
 
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
@@ -22,6 +14,7 @@ import {
 } from '@/components/ui/home';
 import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
 import { useGameLists } from '@/hooks/game/useGameList';
+import { useAppSelector } from '@/store/store';
 
 const DUMMY_CONTINUE_TRIP = {
   id: '101',
@@ -99,20 +92,9 @@ const DUMMY_FRIENDS = {
   playingCount: 3,
 };
 
-// 공통 그림자
-const shadow = Platform.select({
-  ios: {
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-  },
-  android: { elevation: 3 },
-});
-
 export default function HomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
-  // const { nickname } = useAppSelector((state) => state.userReducer);
+  const { nickname } = useAppSelector((state) => state.userReducer);
 
   const { waiting, ongoing, ended } = useGameLists();
 
@@ -132,11 +114,19 @@ export default function HomeScreen() {
     });
   };
 
+  // 대표여행지 상세 스크린으로 이동
+  const goToSpotDetailScreen = (tripSpotId: string) => {
+    navigation.navigate('SpotStackNavigator', {
+      screen: 'SpotDetailScreen',
+      params: { tripSpotId },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* 헤더 */}
-        {/* <HeaderSection nickname={nickname} /> */}
+        <HeaderSection nickname={nickname} />
         <View style={styles.headerBanner}>
           <GameSummaryBanner
             counts={{
@@ -160,8 +150,7 @@ export default function HomeScreen() {
         <RecommendedPlacesSection
           title="추천 여행지"
           data={DUMMY_PLACES}
-          // onPressItem={(id) => navigation.navigate('SpotDetailScreen' as never, { id } as never)}
-          onPressMore={() => navigation.navigate('SpotListScreen' as never)}
+          onPressItem={goToSpotDetailScreen}
         />
 
         {/* 내 기록 */}
@@ -178,9 +167,6 @@ export default function HomeScreen() {
           // onPress={() =>
           // navigation.navigate('SpotDetailScreen' as never, { id: DUMMY_RANDOM_PICK.id } as never)
           // }
-          onRefresh={() => {
-            /* TODO: seed 기반 다시 뽑기 */
-          }}
         />
 
         {/* 친구와 함께하기 배너 */}
@@ -194,18 +180,18 @@ export default function HomeScreen() {
   );
 }
 
-// function HeaderSection({ nickname }: { nickname?: string }) {
-//   return (
-//     <View style={styles.headerWrapper}>
-//       <TextBox size={14} color={palette.gray400}>
-//         반가워요
-//       </TextBox>
-//       <TextBox size={22} fontsName="Pretendard800" color={palette.gray800}>
-//         {nickname ? `${nickname} 님` : '여행자 님'}
-//       </TextBox>
-//     </View>
-//   );
-// }
+function HeaderSection({ nickname }: { nickname?: string }) {
+  return (
+    <View style={styles.headerWrapper}>
+      <TextBox size={14} color={palette.gray400}>
+        반가워요
+      </TextBox>
+      <TextBox size={22} fontsName="Pretendard800" color={palette.gray800}>
+        {nickname ? `${nickname} 님` : '여행자 님'}
+      </TextBox>
+    </View>
+  );
+}
 
 // function SearchSection({ onPress }: { onPress: () => void }) {
 //   return (
