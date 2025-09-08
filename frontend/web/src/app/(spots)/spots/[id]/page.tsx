@@ -55,7 +55,7 @@ export default function SpotDetail({ params }: Props) {
 
   return (
     <>
-      <div className={styles.spotContainer}>
+      <div className={`appPage ${styles.spotContainer}`}>
         <section className={styles.spotHeader}>
           <div className={styles.mainImageWrapper}>
             <Image
@@ -69,8 +69,12 @@ export default function SpotDetail({ params }: Props) {
             />
           </div>
           <div className={styles.regionContent}>
-            <h2>{region?.representativeRegionName || "지역 정보"}</h2>
-            <p>
+            <div className={styles.regionTitle}>
+              <h2 className={styles.title}>
+                {region?.representativeRegionName || "지역 정보"}
+              </h2>
+            </div>
+            <p className={styles.description}>
               {regionLoading
                 ? "지역 정보를 불러오는 중..."
                 : region?.description || "해당 지역에 대한 설명을 여기에 표시"}
