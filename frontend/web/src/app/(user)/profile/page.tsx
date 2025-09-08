@@ -9,7 +9,7 @@ export default function Profile() {
   return (
     <div className={`appPage ${styles.profileWrapper}`}>
       <ProfileInfo />
-      <div className={styles.lists}>
+      <div className={`appPage ${styles.lists}`}>
         <HorizontalList
           title="나의 게임 기록"
           items={spotsData}
