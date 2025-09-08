@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import styles from "./GameList.module.scss";
 // components
 import { GameList } from "@/widgets/game-list/GameList";
-import { MyGamesHorizontal } from "@/widgets/my-games-horizontal/MyGamesHorizontal";
+import { GameListHorizontal } from "@/widgets/game-list-horizontal/GameListHorizontal";
 import Button from "@/shared/ui/common/Button/Button";
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
 
@@ -52,9 +52,9 @@ export default function Game() {
         </div>
       )}
 
-      <MyGamesHorizontal type={"WAITING"} />
-      <MyGamesHorizontal type={"ONGOING"} />
-      <MyGamesHorizontal type={"ENDED"} />
+      <GameListHorizontal type={"ONGOING"} />
+      <GameListHorizontal type={"WAITING"} />
+      <GameListHorizontal type={"ENDED"} />
 
       <CreateGameModal
         isOpen={isCreateModalOpen}
