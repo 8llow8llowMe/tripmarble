@@ -1,9 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-
 import java.time.LocalDateTime;
+import lombok.Builder;
 
 @Builder
 @Schema(description = "여행 게임 이동 로그(타임라인) 조회 응답 DTO")
@@ -34,6 +33,10 @@ public record TripGameMoveLogResponse(
     String missionResultDescription,
 
     @Schema(description = "미션 처리 완료 시각", example = "2025-09-06T13:46:01")
-    LocalDateTime missionProcessedAt
+    LocalDateTime missionProcessedAt,
+
+    @Schema(description = "미션 참조 ID (여행지 리뷰 ID 등)", example = "99887766")
+    String missionReferenceId
 ) {
+
 }
