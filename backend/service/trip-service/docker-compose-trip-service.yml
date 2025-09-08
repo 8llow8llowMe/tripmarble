@@ -8,6 +8,9 @@ x-trip-service-environment: &trip_service_environment
   DB_PASSWORD: ${DB_PASSWORD}
   SERVICE_DISCOVERY_HOSTNAME: ${SERVICE_DISCOVERY_HOSTNAME}
   SERVICE_DISCOVERY_PORT: ${SERVICE_DISCOVERY_PORT}
+  SNOWFLAKE_DATACENTER_ID: ${SNOWFLAKE_DATACENTER_ID}
+  SNOWFLAKE_WORKER_ID: ${SNOWFLAKE_WORKER_ID}
+  JWT_ACCESS_KEY: ${JWT_ACCESS_KEY}
 
 services:
   trip-service-dev:
@@ -16,7 +19,7 @@ services:
       context: .
       dockerfile: trip-service.Dockerfile
     ports:
-      - "${TRIP_SERVICE_PORT_DEV}:${TRIP_SERVICE_PORT}" # host:container
+      - '${TRIP_SERVICE_PORT_DEV}:${TRIP_SERVICE_PORT}' # host:container
     environment:
       <<: *trip_service_environment
       TRIP_MARBLE_DOMAIN: ${TRIP_MARBLE_DOMAIN_DEV}
@@ -30,7 +33,7 @@ services:
       context: .
       dockerfile: trip-service.Dockerfile
     ports:
-      - "${TRIP_SERVICE_PORT_PROD}:${TRIP_SERVICE_PORT}" # host:container
+      - '${TRIP_SERVICE_PORT_PROD}:${TRIP_SERVICE_PORT}' # host:container
     environment:
       <<: *trip_service_environment
     networks:
