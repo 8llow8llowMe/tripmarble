@@ -86,19 +86,37 @@
   transform: translateY(-50%);
 }
 
+.polaroidContainer {
+  width: 35vw;
+  position: fixed;
+  left: 10%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 25;
+  opacity: 0;
+  pointer-events: auto;
+}
+
 .boardLayerWrapper {
+  background: #555;
+  justify-content: start;
+  --piece-w: clamp(280px, 30vw, 520px);
+  --col: calc(var(--piece-w) / 2);
+
   position: fixed;
   inset: 0;
   top: 65vh;
   left: calc((100vw - var(--col) * 6) / 2);
-  transform: translateY(-50%);
+  // transform: translateY(-50%);
   pointer-events: none;
   opacity: 0;
+  width: 80%;
 }
 
 .piece {
   position: absolute;
-  width: var(--piece-w);
+  // width: var(--piece-w);
+  width: auto;
   height: auto;
   will-change: transform, opacity;
 }
@@ -123,5 +141,8 @@
 @media screen and (max-width: 700px) {
   .buttonContainer {
     width: 45vw;
+  }
+  .polaroidContainer {
+    width: 60vw;
   }
 }
