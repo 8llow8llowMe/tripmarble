@@ -87,12 +87,26 @@ pipeline {
                 dir("${env.FS_PATH}") {
                     script {
                         echo "Running expo prebuild (Managed Workflow)"
-                        sh 'npx expo prebuild --platform android --clean'
+                        
+                        // Node.js 메모리 설정
+                        sh '''
+                            export NODE_OPTIONS="--max-old-space-size=4096"
+                            npx expo prebuild --platform android --clean
+                        '''
                         
                         // prebuild 성공 확인
                         sh 'ls -la android/'
                         sh 'test -f android/gradlew && echo "gradlew found" || echo "gradlew NOT found"'
                         sh 'chmod +x android/gradlew'
+                        
+                        // Android 프로젝트의 gradle.properties 설정
+                        sh '''
+                            echo "Setting up Android Gradle properties..."
+                            echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError" >> android/gradle.properties
+                            echo "org.gradle.daemon=true" >> android/gradle.properties
+                            echo "org.gradle.parallel=true" >> android/gradle.properties
+                            echo "org.gradle.configureondemand=true" >> android/gradle.properties
+                        '''
                     }
                 }
             }
@@ -134,12 +148,24 @@ pipeline {
                         sh 'test -f gradlew || (echo "gradlew not found, listing directory:" && ls -la && exit 1)'
                         sh 'chmod +x gradlew'
                         
+                        // Gradle 데몬 정리 및 메모리 설정
+                        sh '''
+                            echo "Cleaning up existing Gradle daemons..."
+                            ./gradlew --stop || true
+                            
+                            echo "Setting up Gradle properties for better memory management..."
+                            echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError" >> gradle.properties
+                            echo "org.gradle.daemon=true" >> gradle.properties
+                            echo "org.gradle.parallel=true" >> gradle.properties
+                            echo "org.gradle.configureondemand=true" >> gradle.properties
+                        '''
+                        
                         if (params.TARGET_BRANCH == 'main') {
                             echo "Building signed AAB"
-                            sh './gradlew clean bundleRelease'
+                            sh './gradlew clean bundleRelease --no-daemon --max-workers=2'
                         } else {
                             echo "Building debug APK"
-                            sh './gradlew clean assembleDebug'
+                            sh './gradlew clean assembleDebug --no-daemon --max-workers=2'
                         }
                     }
                 }
@@ -194,6 +220,15 @@ pipeline {
     post {
         always {
             script {
+                // Gradle 데몬 정리
+                try {
+                    dir("${env.FS_PATH}/android") {
+                        sh './gradlew --stop || true'
+                    }
+                } catch (Exception e) {
+                    echo "Failed to stop Gradle daemon: ${e.getMessage()}"
+                }
+                
                 if (env.NODE_NAME) {
                     cleanWs()
                 }
