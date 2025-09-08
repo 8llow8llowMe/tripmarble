@@ -4,17 +4,27 @@ import ServiceTermsSheet from '@/components/bottomSheet/ServiceTermsSheet';
 import Divider from '@/components/common/Divider';
 import { palette } from '@/constants/colors';
 import { useBottomSheetBase } from '@/hooks/useBottomSheetBase';
+import useWithdrawMutaion from '@/hooks/user/useWithdraw';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useNavigation } from '@react-navigation/native';
 
 import React from 'react';
-import { SafeAreaView, TouchableOpacity } from 'react-native';
+import { Alert, SafeAreaView, TouchableOpacity } from 'react-native';
 import { View, StyleSheet, ScrollView } from 'react-native';
 
 const SettingsHomeScreen = () => {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
+
+  const { withdraw, isPending: withdrawPending } = useWithdrawMutaion();
+
+  const confirmWithdraw = () => {
+    Alert.alert('회원탈퇴', '정말로 탈퇴 하시겠습니까?\n삭제 후에는 복구할 수 없습니다.', [
+      { text: '취소', style: 'cancel' },
+      { text: '탈퇴하기', style: 'destructive', onPress: () => withdraw() },
+    ]);
+  };
 
   const {
     bottomSheetRef: serviceTermsBottomSheetRef,
@@ -105,6 +115,18 @@ const SettingsHomeScreen = () => {
             </View>
           </TouchableOpacity>
         </View>
+        <View style={styles.section}>
+          <TouchableOpacity onPress={confirmWithdraw} disabled={withdrawPending}>
+            <View style={styles.row}>
+              <TextBox
+                size={14}
+                style={[styles.withdrawText, withdrawPending && styles.withdrawTextDisabled]}
+              >
+                {withdrawPending ? '회원탈퇴 중…' : '회원탈퇴'}
+              </TextBox>
+            </View>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {/* 약관 및 정책 바텀시트 */}
@@ -154,6 +176,13 @@ const styles = StyleSheet.create({
   },
   label: {
     fontWeight: '600',
+  },
+  withdrawText: {
+    textDecorationLine: 'underline',
+    color: palette.gray500,
+  },
+  withdrawTextDisabled: {
+    color: palette.gray300,
   },
 });
 
