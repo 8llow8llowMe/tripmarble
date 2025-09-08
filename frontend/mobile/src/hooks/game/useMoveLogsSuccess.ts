@@ -4,7 +4,7 @@ import { END_POINTS } from '@/constants/apis';
 import { useMutation } from '@tanstack/react-query';
 
 // === 타입 ===
-export interface MoveLogSuccessBody {
+export interface MoveLogBody {
   tripGameMoveLogId: string;
   tripGameTileId: string;
   tripGameMemberId: string;
@@ -17,7 +17,7 @@ export interface MoveLogSuccessBody {
 }
 
 export interface MoveLogSuccessResponse extends ApiResponseBase {
-  dataBody: MoveLogSuccessBody;
+  dataBody: MoveLogBody;
 }
 
 // === API 호출 ===
