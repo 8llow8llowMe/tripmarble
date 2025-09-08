@@ -42,7 +42,7 @@
   /* 기본 간격(반응형 최소값 상향) - TSX에서 --embla-gap이 주입되면 그 값을 사용 */
   --embla-gap: clamp(16px, 3vw, 24px);
   /* 가장자리 여백을 내부 간격과 동일하게 맞춤 → 첫/마지막 카드가 좌우에 붙어 보이지 않음 */
-  padding-left: var(--embla-gap);
+  // padding-left: var(--embla-gap);
   padding-right: var(--embla-gap);
 }
 
