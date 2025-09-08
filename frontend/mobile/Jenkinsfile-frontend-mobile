@@ -32,6 +32,8 @@ pipeline {
 
     environment {
         FS_PATH = "frontend/${params.SERVICE_GROUP}"
+        GRADLE_OPTS = "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false"
+        JAVA_OPTS = "-Xmx2g -XX:MaxMetaspaceSize=512m"
     }
 
     stages {
@@ -99,13 +101,17 @@ pipeline {
                         sh 'test -f android/gradlew && echo "gradlew found" || echo "gradlew NOT found"'
                         sh 'chmod +x android/gradlew'
                         
-                        // Android 프로젝트의 gradle.properties 설정
+                        // Android 프로젝트의 gradle.properties 설정 (안정성 우선)
                         sh '''
-                            echo "Setting up Android Gradle properties..."
-                            echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError" >> android/gradle.properties
-                            echo "org.gradle.daemon=true" >> android/gradle.properties
-                            echo "org.gradle.parallel=true" >> android/gradle.properties
-                            echo "org.gradle.configureondemand=true" >> android/gradle.properties
+                            echo "Setting up Android Gradle properties for stability..."
+                            cat > android/gradle.properties << EOF
+org.gradle.daemon=false
+org.gradle.parallel=false
+org.gradle.configureondemand=false
+org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+org.gradle.caching=false
+org.gradle.workers.max=1
+EOF
                         '''
                     }
                 }
@@ -148,24 +154,33 @@ pipeline {
                         sh 'test -f gradlew || (echo "gradlew not found, listing directory:" && ls -la && exit 1)'
                         sh 'chmod +x gradlew'
                         
-                        // Gradle 데몬 정리 및 메모리 설정
+                        // Gradle 데몬 완전 비활성화 및 안정성 설정
                         sh '''
                             echo "Cleaning up existing Gradle daemons..."
                             ./gradlew --stop || true
+                            pkill -f gradle || true
                             
-                            echo "Setting up Gradle properties for better memory management..."
-                            echo "org.gradle.jvmargs=-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError" >> gradle.properties
-                            echo "org.gradle.daemon=true" >> gradle.properties
-                            echo "org.gradle.parallel=true" >> gradle.properties
-                            echo "org.gradle.configureondemand=true" >> gradle.properties
+                            echo "Setting up Gradle properties for maximum stability..."
+                            cat > gradle.properties << EOF
+                            org.gradle.daemon=false
+                            org.gradle.parallel=false
+                            org.gradle.configureondemand=false
+                            org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+                            org.gradle.caching=false
+                            org.gradle.workers.max=1
+                            EOF
                         '''
                         
-                        if (params.TARGET_BRANCH == 'main') {
-                            echo "Building signed AAB"
-                            sh './gradlew clean bundleRelease --no-daemon --max-workers=2'
-                        } else {
-                            echo "Building debug APK"
-                            sh './gradlew clean assembleDebug --no-daemon --max-workers=2'
+                        // 빌드 재시도 메커니즘
+                        def buildCommand = params.TARGET_BRANCH == 'main' ? 
+                            './gradlew clean bundleRelease --no-daemon --no-parallel --max-workers=1 --stacktrace' :
+                            './gradlew clean assembleDebug --no-daemon --no-parallel --max-workers=1 --stacktrace'
+                        
+                        def buildType = params.TARGET_BRANCH == 'main' ? 'signed AAB' : 'debug APK'
+                        
+                        retry(3) {
+                            echo "Building ${buildType} (attempt ${env.BUILD_NUMBER ?: '1'})"
+                            sh buildCommand
                         }
                     }
                 }
