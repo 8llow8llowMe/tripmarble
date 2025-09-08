@@ -4,6 +4,8 @@
 
   --piece-w: clamp(280px, 30vw, 520px);
   --col: calc(var(--piece-w) / 2);
+
+  --embla-gap: clamp(16px, 3vw, 24px);
 }
 
 // @media (prefers-color-scheme: dark) {
