@@ -41,4 +41,26 @@ public class TripSpotReviewCreateProcessor {
         // 4. Info 변환
         return TripSpotReviewCreateInfo.of(saved);
     }
+
+    public TripSpotReviewCreateInfo createMissionReview(long tripSpotId, long memberId, String content, double rating) {
+        // 1. 여행지 존재 검증
+        TripSpot tripSpot = tripSpotRepositoryPort.findById(tripSpotId)
+            .orElseThrow(() -> new TripException(TripErrorCode.TRIP_SPOT_NOT_FOUND));
+
+        // 2. 리뷰 생성 (게임 미션 리뷰)
+        TripSpotReview tripSpotReview = TripSpotReview.builder()
+            .id(snowflakeIdGenerator.generateId())
+            .tripSpotId(tripSpotId)
+            .memberId(memberId)
+            .content(content)
+            .rating(rating)
+            .sourceType(ReviewSourceType.GAME_MISSION)
+            .build();
+
+        // 3. 저장
+        TripSpotReview saved = tripSpotReviewRepositoryPort.save(tripSpotReview, tripSpot);
+
+        // 4. Info 반환
+        return TripSpotReviewCreateInfo.of(saved);
+    }
 }
