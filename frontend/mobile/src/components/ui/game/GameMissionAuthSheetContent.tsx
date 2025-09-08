@@ -13,6 +13,8 @@ import GameTabs from '@/components/ui/game-mission/GameTabs';
 import MissionReviewForm from '@/components/ui/game-mission/MissionReviewForm';
 import MissionLocationForm from '@/components/ui/game-mission/MissionLocationForm';
 import SubmitButton from '@/components/ui/game-mission/SubmitButton';
+import { TouchableOpacity } from 'react-native';
+import useMoveLogsSkipMutation from '@/hooks/game/useMoveLogsSkip';
 
 export interface GameMissionAuthSheetProps {
   tile: any;
@@ -58,6 +60,7 @@ export function GameMissionAuthSheetContent({
   // hooks for mutation and query management
   const queryClient = useQueryClient();
   const { mutateAsync: markMissionSuccess, isPending: isSubmitting } = useMoveLogsSuccessMutation();
+  const { mutateAsync: markMissionSkip, isPending: isSkipping } = useMoveLogsSkipMutation();
 
   const MAX_IMAGES = 5;
   const pickImages = async () => {
@@ -148,71 +151,108 @@ export function GameMissionAuthSheetContent({
                 />
               )}
 
-              <SubmitButton
-                disabled={!canSubmit || isSubmitting}
-                loading={isSubmitting}
-                onPress={async () => {
-                  if (!canSubmit) return;
-                  const payload =
-                    mode === 'review'
-                      ? {
-                          type: 'review' as const,
-                          rating,
-                          review: review.trim(),
-                          images,
-                          tileId: tile?.tripGameTileId ?? tile?.tripSpotId,
-                          tripGameId,
-                        }
-                      : {
-                          type: 'location' as const,
-                          verified: locationVerified,
-                          tileId: tile?.tripGameTileId ?? tile?.tripSpotId,
-                          tripGameId,
-                        };
-                  // If missing required ids, show alert and abort
-                  if (!tripGameId || !pendingMoveLogId) {
-                    Alert.alert(
-                      '제출 불가',
-                      '진행 가능한 이동 로그가 없어요. 주사위를 굴려 현재 칸에 도착한 뒤 다시 시도해주세요.',
-                    );
-                    return;
-                  }
-                  try {
-                    await markMissionSuccess({
-                      tripGameId,
-                      tripGameMoveLogId: pendingMoveLogId,
-                    });
+              <View style={styles.actionRow}>
+                <SubmitButton
+                  style={{ flex: 1, marginRight: 8 }}
+                  disabled={!canSubmit || isSubmitting}
+                  loading={isSubmitting}
+                  onPress={async () => {
+                    if (!canSubmit) return;
+                    // If missing required ids, show alert and abort
+                    if (!tripGameId || !pendingMoveLogId) {
+                      Alert.alert(
+                        '제출 불가',
+                        '진행 가능한 이동 로그가 없어요. 주사위를 굴려 현재 칸에 도착한 뒤 다시 시도해주세요.',
+                      );
+                      return;
+                    }
+                    try {
+                      await markMissionSuccess({
+                        tripGameId,
+                        tripGameMoveLogId: pendingMoveLogId,
+                      });
 
-                    // 먼저 무효화하고
-                    await Promise.all([
-                      queryClient.invalidateQueries({
+                      // 먼저 무효화하고
+                      await Promise.all([
+                        queryClient.invalidateQueries({
+                          queryKey: [QUERY_KEY.GAME.MOVE_LOGS, tripGameId],
+                        }),
+                        queryClient.invalidateQueries({
+                          queryKey: [QUERY_KEY.GAME.GAME_DETAIL_INFO, tripGameId],
+                        }),
+                      ]);
+                      // 이어서 즉시 재요청하여 최신 데이터로 갱신 (버튼 상태 전환 보장)
+                      await queryClient.refetchQueries({
                         queryKey: [QUERY_KEY.GAME.MOVE_LOGS, tripGameId],
-                      }),
-                      queryClient.invalidateQueries({
+                        type: 'active',
+                      });
+                      await queryClient.refetchQueries({
                         queryKey: [QUERY_KEY.GAME.GAME_DETAIL_INFO, tripGameId],
-                      }),
-                    ]);
-                    // 이어서 즉시 재요청하여 최신 데이터로 갱신 (버튼 상태 전환 보장)
-                    await queryClient.refetchQueries({
-                      queryKey: [QUERY_KEY.GAME.MOVE_LOGS, tripGameId],
-                      type: 'active',
-                    });
-                    await queryClient.refetchQueries({
-                      queryKey: [QUERY_KEY.GAME.GAME_DETAIL_INFO, tripGameId],
-                      type: 'active',
-                    });
+                        type: 'active',
+                      });
 
-                    setActiveTab('info');
-                    onMissionSucceeded?.();
-                    onRequestClose();
-                  } catch (e) {
-                    Alert.alert(
-                      '제출 실패',
-                      '미션 인증 제출 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
-                    );
-                  }
-                }}
-              />
+                      setActiveTab('info');
+                      onMissionSucceeded?.();
+                      onRequestClose();
+                    } catch (e) {
+                      Alert.alert(
+                        '제출 실패',
+                        '미션 인증 제출 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
+                      );
+                    }
+                  }}
+                />
+
+                <TouchableOpacity
+                  style={[styles.actionSecondary, (isSkipping || isSubmitting) && { opacity: 0.5 }]}
+                  disabled={isSkipping || isSubmitting || !tripGameId || !pendingMoveLogId}
+                  onPress={async () => {
+                    if (!tripGameId || !pendingMoveLogId) {
+                      Alert.alert(
+                        '건너뛰기 불가',
+                        '진행 가능한 이동 로그가 없어요. 주사위를 굴려 현재 칸에 도착한 뒤 다시 시도해주세요.',
+                      );
+                      return;
+                    }
+                    try {
+                      await markMissionSkip({
+                        tripGameId,
+                        tripGameMoveLogId: pendingMoveLogId,
+                      });
+
+                      await Promise.all([
+                        queryClient.invalidateQueries({
+                          queryKey: [QUERY_KEY.GAME.MOVE_LOGS, tripGameId],
+                        }),
+                        queryClient.invalidateQueries({
+                          queryKey: [QUERY_KEY.GAME.GAME_DETAIL_INFO, tripGameId],
+                        }),
+                      ]);
+                      await queryClient.refetchQueries({
+                        queryKey: [QUERY_KEY.GAME.MOVE_LOGS, tripGameId],
+                        type: 'active',
+                      });
+                      await queryClient.refetchQueries({
+                        queryKey: [QUERY_KEY.GAME.GAME_DETAIL_INFO, tripGameId],
+                        type: 'active',
+                      });
+
+                      setActiveTab('info');
+                      onMissionSucceeded?.();
+                      onRequestClose();
+                    } catch (e) {
+                      Alert.alert(
+                        '건너뛰기 실패',
+                        '미션 건너뛰기 처리 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
+                      );
+                    }
+                  }}
+                >
+                  <Text style={styles.actionSecondaryText}>
+                    {isSkipping ? '건너뛰는 중…' : '건너뛰기'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         </View>
@@ -239,5 +279,24 @@ const styles = StyleSheet.create({
   missionTabTextActive: {
     color: palette.white,
     backgroundColor: palette.mainColor,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionSecondary: {
+    flex: 1,
+    backgroundColor: palette.white,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 10,
+    marginTop: 8,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: palette.completeText,
+  },
+  actionSecondaryText: {
+    color: palette.completeText,
+    fontWeight: '700',
   },
 });

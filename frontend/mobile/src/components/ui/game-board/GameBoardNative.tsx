@@ -15,7 +15,7 @@ import Svg, { Rect, Text as SvgText, TSpan, Defs, ClipPath } from 'react-native-
 type Props = {
   count?: number; // 한 변 칸 수 (기본 5)
   tiles: TripGameTileView[];
-  visits?: Record<string, { order: number; status: 'SUCCESS' | 'PENDING' | 'FAIL' }>;
+  visits?: Record<string, { order: number; status: 'SUCCESS' | 'PENDING' | 'SKIPPED' | 'FAIL' }>;
   initialIndex: number;
   onCellPress?: (tile: TripGameTileView, index: number) => void;
   pieceSource?: any; // require('.../Logo.png') 또는 { uri: ... }
@@ -333,7 +333,6 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
 
           // 방문 이력 하이라이트: 상태별 반투명 오버레이 + 순서 배지
           const visit = cell.tileId ? visits[cell.tileId as string] : undefined;
-
           return (
             <Fragment key={`${cell.row}-${cell.col}`}>
               {/* 공통 클립패스: 동일한 라운드 코너 유지 */}
@@ -377,7 +376,9 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
                       ? '#34D399'
                       : visit.status === 'PENDING'
                         ? '#F59E0B'
-                        : '#EF4444';
+                        : visit.status === 'SKIPPED'
+                          ? '#ff3535'
+                          : '#EF4444';
                   return (
                     <>
                       {/* 상태별 반투명 오버레이 */}
