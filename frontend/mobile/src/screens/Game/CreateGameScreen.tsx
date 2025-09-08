@@ -206,7 +206,9 @@ export default function CreateGameScreen() {
 
       if (tripGameId) {
         console.log(`🎉🎉🎉 게임 생성 완료! tripGameId: ${tripGameId}`);
-        goToGameOngoingScreen(tripGameId); // TODO: tripGameId=611073007951155200 진행중? 시작은 언제해주지?
+        // goToGameOngoingScreen(tripGameId);
+
+        goToPlayHomeScreen();
         // TODO: 나의 게임 목록 쿼리 무효화
       } else {
         console.log('⚠️⚠️⚠️ [CreateGame] 성공이지만 tripGameId 없음. PlayHome으로 이동'); // fallback
