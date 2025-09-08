@@ -34,7 +34,10 @@ public class TripGameMissionProcessor {
         // 1. 미션 컨텍스트 로딩 및 검증
         MissionContext context = loadMissionContext(tripGameId, tripGameMoveLogId, memberId);
 
-        // 2. 내부 서비스 호출 -> 리뷰 생성
+        // 2. 타일 도메인에 행위 위임
+        context.gameTile().performReviewMission();
+
+        // 3. 내부 서비스 호출 -> 리뷰 생성
         TripSpotReviewCreateInternalRequest request = TripSpotReviewCreateInternalRequest.builder()
             .tripSpotId(command.tripSpotId())
             .memberId(memberId)
@@ -45,11 +48,11 @@ public class TripGameMissionProcessor {
 
         TripSpotReviewCreateInternalResponse response = tripSpotReviewClientPort.createTripSpotReview(request);
 
-        // 3. 성공 처리 후 MoveLog 업데이트 (리뷰 ID 참조 저장)
+        // 4. 성공 처리 후 MoveLog 업데이트 (리뷰 ID 참조 저장)
         TripGameMoveLog updated = context.moveLog().updateMissionResultWithReference(MissionResult.SUCCESS, response.tripSpotReviewId());
         TripGameMoveLog saved = tripGameMoveLogRepositoryPort.save(updated, context.gameTile(), context.gameMember());
 
-        // 4. 결과 반환
+        // 5. 결과 반환
         return MissionResultInfo.of(saved);
     }
 
@@ -84,7 +87,7 @@ public class TripGameMissionProcessor {
             throw new TripGameException(TripGameErrorCode.MISSION_NOT_OWNER);
         }
 
-        // 타일 조회 및 컨텍스트 검증
+        // 4. 타일 조회 및 컨텍스트 검증
         TripGameTile tile = tripGameTileRepositoryPort.findById(moveLog.tripGameTileId())
             .orElseThrow(() -> new TripGameException(TripGameErrorCode.TILE_NOT_FOUND));
 
