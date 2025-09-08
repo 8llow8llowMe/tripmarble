@@ -11,21 +11,26 @@ import {
   SafeAreaView,
   ScrollView,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import GameBoardNative, { GameBoardHandle } from '@/components/ui/game-board/GameBoardNative';
-import { gameInfoDummy } from '@/utils/gameInfoDummy';
-import useGetGameTilesQuery, { TripGameTileView } from '@/hooks/game/useGetGameTiles';
+import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
+
+//icons
+import { Ionicons } from '@expo/vector-icons';
 import Logo from 'assets/images/Logo.png';
-import DiceView from '@/components/ui/lottie/DiceView';
-import useGameDiceMutation from '@/hooks/game/useGameDice';
 import DotThree from '@assets/icons/dots-three';
+// components
+import GameBoardNative, { GameBoardHandle } from '@/components/ui/game-board/GameBoardNative';
+import { GameMissionAuthSheetContent } from '@/components/ui/game/GameMissionAuthSheetContent';
+import DiceView from '@/components/ui/lottie/DiceView';
+import CongratulationView from '@/components/ui/lottie/CongratulationsView';
+// datas
+import { gameInfoDummy } from '@/utils/gameInfoDummy';
+// apis
+import useGetGameTilesQuery, { TripGameTileView } from '@/hooks/game/useGetGameTiles';
+import useGameDiceMutation from '@/hooks/game/useGameDice';
 import useGameEndMutation from '@/hooks/game/useGameEnd';
 import useGameDetailQuery from '@/hooks/game/useGameDetail';
 import useMoveLogsQuery from '@/hooks/game/useMoveLogs';
-import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
-import { GameMissionAuthSheetContent } from '@/components/ui/game/GameMissionAuthSheetContent';
-import CongratulationView from '@/components/ui/lottie/CongratulationsView';
 
 export default function OngoingGameScreen({ route }) {
   const { tripGameId } = route.params || {};
@@ -162,7 +167,7 @@ export default function OngoingGameScreen({ route }) {
   const forceShowMissionButton = Boolean(isPendingMission || isSameTileForAuth);
 
   // 탭 (정보 / 방법)
-  const [activeTab, setActiveTab] = useState<'timeline' | 'guide'>('guide');
+  const [activeTab, setActiveTab] = useState<'timeline' | 'guide'>('timeline');
   const menuOpacity = useRef(new Animated.Value(0)).current;
   const menuScale = useRef(new Animated.Value(0.96)).current;
 
@@ -436,22 +441,22 @@ export default function OngoingGameScreen({ route }) {
           </TouchableOpacity>
         )}
 
-        {/* Tabs: 게임 정보 / 게임 방법 */}
+        {/* Tabs: 타임 라인 / 게임 방법 */}
         <View style={styles.tabBar}>
-          <TouchableOpacity
-            style={[styles.tabItem, activeTab === 'guide' && styles.tabItemActive]}
-            onPress={() => setActiveTab('guide')}
-          >
-            <Text style={[styles.tabText, activeTab === 'guide' && styles.tabTextActive]}>
-              게임 방법
-            </Text>
-          </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tabItem, activeTab === 'timeline' && styles.tabItemActive]}
             onPress={() => setActiveTab('timeline')}
           >
             <Text style={[styles.tabText, activeTab === 'timeline' && styles.tabTextActive]}>
               타임 라인
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabItem, activeTab === 'guide' && styles.tabItemActive]}
+            onPress={() => setActiveTab('guide')}
+          >
+            <Text style={[styles.tabText, activeTab === 'guide' && styles.tabTextActive]}>
+              게임 방법
             </Text>
           </TouchableOpacity>
         </View>
