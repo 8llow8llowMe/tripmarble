@@ -32,21 +32,13 @@ export default function GameHomeScreen() {
     navigation.navigate('CreateGameScreen');
   };
 
-  // 진행중인 게임 스크린으로 이동
-  const goToGameOngoingScreen = async (tripGameId: string, isWaiting: boolean = false) => {
+  // 게임 상세 스크린으로 이동
+  const goToGameDetailScreen = async (tripGameId: string, isWaiting: boolean = false) => {
     if (isWaiting) {
       await fetchGameStart(tripGameId);
     }
     navigation.navigate('GamePlayStackNavigator', {
-      screen: 'OngoingGameScreen',
-      params: { tripGameId },
-    });
-  };
-
-  // 종료된 게임 스크린으로 이동
-  const goToGameEndedScreen = (tripGameId: string) => {
-    navigation.navigate('GamePlayStackNavigator', {
-      screen: 'OngoingGameScreen',
+      screen: 'GameDetailScreen',
       params: { tripGameId },
     });
   };
@@ -111,7 +103,7 @@ export default function GameHomeScreen() {
               {(ongoing.data?.data.dataBody.contents ?? []).map((game) => (
                 <TouchableOpacity
                   key={game.tripGameId}
-                  onPress={() => goToGameOngoingScreen(game.tripGameId)}
+                  onPress={() => goToGameDetailScreen(game.tripGameId, false)}
                   activeOpacity={0.8}
                   style={styles.ongoingCardHorizontal}
                 >
@@ -181,7 +173,7 @@ export default function GameHomeScreen() {
               {(waiting.data?.data.dataBody.contents ?? []).map((game) => (
                 <TouchableOpacity
                   key={game.tripGameId}
-                  onPress={() => goToGameOngoingScreen(game.tripGameId, true)}
+                  onPress={() => goToGameDetailScreen(game.tripGameId, true)}
                   activeOpacity={0.8}
                   style={styles.waitingCardHorizontal}
                 >
@@ -240,7 +232,7 @@ export default function GameHomeScreen() {
                 <TouchableOpacity
                   key={game.tripGameId}
                   activeOpacity={0.8}
-                  onPress={() => goToGameEndedScreen(game.tripGameId)}
+                  onPress={() => goToGameDetailScreen(game.tripGameId, false)}
                   style={{ marginHorizontal: 16 }}
                 >
                   <View style={styles.endedCardNew}>

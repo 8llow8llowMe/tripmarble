@@ -1,13 +1,13 @@
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
-import OngoingGameDetail from '@/components/ui/game-detail/OngoingGameDetail';
+import GameDetail from '@/components/ui/game-detail/GameDetail';
 
-export default function OngoingGameScreen({ route }: any) {
+export default function GameDetailScreen({ route }: any) {
   const { tripGameId } = route.params || {};
   const navigation = useNavigation<any>();
 
   return (
-    <OngoingGameDetail
+    <GameDetail
       tripGameId={tripGameId}
       onBack={() => navigation.goBack()}
       onExit={() => navigation.goBack()}

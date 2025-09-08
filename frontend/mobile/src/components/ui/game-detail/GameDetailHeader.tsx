@@ -6,11 +6,12 @@ import DotThree from '@assets/icons/dots-three';
 
 type Props = {
   title?: string;
+  isGameEnd?: boolean;
   onBack?: () => void;
   onMenu?: () => void;
 };
 
-export default function GameDetailHeader({ title, onBack, onMenu }: Props) {
+export default function GameDetailHeader({ title, isGameEnd = false, onBack, onMenu }: Props) {
   return (
     <View style={styles.header}>
       <TouchableOpacity onPress={onBack}>
@@ -19,10 +20,17 @@ export default function GameDetailHeader({ title, onBack, onMenu }: Props) {
       <Text style={styles.headerTitle} numberOfLines={1}>
         {title ?? '@@ 여행'}
       </Text>
-
-      <TouchableOpacity onPress={onMenu} accessibilityRole="button" accessibilityLabel="옵션 열기">
-        <DotThree width={24} height={24} />
-      </TouchableOpacity>
+      {!isGameEnd ? (
+        <TouchableOpacity
+          onPress={onMenu}
+          accessibilityRole="button"
+          accessibilityLabel="옵션 열기"
+        >
+          <DotThree width={24} height={24} />
+        </TouchableOpacity>
+      ) : (
+        ''
+      )}
     </View>
   );
 }

@@ -119,7 +119,7 @@ export default function HomeScreen() {
   // 진행중인 게임 스크린으로 이동
   const goToGameOngoingScreen = (tripGameId: string) => {
     navigation.navigate('GamePlayStackNavigator', {
-      screen: 'OngoingGameScreen',
+      screen: 'GameDetailScreen',
       params: { tripGameId },
     });
   };

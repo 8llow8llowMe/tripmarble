@@ -1,7 +1,7 @@
 import EndedGameScreen from '@/screens/Game/EndedGameScreen';
 import GameHomeScreen from '@/screens/Game/GameHomeScreen';
 import GameListScreen from '@/screens/Game/GameListScreen';
-import OngoingGameScreen from '@/screens/Game/OngoingGameScreen';
+import GameDetailScreen from '@/screens/Game/GameDetailScreen';
 import { GamePlayStackParamList } from '@/types/navigation/navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -21,8 +21,8 @@ export default function GamePlayStackNavigator() {
         options={{ headerShown: false }}
       />
       <GamePlayStack.Screen
-        name="OngoingGameScreen"
-        component={OngoingGameScreen}
+        name="GameDetailScreen"
+        component={GameDetailScreen}
         options={{ headerShown: false }}
       />
       <GamePlayStack.Screen

@@ -173,12 +173,12 @@ export default function CreateGameScreen() {
   );
 
   // 진행중인 게임 스크린으로 이동
-  const goToGameOngoingScreen = (tripGameId: string) => {
-    navigation.replace('GamePlayStackNavigator', {
-      screen: 'OngoingGameScreen',
-      params: { tripGameId },
-    });
-  };
+  // const goToDetailGameScreen = (tripGameId: string) => {
+  //   navigation.replace('GamePlayStackNavigator', {
+  //     screen: 'GameDetailScreen',
+  //     params: { tripGameId },
+  //   });
+  // };
 
   // 게임 탭 메인 홈 스크린으로 이동
   const goToPlayHomeScreen = () => {
@@ -206,7 +206,7 @@ export default function CreateGameScreen() {
 
       if (tripGameId) {
         console.log(`🎉🎉🎉 게임 생성 완료! tripGameId: ${tripGameId}`);
-        // goToGameOngoingScreen(tripGameId);
+        // goToDetailGameScreen(tripGameId);
 
         goToPlayHomeScreen();
         // TODO: 나의 게임 목록 쿼리 무효화

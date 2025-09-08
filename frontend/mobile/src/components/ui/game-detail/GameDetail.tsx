@@ -39,7 +39,7 @@ type Props = {
   onExit?: () => void; // after force end
 };
 
-export default function OngoingGameDetail({ tripGameId, onBack, onExit }: Props) {
+export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
   const { gameDetail, isLoading: gameDetailIsLoading } = useGameDetailQuery(tripGameId);
   const detail = (gameDetail as any)?.data?.dataBody ?? (gameDetail as any)?.dataBody ?? undefined;
   const titleFromDetail: string | undefined = detail?.title ?? detail?.representativeRegionName;
@@ -246,7 +246,12 @@ export default function OngoingGameDetail({ tripGameId, onBack, onExit }: Props)
           <CongratulationView visible={diceVisible} onFinish={() => setConfettiVisible(false)} />
         )}
 
-        <GameDetailHeader title={titleFromDetail} onBack={onBack} onMenu={openMenu} />
+        <GameDetailHeader
+          title={titleFromDetail}
+          isGameEnd={isGameEnd}
+          onBack={onBack}
+          onMenu={openMenu}
+        />
 
         <GameDetailInfo
           turnOrder={currentTurnOrderFromDetail}

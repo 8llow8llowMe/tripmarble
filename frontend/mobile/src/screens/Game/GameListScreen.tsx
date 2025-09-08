@@ -19,10 +19,14 @@ import EmptyListCard from '@/components/common/card/EmptyListCard';
 
 type Props = NativeStackScreenProps<GamePlayStackParamList, 'GameListScreen'>;
 
-export default function GameListScreen({ route }: Props) {
+export default function GameListScreen({ route, navigation }: Props) {
   const status = route.params?.status;
   const { items, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } =
     useInfiniteGameList({ status, size: 20 });
+
+  const goToGameDetailScreen = (tripGameId: string) => {
+    navigation.navigate('GameDetailScreen', { tripGameId });
+  };
 
   const headerTitle = (() => {
     switch (status) {
@@ -49,7 +53,11 @@ export default function GameListScreen({ route }: Props) {
       : undefined;
     const subtitle = `${item.gameStatusDescription} · ${(item.tripThemeNames ?? []).join(' · ')}`;
     return (
-      <TouchableOpacity activeOpacity={0.8} style={styles.row}>
+      <TouchableOpacity
+        activeOpacity={0.8}
+        style={styles.row}
+        onPress={() => goToGameDetailScreen(item.tripGameId)}
+      >
         {thumb ? (
           <Image source={thumb} style={styles.thumb} />
         ) : (
