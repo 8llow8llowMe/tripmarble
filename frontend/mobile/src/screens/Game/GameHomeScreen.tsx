@@ -19,7 +19,6 @@ import { fetchGameStart } from '@/hooks/game/useGameStart';
 import { useGameLists } from '@/hooks/game/useGameList';
 // components
 import CreateGameBanner from '@/components/common/banner/CreateGameBanner';
-import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
 import EmptyListCard from '@/components/common/card/EmptyListCard';
 
@@ -80,17 +79,18 @@ export default function GameHomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.scroll}>
-        <GameSummaryBanner
+      {/* <ScrollView style={styles.scroll}> */}
+      <ScrollView>
+        {/* <GameSummaryBanner
           counts={{
             ongoing: ongoing.data?.data.dataBody.contents.length,
             waiting: waiting.data?.data.dataBody.contents.length,
             ended: ended.data?.data.dataBody.contents.length,
           }}
-        />
+        /> */}
 
         {/* 진행중인 게임 목록 */}
-        <View style={{ marginVertical: 22 }}>
+        <View style={{ marginBottom: 22 }}>
           <SectionHeader title="진행중인 게임" />
 
           {(ongoing.data?.data.dataBody.contents?.length ?? 0) === 0 ? (
@@ -271,7 +271,7 @@ export default function GameHomeScreen() {
 }
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white, height: 'auto' },
-  scroll: { paddingVertical: 32 },
+  // scroll: { paddingVertical: 32 },
 
   title: {
     fontSize: 24,
