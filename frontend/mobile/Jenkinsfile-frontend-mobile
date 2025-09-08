@@ -32,11 +32,6 @@ pipeline {
 
     environment {
         FS_PATH = "frontend/${params.SERVICE_GROUP}"
-        ANDROID_KEYSTORE = credentials('android-keystore')
-        ANDROID_KEYSTORE_PASS = credentials('android-keystore-pass')
-        ANDROID_KEY_ALIAS = credentials('android-key-alias')
-        ANDROID_KEY_PASS = credentials('android-key-pass')
-        PLAY_SERVICE_ACCOUNT_JSON = credentials('google-play-service-json')
     }
 
     stages {
@@ -88,6 +83,12 @@ pipeline {
                 dir("${env.FS_PATH}/android") {
                     script {
                         echo "Injecting Android keystore for release build"
+                        
+                        // Production 빌드용 credentials 설정
+                        env.ANDROID_KEYSTORE = credentials('android-keystore')
+                        env.ANDROID_KEYSTORE_PASS = credentials('android-keystore-pass')
+                        env.ANDROID_KEY_ALIAS = credentials('android-key-alias')
+                        env.ANDROID_KEY_PASS = credentials('android-key-pass')
 
                         sh 'cp ${ANDROID_KEYSTORE} app/keystore.jks'
 
@@ -140,6 +141,9 @@ pipeline {
                 dir("${env.FS_PATH}") {
                     script {
                         echo "Deploying AAB to Google Play Store"
+                        
+                        // Google Play Store credentials 설정
+                        env.PLAY_SERVICE_ACCOUNT_JSON = credentials('google-play-service-json')
 
                         writeFile file: 'google-play-service-account.json', text: "${env.PLAY_SERVICE_ACCOUNT_JSON}"
 
@@ -162,7 +166,11 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            script {
+                if (env.NODE_NAME) {
+                    cleanWs()
+                }
+            }
         }
     }
 }
