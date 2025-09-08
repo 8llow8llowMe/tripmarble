@@ -46,6 +46,10 @@ const END_POINTS = {
     MOVE_LOGS: (tripGameId: string) => `/trip-games/${tripGameId}/move-logs`,
     MOVE_LOGS_SUCCESS: (tripGameId: string, tripGameMoveLogId: string) =>
       `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/success`,
+    MOVE_LOGS_FAIL: (tripGameId: string, tripGameMoveLogId: string) =>
+      `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/fail`,
+    MOVE_LOGS_SKIP: (tripGameId: string, tripGameMoveLogId: string) =>
+      `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/skip`,
   },
 };
 
