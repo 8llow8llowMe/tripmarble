@@ -1,11 +1,11 @@
 package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.util.List;
 
 @Schema(description = "여행지 리뷰 생성 요청 DTO")
@@ -17,12 +17,14 @@ public record TripSpotReviewCreateRequest(
     String content,
 
     @Schema(description = "별점 (1~5)", example = "4.5")
-    @Min(value = 1, message = "별점은 최소 1점이어야 합니다.")
-    @Max(value = 5, message = "별점은 최대 5점이어야 합니다.")
+    @NotNull(message = "별점은 필수입니다.")
+    @DecimalMin(value = "1.0", message = "별점은 최소 1점이어야 합니다.")
+    @DecimalMax(value = "5.0", message = "별점은 최대 5점이어야 합니다.")
     double rating,
 
     @Schema(description = "리뷰 사진 URL 목록", example = "[\"http://.../photo1.jpg\", \"http://.../photo2.jpg\"]")
     @Size(max = 5, message = "리뷰 사진은 최대 5장까지 등록할 수 있습니다.")
     List<String> photoUrls
 ) {
+
 }
