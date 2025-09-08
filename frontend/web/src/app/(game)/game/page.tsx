@@ -9,8 +9,7 @@ import { GameList } from "@/widgets/game-list/GameList";
 import { MyGamesHorizontal } from "@/widgets/my-games-horizontal/MyGamesHorizontal";
 import Button from "@/shared/ui/common/Button/Button";
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
-// datas
-import { gamesDummy } from "@/entities/games/model/gamesDummy";
+
 // stores
 import { useAppSelector } from "@/entities/users/model";
 import useMyGameList from "@/entities/games/hooks/useMyGameList";
