@@ -3,16 +3,16 @@ package com.followfollowme.tripmarble.domainlayer.game.application.service;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MissionResultResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameMoveLogResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter.TripGameMoveLogPresenter;
+import com.followfollowme.tripmarble.domainlayer.game.application.command.ReviewMissionCommand;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.MissionResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameMoveLogQueryInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameMoveLogWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameMissionProcessor;
 import com.followfollowme.tripmarble.domainlayer.game.application.service.processor.TripGameMoveLogQueryProcessor;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,15 +24,17 @@ public class TripGameMoveLogFacade implements TripGameMoveLogWebUseCase {
 
     @Override
     @Transactional
-    public MissionResultResponse skipMission(long tripGameId, long tripGameMoveLogId, long memberId) {
-        MissionResultInfo missionResultInfo = tripGameMissionProcessor.skipMission(tripGameId, tripGameMoveLogId, memberId);
+    public MissionResultResponse processReviewMission(
+        long tripGameId, long tripGameMoveLogId, long memberId, ReviewMissionCommand command) {
+        MissionResultInfo missionResultInfo =
+            tripGameMissionProcessor.processReviewMission(tripGameId, tripGameMoveLogId, memberId, command);
         return tripGameMoveLogPresenter.toMissionResultResponse(missionResultInfo);
     }
 
     @Override
     @Transactional
-    public MissionResultResponse successMission(long tripGameId, long tripGameMoveLogId, long memberId) {
-        MissionResultInfo missionResultInfo = tripGameMissionProcessor.successMission(tripGameId, tripGameMoveLogId, memberId);
+    public MissionResultResponse skipMission(long tripGameId, long tripGameMoveLogId, long memberId) {
+        MissionResultInfo missionResultInfo = tripGameMissionProcessor.skipMission(tripGameId, tripGameMoveLogId, memberId);
         return tripGameMoveLogPresenter.toMissionResultResponse(missionResultInfo);
     }
 
