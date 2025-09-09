@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/entities/users/model";
-import { toast } from "react-toastify";
 // three
 import * as THREE from "three";
 import { PMREMGenerator } from "three";
@@ -17,15 +17,15 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "./HomeDice.module.scss";
 // components
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
-// import LiquidButton from "@/shared/ui/common/LiquidButton/LiquidButton";
-import PolaroidStack from "./PolaroidStack";
 import useRepresentativeRegions from "@/entities/trips/hooks/useRepresentativeRegions";
 import noImage from "/public/images/no-image.png";
+import PolaroidStack from "@/entities/home/ui/polaroid-stack/PolaroidStack";
 
 export default function HomeDicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cubeRef = useRef<THREE.Object3D | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
+  const [portalEl, setPortalEl] = useState<HTMLElement | null>(null);
 
   const [loadedCount, setLoadedCount] = useState(0);
   const handlePieceLoaded = () => {
@@ -35,14 +35,26 @@ export default function HomeDicePage() {
   // Prefetch representative regions early to avoid delay
   const { data: regionsData } = useRepresentativeRegions();
   const polaroidItems = (regionsData?.data?.dataBody || [])
-    .slice(0, 5)
+    .slice(0, 6)
     .map((r: any) => ({
       id: r.representativeRegionId,
       name: r.representativeRegionName,
       imgUrl: r.representativeRegionImageUrl || (noImage as any).src,
     }));
 
+  // Create a fixed-layer portal element so board isn't affected by parent transforms after routing
   useEffect(() => {
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    setPortalEl(el);
+    return () => {
+      document.body.removeChild(el);
+      setPortalEl(null);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!portalEl) return;
     window.scrollTo(0, 0);
     gsap.registerPlugin(ScrollTrigger);
     if (!containerRef.current) return;
@@ -58,6 +70,7 @@ export default function HomeDicePage() {
 
     // Ensure initial hidden state for polaroid stack before timeline runs
     gsap.set(".polaroid-container", { opacity: 0, pointerEvents: "none" });
+    gsap.set(`.${styles.polaroidHint}`, { autoAlpha: 0 });
     // Hide cards and set initial transform so fromTo works consistently
     gsap.set("[data-polaroid-card]", { autoAlpha: 0, y: 180, scale: 0.96 });
     // Reset bodies (avoid inheriting transforms if hot reloaded)
@@ -221,15 +234,9 @@ export default function HomeDicePage() {
 
     tl.to({}, { duration: 1 }); // pause for 1 second at time = 4.2
 
-    // 버튼 페이드아웃 이후 폴라로이드 등장 + 스택 쌓기
-    tl.to(
-      ".button-container",
-      { opacity: 0, duration: 0.8, ease: "power2.in" },
-      5.2
-    )
-      .set(".polaroid-container", { opacity: 1, pointerEvents: "auto" }, 5.3)
-
-      // 1) 카드 자체를 아래에서 위로 하나씩 등장
+    // 폴라로이드 등장 + 스택 쌓기
+    tl.set(".polaroid-container", { opacity: 1, pointerEvents: "auto" }, 5.2)
+      // 1) 카드 자체를 아래에서 위로 하나씩 등장 (그리드 자리로 등장)
       .fromTo(
         "[data-polaroid-card]",
         { autoAlpha: 0, y: 180, scale: 0.96 },
@@ -240,38 +247,16 @@ export default function HomeDicePage() {
           duration: 0.6,
           ease: "power3.out",
           // 아래에서 위로 차례대로 올라오게
-          stagger: { each: 0.28, from: "end" }, // 마지막 카드가 먼저, 처음 카드가 맨 위로 오게 하려면 "start"
+          stagger: { each: 0.28, from: "start" }, // 마지막 카드가 먼저, 처음 카드가 맨 위로 오게 하려면 "start"
         },
         5.35
       )
-
-      // 2) 중앙에 “겹치듯” 정렬 (약간의 오프셋/회전만)
-      .to(
-        "[data-polaroid-body]",
-        {
-          x: 0,
-          // 카드 수에 따라 얕은 y 오프셋 분포 (위로 갈수록 조금씩 -y)
-          y: gsap.utils.distribute({ base: 0, amount: -40 }), // 총 -40px 범위에서 균등 분배
-          // 좌우로 살짝 펼쳐진 느낌의 회전
-          rotate: gsap.utils.distribute({ base: -6, amount: 12 }), // -6deg ~ +6deg
-          duration: 0.55,
-          ease: "power2.out",
-          stagger: 0.22,
-        },
-        ">-0.25" // 1)과 살짝 겹치게 시작
-      )
-
-      // 3) 맨 위 카드만 살짝 튕겨주는 맛 (선택)
-      .to(
-        "[data-polaroid-card]:last-child [data-polaroid-body]",
-        {
-          y: "-=6",
-          duration: 0.18,
-          yoyo: true,
-          repeat: 1,
-          ease: "power1.inOut",
-        },
-        ">"
+      // 폴라로이드가 모두 등장한 뒤, 힌트를 아래에서 위로 페이드 인
+      .fromTo(
+        `.${styles.polaroidHint}`,
+        { autoAlpha: 0, y: 28 },
+        { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" },
+        ">-0.1"
       );
 
     // 텍스트 애니메이션
@@ -330,10 +315,15 @@ export default function HomeDicePage() {
     return () => {
       window.removeEventListener("resize", onResize);
       gsap.ticker.remove(ticker);
+      // Kill all ScrollTriggers created in this scope
       ScrollTrigger.getAll().forEach((t) => t.kill());
-      gsap.set(`.${styles.boardPieces}, .${styles.piece}`, {
-        clearProps: "all",
-      });
+      // Clear only GSAP-related inline styles on our elements if they still exist
+      const toClear = gsap.utils.toArray<HTMLElement>(
+        `.${styles.piece}, .${styles.pieceBox}`
+      );
+      if (toClear.length) {
+        gsap.set(toClear, { clearProps: "transform,opacity,will-change" });
+      }
       cancelAnimationFrame(raf);
       renderer.dispose();
       pmrem?.dispose();
@@ -349,7 +339,7 @@ export default function HomeDicePage() {
         }
       });
     };
-  }, [polaroidItems.length, loadedCount]);
+  }, [polaroidItems.length, loadedCount, portalEl]);
 
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const router = useRouter();
@@ -363,6 +353,8 @@ export default function HomeDicePage() {
   //   }
   //   setCreateModalOpen(true);
   // };
+
+  const boardImageSizes = "(max-width: 860px) 33vw, 520px";
 
   return (
     <>
@@ -384,84 +376,79 @@ export default function HomeDicePage() {
         <div className={`text ${styles.fadeText}`} data-index="1">
           주사위를 굴려 여행을 떠나보세요!
         </div>
-        {/* Board (over canvas) */}
-        <div className={styles.boardLayerWrapper} ref={boardRef}>
-          <Image
-            className={`${styles.piece} ${styles.pOuterLeft}`}
-            src="/images/board/Board01.png"
-            alt="Board outer left"
-            fill
-            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
-            style={{ objectFit: "contain" }}
-            priority
-            onLoad={handlePieceLoaded}
-          />
-          <Image
-            className={`${styles.piece} ${styles.pMidLeft}`}
-            src="/images/board/Board02.png"
-            alt="Board mid left"
-            fill
-            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
-            style={{ objectFit: "contain" }}
-            onLoad={handlePieceLoaded}
-          />
-          <Image
-            className={`${styles.piece} ${styles.pOuterRight}`}
-            src="/images/board/Board05.png"
-            alt="Board outer right"
-            fill
-            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
-            style={{ objectFit: "contain" }}
-            onLoad={handlePieceLoaded}
-          />
-          <Image
-            className={`${styles.piece} ${styles.pMidRight}`}
-            src="/images/board/Board04.png"
-            alt="Board mid right"
-            fill
-            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
-            style={{ objectFit: "contain" }}
-            onLoad={handlePieceLoaded}
-          />
-          <Image
-            className={`${styles.piece} ${styles.pCenter}`}
-            src="/images/board/Board03.png"
-            alt="Board center"
-            fill
-            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
-            style={{ objectFit: "contain" }}
-            onLoad={handlePieceLoaded}
-          />
-        </div>
-        {/* 버튼 */}
-        {/* <div className={`button-container ${styles.buttonContainer}`}>
-          <Link href="/recommend">
-            <LiquidButton
-              width="100%"
-              height="100%"
-              fontSize="1.5rem"
-              radius="lg"
-              bgColor="primary"
-              paddingSize="xl"
-            >
-              랜덤 여행지 추천받기
-            </LiquidButton>
-          </Link>
-          <LiquidButton
-            width="100%"
-            height="100%"
-            fontSize="1.5rem"
-            radius="lg"
-            bgColor="primary"
-            paddingSize="xl"
-            onClick={handleCreateClick}
-          >
-            게임 만들기
-          </LiquidButton>
-        </div> */}
+        {/* Board (over canvas) rendered via portal to disconnect from parent transforms */}
+        {portalEl &&
+          createPortal(
+            <div className={styles.boardLayerWrapper} ref={boardRef}>
+              <div className={styles.boardGroup}>
+                <div className={`${styles.pieceBox} ${styles.pOuterLeft}`}>
+                  <Image
+                    className={styles.piece}
+                    src="/images/board/Board01.png"
+                    alt="Board outer left"
+                    fill
+                    sizes={boardImageSizes}
+                    style={{ objectFit: "contain" }}
+                    priority
+                    onLoad={handlePieceLoaded}
+                  />
+                </div>
+                <div className={`${styles.pieceBox} ${styles.pMidLeft}`}>
+                  <Image
+                    className={styles.piece}
+                    src="/images/board/Board02.png"
+                    alt="Board mid left"
+                    fill
+                    sizes={boardImageSizes}
+                    style={{ objectFit: "contain" }}
+                    onLoad={handlePieceLoaded}
+                  />
+                </div>
+                <div className={`${styles.pieceBox} ${styles.pOuterRight}`}>
+                  <Image
+                    className={styles.piece}
+                    src="/images/board/Board05.png"
+                    alt="Board outer right"
+                    fill
+                    sizes={boardImageSizes}
+                    style={{ objectFit: "contain" }}
+                    onLoad={handlePieceLoaded}
+                  />
+                </div>
+                <div className={`${styles.pieceBox} ${styles.pMidRight}`}>
+                  <Image
+                    className={styles.piece}
+                    src="/images/board/Board04.png"
+                    alt="Board mid right"
+                    fill
+                    sizes={boardImageSizes}
+                    style={{ objectFit: "contain" }}
+                    onLoad={handlePieceLoaded}
+                  />
+                </div>
+                <div className={`${styles.pieceBox} ${styles.pCenter}`}>
+                  <Image
+                    className={styles.piece}
+                    src="/images/board/Board03.png"
+                    alt="Board center"
+                    fill
+                    sizes={boardImageSizes}
+                    style={{ objectFit: "contain" }}
+                    onLoad={handlePieceLoaded}
+                  />
+                </div>
+              </div>
+            </div>,
+            portalEl
+          )}
         {/* 폴라로이드 스택 */}
         <div className={`polaroid-container ${styles.polaroidContainer}`}>
           <PolaroidStack items={polaroidItems} />
+        </div>
+        <div className={styles.polaroidHint}>
+          <span>사진을 눌러</span>
+          <br className={styles.mobileBr} />
+          <span>여행지를 찾아보세요!</span>
         </div>
         <CreateGameModal
           isOpen={isCreateModalOpen}
