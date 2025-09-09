@@ -105,13 +105,43 @@ pipeline {
                         sh '''
                             echo "Setting up Android Gradle properties for stability..."
                             cat > android/gradle.properties << EOF
-org.gradle.daemon=false
-org.gradle.parallel=false
-org.gradle.configureondemand=false
-org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
-org.gradle.caching=false
-org.gradle.workers.max=1
-EOF
+                            org.gradle.daemon=false
+                            org.gradle.parallel=false
+                            org.gradle.configureondemand=false
+                            org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+                            org.gradle.caching=false
+                            org.gradle.workers.max=1
+                            
+                            # React Native Hermes configuration
+                            project.ext.react = [
+                                enableHermes: true
+                            ]
+                            EOF
+                        '''
+                        
+                        // Hermes 설정 수정 (React Native 표준 방식)
+                        sh '''
+                            echo "Fixing Hermes configuration using React Native standard..."
+                            
+                            # app/build.gradle에서 project.ext.react 설정 확인 및 수정
+                            if [ -f android/app/build.gradle ]; then
+                                # project.ext.react 블록이 없는 경우 추가
+                                if ! grep -q "project.ext.react" android/app/build.gradle; then
+                                    echo "Adding project.ext.react configuration..."
+                                    # android 블록 시작 부분에 추가
+                                    sed -i '/android {/a\\
+                                    \\
+                                    project.ext.react = [\\
+                                        enableHermes: true\\
+                                    ]' android/app/build.gradle
+                                fi
+                                
+                                # hermesEnabled 대신 enableHermes 사용하도록 수정
+                                if grep -q "hermesEnabled" android/app/build.gradle; then
+                                    echo "Replacing hermesEnabled with enableHermes..."
+                                    sed -i 's/hermesEnabled/enableHermes/g' android/app/build.gradle
+                                fi
+                            fi
                         '''
                     }
                 }
@@ -216,11 +246,11 @@ EOF
                         writeFile file: 'google-play-service-account.json', text: "${env.PLAY_SERVICE_ACCOUNT_JSON}"
 
                         sh '''
-                            fastlane supply --aab android/app/build/outputs/bundle/release/app-release.aab \
-                                            --track production \
-                                            --json_key google-play-service-account.json \
-                                            --skip_upload_metadata \
-                                            --skip_upload_images \
+                            fastlane supply --aab android/app/build/outputs/bundle/release/app-release.aab \\
+                                            --track production \\
+                                            --json_key google-play-service-account.json \\
+                                            --skip_upload_metadata \\
+                                            --skip_upload_images \\
                                             --skip_upload_screenshots
                         '''
 
