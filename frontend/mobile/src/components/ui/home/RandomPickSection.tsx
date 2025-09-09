@@ -34,8 +34,8 @@ const RandomPickSection = ({
   return (
     <View style={styles.container}>
       <SectionHeader
-        title="오늘의 랜덤 픽"
-        // rightNode={
+        title="오늘의 랜덤 PICK!"
+        // rightNode={`
         //   <TouchableOpacity onPress={onRefresh} style={styles.iconBtn} activeOpacity={0.8}>
         //     <MaterialCommunityIcons name="dice-5-outline" size={18} color={palette.gray600} />
         //     <TextBox size={13} color={palette.gray600} style={{ marginLeft: 6 }}>
