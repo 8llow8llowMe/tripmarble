@@ -35,6 +35,12 @@ const GamePlayPage = ({ params }: Props) => {
     isReady: true,
   };
 
-  return <GamePlay tripGameView={tripGameView} tripGameTileViews={tileViews} />;
+  return (
+    <GamePlay
+      tripGameView={tripGameView}
+      tripGameTileViews={tileViews}
+      initialStepNo={detail.currentStepNo ?? 0}
+    />
+  );
 };
 export default GamePlayPage;

@@ -7,9 +7,9 @@ import useMyGameListInfinite from "@/entities/games/hooks/useGameListInfinite";
 import { GameStatus } from "@/entities/games/hooks/useMyGameList";
 
 const statusLabel = (status?: GameStatus) => {
-  if (status === "WAITING") return "시작 전 게임";
-  if (status === "ONGOING") return "진행중인 내 게임";
-  if (status === "ENDED") return "진행 종료된 내 게임";
+  if (status === "WAITING") return "시작전 게임";
+  if (status === "ONGOING") return "진행중인 게임";
+  if (status === "ENDED") return "종료된 게임";
   return "내 게임";
 };
 
