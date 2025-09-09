@@ -6,7 +6,7 @@ import { GameSummary } from "@/entities/games/hooks/useMyGameList";
 
 export function GameList({ games }: { games: GameSummary[] }) {
   const mainGame = games[0];
-  const listGames = games.slice(1, 3);
+  const listGames = games.slice(1, 5);
 
   return (
     <div className={styles.gamesContainer}>
@@ -22,7 +22,7 @@ export function GameList({ games }: { games: GameSummary[] }) {
             alt="대표 게임 이미지"
             fill
             style={{ objectFit: "cover" }}
-            sizes="(max-width: 900px) 100vw, 48vw"
+            sizes="(max-width: 900px) 100vw, 24vw"
             priority
           />
           {/* 오버레이 정보 */}
