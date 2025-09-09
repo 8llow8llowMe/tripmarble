@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Image from "next/image";
+import Card from "@/shared/ui/common/Card/Card";
 import styles from "./GameListPage.module.scss";
 import useMyGameListInfinite from "@/entities/games/hooks/useGameListInfinite";
 import { GameStatus } from "@/entities/games/hooks/useMyGameList";
@@ -39,9 +39,7 @@ const GameListPageInner = () => {
     return () => observer.disconnect();
   }, [hasNextPage, fetchNextPage]);
 
-  const handleClick = (gameId: string) => {
-    router.push(`/game/${gameId}`);
-  };
+  // navigation handled by Card href
 
   return (
     <div className={`${styles.pageWrapper} appPage`}>
@@ -58,30 +56,16 @@ const GameListPageInner = () => {
       <section className={styles.grid}>
         {data?.pages.flatMap((page) =>
           page.data.dataBody.contents.map((game) => (
-            <div
+            <Card
               key={game.tripGameId}
-              className={styles.card}
-              onClick={() => handleClick(game.tripGameId)}
-            >
-              <div className={styles.thumb}>
-                <Image
-                  src={
-                    game.representativeRegionImageUrl || "/images/no-image.png"
-                  }
-                  alt={game.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 16rem"
-                  style={{ objectFit: "cover" }}
-                />
-              </div>
-              <div className={styles.meta}>
-                <div className={styles.region}>
-                  {game.representativeRegionName}
-                </div>
-                <div className={styles.name}>{game.title}</div>
-                <div className={styles.date}>{game.startedAt}</div>
-              </div>
-            </div>
+              href={`/game/${game.tripGameId}`}
+              imageUrl={
+                game.representativeRegionImageUrl || "/images/no-image.png"
+              }
+              regionName={game.representativeRegionName}
+              title={game.title}
+              date={game.startedAt}
+            />
           ))
         )}
         <div ref={observerRef} />
