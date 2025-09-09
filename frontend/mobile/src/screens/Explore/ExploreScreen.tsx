@@ -10,26 +10,29 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import jejuImage from '@images/places/jeju2.png';
 import gyeongjuImage from '@images/places/gyeongju.png';
 
 import { useNavigation } from '@react-navigation/native';
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
+import useRepresentativeRegionsListQuery from '@/hooks/trip/useRepresentativeRegionsList';
+import {
+  HeroBannerSection,
+  QuickFilterSection,
+  PopularPlacesSection,
+  TrendKeywordsSection,
+  MagazineSection,
+} from '@/components/ui/explore';
 
 const bgHeight = Dimensions.get('window').height * 0.5;
 const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 가능)
 
 export default function ExploreScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
+  const { representativeRegionsList } = useRepresentativeRegionsListQuery();
 
-  const popularPlaces = [
-    { name: '부산', image: gyeongjuImage, representativeRegionId: '5' },
-    { name: '제주도', image: gyeongjuImage, representativeRegionId: '10' },
-    { name: '강릉', image: gyeongjuImage, representativeRegionId: '6' },
-    { name: '경주', image: gyeongjuImage, representativeRegionId: '8' },
-  ];
+  console.log('🥸🥸🥸', representativeRegionsList);
 
   // 대표여행지 스크린으로 이동
   const goToSpotListScreen = (representativeRegionId: string) => {
@@ -43,11 +46,10 @@ export default function ExploreScreen() {
     <View style={{ flex: 1, backgroundColor: palette.white }}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={{ position: 'relative' }}>
+        {/* <View style={{ position: 'relative' }}>
           <Image source={jejuImage} style={styles.backgroundImage} />
           <View style={styles.overlay} />
-        </View>
-
+        </View> */}
         {/* <View style={[styles.searchBoxWrapper, { top: bgHeight - searchBoxHeight / 2 }]}>
           <TouchableOpacity
             activeOpacity={0.7}
@@ -59,41 +61,12 @@ export default function ExploreScreen() {
             </TextBox>
           </TouchableOpacity>
         </View> */}
-
-        <TextBox size={18} fontsName="Pretendard600" style={styles.sectionTitle}>
-          지금 인기있는 여행지
-        </TextBox>
-        <View style={styles.placeWrapper}>
-          {popularPlaces.map((place, idx) => (
-            <TouchableOpacity
-              key={idx}
-              style={styles.placeItem}
-              activeOpacity={0.7}
-              onPress={() => {
-                goToSpotListScreen(place.representativeRegionId);
-              }}
-            >
-              <View style={styles.placeCircle}>
-                <Image source={place.image} style={styles.placeImage} resizeMode="cover" />
-              </View>
-              <TextBox size={15} color={palette.gray600} style={styles.placeName}>
-                {place.name}
-              </TextBox>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        <TextBox size={18} fontsName="Pretendard600" style={styles.sectionTitle}>
-          현재 진행중인 트립마블
-        </TextBox>
-        <View style={styles.card} />
-        <View style={styles.card} />
-
-        <TextBox size={18} fontsName="Pretendard600" style={styles.sectionTitle}>
-          어떤 것을 넣으면 좋을까
-        </TextBox>
-        <View style={styles.card} />
-        <View style={styles.card} />
+        <HeroBannerSection />
+        {/* <SearchBox /> 검색  */}
+        {/* <QuickFilterSection /> */}
+        <PopularPlacesSection />
+        <TrendKeywordsSection />
+        <MagazineSection />
       </ScrollView>
     </View>
   );
