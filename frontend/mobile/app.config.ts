@@ -44,11 +44,10 @@ const defineConfig = (): ExpoConfig => ({
       backgroundColor: '#ffffff',
     },
     edgeToEdgeEnabled: true,
-    enableHermes: true,
+    jsEngine: 'hermes',
   },
   web: { favicon: './assets/favicon.png' },
   experiments: { reactCanary: true },
-
   extra: {
     APP_ENV: profile,
     EXPO_PUBLIC_AUTH_SERVICE: process.env.EXPO_PUBLIC_AUTH_SERVICE,
