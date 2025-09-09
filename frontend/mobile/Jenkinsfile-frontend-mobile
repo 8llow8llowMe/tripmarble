@@ -90,10 +90,11 @@ pipeline {
                     script {
                         echo "Running expo prebuild (Managed Workflow)"
                         
-                        // Node.js 메모리 설정
+                        // Node.js 메모리 설정 및 Expo prebuild
                         sh '''
                             export NODE_OPTIONS="--max-old-space-size=4096"
-                            npx expo prebuild --platform android --clean
+                            echo "Running expo prebuild with explicit Hermes configuration..."
+                            npx expo prebuild --platform android --clean --no-install
                         '''
                         
                         // prebuild 성공 확인
@@ -125,7 +126,9 @@ pipeline {
                             
                             # app/build.gradle에서 project.ext.react 설정 확인 및 수정
                             if [ -f android/app/build.gradle ]; then
-                                # project.ext.react 블록이 없는 경우 추가
+                                echo "Found android/app/build.gradle, applying Hermes fixes..."
+                                
+                                # 1. project.ext.react 블록이 없는 경우 추가
                                 if ! grep -q "project.ext.react" android/app/build.gradle; then
                                     echo "Adding project.ext.react configuration for jsEngine..."
                                     # android 블록 시작 부분에 추가
@@ -136,17 +139,38 @@ pipeline {
                                     ]' android/app/build.gradle
                                 fi
                                 
-                                # jsEngine 설정에 맞게 Hermes 활성화 확인
-                                if grep -q "hermesEnabled" android/app/build.gradle; then
-                                    echo "Replacing hermesEnabled with enableHermes for jsEngine compatibility..."
-                                    sed -i 's/hermesEnabled/enableHermes/g' android/app/build.gradle
-                                fi
+                                # 2. hermesEnabled를 enableHermes로 완전 교체
+                                echo "Replacing all hermesEnabled references with enableHermes..."
+                                sed -i 's/hermesEnabled/enableHermes/g' android/app/build.gradle
                                 
-                                # jsEngine: hermes와 호환되도록 설정 확인
+                                # 3. dependencies 블록에서 hermesEnabled 참조 제거/수정
+                                echo "Fixing dependencies block hermesEnabled references..."
+                                sed -i '/dependencies {/,/}/ {
+                                    s/if (hermesEnabled)/if (project.ext.react.enableHermes)/g
+                                    s/if (enableHermes)/if (project.ext.react.enableHermes)/g
+                                }' android/app/build.gradle
+                                
+                                # 4. jsEngine: hermes와 호환되도록 설정 확인
                                 if ! grep -q "enableHermes.*true" android/app/build.gradle; then
                                     echo "Ensuring enableHermes is set to true for jsEngine..."
                                     sed -i 's/enableHermes.*false/enableHermes: true/g' android/app/build.gradle
                                 fi
+                                
+                                # 5. React Native 0.79.5 호환성을 위한 추가 설정
+                                echo "Applying React Native 0.79.5 compatibility fixes..."
+                                # hermesEnabled 변수 선언 제거 (있다면)
+                                sed -i '/def hermesEnabled/d' android/app/build.gradle
+                                sed -i '/hermesEnabled =/d' android/app/build.gradle
+                                
+                                # 6. 수정된 내용 확인
+                                echo "Verifying Hermes configuration..."
+                                grep -n "hermesEnabled\|enableHermes\|project.ext.react" android/app/build.gradle || echo "No Hermes config found"
+                                
+                                # 7. build.gradle 파일 내용 일부 출력 (디버깅용)
+                                echo "Build.gradle Hermes-related lines:"
+                                grep -n "hermes\|Hermes" android/app/build.gradle || echo "No Hermes references found"
+                            else
+                                echo "android/app/build.gradle not found, skipping Hermes configuration"
                             fi
                         '''
                     }
