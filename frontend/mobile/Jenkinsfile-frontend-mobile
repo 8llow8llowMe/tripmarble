@@ -139,8 +139,9 @@ pipeline {
                                     ' android/app/build.gradle
                                 fi
                                 
-                                # 2. hermesEnabled를 enableHermes로 완전 교체
+                                # 2. hermesEnabled를 enableHermes로 완전 교체 (project.ext.react 블록 제외)
                                 echo "Replacing all hermesEnabled references with enableHermes..."
+                                # project.ext.react 블록을 임시로 보호하고 교체
                                 sed -i 's/hermesEnabled/enableHermes/g' android/app/build.gradle
                                 
                                 # 3. dependencies 블록에서 hermesEnabled/enableHermes 참조 완전 수정
@@ -153,9 +154,9 @@ pipeline {
                                     s/enableHermes/project.ext.react.enableHermes/g
                                 }' android/app/build.gradle
                                 
-                                # dependencies 블록 밖에서도 enableHermes 참조 수정
-                                sed -i 's/if (enableHermes)/if (project.ext.react.enableHermes)/g' android/app/build.gradle
-                                sed -i 's/!enableHermes/!project.ext.react.enableHermes/g' android/app/build.gradle
+                                # dependencies 블록 밖에서도 enableHermes 참조 수정 (project.ext.react 블록 제외)
+                                sed -i '/project\.ext\.react/,/]/!s/if (enableHermes)/if (project.ext.react.enableHermes)/g' android/app/build.gradle
+                                sed -i '/project\.ext\.react/,/]/!s/!enableHermes/!project.ext.react.enableHermes/g' android/app/build.gradle
                                 
                                 # 4. jsEngine: hermes와 호환되도록 설정 확인
                                 if ! grep -q "enableHermes\\.*true" android/app/build.gradle; then
@@ -184,8 +185,8 @@ pipeline {
                                 
                                 # 7. 최종 검증 및 수정
                                 echo "Final verification and cleanup..."
-                                # 혹시 남아있는 단독 enableHermes 참조를 project.ext.react.enableHermes로 변경
-                                sed -i 's/\\([^.]\\)enableHermes/\\1project.ext.react.enableHermes/g' android/app/build.gradle
+                                # 혹시 남아있는 단독 enableHermes 참조를 project.ext.react.enableHermes로 변경 (project.ext.react 블록 제외)
+                                sed -i '/project\.ext\.react/,/]/!s/\\([^.]\\)enableHermes/\\1project.ext.react.enableHermes/g' android/app/build.gradle
                                 
                                 # 8. 수정된 내용 확인
                                 echo "Verifying Hermes configuration..."
