@@ -53,7 +53,7 @@ const useGameListInfinite = (params?: {
       if (!hasNext || contents.length === 0) return undefined;
       return contents[contents.length - 1].tripGameId;
     },
-    enabled: false,
+    enabled: true,
   });
 };
 
