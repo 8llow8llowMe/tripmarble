@@ -15,15 +15,7 @@ import {
 import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
 import { useGameLists } from '@/hooks/game/useGameList';
 import { useAppSelector } from '@/store/store';
-
-const DUMMY_CONTINUE_TRIP = {
-  id: '101',
-  title: '여수 2박 3일',
-  day: 2,
-  progress: 68,
-  cover:
-    'https://images.unsplash.com/photo-1526481280698-8fcc13fd345d?q=80&w=1600&auto=format&fit=crop',
-};
+import useTripSpotQuery from '@/hooks/trip/useSpot';
 
 const DUMMY_PLACES = [
   {
@@ -97,6 +89,13 @@ export default function HomeScreen() {
   const { nickname } = useAppSelector((state) => state.userReducer);
 
   const { waiting, ongoing, ended } = useGameLists();
+  // const { tripSpot, isLoading, isError, refetch } = useTripSpotQuery({ tripSpotId });
+
+  // 가장 최신의 진행중인 게임 추출
+  const ongoingContents = ongoing.data?.data.dataBody.contents ?? [];
+  const latestTrip = ongoingContents.reduce((latest, item) => {
+    return new Date(item.startedAt) > new Date(latest.startedAt) ? item : latest;
+  }, ongoingContents[0]);
 
   // 진행중인 게임 스크린으로 이동
   const goToGameOngoingScreen = (tripGameId: string) => {
@@ -140,10 +139,20 @@ export default function HomeScreen() {
         {/* 검색 */}
         {/* <SearchSection onPress={() => navigation.navigate('SearchScreen')} /> */}
 
-        {/* 여행 계속하기 */}
-        <ContinueTripSection
-          data={DUMMY_CONTINUE_TRIP}
-          onContinue={() => goToGameOngoingScreen(DUMMY_CONTINUE_TRIP.id)}
+        {/* 내 기록 */}
+        {/* <HistorySection
+          title="나의 게임 기록"
+          data={DUMMY_JOURNALS}
+          // onPressItem={(id) => navigation.navigate('JournalDetail' as never, { id } as never)}
+          onPressMore={() => goToGameListScreen()}
+        /> */}
+
+        {/* 랜덤 여행지 추천 */}
+        <RandomPickSection
+          data={DUMMY_RANDOM_PICK}
+          // onPress={() =>
+          // navigation.navigate('SpotDetailScreen' as never, { id: DUMMY_RANDOM_PICK.id } as never)
+          // }
         />
 
         {/* 추천 여행지 */}
@@ -153,21 +162,10 @@ export default function HomeScreen() {
           onPressItem={goToSpotDetailScreen}
         />
 
-        {/* 내 기록 */}
-        <HistorySection
-          title="내 기록"
-          data={DUMMY_JOURNALS}
-          // onPressItem={(id) => navigation.navigate('JournalDetail' as never, { id } as never)}
-          onPressMore={() => goToGameListScreen()}
-        />
-
-        {/* 랜덤 여행지 추천 */}
-        <RandomPickSection
-          data={DUMMY_RANDOM_PICK}
-          // onPress={() =>
-          // navigation.navigate('SpotDetailScreen' as never, { id: DUMMY_RANDOM_PICK.id } as never)
-          // }
-        />
+        {/* 여행 계속하기 */}
+        {latestTrip && (
+          <ContinueTripSection data={latestTrip} onPressItem={goToGameOngoingScreen} />
+        )}
 
         {/* 친구와 함께하기 배너 */}
         <FriendsBannerSection
