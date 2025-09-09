@@ -164,11 +164,11 @@ pipeline {
                                 
                                 # 6. 수정된 내용 확인
                                 echo "Verifying Hermes configuration..."
-                                grep -n "hermesEnabled\|enableHermes\|project.ext.react" android/app/build.gradle || echo "No Hermes config found"
+                                grep -n "hermesEnabled\\|enableHermes\\|project.ext.react" android/app/build.gradle || echo "No Hermes config found"
                                 
                                 # 7. build.gradle 파일 내용 일부 출력 (디버깅용)
                                 echo "Build.gradle Hermes-related lines:"
-                                grep -n "hermes\|Hermes" android/app/build.gradle || echo "No Hermes references found"
+                                grep -n "hermes\\|Hermes" android/app/build.gradle || echo "No Hermes references found"
                             else
                                 echo "android/app/build.gradle not found, skipping Hermes configuration"
                             fi
