@@ -5,5 +5,5 @@ import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.Trip
 
 public interface TripSpotReviewClientPort {
 
-    TripSpotReviewCreateInternalResponse createTripSpotReview(TripSpotReviewCreateInternalRequest request);
+    TripSpotReviewCreateInternalResponse createTripSpotReview(long tripSpotId, TripSpotReviewCreateInternalRequest request);
 }

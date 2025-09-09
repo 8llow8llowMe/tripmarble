@@ -39,14 +39,13 @@ public class TripGameMissionProcessor {
 
         // 3. 내부 서비스 호출 -> 리뷰 생성
         TripSpotReviewCreateInternalRequest request = TripSpotReviewCreateInternalRequest.builder()
-            .tripSpotId(command.tripSpotId())
             .memberId(memberId)
             .content(command.content())
             .rating(command.rating())
             .photoUrls(command.photoUrls())
             .build();
 
-        TripSpotReviewCreateInternalResponse response = tripSpotReviewClientPort.createTripSpotReview(request);
+        TripSpotReviewCreateInternalResponse response = tripSpotReviewClientPort.createTripSpotReview(command.tripSpotId(), request);
 
         // 4. 성공 처리 후 MoveLog 업데이트 (리뷰 ID 참조 저장)
         TripGameMoveLog updated = context.moveLog().updateMissionResultWithReference(MissionResult.SUCCESS, response.tripSpotReviewId());
