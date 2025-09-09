@@ -6,7 +6,6 @@ import java.util.List;
 
 @Builder
 public record TripSpotReviewCreateInternalRequest(
-    long tripSpotId,
     long memberId,
     String content,
     double rating,
