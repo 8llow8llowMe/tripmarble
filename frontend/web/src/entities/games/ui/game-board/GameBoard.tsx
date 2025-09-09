@@ -16,13 +16,16 @@ import Piece from "@/shared/assets/images/Piece.png";
 import type { StaticImageData } from "next/image";
 import DiceView from "@/entities/games/ui/game-board/diceView";
 
-const CELL_SIZE = 100;
+const CELL_SIZE = 80;
 
 type Props = {
   count?: number;
   tiles: TripGameTileView[];
   onCellClick?: (tile: TripGameTileView, index: number) => void;
   onDiceChange?: (value: number | null) => void;
+  onMoveComplete?: (tile: TripGameTileView | null, tileIndex: number) => void;
+  visitedMarks?: { tripGameTileId: string; order: number; status: string }[];
+  initialStepNo?: number; // 0 = GO, 1 = first tile
 };
 
 export type GameBoardHandle = {
@@ -30,7 +33,15 @@ export type GameBoardHandle = {
 };
 
 const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
-  { count = 5, tiles, onCellClick, onDiceChange }: Props,
+  {
+    count = 5,
+    tiles,
+    onCellClick,
+    onDiceChange,
+    onMoveComplete,
+    visitedMarks,
+    initialStepNo = 0,
+  }: Props,
   ref
 ) {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -136,7 +147,9 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
   });
 
   const [piecePos, setPiecePos] = useState({ x: 0, y: 0 });
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(
+    initialStepNo % (count * 4 - 4)
+  );
   const [isMoving, setIsMoving] = useState(false);
   const [diceValue, setDiceValue] = useState<number | null>(null);
   const [diceVisible, setDiceVisible] = useState(false);
@@ -161,14 +174,25 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     canvas.width = CELL_SIZE * count + 15;
     canvas.height = CELL_SIZE * count + 15;
 
-    // cache clickable rects (top faces only)
-    cellRectsRef.current = boardData.map((cell) => ({
-      index: cell.index,
-      x: cell.col * CELL_SIZE + 10,
-      y: cell.row * CELL_SIZE,
-      w: CELL_SIZE,
-      h: CELL_SIZE,
-    }));
+    // cache clickable rects (top faces only) - stretch top/bottom rows like drawGameBoard3D
+    const STRETCH = 1.15;
+    cellRectsRef.current = boardData.map((cell) => {
+      const isTop = cell.row === 0;
+      const isBottom = cell.row === count - 1;
+      const w = CELL_SIZE;
+      let h = CELL_SIZE;
+      let y = cell.row * CELL_SIZE;
+      if (isTop) {
+        h = Math.floor(CELL_SIZE * STRETCH);
+        // top row grows inward (down)
+      } else if (isBottom) {
+        h = Math.floor(CELL_SIZE * STRETCH);
+        // bottom row grows inward (up)
+        y = cell.row * CELL_SIZE - (h - CELL_SIZE);
+      }
+      const x = cell.col * CELL_SIZE;
+      return { index: cell.index, x, y, w, h };
+    });
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#ecf1fe";
@@ -183,7 +207,40 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
       CELL_SIZE,
       pieceImageRef.current as HTMLImageElement
     );
-  }, [boardData, count, piecePos, imgReadyTick]);
+
+    // === 방문 순서 마커 그리기 ===
+    if (visitedMarks && visitedMarks.length > 0) {
+      visitedMarks.forEach((mark) => {
+        const idx = tiles.findIndex(
+          (t) => t.tripGameTileId === mark.tripGameTileId
+        );
+        if (idx < 0) return;
+        // cellRectsRef에 계산된(스트레치 반영) top-face 사각형을 그대로 사용해 좌표 일치 보장
+        const rect = cellRectsRef.current.find((r) => r.index === idx);
+        if (!rect) return;
+        const cx = rect.x + 18;
+        const cy = rect.y + 18;
+
+        let color = "#5cc58a"; // success 기본
+        if (mark.status === "PENDING") color = "#ff9f43";
+        else if (mark.status === "FAILED") color = "#f05252";
+        else if (mark.status === "SKIPPED") color = "#aab4c6";
+
+        // 원형 배지
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 텍스트
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 12px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(String(mark.order), cx, cy + 1);
+      });
+    }
+  }, [boardData, count, piecePos, imgReadyTick, visitedMarks, tiles]);
 
   // 초기 말 위치 설정 (최초 1회 혹은 count/currentIndex 변경 시)
   useEffect(() => {
@@ -196,6 +253,17 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     const y = start.customY * CELL_SIZE + CELL_SIZE / 2 + 30;
     setPiecePos({ x, y });
   }, [count, currentIndex, piecePos.x, piecePos.y]);
+
+  // 외부에서 초기 스텝이 바뀌면 반영
+  useEffect(() => {
+    const idx = (initialStepNo ?? 0) % (count * 4 - 4);
+    setCurrentIndex(idx);
+    const start = getCustomPosition(idx, count);
+    const x = start.customX * CELL_SIZE + CELL_SIZE / 2 + 10;
+    const y = start.customY * CELL_SIZE + CELL_SIZE / 2 + 30;
+    setPiecePos({ x, y });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialStepNo, count]);
 
   function getParabolaPoint(
     startX: number,
@@ -213,6 +281,14 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
 
     return { x, y };
   }
+  // Adjust piece Y center for stretched top/bottom rows
+  const STRETCH = 1.15;
+  const centerForRow = (row: number) => {
+    let center = row * CELL_SIZE + CELL_SIZE / 2 + 30;
+    if (row === 0) center += ((STRETCH - 1) * CELL_SIZE) / 2;
+    else if (row === count - 1) center -= ((STRETCH - 1) * CELL_SIZE) / 2;
+    return center;
+  };
 
   const animateMove = (steps: number) => {
     if (isMoving) return;
@@ -229,11 +305,11 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
       const toPos = getCustomPosition(toIndex, count);
       const from = {
         x: fromPos.customX * CELL_SIZE + CELL_SIZE / 2 + 10,
-        y: fromPos.customY * CELL_SIZE + CELL_SIZE / 2 + 30,
+        y: centerForRow(fromPos.customY),
       };
       const to = {
         x: toPos.customX * CELL_SIZE + CELL_SIZE / 2 + 10,
-        y: toPos.customY * CELL_SIZE + CELL_SIZE / 2 + 30,
+        y: centerForRow(toPos.customY),
       };
 
       let startTime: number | null = null;
@@ -259,7 +335,12 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
             );
           } else {
             setIsMoving(false);
-            setCurrentIndex(toIndex % boardData.length);
+            const finalIndex = toIndex % boardData.length;
+            setCurrentIndex(finalIndex);
+            // notify move completion with the landed tile (if any)
+            const landedTileIdx = boardData[finalIndex]?.index ?? -1;
+            const landedTile = landedTileIdx >= 0 ? tiles[landedTileIdx] : null;
+            onMoveComplete?.(landedTile ?? null, landedTileIdx);
           }
         }
       }

@@ -32,7 +32,7 @@ export const fetchGetGameDetail = (tripGameId: string) =>
   apiClient.get<ApiResponse<GameDetailResponse>>(`/trip-games/${tripGameId}`);
 
 const useGetGameDetail = (tripGameId: string) => {
-  const { data, isLoading, isError, isSuccess } = useQuery<
+  const { data, isLoading, isError, isSuccess, refetch } = useQuery<
     AxiosResponse<ApiResponse<GameDetailResponse>, Error>
   >({
     queryKey: ["getGameDetail", tripGameId],
@@ -40,8 +40,7 @@ const useGetGameDetail = (tripGameId: string) => {
     enabled: Boolean(tripGameId),
   });
 
-  return { data, isLoading, isError, isSuccess };
+  return { data, isLoading, isError, isSuccess, refetch };
 };
 
 export default useGetGameDetail;
-
