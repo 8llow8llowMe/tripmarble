@@ -158,9 +158,9 @@ pipeline {
                                 sed -i 's/!enableHermes/!project.ext.react.enableHermes/g' android/app/build.gradle
                                 
                                 # 4. jsEngine: hermes와 호환되도록 설정 확인
-                                if ! grep -q "enableHermes.*true" android/app/build.gradle; then
+                                if ! grep -q "enableHermes\\.*true" android/app/build.gradle; then
                                     echo "Ensuring enableHermes is set to true for jsEngine..."
-                                    sed -i 's/enableHermes.*false/enableHermes: true/g' android/app/build.gradle
+                                    sed -i 's/enableHermes\\.*false/enableHermes: true/g' android/app/build.gradle
                                 fi
                                 
                                 # 5. React Native 0.79.5 호환성을 위한 추가 설정
@@ -185,7 +185,7 @@ pipeline {
                                 # 7. 최종 검증 및 수정
                                 echo "Final verification and cleanup..."
                                 # 혹시 남아있는 단독 enableHermes 참조를 project.ext.react.enableHermes로 변경
-                                sed -i 's/\([^.]\)enableHermes/\1project.ext.react.enableHermes/g' android/app/build.gradle
+                                sed -i 's/\\([^.]\\)enableHermes/\\1project.ext.react.enableHermes/g' android/app/build.gradle
                                 
                                 # 8. 수정된 내용 확인
                                 echo "Verifying Hermes configuration..."
