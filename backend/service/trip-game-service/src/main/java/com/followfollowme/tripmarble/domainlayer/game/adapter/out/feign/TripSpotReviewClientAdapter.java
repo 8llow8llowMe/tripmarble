@@ -14,7 +14,7 @@ public class TripSpotReviewClientAdapter implements TripSpotReviewClientPort {
     private final TripSpotReviewClient tripSpotReviewClient;
 
     @Override
-    public TripSpotReviewCreateInternalResponse createTripSpotReview(TripSpotReviewCreateInternalRequest request) {
-        return tripSpotReviewClient.createTripSpotReview(request);
+    public TripSpotReviewCreateInternalResponse createTripSpotReview(long tripSpotId, TripSpotReviewCreateInternalRequest request) {
+        return tripSpotReviewClient.createTripSpotReview(tripSpotId, request);
     }
 }
