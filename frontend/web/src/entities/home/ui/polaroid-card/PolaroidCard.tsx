@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import styles from "./PolaroidStack.module.scss";
+import styles from "../polaroid-stack/PolaroidStack.module.scss";
 
 type Props = {
   id: number | string;

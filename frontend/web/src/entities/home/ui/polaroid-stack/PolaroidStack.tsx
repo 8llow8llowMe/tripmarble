@@ -1,7 +1,7 @@
 "use client";
 
+import PolaroidCard from "@/entities/home/ui/polaroid-card/PolaroidCard";
 import styles from "./PolaroidStack.module.scss";
-import PolaroidCard from "./PolaroidCard";
 
 type Props = {
   className?: string;
@@ -11,17 +11,24 @@ type Props = {
 
 export default function PolaroidStack({
   className = "",
-  count = 5,
+  count = 6,
   items = [],
 }: Props) {
   const list = items.slice(0, count);
+  const angles = [-6, 4, -2, 5, -4, 2];
 
   return (
     <div className={className}>
-      <div className={styles.stack}>
+      <div className={styles.grid}>
         {list.map((item: any, i: number) => (
           <div key={item.id} data-polaroid-card>
-            <div data-polaroid-body style={{ position: "relative" }}>
+            <div
+              data-polaroid-body
+              style={{
+                position: "relative",
+                transform: `rotate(${angles[i % angles.length]}deg)`,
+              }}
+            >
               <PolaroidCard
                 id={item.id}
                 name={item.name}
