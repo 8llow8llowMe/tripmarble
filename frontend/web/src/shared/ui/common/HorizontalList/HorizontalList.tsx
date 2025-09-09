@@ -2,15 +2,12 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useCallback } from "react";
-import useEmblaCarousel from "embla-carousel-react";
-
+import Carousel from "@/shared/ui/common/Carousel/Carousel";
 import styles from "./HorizontalList.module.scss";
 import {
   HorizontalListItem,
   HorizontalListProps,
 } from "@/shared/ui/common/HorizontalList/types";
-import { ArrowLeftIcon, ArrowRightIcon } from "@/shared/assets/icons";
 
 export default function HorizontalList<T>({
   title,
@@ -21,94 +18,41 @@ export default function HorizontalList<T>({
   gap = 12,
   onItemClick,
 }: HorizontalListProps<T>) {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: false,
-    align: "start",
-    slidesToScroll: "auto",
-    containScroll: "trimSnaps",
-    dragFree: true,
-    skipSnaps: true,
-  });
-
-  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
-
   return (
-    <div className={styles.wrapper}>
-      {(title || true) && (
-        <div className={styles.titleRow}>
-          {<h2 className={styles.title}>{title}</h2>}
-          <div className={styles.arrowButtons}>
-            <button onClick={scrollPrev} className={styles.arrow}>
-              <ArrowLeftIcon />
-            </button>
-            <button onClick={scrollNext} className={styles.arrow}>
-              <ArrowRightIcon />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* viewport: gap 변수 주입 (패딩과 트랙 간격을 동기화) */}
-      <div
-        className={styles.embla}
-        ref={emblaRef}
-        style={{ ["--embla-gap" as any]: `${gap}px` }}
-      >
-        {/* track */}
-        <div className={styles.emblaContainer}>
-          {items.map((item: HorizontalListItem, index: number) => {
-            const CardInner = (
-              <div
-                className={styles.itemWrapper}
-                style={{ width: itemWidth, flex: `0 0 ${itemWidth}px` }}
-                onClick={(e) => {
-                  const clickAllowed = (emblaApi as any)?.clickAllowed?.();
-                  if (clickAllowed === false) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
-                  }
-                  if (onItemClick) {
-                    e.preventDefault();
-                    onItemClick(item);
-                  }
-                }}
-              >
-                <div
-                  className={styles.itemThumb}
-                  style={{ height: itemHeight }}
-                >
-                  <Image
-                    src={item.imgUrl}
-                    alt={item.name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 240px"
-                    style={{ objectFit: "cover" }}
-                  />
-                  <div className={styles.thumbOverlay} />
-                  <div className={styles.textOverlay}>
-                    <div className={styles.thumbTitle}>{item.name}</div>
-                    {item.subtitle && (
-                      <div className={styles.thumbSubtitle}>
-                        {item.subtitle}
-                      </div>
-                    )}
-                  </div>
-                </div>
+    <Carousel<HorizontalListItem>
+      title={title}
+      items={items as any}
+      itemWidth={itemWidth}
+      gap={gap}
+      onItemClick={onItemClick as any}
+      renderItem={(item) => {
+        const content = (
+          <div className={styles.itemWrapper} style={{ width: itemWidth }}>
+            <div className={styles.itemThumb} style={{ height: itemHeight }}>
+              <Image
+                src={item.imgUrl}
+                alt={item.name}
+                fill
+                sizes="(max-width: 768px) 100vw, 240px"
+                style={{ objectFit: "cover" }}
+              />
+              <div className={styles.thumbOverlay} />
+              <div className={styles.textOverlay}>
+                <div className={styles.thumbTitle}>{item.name}</div>
+                {item.subtitle && (
+                  <div className={styles.thumbSubtitle}>{item.subtitle}</div>
+                )}
               </div>
-            );
+            </div>
+          </div>
+        );
 
-            return baseHref ? (
-              <Link key={`slide-${index}`} href={`${baseHref}/${item.id}`}>
-                {CardInner}
-              </Link>
-            ) : (
-              <div key={`slide-${index}`}>{CardInner}</div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
+        return baseHref && !onItemClick ? (
+          <Link href={`${baseHref}/${item.id}`}>{content}</Link>
+        ) : (
+          content
+        );
+      }}
+    />
   );
 }
