@@ -4,7 +4,7 @@ import useMyGameList, {
 } from "@/entities/games/hooks/useMyGameList";
 import { useRouter } from "next/navigation";
 import { fetchGameStart } from "@/entities/games/hooks/useGameStart";
-import HorizontalList from "@/shared/ui/common/HorizontalList/HorizontalList";
+import CardList from "@/shared/ui/common/CardList/CardList";
 import Image from "next/image";
 import { NoGame } from "@/shared/assets/images";
 
@@ -26,9 +26,10 @@ export function GameListHorizontal({ type }: { type: GameStatus }) {
 
   const items = (games || []).map((game) => ({
     id: game.tripGameId,
-    name: game.title,
-    imgUrl: game.representativeRegionImageUrl || "/images/no-image.png",
-    subtitle: game.startedAt,
+    imageUrl: game.representativeRegionImageUrl || "/images/no-image.png",
+    regionName: game.representativeRegionName,
+    title: game.title,
+    date: game.startedAt,
   }));
 
   return (
@@ -50,13 +51,12 @@ export function GameListHorizontal({ type }: { type: GameStatus }) {
         </button>
       </div>
       {items.length > 0 ? (
-        <HorizontalList
+        <CardList
           title=""
           items={items}
           itemWidth={250}
-          itemHeight={200}
           gap={18}
-          onItemClick={(item) => handleClick(String(item.id))}
+          onItemClick={(item) => handleClick(item.id)}
         />
       ) : (
         <div className={styles.emptyState} role="status" aria-live="polite">
