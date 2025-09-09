@@ -11,10 +11,7 @@ export function GameList({ games }: { games: GameSummary[] }) {
   return (
     <div className={styles.gamesContainer}>
       <div className={styles.leftBigImage} style={{ cursor: "pointer" }}>
-        <Link
-          key={mainGame.tripGameId}
-          href={`/game-history/${mainGame.tripGameId}`}
-        >
+        <Link key={mainGame.tripGameId} href={`/game/${mainGame.tripGameId}`}>
           <Image
             src={
               mainGame?.representativeRegionImageUrl || "/images/no-image.png"
@@ -43,7 +40,7 @@ export function GameList({ games }: { games: GameSummary[] }) {
         {listGames.map((game) => (
           <Card
             key={game.tripGameId}
-            href={`/game-history/${game.tripGameId}`}
+            href={`/game/${game.tripGameId}`}
             imageUrl={
               game.representativeRegionImageUrl || "/images/no-image.png"
             }
