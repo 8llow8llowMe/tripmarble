@@ -44,6 +44,7 @@ const defineConfig = (): ExpoConfig => ({
       backgroundColor: '#ffffff',
     },
     edgeToEdgeEnabled: true,
+    enableHermes: true,
   },
   web: { favicon: './assets/favicon.png' },
   experiments: { reactCanary: true },
