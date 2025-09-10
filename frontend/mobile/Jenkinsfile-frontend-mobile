@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+    
     // 파라미터
     parameters {
         string(
@@ -120,7 +120,7 @@ pipeline {
                             sed -i "s/project(':app').hermesEnabled/true/g" node_modules/expo/android/build.gradle
                         fi
                         
-                        # gradle.properties
+                        # gradle.properties with AAPT2 workarounds
                         cat > android/gradle.properties << EOF
 org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC
 org.gradle.daemon=false
@@ -131,10 +131,23 @@ org.gradle.caching=false
 android.useAndroidX=true
 android.enableJetifier=false
 hermesEnabled=true
+
+# AAPT2 ARM64 workarounds
+android.enableResourceOptimizations=false
+android.enableNewResourceProcessing=false
+android.enableBuildConfigAsBytecode=false
 EOF
+                        
+                        # Downgrade Gradle wrapper for ARM64 compatibility
+                        if [ -f android/gradle/wrapper/gradle-wrapper.properties ]; then
+                            sed -i 's/gradle-.*-all.zip/gradle-8.6-all.zip/g' android/gradle/wrapper/gradle-wrapper.properties
+                        fi
                         
                         if [ -f android/build.gradle ]; then
                             sed -i '/ext {/a\\        hermesEnabled = true' android/build.gradle
+                            
+                            # Force older AGP version that works better on ARM64
+                            sed -i "s/classpath.*com.android.tools.build:gradle.*/classpath 'com.android.tools.build:gradle:8.5.0'/g" android/build.gradle
                         fi
                         
                         echo "sdk.dir=/opt/android-sdk" > android/local.properties
