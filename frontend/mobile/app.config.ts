@@ -38,7 +38,7 @@ const defineConfig = (): ExpoConfig => ({
   },
   ios: { supportsTablet: true },
   android: {
-    package: 'com.followfolllowme.tripmarble',
+    package: 'com.followfollowme.tripmarble',
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#ffffff',
