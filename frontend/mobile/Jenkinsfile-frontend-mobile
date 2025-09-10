@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+    
     // 파라미터
     parameters {
         string(
@@ -125,9 +125,9 @@ pipeline {
                             sed -i "s/project(':app').hermesEnabled/true/g" node_modules/expo/android/build.gradle
                         fi
                         
-                        # 4. gradle.properties
+                        # 4. gradle.properties - 메모리 1GB로 증가
                         cat > android/gradle.properties << EOF
-org.gradle.jvmargs=-Xmx768m -XX:MaxMetaspaceSize=384m -XX:+UseG1GC
+org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC
 org.gradle.daemon=false
 org.gradle.parallel=false
 org.gradle.workers.max=1
@@ -140,7 +140,6 @@ EOF
                         
                         # 5. rootProject ext block
                         if [ -f android/build.gradle ]; then
-                            # ext 블록에 hermesEnabled 추가 (다른 방법)
                             sed -i '/ext {/a\\        hermesEnabled = true' android/build.gradle
                         fi
                         
