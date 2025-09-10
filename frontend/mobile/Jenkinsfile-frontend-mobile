@@ -39,8 +39,8 @@ pipeline {
         PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-frontend-mobile-prod"
         ANDROID_SDK_ROOT = "/opt/android-sdk"
         ANDROID_HOME = "/opt/android-sdk"
-        GRADLE_OPTS = "-Xmx384m -XX:MaxMetaspaceSize=64m -Dorg.gradle.daemon=false"
-        NODE_OPTIONS = "--max-old-space-size=384"
+        GRADLE_OPTS = "-Xmx768m -XX:MaxMetaspaceSize=256m -Dorg.gradle.daemon=false"
+        NODE_OPTIONS = "--max-old-space-size=768"
     }
 
     stages {
@@ -196,7 +196,7 @@ react {\\
                         
                         # Setup gradle.properties
                         cat > android/gradle.properties << EOF
-org.gradle.jvmargs=-Xmx384m -XX:MaxMetaspaceSize=64m
+org.gradle.jvmargs=-Xmx768m -XX:MaxMetaspaceSize=256m
 org.gradle.daemon=false
 org.gradle.parallel=false
 org.gradle.workers.max=1
@@ -258,11 +258,13 @@ EOF
             steps {
                 dir("${env.FS_PATH}/android") {
                     script {
-                        // Clean Gradle environment
+                        // Clean Gradle environment and download dependencies
                         sh '''
                             echo "=== Gradle Environment Setup ==="
                             ./gradlew --stop || true
-                            rm -rf ~/.gradle/caches/build-cache-* || true
+                            rm -rf ~/.gradle/caches/ || true
+                            rm -rf ~/.gradle/wrapper/ || true
+                            rm -rf .gradle/ || true
                             
                             # Set environment variables
                             export ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT
@@ -281,6 +283,10 @@ EOF
                             # Verify gradle.properties
                             echo "=== gradle.properties content ==="
                             cat gradle.properties | grep -E "(hermesEnabled|NODE_BINARY|org.gradle.jvmargs)" || echo "Key properties not found"
+                            
+                            # Download dependencies first
+                            echo "=== Downloading Gradle Dependencies ==="
+                            ./gradlew --refresh-dependencies --no-daemon --no-parallel --max-workers=1 --info || echo "Dependency download failed, continuing with build"
                         '''
                         
                         // Build based on type
@@ -295,15 +301,14 @@ EOF
                                 --no-parallel \\
                                 --max-workers=1 \\
                                 --stacktrace \\
+                                --info \\
                                 -x test \\
                                 -x lint \\
                                 -x check \\
                                 -x verify \\
                                 -x ktlint \\
                                 -x detekt \\
-                                -x spotbugs \\
-                                --offline \\
-                                --no-build-cache
+                                -x spotbugs
                         """
                         
                         // Verify output
