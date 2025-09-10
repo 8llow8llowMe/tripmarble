@@ -1,6 +1,7 @@
 pipeline {
     agent any
 
+    // 파라미터
     parameters {
         string(
             name: 'SERVICE_GROUP',
@@ -29,38 +30,84 @@ pipeline {
         )
     }
 
+    // 공통 환경 변수
     environment {
+        MODULE_PATH = "frontend/${params.SERVICE_GROUP}"
         FS_PATH = "frontend/${params.SERVICE_GROUP}"
+        ENV_SUBMODULE = 'frontend/mobile/env'
+        DEV_ENV_FILE = "${ENV_SUBMODULE}/.env-frontend-mobile-dev"
+        PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-frontend-mobile-prod"
         GRADLE_OPTS = "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false"
         JAVA_OPTS = "-Xmx2g -XX:MaxMetaspaceSize=512m"
         NODE_OPTIONS = "--max-old-space-size=4096"
     }
 
     stages {
-        stage('Environment Setup') {
+        stage('Environment Info') {
             steps {
                 script {
-                    echo "=== Mobile Build Configuration ==="
+                    echo "=== Build Information ==="
+                    echo "Branch: ${env.BRANCH_NAME}"
+                    echo "Service: ${params.SERVICE_NAME}"
                     echo "Target Branch: ${params.TARGET_BRANCH}"
+                    echo "PR SHA: ${params.PR_SHA ?: 'Not provided'}"
+                    echo "PR Number: ${params.PR_NUMBER ?: 'Not provided'}"
                     
-                    // 환경 설정 - app.config.ts에서 사용
+                    // 타겟 브랜치 기준으로 배포 환경 결정
                     if (params.TARGET_BRANCH == 'main') {
+                        env.DEPLOY_ENV = 'prod'
                         env.APP_ENV = 'production'
                         env.BUILD_TYPE = 'release'
-                    } else {
+                        echo "Deploy Target: Production (based on target branch)"
+                    } else if (params.TARGET_BRANCH == 'develop') {
+                        env.DEPLOY_ENV = 'dev'
                         env.APP_ENV = 'development'
                         env.BUILD_TYPE = 'debug'
+                        echo "Deploy Target: Development (based on target branch)"
+                    } else {
+                        env.DEPLOY_ENV = 'none'
+                        env.APP_ENV = 'development'
+                        env.BUILD_TYPE = 'debug'
+                        echo "Deploy Target: None"
                     }
                     
                     echo "APP_ENV: ${env.APP_ENV}"
                     echo "BUILD_TYPE: ${env.BUILD_TYPE}"
+                    echo "========================="
                 }
             }
         }
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
-                checkout scm
+                script {
+                    // PR SHA가 있으면 해당 커밋 체크아웃, 없으면 브랜치 HEAD 사용
+                    if (params.PR_SHA && params.PR_SHA != '') {
+                        echo "Checking out PR commit: ${params.PR_SHA}"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: params.PR_SHA]],
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                            extensions: [
+                                [$class: 'SubmoduleOption',
+                                 recursiveSubmodules: true,
+                                 parentCredentials: true]
+                            ]
+                        ])
+                    } else {
+                        echo "Using PR branch code (Jenkins 멀티브랜치가 자동으로 PR 브랜치 체크아웃)"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: scm.branches,
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                            extensions: [
+                                [$class: 'SubmoduleOption',
+                                 recursiveSubmodules: true,
+                                 parentCredentials: true]
+                            ]
+                        ])
+                    }
+                }
             }
         }
 
@@ -103,7 +150,7 @@ pipeline {
             }
         }
 
-        stage('Prebuild Android') {
+        stage('Build Application') {
             steps {
                 dir("${env.FS_PATH}") {
                     script {
@@ -236,31 +283,39 @@ EOF
                     }
                 }
             }
-        }
-
-        stage('Archive Artifacts') {
-            steps {
-                dir("${env.FS_PATH}/android") {
-                    script {
-                        if (env.BUILD_TYPE == 'release') {
-                            archiveArtifacts artifacts: 'app/build/outputs/bundle/release/*.aab', 
-                                           fingerprint: true
-                        } else {
-                            archiveArtifacts artifacts: 'app/build/outputs/apk/debug/*.apk', 
-                                           fingerprint: true
-                        }
-                    }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'app/build/outputs/**/*', 
+                                   fingerprint: true
                 }
             }
         }
 
-        stage('Deploy to Play Store') {
+
+        stage('Deploy to Dev') {
             when {
-                expression { env.BUILD_TYPE == 'release' }
+                // 타겟 브랜치가 develop인 경우 dev 환경에 배포
+                expression { params.TARGET_BRANCH == 'develop' }
+            }
+            steps {
+                script {
+                    echo "Deploying ${params.SERVICE_NAME} to Development"
+                    
+                    // 개발 환경에서는 빌드만 확인하고 배포하지 않음
+                    echo "Development deployment skipped - build verification only"
+                }
+            }
+        }
+
+        stage('Deploy to Prod') {
+            when {
+                // 타겟 브랜치가 main인 경우 prod 환경에 배포
+                expression { params.TARGET_BRANCH == 'main' }
             }
             steps {
                 dir("${env.FS_PATH}") {
                     script {
+                        echo "Deploying ${params.SERVICE_NAME} to Production"
                         echo "Deploying to Google Play Store"
                         
                         withCredentials([
@@ -289,12 +344,6 @@ EOF
     }
 
     post {
-        success {
-            echo 'Build completed successfully!'
-        }
-        failure {
-            echo 'Build failed. Check the logs above.'
-        }
         always {
             script {
                 // Cleanup
