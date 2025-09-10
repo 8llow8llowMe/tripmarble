@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     // 파라미터
     parameters {
         string(
@@ -31,6 +31,14 @@ pipeline {
     }
 
     // 공통 환경 변수
+    parameters {
+        string(name: 'SERVICE_GROUP', defaultValue: 'mobile', description: '상위 모듈 디렉터리')
+        string(name: 'SERVICE_NAME', defaultValue: 'mobile', description: '서비스 이름')
+        string(name: 'TARGET_BRANCH', defaultValue: 'develop', description: 'PR 타겟 브랜치')
+        string(name: 'PR_SHA', defaultValue: '', description: 'PR 커밋 SHA')
+        string(name: 'PR_NUMBER', defaultValue: '', description: 'PR 번호')
+    }
+
     environment {
         FS_PATH = "frontend/${params.SERVICE_GROUP}"
         ANDROID_SDK_ROOT = "/opt/android-sdk"
@@ -125,16 +133,16 @@ pipeline {
                             sed -i "s/project(':app').hermesEnabled/true/g" node_modules/expo/android/build.gradle
                         fi
                         
-                        # 4. gradle.properties - 메모리 1GB로 증가
+                        # 4. gradle.properties - 메모리 1.5GB로 증가 + Jetifier 비활성화
                         cat > android/gradle.properties << EOF
-org.gradle.jvmargs=-Xmx1024m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC
+org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200
 org.gradle.daemon=false
 org.gradle.parallel=false
 org.gradle.workers.max=1
 org.gradle.configureondemand=false
 org.gradle.caching=false
 android.useAndroidX=true
-android.enableJetifier=true
+android.enableJetifier=false
 hermesEnabled=true
 EOF
                         
@@ -146,7 +154,11 @@ EOF
                         # local.properties
                         echo "sdk.dir=/opt/android-sdk" > android/local.properties
                         
-                        echo "hermesEnabled fix completed"
+                        # Gradle 캐시 정리
+                        rm -rf ~/.gradle/caches/transforms-* || true
+                        rm -rf ~/.gradle/caches/journal-* || true
+                        
+                        echo "Configuration completed"
                     '''
                 }
             }
