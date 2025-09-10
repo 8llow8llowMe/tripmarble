@@ -1,7 +1,6 @@
 pipeline {
     agent any
 
-    // 파라미터
     parameters {
         string(
             name: 'SERVICE_GROUP',
@@ -34,25 +33,32 @@ pipeline {
         FS_PATH = "frontend/${params.SERVICE_GROUP}"
         GRADLE_OPTS = "-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=false"
         JAVA_OPTS = "-Xmx2g -XX:MaxMetaspaceSize=512m"
+        NODE_OPTIONS = "--max-old-space-size=4096"
     }
 
     stages {
-        stage('Environment Info') {
+        stage('Environment Setup') {
             steps {
                 script {
-                    echo "=== Mobile Build Information ==="
-                    echo "Branch: ${env.BRANCH_NAME}"
+                    echo "=== Mobile Build Configuration ==="
                     echo "Target Branch: ${params.TARGET_BRANCH}"
+                    
+                    // 환경 설정 - app.config.ts에서 사용
                     if (params.TARGET_BRANCH == 'main') {
-                        env.DEPLOY_ENV = 'prod'
+                        env.APP_ENV = 'production'
+                        env.BUILD_TYPE = 'release'
                     } else {
-                        env.DEPLOY_ENV = 'dev'
+                        env.APP_ENV = 'development'
+                        env.BUILD_TYPE = 'debug'
                     }
+                    
+                    echo "APP_ENV: ${env.APP_ENV}"
+                    echo "BUILD_TYPE: ${env.BUILD_TYPE}"
                 }
             }
         }
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
@@ -70,14 +76,22 @@ pipeline {
             steps {
                 dir("${env.FS_PATH}") {
                     script {
-                        echo "Verifying environment variables..."
                         sh '''
-                            echo "Checking env files:"
-                            ls -la env/
-                            echo "Development env content:"
-                            cat env/.env-frontend-mobile-dev || echo "Dev env file not found"
-                            echo "Production env content:"
-                            cat env/.env-frontend-mobile-prod || echo "Prod env file not found"
+                            echo "=== Environment Files Check ==="
+                            if [ "${APP_ENV}" = "production" ]; then
+                                ENV_FILE="env/.env-frontend-mobile-prod"
+                            else
+                                ENV_FILE="env/.env-frontend-mobile-dev"
+                            fi
+                            
+                            if [ -f "$ENV_FILE" ]; then
+                                echo "Using environment file: $ENV_FILE"
+                                echo "Environment variables loaded:"
+                                grep "EXPO_PUBLIC_" "$ENV_FILE" | sed 's/=.*/=***/' || true
+                            else
+                                echo "Environment file not found: $ENV_FILE"
+                                exit 1
+                            fi
                         '''
                     }
                 }
@@ -88,84 +102,55 @@ pipeline {
             steps {
                 dir("${env.FS_PATH}") {
                     script {
-                        echo "Running expo prebuild (Managed Workflow)"
+                        echo "Running Expo prebuild for ${env.APP_ENV}"
                         
-                        // Node.js 메모리 설정 및 Expo prebuild
+                        // Expo prebuild with environment
                         sh '''
-                            export NODE_OPTIONS="--max-old-space-size=4096"
-                            echo "Running expo prebuild with explicit Hermes configuration..."
+                            export APP_ENV="${APP_ENV}"
+                            echo "Building with APP_ENV=${APP_ENV}"
+                            
+                            # Clean prebuild
                             npx expo prebuild --platform android --clean --no-install
+                            
+                            # Verify prebuild
+                            if [ ! -f android/gradlew ]; then
+                                echo "Error: gradlew not generated"
+                                exit 1
+                            fi
+                            chmod +x android/gradlew
                         '''
                         
-                        // prebuild 성공 확인
-                        sh 'ls -la android/'
-                        sh 'test -f android/gradlew && echo "gradlew found" || echo "gradlew NOT found"'
-                        sh 'chmod +x android/gradlew'
-                        
-                        // Android 프로젝트의 gradle.properties 설정 (안정성 우선)
+                        // Fix React Native configuration for Expo SDK 53
                         sh '''
-                            echo "Setting up Android Gradle properties for stability..."
-                            cat > android/gradle.properties << EOF
-                            org.gradle.daemon=false
-                            org.gradle.parallel=false
-                            org.gradle.configureondemand=false
-                            org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
-                            org.gradle.caching=false
-                            org.gradle.workers.max=1
+                            echo "=== Configuring for Expo SDK 53 ==="
                             
-                            # React Native Hermes configuration (Expo SDK 53 jsEngine)
-                            project.ext.react = [
-                                enableHermes: true
-                            ]
-                            EOF
-                        '''
-                        
-                        // Hermes 설정 수정 (간단하고 안전한 방식)
-                        sh '''
-                            echo "Fixing Hermes configuration for Expo SDK 53 jsEngine..."
-                            
-                            # app/build.gradle에서 Hermes 설정 수정
+                            # Remove old project.ext.react configuration
                             if [ -f android/app/build.gradle ]; then
-                                echo "Found android/app/build.gradle, applying Hermes fixes..."
+                                # Remove old config block
+                                sed -i '/project\\.ext\\.react = \\[/,/^\\]/d' android/app/build.gradle
                                 
-                                # 1. project.ext.react 블록이 없는 경우 추가
-                                if ! grep -q "project.ext.react" android/app/build.gradle; then
-                                    echo "Adding project.ext.react configuration..."
-                                    cat > temp_react_config.txt << 'EOF'
-project.ext.react = [
-    enableHermes: true
-]
-
-EOF
-                                    cat temp_react_config.txt android/app/build.gradle > temp_build.gradle
-                                    mv temp_build.gradle android/app/build.gradle
-                                    rm temp_react_config.txt
+                                # Add new react {} block if not exists
+                                if ! grep -q "^react {" android/app/build.gradle; then
+                                    # Find apply plugin line
+                                    PLUGIN_LINE=$(grep -n "apply plugin: \\"com.facebook.react\\"" android/app/build.gradle | cut -d: -f1)
+                                    
+                                    if [ ! -z "$PLUGIN_LINE" ]; then
+                                        sed -i "${PLUGIN_LINE}a\\
+\\
+react {\\
+    hermesEnabled = true\\
+}" android/app/build.gradle
+                                        echo "Added new react {} configuration"
+                                    fi
                                 fi
                                 
-                                # 2. hermesEnabled를 enableHermes로 교체
-                                echo "Replacing hermesEnabled with enableHermes..."
-                                sed -i 's/hermesEnabled/enableHermes/g' android/app/build.gradle
-                                
-                                # 3. enableHermes 참조를 project.ext.react.enableHermes로 교체 (단순한 방법)
-                                echo "Fixing enableHermes references..."
-                                sed -i 's/if (enableHermes)/if (project.ext.react.enableHermes)/g' android/app/build.gradle
-                                sed -i 's/!enableHermes/!project.ext.react.enableHermes/g' android/app/build.gradle
-                                
-                                # 4. 변수 선언 제거
-                                echo "Removing variable declarations..."
-                                sed -i '/def hermesEnabled/d' android/app/build.gradle
-                                sed -i '/def enableHermes/d' android/app/build.gradle
-                                sed -i '/hermesEnabled =/d' android/app/build.gradle
-                                sed -i '/enableHermes =/d' android/app/build.gradle
-                                
-                                # 5. 수정된 내용 확인
-                                echo "Verifying Hermes configuration..."
-                                echo "=== Hermes-related lines ==="
-                                grep -n "hermesEnabled\\|enableHermes\\|project.ext.react" android/app/build.gradle || echo "No Hermes config found"
-                                echo "=== project.ext.react block ==="
-                                grep -A 3 "project.ext.react" android/app/build.gradle || echo "project.ext.react block not found"
-                            else
-                                echo "android/app/build.gradle not found, skipping Hermes configuration"
+                                # Verify configuration
+                                if grep -q "^react {" android/app/build.gradle; then
+                                    echo "React configuration verified"
+                                else
+                                    echo "React configuration missing"
+                                    exit 1
+                                fi
                             fi
                         '''
                     }
@@ -173,29 +158,31 @@ EOF
             }
         }
 
-        stage('Setup Keystore') {
+        stage('Setup Signing') {
             when {
-                expression { params.TARGET_BRANCH == 'main' }
+                expression { env.BUILD_TYPE == 'release' }
             }
             steps {
                 dir("${env.FS_PATH}/android") {
                     script {
-                        echo "Injecting Android keystore for release build"
-                        
-                        // Production 빌드용 credentials 설정
-                        env.ANDROID_KEYSTORE = credentials('android-keystore')
-                        env.ANDROID_KEYSTORE_PASS = credentials('android-keystore-pass')
-                        env.ANDROID_KEY_ALIAS = credentials('android-key-alias')
-                        env.ANDROID_KEY_PASS = credentials('android-key-pass')
-
-                        sh 'cp ${ANDROID_KEYSTORE} app/keystore.jks'
-
-                        sh '''
-                            echo "MYAPP_UPLOAD_STORE_FILE=keystore.jks" >> gradle.properties
-                            echo "MYAPP_UPLOAD_KEY_ALIAS=${ANDROID_KEY_ALIAS}" >> gradle.properties
-                            echo "MYAPP_UPLOAD_STORE_PASSWORD=${ANDROID_KEYSTORE_PASS}" >> gradle.properties
-                            echo "MYAPP_UPLOAD_KEY_PASSWORD=${ANDROID_KEY_PASS}" >> gradle.properties
-                        '''
+                        withCredentials([
+                            file(credentialsId: 'android-keystore', variable: 'KEYSTORE'),
+                            string(credentialsId: 'android-keystore-pass', variable: 'KEYSTORE_PASS'),
+                            string(credentialsId: 'android-key-alias', variable: 'KEY_ALIAS'),
+                            string(credentialsId: 'android-key-pass', variable: 'KEY_PASS')
+                        ]) {
+                            sh '''
+                                cp ${KEYSTORE} app/keystore.jks
+                                
+                                cat >> gradle.properties << EOF
+MYAPP_UPLOAD_STORE_FILE=keystore.jks
+MYAPP_UPLOAD_KEY_ALIAS=${KEY_ALIAS}
+MYAPP_UPLOAD_STORE_PASSWORD=${KEYSTORE_PASS}
+MYAPP_UPLOAD_KEY_PASSWORD=${KEY_PASS}
+EOF
+                                echo "Signing configuration added"
+                            '''
+                        }
                     }
                 }
             }
@@ -205,36 +192,42 @@ EOF
             steps {
                 dir("${env.FS_PATH}/android") {
                     script {
-                        // gradlew 파일 존재 확인
-                        sh 'test -f gradlew || (echo "gradlew not found, listing directory:" && ls -la && exit 1)'
-                        sh 'chmod +x gradlew'
-                        
-                        // Gradle 데몬 완전 비활성화 및 안정성 설정
+                        // Clean Gradle environment
                         sh '''
-                            echo "Cleaning up existing Gradle daemons..."
                             ./gradlew --stop || true
-                            pkill -f gradle || true
-                            
-                            echo "Setting up Gradle properties for maximum stability..."
-                            cat > gradle.properties << EOF
-                            org.gradle.daemon=false
-                            org.gradle.parallel=false
-                            org.gradle.configureondemand=false
-                            org.gradle.jvmargs=-Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
-                            org.gradle.caching=false
-                            org.gradle.workers.max=1
-                            EOF
+                            rm -rf ~/.gradle/caches/build-cache-* || true
                         '''
                         
-                        // 빌드 실행
-                        def buildCommand = params.TARGET_BRANCH == 'main' ? 
-                            './gradlew clean bundleRelease --no-daemon --no-parallel --max-workers=1 --stacktrace' :
-                            './gradlew clean assembleDebug --no-daemon --no-parallel --max-workers=1 --stacktrace'
+                        // Build based on type
+                        def buildTask = env.BUILD_TYPE == 'release' ? 
+                            'bundleRelease' : 'assembleDebug'
                         
-                        def buildType = params.TARGET_BRANCH == 'main' ? 'signed AAB' : 'debug APK'
+                        echo "Building ${env.BUILD_TYPE} (${buildTask})"
                         
-                        echo "Building ${buildType}"
-                        sh buildCommand
+                        sh """
+                            ./gradlew clean ${buildTask} \\
+                                --no-daemon \\
+                                --no-parallel \\
+                                --max-workers=1 \\
+                                --stacktrace
+                        """
+                        
+                        // Verify output
+                        sh '''
+                            if [ "${BUILD_TYPE}" = "release" ]; then
+                                OUTPUT_FILE="app/build/outputs/bundle/release/app-release.aab"
+                            else
+                                OUTPUT_FILE="app/build/outputs/apk/debug/app-debug.apk"
+                            fi
+                            
+                            if [ -f "$OUTPUT_FILE" ]; then
+                                echo "Build successful: $OUTPUT_FILE"
+                                ls -lh "$OUTPUT_FILE"
+                            else
+                                echo "Build output not found"
+                                exit 1
+                            fi
+                        '''
                     }
                 }
             }
@@ -244,10 +237,12 @@ EOF
             steps {
                 dir("${env.FS_PATH}/android") {
                     script {
-                        if (params.TARGET_BRANCH == 'main') {
-                            archiveArtifacts artifacts: 'app/build/outputs/bundle/release/*.aab', fingerprint: true
+                        if (env.BUILD_TYPE == 'release') {
+                            archiveArtifacts artifacts: 'app/build/outputs/bundle/release/*.aab', 
+                                           fingerprint: true
                         } else {
-                            archiveArtifacts artifacts: 'app/build/outputs/apk/debug/*.apk', fingerprint: true
+                            archiveArtifacts artifacts: 'app/build/outputs/apk/debug/*.apk', 
+                                           fingerprint: true
                         }
                     }
                 }
@@ -256,29 +251,32 @@ EOF
 
         stage('Deploy to Play Store') {
             when {
-                expression { params.TARGET_BRANCH == 'main' }
+                expression { env.BUILD_TYPE == 'release' }
             }
             steps {
                 dir("${env.FS_PATH}") {
                     script {
-                        echo "Deploying AAB to Google Play Store"
+                        echo "Deploying to Google Play Store"
                         
-                        // Google Play Store credentials 설정
-                        env.PLAY_SERVICE_ACCOUNT_JSON = credentials('google-play-service-json')
-
-                        writeFile file: 'google-play-service-account.json', text: "${env.PLAY_SERVICE_ACCOUNT_JSON}"
-
-                        sh '''
-                            fastlane supply --aab android/app/build/outputs/bundle/release/app-release.aab \\
-                                            --track production \\
-                                            --json_key google-play-service-account.json \\
-                                            --skip_upload_metadata \\
-                                            --skip_upload_images \\
-                                            --skip_upload_screenshots
-                        '''
-
-                        sh 'rm -f google-play-service-account.json'
-                        sh 'rm -f android/app/keystore.jks'
+                        withCredentials([
+                            file(credentialsId: 'google-play-service-json', variable: 'PLAY_JSON')
+                        ]) {
+                            sh '''
+                                cp ${PLAY_JSON} google-play-service-account.json
+                                
+                                fastlane supply \\
+                                    --aab android/app/build/outputs/bundle/release/app-release.aab \\
+                                    --track production \\
+                                    --json_key google-play-service-account.json \\
+                                    --skip_upload_metadata \\
+                                    --skip_upload_images \\
+                                    --skip_upload_screenshots
+                                
+                                # Cleanup
+                                rm -f google-play-service-account.json
+                                rm -f android/app/keystore.jks
+                            '''
+                        }
                     }
                 }
             }
@@ -286,20 +284,24 @@ EOF
     }
 
     post {
+        success {
+            echo 'Build completed successfully!'
+        }
+        failure {
+            echo 'Build failed. Check the logs above.'
+        }
         always {
             script {
-                // Gradle 데몬 정리
-                try {
-                    dir("${env.FS_PATH}/android") {
-                        sh './gradlew --stop || true'
-                    }
-                } catch (Exception e) {
-                    echo "Failed to stop Gradle daemon: ${e.getMessage()}"
+                // Cleanup
+                dir("${env.FS_PATH}") {
+                    sh '''
+                        if [ -d android ]; then
+                            cd android
+                            ./gradlew --stop || true
+                        fi
+                    '''
                 }
-                
-                if (env.NODE_NAME) {
-                    cleanWs()
-                }
+                cleanWs()
             }
         }
     }
