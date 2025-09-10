@@ -1,6 +1,7 @@
 pipeline {
     agent any
 
+    // 파라미터
     parameters {
         string(
             name: 'SERVICE_GROUP',
@@ -29,126 +30,118 @@ pipeline {
         )
     }
 
+    // 공통 환경 변수
     environment {
         MODULE_PATH = "frontend/${params.SERVICE_GROUP}"
         FS_PATH = "frontend/${params.SERVICE_GROUP}"
         ENV_SUBMODULE = 'frontend/mobile/env'
-        
-        // 메모리 최적화 설정 (라즈베리파이용)
-        GRADLE_OPTS = "-Xmx768m -XX:MaxMetaspaceSize=256m -XX:+UseG1GC -Dorg.gradle.daemon=false"
-        JAVA_OPTS = "-Xmx768m -XX:MaxMetaspaceSize=256m"
+        DEV_ENV_FILE = "${ENV_SUBMODULE}/.env-frontend-mobile-dev"
+        PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-frontend-mobile-prod"
+        GRADLE_OPTS = "-Xmx768m -XX:MaxMetaspaceSize=256m -Dorg.gradle.daemon=false"
         NODE_OPTIONS = "--max-old-space-size=1536"
-        _JAVA_OPTIONS = "-Xmx768m"
     }
 
     stages {
-        stage('System Check') {
+        stage('Environment Info') {
             steps {
                 script {
-                    sh '''
-                        echo "=== System Resources ==="
-                        free -h
-                        df -h /
-                        swapon --show
-                    '''
-                }
-            }
-        }
-
-        stage('Environment Setup') {
-            steps {
-                script {
+                    echo "=== Build Information ==="
+                    echo "Branch: ${env.BRANCH_NAME}"
+                    echo "Service: ${params.SERVICE_NAME}"
+                    echo "Target Branch: ${params.TARGET_BRANCH}"
+                    echo "PR SHA: ${params.PR_SHA ?: 'Not provided'}"
+                    echo "PR Number: ${params.PR_NUMBER ?: 'Not provided'}"
+                    
+                    // 타겟 브랜치 기준으로 배포 환경 결정
                     if (params.TARGET_BRANCH == 'main') {
                         env.DEPLOY_ENV = 'prod'
                         env.APP_ENV = 'production'
                         env.BUILD_TYPE = 'release'
-                    } else {
+                        echo "Deploy Target: Production (based on target branch)"
+                    } else if (params.TARGET_BRANCH == 'develop') {
                         env.DEPLOY_ENV = 'dev'
                         env.APP_ENV = 'development'
                         env.BUILD_TYPE = 'debug'
+                        echo "Deploy Target: Development (based on target branch)"
+                    } else {
+                        env.DEPLOY_ENV = 'none'
+                        env.APP_ENV = 'development'
+                        env.BUILD_TYPE = 'debug'
+                        echo "Deploy Target: None"
                     }
-                    echo "APP_ENV: ${env.APP_ENV}, BUILD_TYPE: ${env.BUILD_TYPE}"
+                    
+                    echo "APP_ENV: ${env.APP_ENV}"
+                    echo "BUILD_TYPE: ${env.BUILD_TYPE}"
+                    echo "========================="
                 }
             }
         }
 
         stage('Checkout Code') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: params.PR_SHA ? [[name: params.PR_SHA]] : scm.branches,
-                    userRemoteConfigs: scm.userRemoteConfigs,
-                    extensions: [
-                        [$class: 'SubmoduleOption',
-                         recursiveSubmodules: true,
-                         parentCredentials: true]
-                    ]
-                ])
+                script {
+                    // PR SHA가 있으면 해당 커밋 체크아웃, 없으면 브랜치 HEAD 사용
+                    if (params.PR_SHA && params.PR_SHA != '') {
+                        echo "Checking out PR commit: ${params.PR_SHA}"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: params.PR_SHA]],
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                            extensions: [
+                                [$class: 'SubmoduleOption',
+                                 recursiveSubmodules: true,
+                                 parentCredentials: true]
+                            ]
+                        ])
+                    } else {
+                        echo "Using PR branch code (Jenkins 멀티브랜치가 자동으로 PR 브랜치 체크아웃)"
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: scm.branches,
+                            userRemoteConfigs: scm.userRemoteConfigs,
+                            extensions: [
+                                [$class: 'SubmoduleOption',
+                                 recursiveSubmodules: true,
+                                 parentCredentials: true]
+                            ]
+                        ])
+                    }
+                }
             }
         }
 
         stage('Install Dependencies') {
             steps {
                 dir("${env.FS_PATH}") {
-                    sh '''
-                        # 캐시 정리로 공간 확보
-                        yarn cache clean
-                        rm -rf node_modules
-                        yarn install --frozen-lockfile --network-timeout 100000
-                    '''
+                    sh 'yarn install --frozen-lockfile --network-timeout 100000'
                 }
             }
         }
 
-        stage('Prebuild Android') {
+        stage('Verify Environment') {
             steps {
                 dir("${env.FS_PATH}") {
                     script {
                         sh '''
-                            export APP_ENV="${APP_ENV}"
+                            echo "=== Environment Files Check ==="
+                            if [ "${APP_ENV}" = "production" ]; then
+                                ENV_FILE="env/.env-frontend-mobile-prod"
+                            else
+                                ENV_FILE="env/.env-frontend-mobile-dev"
+                            fi
                             
-                            # 이전 빌드 제거
-                            rm -rf android ios
+                            echo "Looking for environment file: $ENV_FILE"
+                            echo "Current directory: $(pwd)"
+                            echo "Files in env directory:"
+                            ls -la env/ || echo "env directory not found"
                             
-                            # Prebuild
-                            npx expo prebuild --platform android --clean --no-install
-                            chmod +x android/gradlew
-                        '''
-                        
-                        // gradle.properties 최적화
-                        sh '''
-                            cat > android/gradle.properties << 'EOF'
-# 메모리 최적화 설정
-org.gradle.jvmargs=-Xmx768m -XX:MaxMetaspaceSize=256m -XX:+UseG1GC
-org.gradle.daemon=false
-org.gradle.parallel=false
-org.gradle.configureondemand=false
-org.gradle.caching=false
-org.gradle.workers.max=1
-
-# 빌드 최적화
-android.enableR8.fullMode=false
-android.enableBuildCache=false
-android.useAndroidX=true
-android.enableJetifier=true
-EOF
-                        '''
-                        
-                        // React Native 설정
-                        sh '''
-                            if [ -f android/app/build.gradle ]; then
-                                sed -i '/project\\.ext\\.react = \\[/,/^\\]/d' android/app/build.gradle
-                                
-                                if ! grep -q "^react {" android/app/build.gradle; then
-                                    PLUGIN_LINE=$(grep -n "apply plugin: \\"com.facebook.react\\"" android/app/build.gradle | cut -d: -f1)
-                                    if [ ! -z "$PLUGIN_LINE" ]; then
-                                        sed -i "${PLUGIN_LINE}a\\
-\\
-react {\\
-    hermesEnabled = true\\
-}" android/app/build.gradle
-                                    fi
-                                fi
+                            if [ -f "$ENV_FILE" ]; then
+                                echo "Using environment file: $ENV_FILE"
+                                echo "Environment variables loaded:"
+                                grep "EXPO_PUBLIC_" "$ENV_FILE" | sed 's/=.*/=***/' || true
+                            else
+                                echo "Environment file not found: $ENV_FILE"
+                                exit 1
                             fi
                         '''
                     }
@@ -156,10 +149,36 @@ react {\\
             }
         }
 
-        stage('Setup Signing') {
-            when {
-                expression { env.BUILD_TYPE == 'release' }
+        stage('Build Application') {
+            steps {
+                dir("${env.FS_PATH}") {
+                    sh '''
+                        export APP_ENV="${APP_ENV}"
+                        
+                        # Clean and prebuild
+                        rm -rf android ios
+                        npx expo prebuild --platform android --clean --no-install
+                        chmod +x android/gradlew
+                        
+                        # Fix hermesEnabled error - replace with true
+                        sed -i 's/hermesEnabled/true/g' android/app/build.gradle
+                        
+                        # Setup gradle.properties
+                        cat > android/gradle.properties << EOF
+org.gradle.jvmargs=-Xmx768m -XX:MaxMetaspaceSize=256m
+org.gradle.daemon=false
+org.gradle.parallel=false
+org.gradle.workers.max=1
+android.useAndroidX=true
+android.enableJetifier=true
+EOF
+                    '''
+                }
             }
+        }
+
+        stage('Setup Signing') {
+            when { expression { env.BUILD_TYPE == 'release' } }
             steps {
                 dir("${env.FS_PATH}/android") {
                     withCredentials([
@@ -170,180 +189,118 @@ react {\\
                     ]) {
                         sh '''
                             cp ${KEYSTORE} app/keystore.jks
-                            
-                            cat >> gradle.properties << EOF
-MYAPP_UPLOAD_STORE_FILE=keystore.jks
-MYAPP_UPLOAD_KEY_ALIAS=${KEY_ALIAS}
-MYAPP_UPLOAD_STORE_PASSWORD=${KEYSTORE_PASS}
-MYAPP_UPLOAD_KEY_PASSWORD=${KEY_PASS}
-EOF
+                            echo "MYAPP_UPLOAD_STORE_FILE=keystore.jks" >> gradle.properties
+                            echo "MYAPP_UPLOAD_KEY_ALIAS=${KEY_ALIAS}" >> gradle.properties
+                            echo "MYAPP_UPLOAD_STORE_PASSWORD=${KEYSTORE_PASS}" >> gradle.properties
+                            echo "MYAPP_UPLOAD_KEY_PASSWORD=${KEY_PASS}" >> gradle.properties
                         '''
                     }
                 }
             }
         }
 
-        stage('Build APK') {
+        stage('Build Android') {
             steps {
                 dir("${env.FS_PATH}/android") {
                     script {
-                        // Gradle 정리
-                        sh '''
-                            ./gradlew --stop || true
-                            pkill -f gradle || true
-                            rm -rf ~/.gradle/caches/transforms-* || true
-                            rm -rf ~/.gradle/caches/build-cache-* || true
-                        '''
+                        // Clean gradle
+                        sh './gradlew --stop || true'
                         
-                        // APK 빌드 (AAB보다 메모리 적게 사용)
-                        def apkTask = env.BUILD_TYPE == 'release' ? 
-                            'assembleRelease' : 'assembleDebug'
-                        
-                        sh """
-                            export GRADLE_OPTS="-Xmx768m -XX:MaxMetaspaceSize=256m -Dorg.gradle.daemon=false"
-                            
-                            echo "Building APK first (less memory than AAB)..."
-                            ./gradlew clean ${apkTask} \\
-                                --no-daemon \\
-                                --no-parallel \\
-                                --max-workers=1 \\
-                                --no-build-cache \\
-                                --info
-                        """
-                        
-                        // APK 확인
-                        sh '''
-                            if [ "${BUILD_TYPE}" = "release" ]; then
-                                APK_FILE="app/build/outputs/apk/release/app-release.apk"
-                            else
-                                APK_FILE="app/build/outputs/apk/debug/app-debug.apk"
-                            fi
-                            
-                            if [ -f "$APK_FILE" ]; then
-                                echo "✓ APK built successfully"
-                                ls -lh "$APK_FILE"
-                            else
-                                echo "✗ APK build failed"
-                                exit 1
-                            fi
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Convert to AAB') {
-            when {
-                expression { env.BUILD_TYPE == 'release' }
-            }
-            steps {
-                dir("${env.FS_PATH}/android") {
-                    script {
-                        sh '''
-                            echo "Converting APK to AAB..."
-                            
-                            # 메모리 정리
-                            ./gradlew --stop || true
-                            sync
-                            echo 3 | sudo tee /proc/sys/vm/drop_caches || true
-                            
-                            # bundletool 다운로드 (없으면)
-                            if [ ! -f bundletool.jar ]; then
-                                wget -q https://github.com/google/bundletool/releases/latest/download/bundletool-all.jar -O bundletool.jar
-                            fi
-                            
-                            # APK에서 AAB 생성 시도 (방법 1: 직접 bundle 빌드)
-                            echo "Building AAB with minimal memory..."
-                            export GRADLE_OPTS="-Xmx512m -XX:MaxMetaspaceSize=256m -Dorg.gradle.daemon=false"
-                            
-                            # 이미 APK가 빌드되어 있으므로 리소스가 준비됨
-                            # bundleRelease를 실행하되 이미 컴파일된 것을 재사용
-                            ./gradlew bundleRelease \\
-                                --no-daemon \\
-                                --no-parallel \\
-                                --max-workers=1 \\
-                                --no-build-cache \\
-                                -x lint \\
-                                -x test \\
-                                --rerun-tasks=false || {
-                                
-                                # 실패 시 대안: universal APK를 AAB로 변환
-                                echo "Direct bundle failed, trying alternative..."
-                                
-                                # Universal APK 생성
-                                ./gradlew packageRelease --no-daemon
-                                
-                                # bundletool로 변환 (실험적)
-                                java -jar bundletool.jar build-apks \\
-                                    --mode=universal \\
-                                    --bundle=app/build/outputs/apk/release/app-release.apk \\
-                                    --output=app/build/outputs/bundle/release/app.aab \\
-                                    --ks=app/keystore.jks \\
-                                    --ks-pass=pass:${KEYSTORE_PASS} \\
-                                    --ks-key-alias=${KEY_ALIAS} \\
-                                    --key-pass=pass:${KEY_PASS} || echo "Bundletool conversion failed"
-                            }
-                            
-                            # AAB 확인
-                            AAB_FILE="app/build/outputs/bundle/release/app-release.aab"
-                            if [ -f "$AAB_FILE" ]; then
-                                echo "✓ AAB created successfully"
-                                ls -lh "$AAB_FILE"
-                                
-                                # AAB 검증
-                                java -jar bundletool.jar validate --bundle="$AAB_FILE"
-                            else
-                                echo "✗ AAB creation failed"
-                                echo "Checking for any AAB files:"
-                                find . -name "*.aab" -type f
-                                exit 1
-                            fi
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Archive Artifacts') {
-            steps {
-                dir("${env.FS_PATH}/android") {
-                    script {
                         if (env.BUILD_TYPE == 'release') {
-                            archiveArtifacts artifacts: 'app/build/outputs/bundle/release/*.aab, app/build/outputs/apk/release/*.apk', 
-                                           fingerprint: true,
-                                           allowEmptyArchive: false
+                            // Production: Build AAB for Play Store
+                            sh '''
+                                ./gradlew clean bundleRelease \
+                                    --no-daemon \
+                                    --no-parallel \
+                                    --max-workers=1 \
+                                    -x test \
+                                    -x lint
+                            '''
+                            
+                            sh '''
+                                if [ -f app/build/outputs/bundle/release/app-release.aab ]; then
+                                    echo "AAB built successfully"
+                                    ls -lh app/build/outputs/bundle/release/app-release.aab
+                                else
+                                    echo "AAB build failed"
+                                    exit 1
+                                fi
+                            '''
                         } else {
-                            archiveArtifacts artifacts: 'app/build/outputs/apk/debug/*.apk', 
-                                           fingerprint: true
+                            // Development: Build APK only
+                            sh '''
+                                ./gradlew clean assembleDebug \
+                                    --no-daemon \
+                                    --no-parallel \
+                                    --max-workers=1
+                            '''
+                            
+                            sh '''
+                                if [ -f app/build/outputs/apk/debug/app-debug.apk ]; then
+                                    echo "APK built successfully"
+                                    ls -lh app/build/outputs/apk/debug/app-debug.apk
+                                else
+                                    echo "APK build failed"
+                                    exit 1
+                                fi
+                            '''
                         }
                     }
                 }
             }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'app/build/outputs/**/*', 
+                                   fingerprint: true
+                }
+            }
         }
 
-        stage('Deploy to Play Store') {
+        stage('Deploy to Dev') {
             when {
+                // 타겟 브랜치가 develop인 경우 dev 환경에 배포
+                expression { params.TARGET_BRANCH == 'develop' }
+            }
+            steps {
+                script {
+                    echo "Deploying ${params.SERVICE_NAME} to Development"
+                    
+                    // 개발 환경에서는 빌드만 확인하고 배포하지 않음
+                    echo "Development deployment skipped - build verification only"
+                }
+            }
+        }
+
+        stage('Deploy to Prod') {
+            when {
+                // 타겟 브랜치가 main인 경우 prod 환경에 배포
                 expression { params.TARGET_BRANCH == 'main' }
             }
             steps {
                 dir("${env.FS_PATH}") {
-                    withCredentials([
-                        file(credentialsId: 'google-play-service-json', variable: 'PLAY_JSON')
-                    ]) {
-                        sh '''
-                            cp ${PLAY_JSON} google-play-service-account.json
-                            
-                            fastlane supply \\
-                                --aab android/app/build/outputs/bundle/release/app-release.aab \\
-                                --track production \\
-                                --json_key google-play-service-account.json \\
-                                --skip_upload_metadata \\
-                                --skip_upload_images \\
-                                --skip_upload_screenshots
-                            
-                            rm -f google-play-service-account.json
-                            rm -f android/app/keystore.jks
-                        '''
+                    script {
+                        echo "Deploying ${params.SERVICE_NAME} to Production"
+                        echo "Deploying to Google Play Store"
+                        
+                        withCredentials([
+                            file(credentialsId: 'google-play-service-json', variable: 'PLAY_JSON')
+                        ]) {
+                            sh '''
+                                cp ${PLAY_JSON} google-play-service-account.json
+                                
+                                fastlane supply \
+                                    --aab android/app/build/outputs/bundle/release/app-release.aab \
+                                    --track production \
+                                    --json_key google-play-service-account.json \
+                                    --skip_upload_metadata \
+                                    --skip_upload_images \
+                                    --skip_upload_screenshots
+                                
+                                # Cleanup
+                                rm -f google-play-service-account.json
+                                rm -f android/app/keystore.jks
+                            '''
+                        }
                     }
                 }
             }
@@ -352,22 +309,7 @@ EOF
 
     post {
         always {
-            script {
-                dir("${env.FS_PATH}") {
-                    sh '''
-                        if [ -d android ]; then
-                            cd android
-                            ./gradlew --stop || true
-                        fi
-                        
-                        # 메모리 정리
-                        rm -rf android/build
-                        rm -rf android/app/build
-                        rm -rf ~/.gradle/caches/journal-*
-                    '''
-                }
-                cleanWs()
-            }
+            cleanWs()
         }
     }
 }
