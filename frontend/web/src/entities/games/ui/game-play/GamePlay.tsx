@@ -17,7 +17,11 @@ import useReviewMission from "@/entities/games/hooks/useReviewMission";
 import useMoveLogFail from "@/entities/games/hooks/useMoveLogFail";
 import useMoveLogSkip from "@/entities/games/hooks/useMoveLogSkip";
 import useGetGameDetail from "@/entities/games/hooks/useGetGameDetail";
+import useGameEndMutation from "@/entities/games/hooks/useGameEnd";
 import { useQueryClient } from "@tanstack/react-query";
+import { DotThreeIcon } from "@/shared/assets/icons";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 type Props = {
   tripGameView: TripGameView;
@@ -35,13 +39,15 @@ const GamePlay = ({
   const { data: moveLogsRes, refetch: refetchMoveLogs } = useGetMoveLogs(
     tripGameView.tripGameId
   );
-  const { refetch: refetchGameDetail } = useGetGameDetail(
+  const { data: gameDetailRes, refetch: refetchGameDetail } = useGetGameDetail(
     tripGameView.tripGameId
   );
+  const { mutateAsync: endGame, isPending: isEnding } = useGameEndMutation();
   const { mutateAsync: submitReview, isPending: isSubmittingReview } =
     useReviewMission();
   const { mutateAsync: markFail, isPending: isMarkingFail } = useMoveLogFail();
   const { mutateAsync: markSkip, isPending: isMarkingSkip } = useMoveLogSkip();
+  const router = useRouter();
   const dateRange = useMemo(
     () =>
       `${formatDate(new Date(tripGameView.startedAt))} - ${formatDate(
@@ -49,6 +55,22 @@ const GamePlay = ({
       )}`,
     [tripGameView.startedAt, tripGameView.endedAt]
   );
+
+  // 보드 크기를 난이도에 따라 유동 할당 (모바일과 동일 로직)
+  const boardCount = useMemo(() => {
+    const code = tripGameView.difficultyCode as
+      | "EASY"
+      | "NORMAL"
+      | "HARD"
+      | string;
+    return code === "EASY"
+      ? 4
+      : code === "NORMAL"
+      ? 5
+      : code === "HARD"
+      ? 6
+      : 5;
+  }, [tripGameView.difficultyCode]);
 
   const [activeStep, setActiveStep] = useState<number>(1);
   const activeTile = useMemo(
@@ -95,10 +117,18 @@ const GamePlay = ({
     }
   }, [moveLogsRes?.data?.dataBody]);
 
-  const isGameEnd = useMemo(
-    () => sortedLogs[sortedLogs.length - 1]?.missionResultCode === "GAME_END",
-    [sortedLogs]
-  );
+  const isDetailEnded = useMemo(() => {
+    try {
+      return Boolean(gameDetailRes?.data?.dataBody?.endTypeCode);
+    } catch {
+      return false;
+    }
+  }, [gameDetailRes]);
+  const isGameEnd = useMemo(() => {
+    const byLogs =
+      sortedLogs[sortedLogs.length - 1]?.missionResultCode === "GAME_END";
+    return byLogs || isDetailEnded;
+  }, [sortedLogs, isDetailEnded]);
 
   const formatKST = (iso: string) => {
     try {
@@ -146,6 +176,39 @@ const GamePlay = ({
     setModalTile(null);
   };
 
+  // Options menu (three-dot) state
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const menuBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (menuRef.current?.contains(target)) return;
+      if (menuBtnRef.current?.contains(target)) return;
+      setMenuOpen(false);
+    };
+    if (menuOpen) document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, [menuOpen]);
+
+  const confirmEndGame = async () => {
+    setMenuOpen(false);
+    const ok = window.confirm("게임을 종료할까요? 종료하면 되돌릴 수 없어요.");
+    if (!ok) return;
+    try {
+      await endGame(tripGameView.tripGameId);
+      toast.success("게임이 종료되었습니다.");
+      try {
+        await Promise.all([refetchMoveLogs(), refetchGameDetail()]);
+      } catch (_) {}
+      router.push("/game/list");
+    } catch (e) {
+      toast.error("게임 종료 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.");
+    }
+  };
+
   const handleRollDice = async () => {
     // 최종 확인: 서버의 최신 로그 기준으로 PENDING 유무 재확인
     const refreshed = await refetchMoveLogs();
@@ -177,10 +240,7 @@ const GamePlay = ({
     // 도착 타일을 즉시 허용하여 모달/타일 클릭으로 바로 인증 가능
     setMissionReadyTileId(landedTileId);
     setCanRollDice(false);
-    // 서버 이동 로그를 즉시 최신화하여 타임라인/상태 동기화
-    try {
-      await refetchMoveLogs();
-    } catch (_) {}
+    // 이동/미션 UI는 이동 완료 시(onMoveComplete) 리패치하여 동기화
     // 4초 후에 이동 시작
     // setTimeout(() => {
     boardRef.current?.animateMove(dice);
@@ -270,27 +330,50 @@ const GamePlay = ({
     <div className={`${styles.detailWrapper} appPage`}>
       {/* Header */}
       <div className={styles.header}>
-        <div className={styles.title}>
-          {tripGameView.representativeRegionName} 여행
-        </div>
-        <div className={styles.metaRow}>
-          <div className={styles.tripDate}>{dateRange}</div>
-          <div className={styles.badge}>
-            {tripGameView.difficultyDescription}
+        <div className={styles.headerTop}>
+          <div className={styles.title}>
+            {tripGameView.representativeRegionName} 여행
           </div>
-        </div>
-        <div className={styles.themeRow}>
-          {(tripGameView.tripThemeNames || []).join(" · ")}
+          {!isGameEnd && (
+            <div className={styles.headerActions}>
+              <button
+                ref={menuBtnRef}
+                className={styles.moreBtn}
+                aria-label="옵션 메뉴 열기"
+                onClick={() => setMenuOpen((v) => !v)}
+              >
+                <DotThreeIcon size={22} />
+              </button>
+              {menuOpen && (
+                <div className={styles.menu} ref={menuRef} role="menu">
+                  <button
+                    className={styles.menuItem}
+                    onClick={confirmEndGame}
+                    disabled={isEnding}
+                    role="menuitem"
+                  >
+                    게임 종료하기
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
-
+      <div className={styles.metaRow}>
+        <div className={styles.tripDate}>{dateRange}</div>
+        <div className={styles.badge}>{tripGameView.difficultyDescription}</div>
+      </div>
+      <div className={styles.themeRow}>
+        {(tripGameView.tripThemeNames || []).join(" · ")}
+      </div>
       {/* Content two columns */}
       <div className={styles.content}>
         {/* Board */}
         <div className={styles.boardContainer}>
           <GameBoard
             ref={boardRef}
-            count={5}
+            count={boardCount}
             tiles={tripGameTileViews}
             initialStepNo={isGameEnd ? 0 : initialStepNo}
             visitedMarks={sortedLogs.map((log, i) => ({
@@ -334,6 +417,7 @@ const GamePlay = ({
             onSubmitReview={handleMissionReviewSubmit}
             onSkip={handleMissionSkip}
             onFail={handleMissionFail}
+            onRequestEndGame={confirmEndGame}
           />
         )}
 

@@ -5,12 +5,66 @@
   max-width: 840px;
   margin: 0 auto;
   padding: 40px;
-  gap: 16px;
+  gap: 8px;
   width: 100%;
 }
 
 .header {
   width: 100%;
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerActions {
+  position: relative;
+}
+
+.moreBtn {
+  border: none;
+  background: transparent;
+  padding: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #0f1b2a;
+  &:hover {
+    background: #f1f5fb;
+  }
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  top: 34px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 27, 42, 0.12);
+  padding: 6px;
+  min-width: 160px;
+  z-index: 30;
+}
+
+.menuItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  color: #d23434;
+  cursor: pointer;
+  &:hover {
+    background: #fff1f1;
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
 .title {
@@ -32,7 +86,11 @@
 }
 .themeRow {
   color: #70829a;
-  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 12px;
 }
 .badge {
   background: #eef3fb;
@@ -52,8 +110,8 @@
 }
 
 .boardContainer {
-  width: 100%;
-  max-width: 680px;
+  width: auto;
+  max-width: 500px;
   aspect-ratio: 1 / 1.15;
   display: flex;
   justify-content: center;
@@ -148,8 +206,8 @@
 }
 
 .moveButton {
-  width: 100%;
-  max-width: 680px;
+  width: auto;
+  max-width: 500px;
   padding: 14px 22px;
   border-radius: 12px;
   background: #ff6a00;
@@ -157,6 +215,7 @@
   font-weight: 800;
   border: none;
   box-shadow: 0 8px 20px rgba(255, 106, 0, 0.25);
+  cursor: pointer;
 }
 
 .boardText {
@@ -185,6 +244,7 @@
   border-radius: 12px;
   font-weight: 700;
   color: #6f7f97;
+  cursor: pointer;
 }
 .segActive {
   background: #fff;
@@ -194,6 +254,7 @@
 .endedGameText {
   text-align: center;
   color: #4b5563;
+  margin-bottom: 6px;
 }
 
 @media (max-width: 900px) {
