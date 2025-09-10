@@ -39,8 +39,8 @@ pipeline {
         PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-frontend-mobile-prod"
         ANDROID_SDK_ROOT = "/opt/android-sdk"
         ANDROID_HOME = "/opt/android-sdk"
-        GRADLE_OPTS = "-Xmx768m -XX:MaxMetaspaceSize=256m -Dorg.gradle.daemon=false"
-        NODE_OPTIONS = "--max-old-space-size=768"
+        GRADLE_OPTS = "-Xmx384m -XX:MaxMetaspaceSize=64m -Dorg.gradle.daemon=false -XX:+UseG1GC -XX:MaxGCPauseMillis=100"
+        NODE_OPTIONS = "--max-old-space-size=384"
     }
 
     stages {
@@ -196,7 +196,7 @@ react {\\
                         
                         # Setup gradle.properties
                         cat > android/gradle.properties << EOF
-org.gradle.jvmargs=-Xmx768m -XX:MaxMetaspaceSize=256m
+org.gradle.jvmargs=-Xmx384m -XX:MaxMetaspaceSize=64m -XX:+UseG1GC -XX:MaxGCPauseMillis=100
 org.gradle.daemon=false
 org.gradle.parallel=false
 org.gradle.workers.max=1
@@ -284,9 +284,9 @@ EOF
                             echo "=== gradle.properties content ==="
                             cat gradle.properties | grep -E "(hermesEnabled|NODE_BINARY|org.gradle.jvmargs)" || echo "Key properties not found"
                             
-                            # Download dependencies first
+                            # Download dependencies first (separate step)
                             echo "=== Downloading Gradle Dependencies ==="
-                            ./gradlew --refresh-dependencies --no-daemon --no-parallel --max-workers=1 --info || echo "Dependency download failed, continuing with build"
+                            timeout 300 ./gradlew --refresh-dependencies --no-daemon --no-parallel --max-workers=1 --info || echo "Dependency download timeout or failed"
                         '''
                         
                         // Build based on type
@@ -296,7 +296,11 @@ EOF
                         echo "Building ${env.BUILD_TYPE} (${buildTask})"
                         
                         sh """
-                            ./gradlew clean ${buildTask} \\
+                            echo "=== Starting Build with Memory Monitoring ==="
+                            free -h
+                            
+                            # Build with timeout and memory monitoring
+                            timeout 1800 ./gradlew clean ${buildTask} \\
                                 --no-daemon \\
                                 --no-parallel \\
                                 --max-workers=1 \\
@@ -308,7 +312,9 @@ EOF
                                 -x verify \\
                                 -x ktlint \\
                                 -x detekt \\
-                                -x spotbugs
+                                -x spotbugs \\
+                                -x generateCodegenSchemaFromJavaScript \\
+                                -x generateCodegenArtifactsFromSchema
                         """
                         
                         // Verify output
