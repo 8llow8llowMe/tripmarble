@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+    
     // 파라미터
     parameters {
         string(
@@ -36,11 +36,11 @@ pipeline {
         ANDROID_SDK_ROOT = "/opt/android-sdk"
         ANDROID_HOME = "/opt/android-sdk"
         
-        // 메모리 설정 - 6GB 스왑 활용 (Heap 늘리고 Metaspace 충분히)
-        GRADLE_OPTS = "-Xmx768m -XX:MaxMetaspaceSize=384m -Dorg.gradle.daemon=false"
-        JAVA_OPTS = "-Xmx768m -XX:MaxMetaspaceSize=384m"
-        NODE_OPTIONS = "--max-old-space-size=1536"
-        _JAVA_OPTIONS = "-Xmx768m"
+        // 메모리 설정 - 1.5GB 사용
+        GRADLE_OPTS = "-Xmx1536m -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false"
+        JAVA_OPTS = "-Xmx1536m -XX:MaxMetaspaceSize=512m"
+        NODE_OPTIONS = "--max-old-space-size=1024"
+        _JAVA_OPTIONS = "-Xmx1536m"
     }
 
     stages {
@@ -84,9 +84,9 @@ pipeline {
                         fi
                         
                         if [ -f "$ENV_FILE" ]; then
-                            echo "Using environment file: $ENV_FILE"
+                            echo "✓ Environment file found: $ENV_FILE"
                         else
-                            echo "Environment file not found: $ENV_FILE"
+                            echo "✗ Environment file not found: $ENV_FILE"
                             exit 1
                         fi
                     '''
@@ -105,29 +105,24 @@ pipeline {
                         npx expo prebuild --platform android --clean --no-install
                         chmod +x android/gradlew
                         
-                        # Fix hermesEnabled references
-                        echo "Fixing hermesEnabled references..."
-                        
-                        # 1. app/build.gradle
+                        # Fix hermesEnabled
                         if [ -f android/app/build.gradle ]; then
                             sed -i 's/hermesEnabled/true/g' android/app/build.gradle
                         fi
                         
-                        # 2. expo-modules-core
                         if [ -f node_modules/expo-modules-core/android/build.gradle ]; then
                             sed -i "s/project(':app').hermesEnabled/true/g" node_modules/expo-modules-core/android/build.gradle
                             sed -i "s/rootProject.ext.has('hermesEnabled')/true/g" node_modules/expo-modules-core/android/build.gradle
                             sed -i "s/rootProject.ext.hermesEnabled/true/g" node_modules/expo-modules-core/android/build.gradle
                         fi
                         
-                        # 3. expo module
                         if [ -f node_modules/expo/android/build.gradle ]; then
                             sed -i "s/project(':app').hermesEnabled/true/g" node_modules/expo/android/build.gradle
                         fi
                         
-                        # 4. gradle.properties - 메모리 1.5GB로 증가 + Jetifier 비활성화
+                        # gradle.properties
                         cat > android/gradle.properties << EOF
-org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC -XX:MaxGCPauseMillis=200
+org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC
 org.gradle.daemon=false
 org.gradle.parallel=false
 org.gradle.workers.max=1
@@ -138,19 +133,11 @@ android.enableJetifier=false
 hermesEnabled=true
 EOF
                         
-                        # 5. rootProject ext block
                         if [ -f android/build.gradle ]; then
                             sed -i '/ext {/a\\        hermesEnabled = true' android/build.gradle
                         fi
                         
-                        # local.properties
                         echo "sdk.dir=/opt/android-sdk" > android/local.properties
-                        
-                        # Gradle 캐시 정리
-                        rm -rf ~/.gradle/caches/transforms-* || true
-                        rm -rf ~/.gradle/caches/journal-* || true
-                        
-                        echo "Configuration completed"
                     '''
                 }
             }
@@ -182,27 +169,36 @@ EOF
             steps {
                 dir("${env.FS_PATH}/android") {
                     script {
-                        // Gradle 정리
-                        sh './gradlew --stop || true'
+                        // Clean everything
+                        sh '''
+                            ./gradlew --stop || true
+                            pkill -f aapt2 || true
+                            rm -rf ~/.gradle/caches/transforms-*
+                            rm -rf ~/.gradle/caches/8.*/transforms/
+                            rm -rf build/
+                            rm -rf app/build/
+                        '''
                         
                         def buildTask = env.BUILD_TYPE == 'release' ? 'bundleRelease' : 'assembleDebug'
                         
+                        // Build with AAPT2 workarounds
                         sh """
-                            # 메모리 상태 확인
-                            echo "=== Memory Status ==="
+                            echo "=== System Status ==="
                             free -h
+                            df -h /
                             
-                            # 빌드 실행
+                            # Build with AAPT optimizations
                             ./gradlew clean ${buildTask} \\
                                 --no-daemon \\
                                 --no-parallel \\
                                 --max-workers=1 \\
+                                -Pandroid.enableAapt2=false \\
                                 -x test \\
                                 -x lint \\
-                                --info
+                                --stacktrace
                         """
                         
-                        // 결과 확인
+                        // Verify output
                         sh '''
                             if [ "${BUILD_TYPE}" = "release" ]; then
                                 OUTPUT="app/build/outputs/bundle/release/app-release.aab"
@@ -211,10 +207,11 @@ EOF
                             fi
                             
                             if [ -f "$OUTPUT" ]; then
-                                echo "Build successful"
+                                echo "✓ Build successful"
                                 ls -lh "$OUTPUT"
                             else
-                                echo "Build failed - output not found"
+                                echo "✗ Build failed"
+                                find app/build/outputs -name "*.apk" -o -name "*.aab" 2>/dev/null || true
                                 exit 1
                             fi
                         '''
@@ -228,9 +225,9 @@ EOF
                 dir("${env.FS_PATH}/android") {
                     script {
                         if (env.BUILD_TYPE == 'release') {
-                            archiveArtifacts artifacts: 'app/build/outputs/bundle/release/*.aab'
+                            archiveArtifacts artifacts: 'app/build/outputs/bundle/release/*.aab', allowEmptyArchive: false
                         } else {
-                            archiveArtifacts artifacts: 'app/build/outputs/apk/debug/*.apk'
+                            archiveArtifacts artifacts: 'app/build/outputs/apk/debug/*.apk', allowEmptyArchive: false
                         }
                     }
                 }
