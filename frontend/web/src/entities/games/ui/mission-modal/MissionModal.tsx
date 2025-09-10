@@ -115,7 +115,7 @@ export default function MissionModal({
           >
             <div>
               <div className={styles.row}>
-                <div className={styles.label}>별점</div>
+                <div className={styles.label}>별점*</div>
                 <div className={styles.stars}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <span
@@ -131,7 +131,7 @@ export default function MissionModal({
                 </div>
               </div>
               <div className={styles.row}>
-                <div className={styles.label}>리뷰(최소 20자)</div>
+                <div className={styles.label}>리뷰(최소 20자)*</div>
                 <textarea
                   className={styles.textarea}
                   value={content}
