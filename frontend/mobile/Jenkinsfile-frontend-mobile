@@ -37,8 +37,10 @@ pipeline {
         ENV_SUBMODULE = 'frontend/mobile/env'
         DEV_ENV_FILE = "${ENV_SUBMODULE}/.env-frontend-mobile-dev"
         PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-frontend-mobile-prod"
-        GRADLE_OPTS = "-Xmx768m -XX:MaxMetaspaceSize=256m -Dorg.gradle.daemon=false"
-        NODE_OPTIONS = "--max-old-space-size=1536"
+        ANDROID_SDK_ROOT = "/opt/android-sdk"
+        ANDROID_HOME = "/opt/android-sdk"
+        GRADLE_OPTS = "-Xmx2048m -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false"
+        NODE_OPTIONS = "--max-old-space-size=2048"
     }
 
     stages {
@@ -162,42 +164,69 @@ pipeline {
                         
                         # Fix hermesEnabled configuration
                         if [ -f android/app/build.gradle ]; then
-                            # Remove old project.ext.react configuration
-                            sed -i '/project\\.ext\\.react = \\[/,/^\\]/d' android/app/build.gradle
+                            echo "=== Fixing hermesEnabled configuration ==="
                             
-                            # Add new react {} block if not exists
-                            if ! grep -q "^react {" android/app/build.gradle; then
-                                # Find apply plugin line
-                                PLUGIN_LINE=$(grep -n "apply plugin: \\"com.facebook.react\\"" android/app/build.gradle | cut -d: -f1)
-                                
-                                if [ ! -z "$PLUGIN_LINE" ]; then
-                                    sed -i "${PLUGIN_LINE}a\\
+                            # Remove all existing react configurations
+                            sed -i '/project\\.ext\\.react = \\[/,/^\\]/d' android/app/build.gradle
+                            sed -i '/^react {/,/^}/d' android/app/build.gradle
+                            
+                            # Find the line with apply plugin: "com.facebook.react"
+                            PLUGIN_LINE=$(grep -n "apply plugin: \\"com.facebook.react\\"" android/app/build.gradle | cut -d: -f1)
+                            
+                            if [ ! -z "$PLUGIN_LINE" ]; then
+                                # Add react configuration after the plugin line
+                                sed -i "${PLUGIN_LINE}a\\
 \\
 react {\\
     hermesEnabled = true\\
 }" android/app/build.gradle
-                                    echo "Added new react {} configuration"
-                                fi
+                                echo "Added react configuration after line $PLUGIN_LINE"
+                            else
+                                echo "Warning: Could not find React plugin line"
                             fi
                             
-                            # Verify configuration
-                            if grep -q "^react {" android/app/build.gradle; then
-                                echo "React configuration verified"
-                            else
-                                echo "React configuration missing"
-                                exit 1
-                            fi
+                            # Also add to gradle.properties as backup
+                            echo "hermesEnabled=true" >> android/gradle.properties
+                            
+                            # Verify the configuration
+                            echo "=== Verifying configuration ==="
+                            grep -A 3 "react {" android/app/build.gradle || echo "React block not found"
+                            grep "hermesEnabled" android/gradle.properties || echo "hermesEnabled not in gradle.properties"
                         fi
                         
                         # Setup gradle.properties
                         cat > android/gradle.properties << EOF
-org.gradle.jvmargs=-Xmx768m -XX:MaxMetaspaceSize=256m
+org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
 org.gradle.daemon=false
 org.gradle.parallel=false
 org.gradle.workers.max=1
 android.useAndroidX=true
 android.enableJetifier=true
+hermesEnabled=true
+newArchEnabled=false
+NODE_BINARY=$(which node)
 EOF
+                        
+                        # Setup local.properties for Android SDK
+                        cat > android/local.properties << EOF
+sdk.dir=/opt/android-sdk
+EOF
+                        
+                        # Verify environment setup
+                        echo "=== Environment Verification ==="
+                        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+                        echo "ANDROID_HOME: $ANDROID_HOME"
+                        echo "NODE_BINARY: $(which node)"
+                        echo "GRADLE_OPTS: $GRADLE_OPTS"
+                        echo "NODE_OPTIONS: $NODE_OPTIONS"
+                        
+                        # Verify Android SDK
+                        ls -la $ANDROID_SDK_ROOT || echo "Android SDK not found"
+                        ls -la $ANDROID_SDK_ROOT/platform-tools || echo "Platform tools not found"
+                        
+                        # Verify Node.js
+                        which node && node --version || echo "Node.js not found"
+                        which npm && npm --version || echo "npm not found"
                     '''
                 }
             }
@@ -231,8 +260,24 @@ EOF
                     script {
                         // Clean Gradle environment
                         sh '''
+                            echo "=== Gradle Environment Setup ==="
                             ./gradlew --stop || true
                             rm -rf ~/.gradle/caches/build-cache-* || true
+                            
+                            # Set environment variables
+                            export ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT
+                            export ANDROID_HOME=$ANDROID_HOME
+                            export GRADLE_OPTS="$GRADLE_OPTS"
+                            export NODE_OPTIONS="$NODE_OPTIONS"
+                            
+                            # Verify environment
+                            echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+                            echo "GRADLE_OPTS: $GRADLE_OPTS"
+                            echo "NODE_OPTIONS: $NODE_OPTIONS"
+                            
+                            # Verify gradle.properties
+                            echo "=== gradle.properties content ==="
+                            cat gradle.properties | grep -E "(hermesEnabled|NODE_BINARY|org.gradle.jvmargs)" || echo "Key properties not found"
                         '''
                         
                         // Build based on type
