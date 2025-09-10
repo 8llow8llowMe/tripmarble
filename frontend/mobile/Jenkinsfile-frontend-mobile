@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     // 파라미터
     parameters {
         string(
@@ -181,18 +181,17 @@ EOF
                         
                         def buildTask = env.BUILD_TYPE == 'release' ? 'bundleRelease' : 'assembleDebug'
                         
-                        // Build with AAPT2 workarounds
+                        // Build without deprecated options
                         sh """
                             echo "=== System Status ==="
                             free -h
                             df -h /
                             
-                            # Build with AAPT optimizations
+                            # Build with optimizations
                             ./gradlew clean ${buildTask} \\
                                 --no-daemon \\
                                 --no-parallel \\
                                 --max-workers=1 \\
-                                -Pandroid.enableAapt2=false \\
                                 -x test \\
                                 -x lint \\
                                 --stacktrace
