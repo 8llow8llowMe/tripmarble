@@ -39,8 +39,8 @@ pipeline {
         PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-frontend-mobile-prod"
         ANDROID_SDK_ROOT = "/opt/android-sdk"
         ANDROID_HOME = "/opt/android-sdk"
-        GRADLE_OPTS = "-Xmx2048m -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false"
-        NODE_OPTIONS = "--max-old-space-size=2048"
+        GRADLE_OPTS = "-Xmx512m -XX:MaxMetaspaceSize=128m -Dorg.gradle.daemon=false"
+        NODE_OPTIONS = "--max-old-space-size=512"
     }
 
     stages {
@@ -196,7 +196,7 @@ react {\\
                         
                         # Setup gradle.properties
                         cat > android/gradle.properties << EOF
-org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
+org.gradle.jvmargs=-Xmx512m -XX:MaxMetaspaceSize=128m
 org.gradle.daemon=false
 org.gradle.parallel=false
 org.gradle.workers.max=1
@@ -270,6 +270,9 @@ EOF
                             export GRADLE_OPTS="$GRADLE_OPTS"
                             export NODE_OPTIONS="$NODE_OPTIONS"
                             
+                            # Additional memory optimization
+                            export GRADLE_OPTS="$GRADLE_OPTS -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
+                            
                             # Verify environment
                             echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
                             echo "GRADLE_OPTS: $GRADLE_OPTS"
@@ -293,7 +296,10 @@ EOF
                                 --max-workers=1 \\
                                 --stacktrace \\
                                 -x test \\
-                                -x lint
+                                -x lint \\
+                                -x check \\
+                                -x verify \\
+                                --offline
                         """
                         
                         // Verify output
