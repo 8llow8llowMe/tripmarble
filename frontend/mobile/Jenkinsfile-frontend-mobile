@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+    
     // 파라미터
     parameters {
         string(
@@ -30,7 +30,6 @@ pipeline {
         )
     }
 
-    // 공통 환경 변수
     environment {
         FS_PATH = "frontend/${params.SERVICE_GROUP}"
         ANDROID_SDK_ROOT = "/opt/android-sdk"
@@ -105,10 +104,27 @@ pipeline {
                         npx expo prebuild --platform android --clean --no-install
                         chmod +x android/gradlew
                         
-                        # Fix hermesEnabled - replace variable with true
-                        sed -i 's/hermesEnabled/true/g' android/app/build.gradle
+                        # Fix hermesEnabled references in all gradle files
+                        echo "Fixing hermesEnabled references..."
                         
-                        # gradle.properties - 6GB 스왑 활용 설정
+                        # 1. app/build.gradle에서 hermesEnabled를 true로
+                        if [ -f android/app/build.gradle ]; then
+                            sed -i 's/hermesEnabled/true/g' android/app/build.gradle
+                        fi
+                        
+                        # 2. node_modules의 expo-modules-core에서도 수정
+                        if [ -f node_modules/expo-modules-core/android/build.gradle ]; then
+                            sed -i "s/project(':app').hermesEnabled/true/g" node_modules/expo-modules-core/android/build.gradle
+                            sed -i "s/rootProject.ext.has('hermesEnabled')/true/g" node_modules/expo-modules-core/android/build.gradle
+                            sed -i "s/rootProject.ext.hermesEnabled/true/g" node_modules/expo-modules-core/android/build.gradle
+                        fi
+                        
+                        # 3. node_modules의 expo에서도 수정
+                        if [ -f node_modules/expo/android/build.gradle ]; then
+                            sed -i "s/project(':app').hermesEnabled/true/g" node_modules/expo/android/build.gradle
+                        fi
+                        
+                        # 4. gradle.properties에 hermesEnabled 정의
                         cat > android/gradle.properties << EOF
 # 메모리 설정 - 스왑 활용
 org.gradle.jvmargs=-Xmx768m -XX:MaxMetaspaceSize=384m -XX:+UseG1GC
@@ -121,10 +137,21 @@ org.gradle.caching=false
 # Android 설정
 android.useAndroidX=true
 android.enableJetifier=true
+
+# Hermes 설정
+hermesEnabled=true
 EOF
+                        
+                        # 5. rootProject에 hermesEnabled 추가
+                        if [ -f android/build.gradle ]; then
+                            # rootProject.ext에 hermesEnabled 추가
+                            sed -i '/ext {/a\        hermesEnabled = true' android/build.gradle
+                        fi
                         
                         # local.properties
                         echo "sdk.dir=/opt/android-sdk" > android/local.properties
+                        
+                        echo "hermesEnabled fix completed"
                     '''
                 }
             }
