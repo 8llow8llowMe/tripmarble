@@ -1,0 +1,248 @@
+name: Mobile Android Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    paths:
+      - 'frontend/mobile/**'
+      - '.github/workflows/mobile-build.yml'
+
+jobs:
+  build:
+    # frontend-mobile 라벨이 있을 때만 실행
+    if: contains(github.event.pull_request.labels.*.name, 'frontend-mobile')
+    
+    runs-on: ubuntu-latest
+    
+    env:
+      ANDROID_SDK_ROOT: /opt/android-sdk
+      ANDROID_HOME: /opt/android-sdk
+      GRADLE_OPTS: -Xmx2048m -XX:MaxMetaspaceSize=512m
+      NODE_OPTIONS: --max-old-space-size=2048
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: 'frontend/mobile/yarn.lock'
+      
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 35
+          build-tools: 35.0.0
+          ndk-version: 27.1.12297006
+          cmake-version: 3.22.1
+      
+      - name: Install dependencies
+        working-directory: frontend/mobile
+        run: |
+          yarn install --frozen-lockfile
+      
+      - name: Verify environment files
+        working-directory: frontend/mobile
+        run: |
+          # 타겟 브랜치에 따라 환경 파일 결정
+          if [ "${{ github.base_ref }}" = "main" ]; then
+            ENV_FILE="env/.env-frontend-mobile-prod"
+            BUILD_TYPE="release"
+            APP_ENV="production"
+          else
+            ENV_FILE="env/.env-frontend-mobile-dev"
+            BUILD_TYPE="debug"
+            APP_ENV="development"
+          fi
+          
+          echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
+          echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
+          
+          if [ -f "$ENV_FILE" ]; then
+            echo "✓ Environment file found: $ENV_FILE"
+          else
+            echo "✗ Environment file not found: $ENV_FILE"
+            exit 1
+          fi
+      
+      - name: Prebuild
+        working-directory: frontend/mobile
+        run: |
+          # 기존 android/ios 폴더 제거
+          rm -rf android ios
+          
+          # Expo prebuild
+          npx expo prebuild --platform android --clean
+          
+          # Gradle wrapper 실행 권한 부여
+          chmod +x android/gradlew
+          
+          # hermesEnabled 설정 수정
+          if [ -f android/app/build.gradle ]; then
+            # 기존 react 설정 제거
+            sed -i '/project\.ext\.react = \[/,/^\]/d' android/app/build.gradle
+            sed -i '/^react {/,/^}/d' android/app/build.gradle
+            
+            # React 플러그인 라인 찾기
+            PLUGIN_LINE=$(grep -n "apply plugin: \"com.facebook.react\"" android/app/build.gradle | cut -d: -f1)
+            
+            if [ ! -z "$PLUGIN_LINE" ]; then
+              # React 설정 추가
+              sed -i "${PLUGIN_LINE}a\\
+\\
+react {\
+    hermesEnabled = true\
+}" android/app/build.gradle
+              echo "Added react configuration after line $PLUGIN_LINE"
+            fi
+          fi
+          
+          # gradle.properties 설정
+          cat > android/gradle.properties << EOF
+org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
+org.gradle.daemon=false
+org.gradle.parallel=true
+org.gradle.workers.max=4
+android.useAndroidX=true
+android.enableJetifier=true
+hermesEnabled=true
+newArchEnabled=false
+NODE_BINARY=$(which node)
+EOF
+          
+          # local.properties 설정
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+      
+      - name: Setup signing (Release only)
+        if: env.BUILD_TYPE == 'release'
+        working-directory: frontend/mobile
+        run: |
+          # Release 빌드용 서명 설정
+          echo "Setting up release signing..."
+          # 실제 서명 설정은 secrets에서 가져와야 함
+      
+      - name: Build Android
+        working-directory: frontend/mobile/android
+        run: |
+          echo "=== System Status ==="
+          free -h
+          df -h /
+          
+          # 빌드 태스크 결정
+          if [ "${{ env.BUILD_TYPE }}" = "release" ]; then
+            BUILD_TASK="bundleRelease"
+            OUTPUT_PATH="app/build/outputs/bundle/release/app-release.aab"
+          else
+            BUILD_TASK="assembleDebug"
+            OUTPUT_PATH="app/build/outputs/apk/debug/app-debug.apk"
+          fi
+          
+          echo "Building ${{ env.BUILD_TYPE }} ($BUILD_TASK)"
+          
+          # Gradle 빌드
+          ./gradlew clean $BUILD_TASK \
+            --no-daemon \
+            --parallel \
+            --max-workers=4 \
+            --stacktrace \
+            -x test \
+            -x lint \
+            -x check \
+            -x verify
+          
+          # 빌드 결과 확인
+          if [ -f "$OUTPUT_PATH" ]; then
+            echo "✓ Build successful"
+            ls -lh "$OUTPUT_PATH"
+            echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
+          else
+            echo "✗ Build failed"
+            find app/build/outputs -name "*.apk" -o -name "*.aab" 2>/dev/null || true
+            exit 1
+          fi
+      
+      - name: Upload APK (Debug)
+        if: env.BUILD_TYPE == 'debug'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-${{ github.event.number }}
+          path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
+      
+      - name: Upload AAB (Release)
+        if: env.BUILD_TYPE == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-${{ github.event.number }}
+          path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+      
+      - name: Deploy to Google Play (Release only)
+        if: env.BUILD_TYPE == 'release' && github.base_ref == 'main'
+        working-directory: frontend/mobile
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          # Google Play 배포 (fastlane 사용)
+          echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" > google-play-service-account.json
+          
+          # fastlane 설치
+          gem install fastlane
+          
+          # Google Play에 배포
+          fastlane supply \
+            --aab android/app/build/outputs/bundle/release/app-release.aab \
+            --track production \
+            --json_key google-play-service-account.json \
+            --skip_upload_metadata \
+            --skip_upload_images \
+            --skip_upload_screenshots
+          
+          # 정리
+          rm -f google-play-service-account.json
+      
+      - name: Comment PR with build results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const buildType = process.env.BUILD_TYPE;
+            const buildStatus = '${{ job.status }}';
+            const artifactName = buildType === 'release' ? 'app-release-${{ github.event.number }}' : 'app-debug-${{ github.event.number }}';
+            
+            let comment = `## 📱 Mobile Build Results\n\n`;
+            comment += `**Build Type:** ${buildType}\n`;
+            comment += `**Target Branch:** ${{ github.base_ref }}\n`;
+            comment += `**Status:** ${buildStatus === 'success' ? '✅ Success' : '❌ Failed'}\n\n`;
+            
+            if (buildStatus === 'success') {
+              comment += `**Artifact:** ${artifactName}\n`;
+              comment += `**Download:** Check the Actions tab for download link\n\n`;
+              
+              if (buildType === 'debug') {
+                comment += `> 🧪 Debug build completed. Ready for testing.\n`;
+              } else {
+                comment += `> 🚀 Release build completed. Ready for production deployment.\n`;
+              }
+            } else {
+              comment += `> ❌ Build failed. Check the Actions tab for details.\n`;
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
