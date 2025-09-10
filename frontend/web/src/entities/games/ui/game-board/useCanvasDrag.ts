@@ -46,5 +46,5 @@ export function useCanvasDrag(
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", endDrag);
     };
-  }, []);
+  }, [canvasRef, wrapperRef]);
 }
