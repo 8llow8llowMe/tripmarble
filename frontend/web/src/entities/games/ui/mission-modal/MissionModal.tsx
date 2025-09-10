@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import Modal from "@/shared/ui/common/Modal";
 import styles from "./MissionModal.module.scss";
 import type { TripGameTileView } from "@/entities/games/model/gameInfoDummy";
@@ -19,6 +19,7 @@ type Props = {
   submitting?: boolean;
   skipping?: boolean;
   failing?: boolean;
+  onRequestEndGame?: () => void;
 };
 
 export default function MissionModal({
@@ -38,6 +39,9 @@ export default function MissionModal({
   );
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const missionRef = useRef<HTMLDivElement | null>(null);
+  const [fixedHeight, setFixedHeight] = useState<number | undefined>(undefined);
 
   // 모달이 닫힐 때 입력값 초기화
   useEffect(() => {
@@ -51,6 +55,23 @@ export default function MissionModal({
     () => allowMission && rating > 0 && content.trim().length >= 20,
     [allowMission, rating, content]
   );
+
+  // 미션 탭 콘텐츠 높이를 측정하여 본문 최소 높이로 고정
+  useEffect(() => {
+    if (!isOpen) return;
+    const measure = () => {
+      const h = missionRef.current?.scrollHeight ?? 0;
+      if (h > 0) setFixedHeight(h);
+    };
+    // 첫 렌더 이후 한 프레임 뒤 측정 (레이아웃 안정화)
+    const id = requestAnimationFrame(measure);
+    // 리사이즈 시에도 재측정
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("resize", measure);
+    };
+  }, [isOpen, allowMission, tile]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -80,21 +101,18 @@ export default function MissionModal({
           </div>
         </div>
 
-        <div className={styles.body}>
-          {tab === "info" && (
-            <div>
-              <div className={styles.row}>
-                <div className={styles.label}>미션 유형</div>
-                <div>{tile?.missionTypeDescription ?? "-"}</div>
-              </div>
-              <div className={styles.row}>
-                <div className={styles.label}>단계</div>
-                <div>{tile?.stepNo ?? "-"}</div>
-              </div>
-            </div>
-          )}
-
-          {tab === "mission" && (
+        <div
+          className={styles.body}
+          style={fixedHeight ? { minHeight: fixedHeight } : undefined}
+          ref={bodyRef}
+        >
+          {/* 미션 탭 패널 (항상 렌더링, 비활성 시 화면 밖에서 측정) */}
+          <div
+            ref={missionRef}
+            className={`${styles.tabPanel} ${
+              tab === "mission" ? styles.tabVisible : styles.tabHidden
+            }`}
+          >
             <div>
               <div className={styles.row}>
                 <div className={styles.label}>별점</div>
@@ -118,7 +136,7 @@ export default function MissionModal({
                   className={styles.textarea}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  placeholder="여기에 방문 후기를 작성해주세요..."
+                  placeholder="여기에 방문 후기를 작성해주세요."
                 />
               </div>
               <div className={styles.footer}>
@@ -146,7 +164,25 @@ export default function MissionModal({
                 {/* <button className={`${styles.secondary} ${failing ? styles.disabled : ""}`} disabled={!!failing} onClick={() => onFail()}> {failing ? "실패 처리 중…" : "실패"} </button> */}
               </div>
             </div>
-          )}
+          </div>
+
+          {/* 정보 탭 패널 */}
+          <div
+            className={`${styles.tabPanel} ${
+              tab === "info" ? styles.tabVisible : styles.tabHidden
+            }`}
+          >
+            <div>
+              <div className={styles.row}>
+                <div className={styles.label}>미션 유형</div>
+                <div>{tile?.missionTypeDescription ?? "-"}</div>
+              </div>
+              <div className={styles.row}>
+                <div className={styles.label}>단계</div>
+                <div>{tile?.stepNo ?? "-"}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </Modal>
