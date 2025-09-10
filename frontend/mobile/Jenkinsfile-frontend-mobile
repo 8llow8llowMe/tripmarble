@@ -84,6 +84,11 @@ pipeline {
                                 ENV_FILE="env/.env-frontend-mobile-dev"
                             fi
                             
+                            echo "Looking for environment file: $ENV_FILE"
+                            echo "Current directory: $(pwd)"
+                            echo "Files in env directory:"
+                            ls -la env/ || echo "env directory not found"
+                            
                             if [ -f "$ENV_FILE" ]; then
                                 echo "Using environment file: $ENV_FILE"
                                 echo "Environment variables loaded:"
