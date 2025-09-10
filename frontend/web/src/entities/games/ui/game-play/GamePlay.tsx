@@ -82,18 +82,18 @@ const GamePlay = ({
   );
 
   // 정렬된 이동 로그 (시간순)
-  const moveLogs = moveLogsRes?.data?.dataBody ?? [];
-
   const sortedLogs = useMemo(() => {
+    const rows = moveLogsRes?.data?.dataBody ?? [];
+
     try {
-      return [...moveLogs].sort(
+      return [...rows].sort(
         (a, b) =>
           new Date(a.arrivedAt).getTime() - new Date(b.arrivedAt).getTime()
       );
     } catch {
-      return moveLogs;
+      return rows;
     }
-  }, [moveLogsRes]);
+  }, [moveLogsRes?.data?.dataBody]);
 
   const isGameEnd = useMemo(
     () => sortedLogs[sortedLogs.length - 1]?.missionResultCode === "GAME_END",
