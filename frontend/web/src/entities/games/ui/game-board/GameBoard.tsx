@@ -348,7 +348,10 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
       requestAnimationFrame(step);
     }
 
-    animateStep(currentIndex, (currentIndex + 1) % boardData.length);
+    // Delay the piece movement to allow dice animation to play first
+    setTimeout(() => {
+      animateStep(currentIndex, (currentIndex + 1) % boardData.length);
+    }, 4000);
   };
 
   useImperativeHandle(ref, () => ({
@@ -373,8 +376,27 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
         onCellClick(tiles[hit.index], hit.index);
       }
     };
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * scaleX;
+      const y = (e.clientY - rect.top) * scaleY;
+      const hit = cellRectsRef.current.find(
+        (r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h
+      );
+      if (hit && hit.index !== -1) {
+        canvas.style.cursor = "pointer";
+      } else {
+        canvas.style.cursor = "default";
+      }
+    };
     canvas.addEventListener("click", handleClick);
-    return () => canvas.removeEventListener("click", handleClick);
+    canvas.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      canvas.removeEventListener("click", handleClick);
+      canvas.removeEventListener("mousemove", handleMouseMove);
+    };
   }, [tiles, onCellClick, count]);
 
   return (
