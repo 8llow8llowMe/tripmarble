@@ -1,6 +1,6 @@
 .sheet {
-  width: 680px;
-  max-width: 94vw;
+  /* 큰 화면에서는 840px 고정, 작은 화면에서는 뷰포트에 맞춰 축소 */
+  width: min(600px, calc(100vw - 40px));
 }
 
 .header {
@@ -83,6 +83,7 @@
 }
 
 .textarea {
+  resize: none;
   width: 100%;
   min-height: 120px;
   border: 1px solid #dbe3f1;
