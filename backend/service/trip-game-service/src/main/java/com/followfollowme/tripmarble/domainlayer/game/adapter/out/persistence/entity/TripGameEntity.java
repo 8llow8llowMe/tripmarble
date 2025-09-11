@@ -9,7 +9,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,20 +19,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 
-import java.time.LocalDate;
-
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-    name = "trip_game"
+    name = "trip_game",
+    indexes = {
+        @Index(name = "idx_trip_game_representative_region_id", columnList = "representative_region_id"),
+        @Index(name = "idx_trip_game_status_id", columnList = "status, id")
+    }
 )
 public class TripGameEntity extends BaseEntity {
 
     @Id
-    @Comment("여행 게임(계획) 아이디")
+    @Comment("여행 게임(계획) ID")
     private Long id;
 
     @Comment("대표 여행지 연관 외래키")
