@@ -4,9 +4,14 @@ on:
   pull_request:
     types: [labeled, unlabeled, synchronize]
     branches: [develop, main]
+    paths-ignore:  # 모바일 관련 파일 변경 시 Jenkins 트리거 제외
+      - 'frontend/mobile/**'
+      - '.github/workflows/mobile-android-build.yml'
 
 jobs:
   trigger-jenkins:
+    # frontend-mobile 라벨이 있으면 Jenkins 트리거 완전 비활성화
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'frontend-mobile') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check and trigger Jenkins
