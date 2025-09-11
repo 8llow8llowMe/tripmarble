@@ -30,8 +30,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: recursive
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }} # 개인 토큰 사용
+          submodules: true
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          fetch-depth: 0
       
       # 6. Node.js 환경 설정
       - name: Setup Node.js
