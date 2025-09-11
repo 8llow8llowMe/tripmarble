@@ -30,8 +30,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: recursive  # 서브모듈 포함
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}
+          submodules: recursive
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }} # 개인 토큰 사용
       
       # 6. Node.js 환경 설정
       - name: Setup Node.js
