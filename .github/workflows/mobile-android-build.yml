@@ -1,7 +1,4 @@
-# 1. 모바일 안드로이드 빌드 워크플로우
 name: Mobile Android Build
-
-# 2. 트리거 조건 설정
 on:
   pull_request:
     types: [labeled, unlabeled, synchronize]  # 라벨 변경, 코드 동기화 시 실행
@@ -12,73 +9,41 @@ on:
 
 jobs:
   build:
-    # 3. 모바일 관련 파일이 변경되었을 때 실행
-    # 라벨이 있으면 우선 실행, 없어도 모바일 파일 변경 시 실행
     if: contains(github.event.pull_request.labels.*.name, 'frontend-mobile') || contains(github.event.pull_request.labels.*.name, 'mobile')
     
     runs-on: ubuntu-latest
     
-    # 4. 환경 변수 설정
     env:
       ANDROID_SDK_ROOT: /opt/android-sdk
       ANDROID_HOME: /opt/android-sdk
-      GRADLE_OPTS: -Xmx6144m -XX:MaxMetaspaceSize=2048m  # Gradle 메모리 설정
-      NODE_OPTIONS: --max-old-space-size=4096 # Node.js 메모리 설정
+      GRADLE_OPTS: -Xmx6144m -XX:MaxMetaspaceSize=2048m
+      NODE_OPTIONS: --max-old-space-size=4096
     
     steps:
-      # 5. 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      # 5-1. 서브모듈 권한 설정 및 업데이트
-      - name: Configure Git for submodules
+      - name: Setup submodules
         run: |
-          # Personal Access Token 존재 여부 확인
-          if [ -z "${{ secrets.PERSONAL_ACCESS_TOKEN }}" ]; then
-            echo "PERSONAL_ACCESS_TOKEN is not set!"
-            echo "Please set PERSONAL_ACCESS_TOKEN in repository secrets"
-            exit 1
-          else
-            echo "PERSONAL_ACCESS_TOKEN is set"
-          fi
-          
-          # Git 인증 설정
           git config --global url."https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          
-          # Personal Access Token 권한 테스트
-          echo "Testing Personal Access Token permissions..."
-          RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
-               -H "Accept: application/vnd.github.v3+json" \
-               https://api.github.com/repos/8llow8llowMe/TripMarble-env)
-          echo "API Response: $RESPONSE"
-          
-          # 서브모듈 수동 업데이트
-          echo "Updating submodules..."
           git submodule sync --recursive
           git submodule update --init --recursive --force
-          
-          # 서브모듈 상태 확인
-          echo "Submodule status:"
-          git submodule status
       
-      # 6. Node.js 환경 설정
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'yarn'                                    # Yarn 캐시 사용
+          cache: 'yarn'
           cache-dependency-path: 'frontend/mobile/yarn.lock'
       
-      # 7. Java 환경 설정 (Android 빌드용)
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21' 
       
-      # 8. Android SDK 설정
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -87,56 +52,32 @@ jobs:
           ndk-version: 27.1.12297006
           cmake-version: 3.22.1
       
-      # 9. 의존성 설치
       - name: Install dependencies
         working-directory: frontend/mobile
-        run: yarn install --frozen-lockfile  # lockfile 기반으로 정확한 버전 설치
+        run: yarn install --frozen-lockfile
       
-      # 10. 빌드 환경 설정
       - name: Setup build environment
         working-directory: frontend/mobile
         run: |
-          # 타겟 브랜치에 따라 환경 설정
           if [ "${{ github.base_ref }}" = "main" ]; then
-            ENV_FILE="env/.env-frontend-mobile-prod"
-            BUILD_TYPE="release"  # main 브랜치 = 프로덕션 빌드
+            BUILD_TYPE="release"
           else
-            ENV_FILE="env/.env-frontend-mobile-dev"
-            BUILD_TYPE="debug"    # develop 브랜치 = 개발 빌드
+            BUILD_TYPE="debug"
           fi
           
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
-          
-          # 환경 파일 존재 확인
-          if [ ! -f "$ENV_FILE" ]; then
-            echo "Environment file not found: $ENV_FILE"
-            echo "Available files:"
-            ls -la env/ || echo "env directory not found"
-            exit 1
-          fi
-          echo "Environment file found: $ENV_FILE"
       
-      # 11. Expo Prebuild (네이티브 코드 생성)
       - name: Prebuild
         working-directory: frontend/mobile
         run: |
-          # 기존 네이티브 폴더 제거
           rm -rf android ios
-
-          # Android 플랫폼용 네이티브 코드 생성
           npx expo prebuild --platform android --clean
-
-          # Gradle wrapper 실행 권한 부여
           chmod +x android/gradlew
 
-          # Expo prebuild가 app.config.ts 설정을 자동으로 적용하므로 수동 수정 불필요
-          echo "Expo prebuild completed with app.config.ts settings"
-
-          # 스타일 누락 방지: 별도 리소스 파일로 안전하게 추가 (기존 styles.xml 건드리지 않음)
           STYLE_DIR="android/app/src/main/res/values"
           mkdir -p "$STYLE_DIR"
-          
-          # Edge-to-Edge 스타일 파일 생성
+
+          # Edge-to-Edge 전용 스타일만 정의 (중복 방지)
           printf '<resources>\n' > "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '    <!-- Edge-to-Edge 기본 테마 (AppCompat 기반으로 안전하게) -->\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '    <style name="Theme.EdgeToEdge" parent="Theme.AppCompat.Light.NoActionBar">\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
@@ -146,40 +87,27 @@ jobs:
           printf '        <item name="android:windowTranslucentNavigation">true</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '    </style>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '    <!-- 일부 템플릿/플러그인이 참조하는 기본 앱 테마 -->\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '    <style name="AppTheme" parent="Theme.EdgeToEdge" />\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '    <!-- expo-splash-screen 등에서 참조하는 스플래시 테마 -->\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '    <style name="Theme.App.SplashScreen" parent="Theme.EdgeToEdge">\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '        <!-- splash 리소스가 없다면 흰색 배경으로 안전 fallback -->\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '        <item name="android:windowBackground">@android:color/white</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '    </style>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '</resources>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-
-          # 기존 styles.xml이 없다면 기본 스타일 파일 생성 (안전장치)
+          
+          # styles.xml이 없을 경우 fallback 생성
           if [ ! -f "$STYLE_DIR/styles.xml" ]; then
             echo "Creating default styles.xml file..."
             printf '<resources>\n' > "$STYLE_DIR/styles.xml"
             printf '    <!-- 기본 앱 테마 -->\n' >> "$STYLE_DIR/styles.xml"
-            printf '    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">\n' >> "$STYLE_DIR/styles.xml"
+            printf '    <style name="AppTheme" parent="Theme.EdgeToEdge">\n' >> "$STYLE_DIR/styles.xml"
             printf '        <item name="android:statusBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/styles.xml"
             printf '        <item name="android:navigationBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/styles.xml"
+            printf '    </style>\n' >> "$STYLE_DIR/styles.xml"
+            printf '\n' >> "$STYLE_DIR/styles.xml"
+            printf '    <!-- Splash Screen 테마 -->\n' >> "$STYLE_DIR/styles.xml"
+            printf '    <style name="Theme.App.SplashScreen" parent="AppTheme">\n' >> "$STYLE_DIR/styles.xml"
+            printf '        <item name="android:windowBackground">@android:color/white</item>\n' >> "$STYLE_DIR/styles.xml"
             printf '    </style>\n' >> "$STYLE_DIR/styles.xml"
             printf '</resources>\n' >> "$STYLE_DIR/styles.xml"
           fi
 
-          # 스타일 파일 생성 확인
-          echo "Checking created style files..."
-          ls -la "$STYLE_DIR/"
-          echo "Contents of edge_to_edge_styles.xml:"
-          cat "$STYLE_DIR/edge_to_edge_styles.xml" || echo "edge_to_edge_styles.xml not found"
-          echo "Contents of styles.xml:"
-          cat "$STYLE_DIR/styles.xml" || echo "styles.xml not found"
 
-          echo "Android repo/properties/styles patch done."
-
-          # build.gradle 리포지토리 보정 (jcenter → mavenCentral)
+          # build.gradle 리포지토리 보정
           sed -i 's/jcenter()/mavenCentral()/g' android/build.gradle
           sed -i '/repositories {/a\        mavenCentral()' android/build.gradle
 
@@ -196,33 +124,28 @@ jobs:
           echo "newArchEnabled=false" >> android/gradle.properties
           echo "NODE_BINARY=$(which node)" >> android/gradle.properties
 
-          # Android SDK 경로 설정
+          # local.properties 설정
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
       
-      # 12. Android 앱 빌드
       - name: Build Android
         working-directory: frontend/mobile/android
         run: |
-          # 빌드 타입에 따른 태스크 및 출력 경로 설정
           if [ "${{ env.BUILD_TYPE }}" = "release" ]; then
-            BUILD_TASK="bundleRelease"  # AAB 파일 생성 (Google Play 배포용)
+            BUILD_TASK="bundleRelease"
             OUTPUT_PATH="app/build/outputs/bundle/release/app-release.aab"
           else
-            BUILD_TASK="assembleDebug"  # APK 파일 생성 (테스트용)
+            BUILD_TASK="assembleDebug"
             OUTPUT_PATH="app/build/outputs/apk/debug/app-debug.apk"
           fi
           
           echo "Building ${{ env.BUILD_TYPE }} ($BUILD_TASK)"
           
-          # Gradle 빌드 실행
           ./gradlew clean $BUILD_TASK \
             --no-daemon \
             --parallel \
             --max-workers=4 \
             --stacktrace \
-            -x test -x lint -x check -x verify  # 테스트 및 검증 단계 건너뛰기
-          
-          # 빌드 결과 확인
+            -x test -x lint -x check -x verify
           if [ ! -f "$OUTPUT_PATH" ]; then
             echo "✗ Build failed"
             find app/build/outputs -name "*.apk" -o -name "*.aab" 2>/dev/null || true
@@ -233,38 +156,30 @@ jobs:
           ls -lh "$OUTPUT_PATH"
           echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
       
-      # 13. Debug APK 업로드 (아티팩트)
       - name: Upload APK (Debug)
         if: env.BUILD_TYPE == 'debug'
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-${{ github.event.number }}
           path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7  # 7일간 보관
+          retention-days: 7
       
-      # 14. Release AAB 업로드 (아티팩트)
       - name: Upload AAB (Release)
         if: env.BUILD_TYPE == 'release'
         uses: actions/upload-artifact@v4
         with:
           name: app-release-${{ github.event.number }}
           path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
-          retention-days: 30  # 30일간 보관
+          retention-days: 30
       
-      # 15. Google Play Store 배포 (Release만)
       - name: Deploy to Google Play (Release only)
         if: env.BUILD_TYPE == 'release' && github.base_ref == 'main'
         working-directory: frontend/mobile
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
-          # Google Play 서비스 계정 키 파일 생성
           echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" > google-play-service-account.json
-          
-          # Fastlane 설치
           gem install fastlane
-          
-          # Google Play Store에 AAB 파일 업로드
           fastlane supply \
             --aab android/app/build/outputs/bundle/release/app-release.aab \
             --track production \
@@ -273,12 +188,10 @@ jobs:
             --skip_upload_images \
             --skip_upload_screenshots
           
-          # 임시 파일 정리
           rm -f google-play-service-account.json
       
-      # 16. PR에 빌드 결과 댓글 작성
       - name: Comment PR with build results
-        if: always()  # 성공/실패 관계없이 항상 실행
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
@@ -286,7 +199,6 @@ jobs:
             const buildStatus = '${{ job.status }}';
             const artifactName = buildType === 'release' ? 'app-release-${{ github.event.number }}' : 'app-debug-${{ github.event.number }}';
             
-            // 빌드 결과 댓글 생성
             let comment = '## Mobile Build Results\\n\\n';
             comment += '**Build Type:** ' + buildType + '\\n';
             comment += '**Target Branch:** ${{ github.base_ref }}\\n';
@@ -302,7 +214,6 @@ jobs:
               comment += '> Build failed. Check the Actions tab for details.\\n';
             }
             
-            // PR에 댓글 작성
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
