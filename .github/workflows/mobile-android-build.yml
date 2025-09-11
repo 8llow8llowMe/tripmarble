@@ -1,45 +1,53 @@
+# 1. 모바일 안드로이드 빌드 워크플로우
 name: Mobile Android Build
 
+# 2. 트리거 조건 설정
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
-    paths:
+    types: [labeled, unlabeled, synchronize]  # 라벨 변경, 코드 동기화 시 실행
+    branches: [develop, main]                 # develop/main 브랜치로의 PR에서만 실행
+    paths:                                    # 모바일 관련 파일 변경 시에만 실행
       - 'frontend/mobile/**'
       - '.github/workflows/mobile-build.yml'
 
 jobs:
   build:
-    # frontend-mobile 라벨이 있을 때만 실행
+    # 3. frontend-mobile 라벨이 있을 때만 실행
     if: contains(github.event.pull_request.labels.*.name, 'frontend-mobile')
     
     runs-on: ubuntu-latest
     
+    # 4. 환경 변수 설정
     env:
       ANDROID_SDK_ROOT: /opt/android-sdk
       ANDROID_HOME: /opt/android-sdk
-      GRADLE_OPTS: -Xmx2048m -XX:MaxMetaspaceSize=512m
-      NODE_OPTIONS: --max-old-space-size=2048
+      GRADLE_OPTS: -Xmx2048m -XX:MaxMetaspaceSize=512m  # Gradle 메모리 설정
+      NODE_OPTIONS: --max-old-space-size=2048            # Node.js 메모리 설정
     
     steps:
+      # 5. 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: recursive  # 서브모듈 포함
           token: ${{ secrets.GITHUB_TOKEN }}
       
+      # 6. Node.js 환경 설정
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'yarn'
+          node-version: '22'
+          cache: 'yarn'                                    # Yarn 캐시 사용
           cache-dependency-path: 'frontend/mobile/yarn.lock'
       
+      # 7. Java 환경 설정 (Android 빌드용)
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21' 
       
+      # 8. Android SDK 설정
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -48,68 +56,65 @@ jobs:
           ndk-version: 27.1.12297006
           cmake-version: 3.22.1
       
+      # 9. 의존성 설치
       - name: Install dependencies
         working-directory: frontend/mobile
-        run: |
-          yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile  # lockfile 기반으로 정확한 버전 설치
       
-      - name: Verify environment files
+      # 10. 빌드 환경 설정
+      - name: Setup build environment
         working-directory: frontend/mobile
         run: |
-          # 타겟 브랜치에 따라 환경 파일 결정
+          # 타겟 브랜치에 따라 환경 설정
           if [ "${{ github.base_ref }}" = "main" ]; then
             ENV_FILE="env/.env-frontend-mobile-prod"
-            BUILD_TYPE="release"
-            APP_ENV="production"
+            BUILD_TYPE="release"  # main 브랜치 = 프로덕션 빌드
           else
             ENV_FILE="env/.env-frontend-mobile-dev"
-            BUILD_TYPE="debug"
-            APP_ENV="development"
+            BUILD_TYPE="debug"    # develop 브랜치 = 개발 빌드
           fi
           
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
-          echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
           
-          if [ -f "$ENV_FILE" ]; then
-            echo "✓ Environment file found: $ENV_FILE"
-          else
-            echo "✗ Environment file not found: $ENV_FILE"
+          # 환경 파일 존재 확인
+          if [ ! -f "$ENV_FILE" ]; then
+            echo "Environment file not found: $ENV_FILE"
             exit 1
           fi
+          echo "Environment file found: $ENV_FILE"
       
+      # 11. Expo Prebuild (네이티브 코드 생성)
       - name: Prebuild
         working-directory: frontend/mobile
         run: |
-          # 기존 android/ios 폴더 제거
+          # 기존 네이티브 폴더 제거
           rm -rf android ios
           
-          # Expo prebuild
+          # Android 플랫폼용 네이티브 코드 생성
           npx expo prebuild --platform android --clean
           
           # Gradle wrapper 실행 권한 부여
           chmod +x android/gradlew
           
-          # hermesEnabled 설정 수정
+          # React Native 설정 추가 (Hermes 엔진 활성화)
           if [ -f android/app/build.gradle ]; then
-            # 기존 react 설정 제거
+            # 기존 React 설정 제거
             sed -i '/project\.ext\.react = \[/,/^\]/d' android/app/build.gradle
             sed -i '/^react {/,/^}/d' android/app/build.gradle
             
             # React 플러그인 라인 찾기
             PLUGIN_LINE=$(grep -n "apply plugin: \"com.facebook.react\"" android/app/build.gradle | cut -d: -f1)
-            
             if [ ! -z "$PLUGIN_LINE" ]; then
-              # React 설정 추가
+              # Hermes 엔진 활성화 설정 추가
               sed -i "${PLUGIN_LINE}a\\
 \\
 react {\
     hermesEnabled = true\
 }" android/app/build.gradle
-              echo "Added react configuration after line $PLUGIN_LINE"
             fi
           fi
           
-          # gradle.properties 설정
+          # Gradle 빌드 설정
           cat > android/gradle.properties << EOF
 org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
 org.gradle.daemon=false
@@ -122,86 +127,75 @@ newArchEnabled=false
 NODE_BINARY=$(which node)
 EOF
           
-          # local.properties 설정
+          # Android SDK 경로 설정
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
       
-      - name: Setup signing (Release only)
-        if: env.BUILD_TYPE == 'release'
-        working-directory: frontend/mobile
-        run: |
-          # Release 빌드용 서명 설정
-          echo "Setting up release signing..."
-          # 실제 서명 설정은 secrets에서 가져와야 함
-      
+      # 12. Android 앱 빌드
       - name: Build Android
         working-directory: frontend/mobile/android
         run: |
-          echo "=== System Status ==="
-          free -h
-          df -h /
-          
-          # 빌드 태스크 결정
+          # 빌드 타입에 따른 태스크 및 출력 경로 설정
           if [ "${{ env.BUILD_TYPE }}" = "release" ]; then
-            BUILD_TASK="bundleRelease"
+            BUILD_TASK="bundleRelease"  # AAB 파일 생성 (Google Play 배포용)
             OUTPUT_PATH="app/build/outputs/bundle/release/app-release.aab"
           else
-            BUILD_TASK="assembleDebug"
+            BUILD_TASK="assembleDebug"  # APK 파일 생성 (테스트용)
             OUTPUT_PATH="app/build/outputs/apk/debug/app-debug.apk"
           fi
           
           echo "Building ${{ env.BUILD_TYPE }} ($BUILD_TASK)"
           
-          # Gradle 빌드
+          # Gradle 빌드 실행
           ./gradlew clean $BUILD_TASK \
             --no-daemon \
             --parallel \
             --max-workers=4 \
             --stacktrace \
-            -x test \
-            -x lint \
-            -x check \
-            -x verify
+            -x test -x lint -x check -x verify  # 테스트 및 검증 단계 건너뛰기
           
           # 빌드 결과 확인
-          if [ -f "$OUTPUT_PATH" ]; then
-            echo "✓ Build successful"
-            ls -lh "$OUTPUT_PATH"
-            echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
-          else
+          if [ ! -f "$OUTPUT_PATH" ]; then
             echo "✗ Build failed"
             find app/build/outputs -name "*.apk" -o -name "*.aab" 2>/dev/null || true
             exit 1
           fi
+          
+          echo "✓ Build successful"
+          ls -lh "$OUTPUT_PATH"
+          echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
       
+      # 13. Debug APK 업로드 (아티팩트)
       - name: Upload APK (Debug)
         if: env.BUILD_TYPE == 'debug'
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-${{ github.event.number }}
           path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
+          retention-days: 7  # 7일간 보관
       
+      # 14. Release AAB 업로드 (아티팩트)
       - name: Upload AAB (Release)
         if: env.BUILD_TYPE == 'release'
         uses: actions/upload-artifact@v4
         with:
           name: app-release-${{ github.event.number }}
           path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
-          retention-days: 30
+          retention-days: 30  # 30일간 보관
       
+      # 15. Google Play Store 배포 (Release만)
       - name: Deploy to Google Play (Release only)
         if: env.BUILD_TYPE == 'release' && github.base_ref == 'main'
         working-directory: frontend/mobile
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
-          # Google Play 배포 (fastlane 사용)
+          # Google Play 서비스 계정 키 파일 생성
           echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" > google-play-service-account.json
           
-          # fastlane 설치
+          # Fastlane 설치
           gem install fastlane
           
-          # Google Play에 배포
+          # Google Play Store에 AAB 파일 업로드
           fastlane supply \
             --aab android/app/build/outputs/bundle/release/app-release.aab \
             --track production \
@@ -210,11 +204,12 @@ EOF
             --skip_upload_images \
             --skip_upload_screenshots
           
-          # 정리
+          # 임시 파일 정리
           rm -f google-play-service-account.json
       
+      # 16. PR에 빌드 결과 댓글 작성
       - name: Comment PR with build results
-        if: always()
+        if: always()  # 성공/실패 관계없이 항상 실행
         uses: actions/github-script@v7
         with:
           script: |
@@ -222,24 +217,23 @@ EOF
             const buildStatus = '${{ job.status }}';
             const artifactName = buildType === 'release' ? 'app-release-${{ github.event.number }}' : 'app-debug-${{ github.event.number }}';
             
+            # 빌드 결과 댓글 생성
             let comment = `## 📱 Mobile Build Results\n\n`;
             comment += `**Build Type:** ${buildType}\n`;
             comment += `**Target Branch:** ${{ github.base_ref }}\n`;
-            comment += `**Status:** ${buildStatus === 'success' ? '✅ Success' : '❌ Failed'}\n\n`;
+            comment += `**Status:** ${buildStatus === 'success' ? 'Success' : 'Failed'}\n\n`;
             
             if (buildStatus === 'success') {
               comment += `**Artifact:** ${artifactName}\n`;
               comment += `**Download:** Check the Actions tab for download link\n\n`;
-              
-              if (buildType === 'debug') {
-                comment += `> 🧪 Debug build completed. Ready for testing.\n`;
-              } else {
-                comment += `> 🚀 Release build completed. Ready for production deployment.\n`;
-              }
+              comment += buildType === 'debug' ? 
+                `> Debug build completed. Ready for testing.\n` : 
+                `> Release build completed. Ready for production deployment.\n`;
             } else {
-              comment += `> ❌ Build failed. Check the Actions tab for details.\n`;
+              comment += `> Build failed. Check the Actions tab for details.\n`;
             }
             
+            # PR에 댓글 작성
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
