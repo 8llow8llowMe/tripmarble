@@ -21,7 +21,11 @@ export default function TitleStep({
       value={value || ""}
       onChange={(e) => onChange(e.target.value)}
       onKeyDown={(e) => {
-        if (e.key === "Enter") nextStep();
+        if (e.key === "Enter") {
+          e.preventDefault();
+          e.stopPropagation();
+          nextStep();
+        }
       }}
       autoFocus
     />
