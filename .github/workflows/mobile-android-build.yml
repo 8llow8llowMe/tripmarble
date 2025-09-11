@@ -109,10 +109,14 @@ jobs:
           
           # 환경 파일 존재 확인
           if [ ! -f "$ENV_FILE" ]; then
-            echo "Environment file not found: $ENV_FILE"
+            echo "❌ Environment file not found: $ENV_FILE"
+            echo "Available files:"
+            ls -la env/ || echo "env directory not found"
             exit 1
           fi
-          echo "Environment file found: $ENV_FILE"
+          echo "✅ Environment file found: $ENV_FILE"
+          echo "Environment file contents:"
+          cat "$ENV_FILE"
       
       # 11. Expo Prebuild (네이티브 코드 생성)
       - name: Prebuild
