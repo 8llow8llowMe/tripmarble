@@ -122,53 +122,17 @@ jobs:
         run: |
           # 기존 네이티브 폴더 제거
           rm -rf android ios
-          
+
           # Android 플랫폼용 네이티브 코드 생성
           npx expo prebuild --platform android --clean
-          
+
           # Gradle wrapper 실행 권한 부여
           chmod +x android/gradlew
-          
-          # React Native 설정 추가 (Hermes 엔진 활성화)
-          if [ -f android/app/build.gradle ]; then
-            # 기존 React 설정 제거
-            sed -i '/project\.ext\.react = \[/,/^\]/d' android/app/build.gradle
-            sed -i '/^react {/,/^}/d' android/app/build.gradle
-            
-            # React 플러그인 라인 찾기
-            PLUGIN_LINE=$(grep -n "apply plugin: \"com.facebook.react\"" android/app/build.gradle | cut -d: -f1)
-            if [ ! -z "$PLUGIN_LINE" ]; then
-              # Hermes 엔진 활성화 설정 추가 (임시 파일 사용)
-              cp android/app/build.gradle android/app/build.gradle.tmp
-              head -n $PLUGIN_LINE android/app/build.gradle.tmp > android/app/build.gradle
-              echo "" >> android/app/build.gradle
-              echo "react {" >> android/app/build.gradle
-              echo "    hermesEnabled = true" >> android/app/build.gradle
-              echo "}" >> android/app/build.gradle
-              tail -n +$((PLUGIN_LINE + 1)) android/app/build.gradle.tmp >> android/app/build.gradle
-              rm android/app/build.gradle.tmp
-            fi
-          fi
-          
-          # Android 테마 설정 수정 (EdgeToEdge 오류 해결)
-          if [ -f android/app/src/main/res/values/styles.xml ]; then
-            echo "Fixing Android theme configuration..."
-            # EdgeToEdge 테마를 기본 테마로 변경
-            sed -i 's/Theme.EdgeToEdge/Theme.AppCompat.Light.NoActionBar/g' android/app/src/main/res/values/styles.xml
-            sed -i 's/Theme.EdgeToEdge/Theme.AppCompat.Light.NoActionBar/g' android/app/src/main/res/values-night/styles.xml 2>/dev/null || true
-            echo "Android theme configuration fixed"
-          fi
-          
-          # AndroidManifest.xml에서 EdgeToEdge 설정 제거
-          if [ -f android/app/src/main/AndroidManifest.xml ]; then
-            echo "Updating AndroidManifest.xml..."
-            # EdgeToEdge 관련 속성 제거
-            sed -i '/android:enableOnBackInvokedCallback/d' android/app/src/main/AndroidManifest.xml
-            sed -i '/android:windowSoftInputMode/d' android/app/src/main/AndroidManifest.xml
-            echo "AndroidManifest.xml updated"
-          fi
-          
-          # Gradle 빌드 설정
+
+          # Expo prebuild가 app.config.ts 설정을 자동으로 적용하므로 수동 수정 불필요
+          echo "Expo prebuild completed with app.config.ts settings"
+
+          # gradle.properties 설정
           echo "org.gradle.jvmargs=-Xmx6144m -XX:MaxMetaspaceSize=2048m" > android/gradle.properties
           echo "org.gradle.daemon=false" >> android/gradle.properties
           echo "org.gradle.parallel=true" >> android/gradle.properties
@@ -180,7 +144,7 @@ jobs:
           echo "hermesEnabled=true" >> android/gradle.properties
           echo "newArchEnabled=false" >> android/gradle.properties
           echo "NODE_BINARY=$(which node)" >> android/gradle.properties
-          
+
           # Android SDK 경로 설정
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
       
