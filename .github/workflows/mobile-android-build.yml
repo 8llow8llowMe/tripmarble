@@ -132,16 +132,52 @@ jobs:
           # Expo prebuild가 app.config.ts 설정을 자동으로 적용하므로 수동 수정 불필요
           echo "Expo prebuild completed with app.config.ts settings"
 
-          # Theme.EdgeToEdge 스타일 정의 보정
-          mkdir -p android/app/src/main/res/values
-          echo '<resources>' > android/app/src/main/res/values/styles.xml
-          echo '    <style name="Theme.EdgeToEdge" parent="Theme.AppCompat.Light.NoActionBar">' >> android/app/src/main/res/values/styles.xml
-          echo '        <item name="android:windowTranslucentStatus">true</item>' >> android/app/src/main/res/values/styles.xml
-          echo '        <item name="android:windowTranslucentNavigation">true</item>' >> android/app/src/main/res/values/styles.xml
-          echo '        <item name="android:statusBarColor">@android:color/transparent</item>' >> android/app/src/main/res/values/styles.xml
-          echo '        <item name="android:navigationBarColor">@android:color/transparent</item>' >> android/app/src/main/res/values/styles.xml
-          echo '    </style>' >> android/app/src/main/res/values/styles.xml
-          echo '</resources>' >> android/app/src/main/res/values/styles.xml
+          # 스타일 누락 방지: 별도 리소스 파일로 안전하게 추가 (기존 styles.xml 건드리지 않음)
+          STYLE_DIR="android/app/src/main/res/values"
+          mkdir -p "$STYLE_DIR"
+          
+          # Edge-to-Edge 스타일 파일 생성
+          printf '<resources>\n' > "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '    <!-- Edge-to-Edge 기본 테마 (AppCompat 기반으로 안전하게) -->\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '    <style name="Theme.EdgeToEdge" parent="Theme.AppCompat.Light.NoActionBar">\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '        <item name="android:statusBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '        <item name="android:navigationBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '        <item name="android:windowTranslucentStatus">true</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '        <item name="android:windowTranslucentNavigation">true</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '    </style>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '    <!-- 일부 템플릿/플러그인이 참조하는 기본 앱 테마 -->\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '    <style name="AppTheme" parent="Theme.EdgeToEdge" />\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '    <!-- expo-splash-screen 등에서 참조하는 스플래시 테마 -->\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '    <style name="Theme.App.SplashScreen" parent="Theme.EdgeToEdge">\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '        <!-- splash 리소스가 없다면 흰색 배경으로 안전 fallback -->\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '        <item name="android:windowBackground">@android:color/white</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '    </style>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '</resources>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+
+          # 기존 styles.xml이 없다면 기본 스타일 파일 생성 (안전장치)
+          if [ ! -f "$STYLE_DIR/styles.xml" ]; then
+            echo "Creating default styles.xml file..."
+            printf '<resources>\n' > "$STYLE_DIR/styles.xml"
+            printf '    <!-- 기본 앱 테마 -->\n' >> "$STYLE_DIR/styles.xml"
+            printf '    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">\n' >> "$STYLE_DIR/styles.xml"
+            printf '        <item name="android:statusBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/styles.xml"
+            printf '        <item name="android:navigationBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/styles.xml"
+            printf '    </style>\n' >> "$STYLE_DIR/styles.xml"
+            printf '</resources>\n' >> "$STYLE_DIR/styles.xml"
+          fi
+
+          # 스타일 파일 생성 확인
+          echo "Checking created style files..."
+          ls -la "$STYLE_DIR/"
+          echo "Contents of edge_to_edge_styles.xml:"
+          cat "$STYLE_DIR/edge_to_edge_styles.xml" || echo "edge_to_edge_styles.xml not found"
+          echo "Contents of styles.xml:"
+          cat "$STYLE_DIR/styles.xml" || echo "styles.xml not found"
+
+          echo "Android repo/properties/styles patch done."
 
           # build.gradle 리포지토리 보정 (jcenter → mavenCentral)
           sed -i 's/jcenter()/mavenCentral()/g' android/build.gradle
