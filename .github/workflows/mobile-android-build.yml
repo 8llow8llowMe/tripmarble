@@ -106,12 +106,15 @@ jobs:
             # React 플러그인 라인 찾기
             PLUGIN_LINE=$(grep -n "apply plugin: \"com.facebook.react\"" android/app/build.gradle | cut -d: -f1)
             if [ ! -z "$PLUGIN_LINE" ]; then
-              # Hermes 엔진 활성화 설정 추가
-              sed -i "${PLUGIN_LINE}a\\
-\\
-react {\\
-    hermesEnabled = true\\
-}" android/app/build.gradle
+              # Hermes 엔진 활성화 설정 추가 (임시 파일 사용)
+              cp android/app/build.gradle android/app/build.gradle.tmp
+              head -n $PLUGIN_LINE android/app/build.gradle.tmp > android/app/build.gradle
+              echo "" >> android/app/build.gradle
+              echo "react {" >> android/app/build.gradle
+              echo "    hermesEnabled = true" >> android/app/build.gradle
+              echo "}" >> android/app/build.gradle
+              tail -n +$((PLUGIN_LINE + 1)) android/app/build.gradle.tmp >> android/app/build.gradle
+              rm android/app/build.gradle.tmp
             fi
           fi
           
