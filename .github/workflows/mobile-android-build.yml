@@ -132,6 +132,17 @@ jobs:
           # Expo prebuild가 app.config.ts 설정을 자동으로 적용하므로 수동 수정 불필요
           echo "Expo prebuild completed with app.config.ts settings"
 
+          # Theme.EdgeToEdge 스타일 정의 보정
+          mkdir -p android/app/src/main/res/values
+          echo '<resources>' > android/app/src/main/res/values/styles.xml
+          echo '    <style name="Theme.EdgeToEdge" parent="Theme.AppCompat.Light.NoActionBar">' >> android/app/src/main/res/values/styles.xml
+          echo '        <item name="android:windowTranslucentStatus">true</item>' >> android/app/src/main/res/values/styles.xml
+          echo '        <item name="android:windowTranslucentNavigation">true</item>' >> android/app/src/main/res/values/styles.xml
+          echo '        <item name="android:statusBarColor">@android:color/transparent</item>' >> android/app/src/main/res/values/styles.xml
+          echo '        <item name="android:navigationBarColor">@android:color/transparent</item>' >> android/app/src/main/res/values/styles.xml
+          echo '    </style>' >> android/app/src/main/res/values/styles.xml
+          echo '</resources>' >> android/app/src/main/res/values/styles.xml
+
           # build.gradle 리포지토리 보정 (jcenter → mavenCentral)
           sed -i 's/jcenter()/mavenCentral()/g' android/build.gradle
           sed -i '/repositories {/a\        mavenCentral()' android/build.gradle
