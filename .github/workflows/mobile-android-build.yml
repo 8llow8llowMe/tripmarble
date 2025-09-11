@@ -8,12 +8,13 @@ on:
     branches: [develop, main]                 # develop/main 브랜치로의 PR에서만 실행
     paths:                                    # 모바일 관련 파일 변경 시에만 실행
       - 'frontend/mobile/**'
-      - '.github/workflows/mobile-build.yml'
+      - '.github/workflows/mobile-android-build.yml'
 
 jobs:
   build:
-    # 3. frontend-mobile 라벨이 있을 때만 실행
-    if: contains(github.event.pull_request.labels.*.name, 'frontend-mobile')
+    # 3. 모바일 관련 파일이 변경되었을 때 실행
+    # 라벨이 있으면 우선 실행, 없어도 모바일 파일 변경 시 실행
+    if: contains(github.event.pull_request.labels.*.name, 'frontend-mobile') || contains(github.event.pull_request.labels.*.name, 'mobile') || contains(github.event.pull_request.labels.*.name, 'android')
     
     runs-on: ubuntu-latest
     
@@ -108,8 +109,8 @@ jobs:
               # Hermes 엔진 활성화 설정 추가
               sed -i "${PLUGIN_LINE}a\\
 \\
-react {\
-    hermesEnabled = true\
+react {\\
+    hermesEnabled = true\\
 }" android/app/build.gradle
             fi
           fi
