@@ -1,59 +1,133 @@
+.dateStepWrapper {
+  width: 100%;
+  max-width: 500px; /* Adjust max-width as needed */
+  margin: 0 auto;
+}
+
+/* ===== Main Calendar Container ===== */
+.customCalendar {
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.75rem !important; /* 12px */
+  overflow: hidden;
+  font-family: inherit;
+  width: 100%;
+}
+
+.customCalendar :global(.react-datepicker) {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.customCalendar :global(.react-datepicker__month-container) {
+  width: 100%;
+}
+
 .customCalendar :global(.react-datepicker__header) {
-  padding: 0 !important;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0;
 }
 
-// 요일
-.customCalendar :global(.react-datepicker__day-names) {
-  background: #e6f0fe;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0 0 0 0; // 필요하면 조정
-  padding: 4px 0;
-}
-
-.customCalendar :global(.react-datepicker__day-name) {
-  // color: #2066bc;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.selectedRangeStrong {
-  background: linear-gradient(90deg, #2066bc 60%, #4d85d7 100%) !important;
-  color: #fff !important;
-  border-radius: 5px !important;
-  font-weight: 800;
-  box-shadow: 0 0 0 2px #9ec3f8;
-}
-
-.selectedRangeLight {
-  background: #d0e9ff !important;
-  color: #1a65b8 !important;
-  border-radius: 5px !important;
-}
-
+/* ===== Custom Header (Month/Year) ===== */
 .customCalendarHeader {
-  background: #e6f0fe;
-  padding: 12px 0 0 0;
-  border-radius: 10px 10px 0 0;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  font-weight: 700;
-  font-size: 1.25rem;
+  padding: 1rem 1.25rem;
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  color: #111827;
 }
 
 .customCalendarButton {
   border: none;
   background: transparent;
-  font-size: 1.5rem;
+  font-size: 1.5rem; /* 24px */
   cursor: pointer;
+  color: #6b7280;
+  transition: color 150ms ease-in-out;
+  padding: 0 0.5rem;
+
+  &:hover {
+    color: #3b82f6;
+  }
 }
 
-.customCalendar {
-  border: 2px solid #48aaff !important;
-  // box-shadow: 0 0 4px 2px #48aaff88, 0 0 4px 4px #21c3fc55 !important;
-  border-radius: 14px;
-  overflow: hidden;
+/* ===== Day Names (S, M, T...) ===== */
+.customCalendar :global(.react-datepicker__day-names) {
+  display: flex;
+  justify-content: space-around;
+  padding: 0.5rem 0;
+  background-color: #f9fafb;
+}
+
+.customCalendar :global(.react-datepicker__day-name) {
+  font-weight: 500;
+  font-size: 0.875rem; /* 14px */
+  color: #6b7280;
+  margin: 0;
+  width: 2.5rem; /* 40px */
+  line-height: 2.5rem; /* 40px */
+  text-align: center;
+}
+
+/* ===== Days Grid ===== */
+.customCalendar :global(.react-datepicker__month) {
+  margin: 0.5rem 0;
+}
+
+.customCalendar :global(.react-datepicker__week) {
+  display: flex;
+  justify-content: space-around;
+}
+
+.customCalendar :global(.react-datepicker__day) {
+  margin: 0;
+  width: 2.5rem; /* 40px */
+  height: 2.5rem; /* 40px */
+  line-height: 2.5rem; /* 40px */
+  border-radius: 0.5rem; /* 8px */
+  font-size: 0.875rem; /* 14px */
+  transition: background-color 150ms ease-in-out, color 150ms ease-in-out;
+
+  &:hover {
+    background-color: #f3f4f6; /* light gray */
+  }
+}
+
+.customCalendar :global(.react-datepicker__day--outside-month) {
+  color: #d1d5db; /* lighter gray */
+}
+
+.customCalendar :global(.react-datepicker__day--disabled) {
+  color: #d1d5db;
+  cursor: not-allowed;
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+/* ===== Selected Range Styling ===== */
+.selectedRangeStrong,
+.customCalendar :global(.react-datepicker__day--in-selecting-range) {
+  background-color: #3b82f6 !important; /* primary blue */
+  color: #ffffff !important;
+}
+
+.selectedRangeLight,
+.customCalendar :global(.react-datepicker__day--in-range) {
+  background-color: #3b82f6 !important; /* light primary blue */
+  color: #ffffff !important; /* dark primary blue */
+}
+
+/* Fix for start/end of range to have rounded corners */
+.customCalendar :global(.react-datepicker__day--range-start) {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+.customCalendar :global(.react-datepicker__day--range-end) {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
 }
