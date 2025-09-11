@@ -34,6 +34,20 @@ jobs:
           fetch-depth: 0 
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       
+      # 5-1. 서브모듈 권한 설정 및 업데이트
+      - name: Configure Git for submodules
+        run: |
+          git config --global url."https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          
+          # 서브모듈 수동 업데이트
+          echo "Updating submodules..."
+          git submodule sync --recursive
+          git submodule update --init --recursive --force
+          
+          # 서브모듈 상태 확인
+          echo "Submodule status:"
+          git submodule status
+      
       # 6. Node.js 환경 설정
       - name: Setup Node.js
         uses: actions/setup-node@v4
