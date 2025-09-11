@@ -20,10 +20,16 @@ jobs:
           # 트리거 조건 체크
           should_trigger=false
 
+          # frontend-mobile 라벨이 있으면 Jenkins 트리거 비활성화 (GitHub Actions 사용)
+          if [[ "$labels" == *"frontend-mobile"* ]]; then
+            echo "Skip: frontend-mobile label detected - using GitHub Actions instead of Jenkins"
+            exit 0
+          fi
+
           if [[ "$action" == "labeled" || "$action" == "unlabeled" ]]; then
             should_trigger=true
             echo "Trigger: Label changed"
-          elif [[ "$action" == "synchronize" && ("$labels" == *"backend-"* || "$labels" == *"frontend-"*) ]]; then
+          elif [[ "$action" == "synchronize" && ("$labels" == *"backend-"* || ("$labels" == *"frontend-"* && "$labels" != *"frontend-mobile"*)) ]]; then
             # 최근 1시간 이내 push만 허용
             commit_time=$(date -d "${{ github.event.pull_request.head.repo.pushed_at }}" +%s)
             current_time=$(date -u +%s)
