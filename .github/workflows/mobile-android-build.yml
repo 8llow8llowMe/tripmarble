@@ -39,6 +39,12 @@ jobs:
         run: |
           git config --global url."https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/".insteadOf "https://github.com/"
           
+          # Personal Access Token 권한 테스트
+          echo "Testing Personal Access Token permissions..."
+          curl -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" \
+               -H "Accept: application/vnd.github.v3+json" \
+               https://api.github.com/repos/8llow8llowMe/TripMarble-env
+          
           # 서브모듈 수동 업데이트
           echo "Updating submodules..."
           git submodule sync --recursive
