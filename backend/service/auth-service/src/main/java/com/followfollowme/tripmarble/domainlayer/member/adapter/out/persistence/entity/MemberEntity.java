@@ -26,7 +26,7 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "member",
     indexes = {
-        @Index(name = "idx_email", columnList = "email")
+        @Index(name = "idx_member_email", columnList = "email")
     })
 public class MemberEntity extends BaseEntity {
 
