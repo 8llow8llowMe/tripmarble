@@ -24,7 +24,14 @@ export default function RegionStep({ value, onChange }: RegionStepProps) {
             }`}
             onClick={() => onChange(region.representativeRegionId)}
           >
-            <div className={styles.circle} />
+            <div
+              className={styles.circle}
+              style={{
+                backgroundImage: `url(${
+                  region.representativeRegionImageUrl || "/images/no-image.png"
+                })`,
+              }}
+            />
             <div className={styles.regionName}>
               {region.representativeRegionName}
             </div>

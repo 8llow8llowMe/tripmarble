@@ -2,28 +2,29 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 .regionGrid {
   display: grid;
-  grid-template-columns: repeat(5, 120px); /* 고정 칸 너비 */
-  grid-template-rows: repeat(3, 130px); /* 3줄 고정 */
-  gap: 0 30px;
-  max-width: calc(3 * 130px + 24px * 2);
-  max-height: 100%;
-  overflow-x: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
-  padding-bottom: 5px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 20px 12px; /* row-gap column-gap */
+  // padding: 1rem;
+  width: 100%;
+  height: auto;
+
+  // max-height: 600px; /* or any desired max height */
+  overflow-y: auto;
 }
 
 .regionGrid::-webkit-scrollbar {
-  height: 12px; /* 스크롤바 높이 */
+  width: 6px;
 }
 
 .regionGrid::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.3); /* 스크롤바 색 */
-  border-radius: 4px;
-  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
 }
 
 // .regionGrid {
@@ -58,6 +59,9 @@
     border-radius: 50%;
     margin-bottom: 6px;
     transition: border 0.2s, box-shadow 0.2s;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
   .regionName {
