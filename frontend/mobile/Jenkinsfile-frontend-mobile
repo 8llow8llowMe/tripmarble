@@ -1,0 +1,280 @@
+pipeline {
+    agent any
+    
+    // 파라미터
+    parameters {
+        string(
+            name: 'SERVICE_GROUP',
+            defaultValue: 'mobile',
+            description: '상위 모듈 디렉터리'
+        )
+        string(
+            name: 'SERVICE_NAME',
+            defaultValue: 'mobile',
+            description: '서비스 이름'
+        )
+        string(
+            name: 'TARGET_BRANCH',
+            defaultValue: 'develop',
+            description: 'PR 타겟 브랜치 (배포 환경 결정용)'
+        )
+        string(
+            name: 'PR_SHA',
+            defaultValue: '',
+            description: 'PR 커밋 SHA (빌드할 코드)'
+        )
+        string(
+            name: 'PR_NUMBER',
+            defaultValue: '',
+            description: 'PR 번호'
+        )
+    }
+
+    // 공통 환경 변수
+    environment {
+        FS_PATH = "frontend/${params.SERVICE_GROUP}"
+        ANDROID_SDK_ROOT = "/opt/android-sdk"
+        ANDROID_HOME = "/opt/android-sdk"
+        
+        // 메모리 설정 - 1.5GB 사용
+        GRADLE_OPTS = "-Xmx1536m -XX:MaxMetaspaceSize=512m -Dorg.gradle.daemon=false"
+        JAVA_OPTS = "-Xmx1536m -XX:MaxMetaspaceSize=512m"
+        NODE_OPTIONS = "--max-old-space-size=1024"
+        _JAVA_OPTIONS = "-Xmx1536m"
+    }
+
+    stages {
+        stage('Setup') {
+            steps {
+                script {
+                    env.APP_ENV = params.TARGET_BRANCH == 'main' ? 'production' : 'development'
+                    env.BUILD_TYPE = params.TARGET_BRANCH == 'main' ? 'release' : 'debug'
+                    echo "Building ${env.BUILD_TYPE} for ${env.APP_ENV}"
+                }
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: params.PR_SHA ? [[name: params.PR_SHA]] : scm.branches,
+                    userRemoteConfigs: scm.userRemoteConfigs,
+                    extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true, parentCredentials: true]]
+                ])
+            }
+        }
+
+        stage('Install') {
+            steps {
+                dir("${env.FS_PATH}") {
+                    sh 'yarn install --frozen-lockfile --network-timeout 100000'
+                }
+            }
+        }
+
+        stage('Verify Environment') {
+            steps {
+                dir("${env.FS_PATH}") {
+                    sh '''
+                        if [ "${APP_ENV}" = "production" ]; then
+                            ENV_FILE="env/.env-frontend-mobile-prod"
+                        else
+                            ENV_FILE="env/.env-frontend-mobile-dev"
+                        fi
+                        
+                        if [ -f "$ENV_FILE" ]; then
+                            echo "✓ Environment file found: $ENV_FILE"
+                        else
+                            echo "✗ Environment file not found: $ENV_FILE"
+                            exit 1
+                        fi
+                    '''
+                }
+            }
+        }
+
+        stage('Prebuild') {
+            steps {
+                dir("${env.FS_PATH}") {
+                    sh '''
+                        export APP_ENV="${APP_ENV}"
+                        
+                        # Clean and prebuild
+                        rm -rf android ios
+                        npx expo prebuild --platform android --clean --no-install
+                        chmod +x android/gradlew
+                        
+                        # Fix hermesEnabled
+                        if [ -f android/app/build.gradle ]; then
+                            sed -i 's/hermesEnabled/true/g' android/app/build.gradle
+                        fi
+                        
+                        if [ -f node_modules/expo-modules-core/android/build.gradle ]; then
+                            sed -i "s/project(':app').hermesEnabled/true/g" node_modules/expo-modules-core/android/build.gradle
+                            sed -i "s/rootProject.ext.has('hermesEnabled')/true/g" node_modules/expo-modules-core/android/build.gradle
+                            sed -i "s/rootProject.ext.hermesEnabled/true/g" node_modules/expo-modules-core/android/build.gradle
+                        fi
+                        
+                        if [ -f node_modules/expo/android/build.gradle ]; then
+                            sed -i "s/project(':app').hermesEnabled/true/g" node_modules/expo/android/build.gradle
+                        fi
+                        
+                        # gradle.properties with AAPT2 workarounds
+                        cat > android/gradle.properties << EOF
+org.gradle.jvmargs=-Xmx1536m -XX:MaxMetaspaceSize=512m -XX:+UseG1GC
+org.gradle.daemon=false
+org.gradle.parallel=false
+org.gradle.workers.max=1
+org.gradle.configureondemand=false
+org.gradle.caching=false
+android.useAndroidX=true
+android.enableJetifier=false
+hermesEnabled=true
+
+# AAPT2 ARM64 workarounds
+android.enableResourceOptimizations=false
+android.enableNewResourceProcessing=false
+android.enableBuildConfigAsBytecode=false
+EOF
+                        
+                        # Downgrade Gradle wrapper for ARM64 compatibility
+                        if [ -f android/gradle/wrapper/gradle-wrapper.properties ]; then
+                            sed -i 's/gradle-.*-all.zip/gradle-8.6-all.zip/g' android/gradle/wrapper/gradle-wrapper.properties
+                        fi
+                        
+                        if [ -f android/build.gradle ]; then
+                            sed -i '/ext {/a\\        hermesEnabled = true' android/build.gradle
+                            
+                            # Force older AGP version that works better on ARM64
+                            sed -i "s/classpath.*com.android.tools.build:gradle.*/classpath 'com.android.tools.build:gradle:8.5.0'/g" android/build.gradle
+                        fi
+                        
+                        echo "sdk.dir=/opt/android-sdk" > android/local.properties
+                    '''
+                }
+            }
+        }
+
+        stage('Signing') {
+            when { expression { env.BUILD_TYPE == 'release' } }
+            steps {
+                dir("${env.FS_PATH}/android") {
+                    withCredentials([
+                        file(credentialsId: 'android-keystore', variable: 'KEYSTORE'),
+                        string(credentialsId: 'android-keystore-pass', variable: 'KEYSTORE_PASS'),
+                        string(credentialsId: 'android-key-alias', variable: 'KEY_ALIAS'),
+                        string(credentialsId: 'android-key-pass', variable: 'KEY_PASS')
+                    ]) {
+                        sh '''
+                            cp ${KEYSTORE} app/keystore.jks
+                            echo "MYAPP_UPLOAD_STORE_FILE=keystore.jks" >> gradle.properties
+                            echo "MYAPP_UPLOAD_KEY_ALIAS=${KEY_ALIAS}" >> gradle.properties
+                            echo "MYAPP_UPLOAD_STORE_PASSWORD=${KEYSTORE_PASS}" >> gradle.properties
+                            echo "MYAPP_UPLOAD_KEY_PASSWORD=${KEY_PASS}" >> gradle.properties
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir("${env.FS_PATH}/android") {
+                    script {
+                        // Clean everything
+                        sh '''
+                            ./gradlew --stop || true
+                            pkill -f aapt2 || true
+                            rm -rf ~/.gradle/caches/transforms-*
+                            rm -rf ~/.gradle/caches/8.*/transforms/
+                            rm -rf build/
+                            rm -rf app/build/
+                        '''
+                        
+                        def buildTask = env.BUILD_TYPE == 'release' ? 'bundleRelease' : 'assembleDebug'
+                        
+                        // Build without deprecated options
+                        sh """
+                            echo "=== System Status ==="
+                            free -h
+                            df -h /
+                            
+                            # Build with optimizations
+                            ./gradlew clean ${buildTask} \\
+                                --no-daemon \\
+                                --no-parallel \\
+                                --max-workers=1 \\
+                                -x test \\
+                                -x lint \\
+                                --stacktrace
+                        """
+                        
+                        // Verify output
+                        sh '''
+                            if [ "${BUILD_TYPE}" = "release" ]; then
+                                OUTPUT="app/build/outputs/bundle/release/app-release.aab"
+                            else
+                                OUTPUT="app/build/outputs/apk/debug/app-debug.apk"
+                            fi
+                            
+                            if [ -f "$OUTPUT" ]; then
+                                echo "✓ Build successful"
+                                ls -lh "$OUTPUT"
+                            else
+                                echo "✗ Build failed"
+                                find app/build/outputs -name "*.apk" -o -name "*.aab" 2>/dev/null || true
+                                exit 1
+                            fi
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Archive') {
+            steps {
+                dir("${env.FS_PATH}/android") {
+                    script {
+                        if (env.BUILD_TYPE == 'release') {
+                            archiveArtifacts artifacts: 'app/build/outputs/bundle/release/*.aab', allowEmptyArchive: false
+                        } else {
+                            archiveArtifacts artifacts: 'app/build/outputs/apk/debug/*.apk', allowEmptyArchive: false
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when { expression { params.TARGET_BRANCH == 'main' } }
+            steps {
+                dir("${env.FS_PATH}") {
+                    withCredentials([
+                        file(credentialsId: 'google-play-service-json', variable: 'PLAY_JSON')
+                    ]) {
+                        sh '''
+                            cp ${PLAY_JSON} google-play-service-account.json
+                            
+                            fastlane supply \\
+                                --aab android/app/build/outputs/bundle/release/app-release.aab \\
+                                --track production \\
+                                --json_key google-play-service-account.json \\
+                                --skip_upload_metadata \\
+                                --skip_upload_images \\
+                                --skip_upload_screenshots
+                            
+                            rm -f google-play-service-account.json
+                        '''
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}

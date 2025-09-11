@@ -2,16 +2,18 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.presenter;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.MyTripGameResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameCreateResponse;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDetailResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameDiceRollResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameEndResponse;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameResumeResponse;
-import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartMemberView;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameMemberView;
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameRejoinResponse;
 import com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto.TripGameStartResponse;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCreateInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDetailInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameDiceResultInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameEndInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
-import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameResumeInfo;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameRejoinInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameStartInfo;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
@@ -63,50 +65,18 @@ public class TripGamePresenter {
     }
 
     public TripGameStartResponse toGameStartResponse(TripGameStartInfo startInfo) {
-        TripGame game = startInfo.tripGame();
-        List<TripGameStartMemberView> members = startInfo.members().stream()
-            .map(m -> TripGameStartMemberView.builder()
-                .memberId(String.valueOf(m.memberId()))
-                .nickname(m.nickname())
-                .profileImage(m.profileImage())
-                .turnOrder(m.turnOrder())
-                .isHost(m.isHost())
-                .build())
-            .toList();
-
         return TripGameStartResponse.builder()
-            .tripGameId(String.valueOf(game.id()))
-            .gameStatusCode(game.status().name())
-            .gameStatusDescription(game.status().getDescription())
-            .members(members)
+            .tripGameId(String.valueOf(startInfo.tripGameId()))
+            .gameStatusCode(startInfo.status().name())
+            .gameStatusDescription(startInfo.status().getDescription())
             .build();
     }
 
-    public TripGameResumeResponse toResumeResponse(TripGameResumeInfo info) {
-        TripGame game = info.tripGame();
-
-        List<TripGameStartMemberView> memberViews = info.members().stream()
-            .map(m -> TripGameStartMemberView.builder()
-                .memberId(String.valueOf(m.memberId()))
-                .isHost(m.isHost())
-                .turnOrder(m.turnOrder())
-                .build()
-            ).toList();
-
-        return TripGameResumeResponse.builder()
-            .tripGameId(String.valueOf(game.id()))
-            .title(game.title())
-            .gameStatus(game.status().name())
-            .gameStatusDescription(game.status().getDescription())
-            .difficultyCode(game.difficulty().name())
-            .difficultyDescription(game.difficulty().getDescription())
-            .startedAt(game.startedAt())
-            .endedAt(game.endedAt())
-            .currentTurnOrder(game.currentTurnOrder())
-            .currentStepNo(game.currentStepNo())
-//            .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
-            .tripThemeNames(info.themeNames())
-//            .members(memberViews)
+    public TripGameRejoinResponse toReJoinResponse(TripGameRejoinInfo info) {
+        return TripGameRejoinResponse.builder()
+            .tripGameId(String.valueOf(info.tripGameId()))
+            .gameStatus(info.status().name())
+            .gameStatusDescription(info.status().getDescription())
             .build();
     }
 
@@ -129,6 +99,35 @@ public class TripGamePresenter {
             .gameStatusDescription(info.status().getDescription())
             .endTypeCode(info.endType().name())
             .endTypeDescription(info.endType().getDescription())
+            .build();
+    }
+
+    public TripGameDetailResponse toDetailResponse(TripGameDetailInfo info) {
+        List<TripGameMemberView> memberViews = info.members().stream()
+            .map(m -> TripGameMemberView.builder()
+                .memberId(String.valueOf(m.memberId()))
+                .nickname(m.nickname())
+                .profileImageUrl(m.profileImageUrl())
+                .turnOrder(m.turnOrder())
+                .isHost(m.isHost())
+                .build()
+            ).toList();
+
+        return TripGameDetailResponse.builder()
+            .tripGameId(String.valueOf(info.tripGameId()))
+            .representativeRegionImageUrl(info.representativeRegionInfo().imageUrl())
+            .representativeRegionName(info.representativeRegionInfo().representativeRegionName())
+            .tripThemeNames(info.tripThemeNames())
+            .difficultyCode(info.difficulty().name())
+            .difficultyDescription(info.difficulty().getDescription())
+            .title(info.title())
+            .startedAt(info.startedAt())
+            .endedAt(info.endedAt())
+            .currentTurnOrder(info.currentTurnOrder())
+            .currentStepNo(info.currentStepNo())
+            .endTypeCode(info.endType() != null ? info.endType().name() : null)
+            .endTypeDescription(info.endType() != null ? info.endType().getDescription() : null)
+            .members(memberViews)
             .build();
     }
 }

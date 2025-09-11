@@ -7,16 +7,16 @@ import { spotsData } from "@/shared/constants/spots";
 
 export default function Profile() {
   return (
-    <div className={styles.profileWrapper}>
+    <div className={`appPage ${styles.profileWrapper}`}>
       <ProfileInfo />
-      <div className={styles.lists}>
-        <HorizontalList
+      <div className={`appPage ${styles.lists}`}>
+        {/* <HorizontalList
           title="나의 게임 기록"
           items={spotsData}
           baseHref="/spots"
           itemWidth={300}
           itemHeight={180}
-        />
+        /> */}
         <HorizontalList
           title="내가 쓴 리뷰"
           items={spotsData}

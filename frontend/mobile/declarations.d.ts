@@ -5,16 +5,19 @@ declare module '*.svg' {
   export default content;
 }
 
-// declarations.d.ts
 declare module '*.png' {
   import { ImageSourcePropType } from 'react-native';
   const value: ImageSourcePropType;
   export default value;
 }
 
-// declarations.d.ts
 declare module '*.jpg' {
   import { ImageSourcePropType } from 'react-native';
   const value: ImageSourcePropType;
   export default value;
+}
+
+declare module '*.md' {
+  const content: string;
+  export default content;
 }

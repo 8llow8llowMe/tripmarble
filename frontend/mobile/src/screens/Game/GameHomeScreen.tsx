@@ -7,43 +7,38 @@ import {
   ScrollView,
   TouchableOpacity,
   ImageBackground,
+  Image,
 } from 'react-native';
 import ongoingImage from '@images/places/gyeongju.png';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
-import { useMyGameLists } from '@/hooks/game/useMyGameList';
 import { LinearGradient } from 'expo-linear-gradient';
+// hooks
 import { fetchGameStart } from '@/hooks/game/useGameStart';
+import { useGameLists } from '@/hooks/game/useGameList';
+// components
 import CreateGameBanner from '@/components/common/banner/CreateGameBanner';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
-import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
+import EmptyListCard from '@/components/common/card/EmptyListCard';
 
 export default function GameHomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
 
-  const { waiting, ongoing, ended } = useMyGameLists();
+  const { waiting, ongoing, ended } = useGameLists();
 
   // 게임 생성 스크린으로 이동
   const goToGameCreateScreen = () => {
     navigation.navigate('CreateGameScreen');
   };
 
-  // 진행중인 게임 스크린으로 이동
-  const goToGameOngoingScreen = async (tripGameId: string, isWaiting: boolean = false) => {
+  // 게임 상세 스크린으로 이동
+  const goToGameDetailScreen = async (tripGameId: string, isWaiting: boolean = false) => {
     if (isWaiting) {
       await fetchGameStart(tripGameId);
     }
     navigation.navigate('GamePlayStackNavigator', {
-      screen: 'OngoingGameScreen',
-      params: { tripGameId },
-    });
-  };
-
-  // 종료된 게임 스크린으로 이동
-  const goToGameEndedScreen = (tripGameId: string) => {
-    navigation.navigate('GamePlayStackNavigator', {
-      screen: 'EndedGameScreen',
+      screen: 'GameDetailScreen',
       params: { tripGameId },
     });
   };
@@ -65,50 +60,92 @@ export default function GameHomeScreen() {
     });
   };
 
+  const formatYmd = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const y = String(d.getFullYear()).slice(2);
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}.${m}.${day}`;
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.scroll}>
-        <GameSummaryBanner counts={{ ongoing: 1, waiting: 0, ended: 2 }} />
+      {/* <ScrollView style={styles.scroll}> */}
+      <ScrollView>
+        {/* <GameSummaryBanner
+          counts={{
+            ongoing: ongoing.data?.data.dataBody.contents.length,
+            waiting: waiting.data?.data.dataBody.contents.length,
+            ended: ended.data?.data.dataBody.contents.length,
+          }}
+        /> */}
 
         {/* 진행중인 게임 목록 */}
-        <View style={{ marginVertical: 22 }}>
-          <SectionHeader title="진행중인 게임" />
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.ongoingRow}
-            style={{ marginLeft: 16 }}
-          >
-            {(ongoing.data?.data.dataBody.contents ?? []).map((game) => (
-              <TouchableOpacity
-                key={game.tripGameId}
-                onPress={() => goToGameOngoingScreen(game.tripGameId)}
-                activeOpacity={0.8}
-                style={styles.ongoingCardHorizontal}
-              >
-                <ImageBackground
-                  source={
-                    game.representativeRegionImageUrl
-                      ? { uri: game.representativeRegionImageUrl }
-                      : ongoingImage
-                  }
-                  style={styles.ongoingImage}
-                  resizeMode="cover"
-                  imageStyle={{ borderRadius: 16 }}
+        <View style={{ marginBottom: 22 }}>
+          <SectionHeader
+            title="진행중인 게임"
+            moreTitle="전체보기"
+            onPressMore={() => goToGameListScreen('ONGOING')}
+          />
+
+          {(ongoing.data?.data.dataBody.contents?.length ?? 0) === 0 ? (
+            <EmptyListCard
+              title="진행중인 게임이 없어요"
+              description="새 게임을 만들어 모험을 시작해보세요!"
+            />
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.ongoingRow}
+            >
+              {(ongoing.data?.data.dataBody.contents ?? []).map((game) => (
+                <TouchableOpacity
+                  key={game.tripGameId}
+                  onPress={() => goToGameDetailScreen(game.tripGameId, false)}
+                  activeOpacity={0.8}
+                  style={styles.ongoingCardHorizontal}
                 >
-                  <LinearGradient
-                    colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
-                    style={StyleSheet.absoluteFill}
-                  />
-                  <View style={styles.ongoingFooter}>
-                    <Text style={styles.ongoingText} numberOfLines={1}>
-                      {game.title || game.representativeRegionName}
-                    </Text>
-                  </View>
-                </ImageBackground>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+                  <ImageBackground
+                    source={
+                      game.representativeRegionImageUrl
+                        ? { uri: game.representativeRegionImageUrl }
+                        : ongoingImage
+                    }
+                    style={styles.ongoingImage}
+                    resizeMode="cover"
+                    imageStyle={{ borderRadius: 16 }}
+                  >
+                    {/* 하단 배지 박스 */}
+                    <View style={styles.cardBadge}>
+                      {/* 상단: 제목 + 지역(별 자리) */}
+                      <View style={styles.badgeTopRow}>
+                        <Text style={styles.cardTitle} numberOfLines={1}>
+                          {game.title || game.representativeRegionName}
+                        </Text>
+                        <View style={styles.regionPill}>
+                          <Text style={styles.regionText} numberOfLines={1}>
+                            {game.representativeRegionName}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* 하단: 테마 · 날짜 */}
+                      <View style={styles.badgeBottomRow}>
+                        <Text style={styles.themesText} numberOfLines={1}>
+                          {(game.tripThemeNames ?? []).join(' · ')}
+                        </Text>
+                        <Text style={styles.dateText}>
+                          {formatYmd(game.startedAt)} ~ {formatYmd(game.endedAt)}
+                        </Text>
+                      </View>
+                    </View>
+                  </ImageBackground>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
         </View>
 
         {/* 게임 생성 배너 */}
@@ -121,42 +158,49 @@ export default function GameHomeScreen() {
             moreTitle="전체보기"
             onPressMore={() => goToGameListScreen('WAITING')}
           />
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.ongoingRow}
-            style={{ marginLeft: 16 }}
-          >
-            {(waiting.data?.data.dataBody.contents ?? []).map((game) => (
-              <TouchableOpacity
-                key={game.tripGameId}
-                onPress={() => goToGameOngoingScreen(game.tripGameId, true)}
-                activeOpacity={0.8}
-                style={styles.waitingCardHorizontal}
-              >
-                <ImageBackground
-                  source={
-                    game.representativeRegionImageUrl
-                      ? { uri: game.representativeRegionImageUrl }
-                      : ongoingImage
-                  }
-                  style={styles.waitingImage}
-                  resizeMode="cover"
-                  imageStyle={{ borderRadius: 16 }}
+
+          {(waiting.data?.data.dataBody.contents?.length ?? 0) === 0 ? (
+            <EmptyListCard
+              title="시작 전 게임이 없어요"
+              description="게임을 만들면 이곳에서 확인할 수 있어요."
+            />
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.ongoingRow}
+            >
+              {(waiting.data?.data.dataBody.contents ?? []).map((game) => (
+                <TouchableOpacity
+                  key={game.tripGameId}
+                  onPress={() => goToGameDetailScreen(game.tripGameId, true)}
+                  activeOpacity={0.8}
+                  style={styles.waitingCardHorizontal}
                 >
-                  <LinearGradient
-                    colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
-                    style={StyleSheet.absoluteFill}
-                  />
-                  <View style={styles.ongoingFooter}>
-                    <Text style={styles.ongoingText} numberOfLines={1}>
-                      {game.title || game.representativeRegionName}
-                    </Text>
-                  </View>
-                </ImageBackground>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+                  <ImageBackground
+                    source={
+                      game.representativeRegionImageUrl
+                        ? { uri: game.representativeRegionImageUrl }
+                        : ongoingImage
+                    }
+                    style={styles.waitingImage}
+                    resizeMode="cover"
+                    imageStyle={{ borderRadius: 16 }}
+                  >
+                    <LinearGradient
+                      colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.4)']}
+                      style={StyleSheet.absoluteFill}
+                    />
+                    <View style={styles.ongoingFooter}>
+                      <Text style={styles.ongoingText} numberOfLines={1}>
+                        {game.title || game.representativeRegionName}
+                      </Text>
+                    </View>
+                  </ImageBackground>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
         </View>
 
         {/* 종료된 게임 목록 */}
@@ -170,36 +214,46 @@ export default function GameHomeScreen() {
           {(() => {
             if (ended.data?.data.dataBody === undefined) {
               return (
-                <View style={[styles.endedCard, { justifyContent: 'center' }]}>
-                  <View style={[styles.endedInfo, { alignItems: 'center' }]}>
-                    <Text style={styles.endedTitle}>종료된 게임이 없습니다</Text>
-                    <Text style={styles.endedDesc}>완료된 게임이 나타나면 이곳에 표시돼요</Text>
-                  </View>
-                </View>
+                <EmptyListCard
+                  title="종료된 게임이 없어요"
+                  description="완료된 게임이 나타나면 이곳에 표시돼요"
+                />
               );
             }
-            const list = waiting.data?.data.dataBody.contents ?? [];
+
+            const list = ended.data?.data.dataBody.contents.slice(0, 4) ?? [];
             return list.map((game) => {
-              const date = new Date(game.endedAt || game.startedAt);
-              const month = date.toLocaleString('en-US', { month: 'short' });
-              const day = String(date.getDate()).padStart(2, '0');
+              const period = `${formatYmd(game.startedAt)} ~ ${formatYmd(game.endedAt || game.startedAt)}`;
+              const thumb = game.representativeRegionImageUrl
+                ? { uri: game.representativeRegionImageUrl }
+                : ongoingImage;
+
               return (
                 <TouchableOpacity
                   key={game.tripGameId}
                   activeOpacity={0.8}
-                  onPress={() => goToGameEndedScreen(game.tripGameId)}
+                  onPress={() => goToGameDetailScreen(game.tripGameId, false)}
                   style={{ marginHorizontal: 16 }}
                 >
-                  <View style={styles.endedCard}>
-                    <View style={styles.endedDateBox}>
-                      <Text style={styles.endedDateMonth}>{month}</Text>
-                      <Text style={styles.endedDateDay}>{day}</Text>
-                    </View>
-                    <View style={styles.endedInfo}>
-                      <Text style={styles.endedTitle} numberOfLines={1}>
+                  <View style={styles.endedCardNew}>
+                    <Image source={thumb} style={styles.endedThumb} />
+
+                    <View style={styles.endedRight}>
+                      <Text style={styles.endedTitleNew} numberOfLines={1}>
                         {game.title || game.representativeRegionName}
                       </Text>
-                      <Text style={styles.endedDesc}>종료된 게임</Text>
+
+                      <Text style={styles.endedDateText} numberOfLines={1}>
+                        {period}
+                      </Text>
+
+                      <View style={styles.chipsRow}>
+                        {(game.tripThemeNames ?? []).map((t) => (
+                          <View key={t} style={styles.chip}>
+                            <Text style={styles.chipText}>{t}</Text>
+                          </View>
+                        ))}
+                      </View>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -212,8 +266,8 @@ export default function GameHomeScreen() {
   );
 }
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: palette.white },
-  scroll: { paddingBottom: 32 },
+  safeArea: { flex: 1, backgroundColor: palette.white, height: 'auto' },
+  // scroll: { paddingVertical: 32 },
 
   title: {
     fontSize: 24,
@@ -236,7 +290,7 @@ const styles = StyleSheet.create({
   },
   ongoingImage: {
     width: '100%',
-    height: 240,
+    height: '100%',
   },
   ongoingFooter: {
     padding: 16,
@@ -249,68 +303,134 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  endedCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0F1F2',
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#BCC2C8',
-    marginBottom: 16,
-    padding: 12,
-  },
-  endedDateBox: {
-    width: 90,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
-    paddingVertical: 8,
-  },
-  endedDateMonth: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#888',
-    marginBottom: 2,
-  },
-  endedDateDay: {
-    fontSize: 38,
-    fontWeight: '700',
-    color: '#555',
-    marginTop: -5,
-  },
-  endedInfo: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  endedTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#222',
-  },
-  endedDesc: {
-    fontSize: 16,
-    color: '#222',
-    marginTop: 4,
-  },
-  ongoingRow: {
-    paddingRight: 8,
-    gap: 12,
-  },
+  ongoingRow: { marginLeft: 16 },
   ongoingCardHorizontal: {
-    width: 260,
-    // backgroundColor: '#F5F6F8',
+    width: 240,
+    height: 360,
     borderRadius: 12,
     overflow: 'hidden',
-    marginRight: 12,
-    // borderWidth: 2,
-    // borderColor: '#BCC2C8',
+    marginRight: 16,
   },
   waitingCardHorizontal: {
     width: 120,
     borderRadius: 12,
     overflow: 'hidden',
-    marginRight: 6,
+    marginRight: 16,
+  },
+  cardBadge: {
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    bottom: 12,
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    // 그림자
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 10,
+    elevation: 6,
+  },
+
+  badgeTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  cardTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0f172a', // slate-900
+    marginRight: 8,
+  },
+
+  regionPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+    backgroundColor: '#EEF2FF', // indigo-50 느낌
+  },
+
+  regionText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#334155', // slate-700
+  },
+
+  badgeBottomRow: {
+    marginTop: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+
+  themesText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#475569', // slate-600
+  },
+
+  dateText: {
+    fontSize: 12,
+    color: '#64748b', // slate-500
+  },
+
+  // 새로운 종료 카드 스타일
+  endedCardNew: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    marginBottom: 16,
+
+    // 라이트 그림자
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 10,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#eef2f7',
+  },
+  endedThumb: {
+    width: 84,
+    height: 84,
+    borderRadius: 12,
+    marginRight: 12,
+  },
+  endedRight: {
+    flex: 1,
+  },
+  endedTitleNew: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0f172a', // slate-900
+  },
+  endedDateText: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#64748b', // slate-500
+  },
+  chipsRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  chip: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: '#eef2f7', // 연한 회색
+  },
+  chipText: {
+    fontSize: 12,
+    color: '#475569', // slate-600
   },
 });

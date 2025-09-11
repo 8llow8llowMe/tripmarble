@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -22,7 +23,10 @@ import org.hibernate.annotations.Comment;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-    name = "trip_theme_content_type_mapping"
+    name = "trip_theme_content_type_mapping",
+    indexes = {
+        @Index(name = "idx_trip_theme_content_type_mapping_trip_theme_id", columnList = "trip_theme_id")
+    }
 )
 public class TripThemeContentTypeMappingEntity {
 

@@ -3,7 +3,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { ImageBackground, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { palette } from '@/constants/colors';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
 
 const DUMMY_RANDOM_PICK = {
@@ -27,24 +26,23 @@ const shadow = Platform.select({
 const RandomPickSection = ({
   data,
   onPress,
-  onRefresh,
 }: {
   data: typeof DUMMY_RANDOM_PICK;
   onPress?: () => void;
-  onRefresh: () => void;
+  onRefresh?: () => void;
 }) => {
   return (
     <View style={styles.container}>
       <SectionHeader
         title="오늘의 랜덤 픽"
-        rightNode={
-          <TouchableOpacity onPress={onRefresh} style={styles.iconBtn} activeOpacity={0.8}>
-            <MaterialCommunityIcons name="dice-5-outline" size={18} color={palette.gray600} />
-            <TextBox size={13} color={palette.gray600} style={{ marginLeft: 6 }}>
-              다시 뽑기
-            </TextBox>
-          </TouchableOpacity>
-        }
+        // rightNode={
+        //   <TouchableOpacity onPress={onRefresh} style={styles.iconBtn} activeOpacity={0.8}>
+        //     <MaterialCommunityIcons name="dice-5-outline" size={18} color={palette.gray600} />
+        //     <TextBox size={13} color={palette.gray600} style={{ marginLeft: 6 }}>
+        //       다시 뽑기
+        //     </TextBox>
+        //   </TouchableOpacity>
+        // }
       />
       <TouchableOpacity style={[styles.card, shadow]} activeOpacity={0.9} onPress={onPress}>
         <ImageBackground

@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.member.adapter.out.persistence.entity;
 
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
+import com.followfollowme.tripmarble.domainlayer.member.domain.model.enums.MemberStatus;
 import com.followfollowme.tripmarble.persistence.entity.BaseEntity;
 import com.followfollowme.tripmarble.security.common.enums.SecurityRole;
 import jakarta.persistence.Column;
@@ -25,7 +26,7 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "member",
     indexes = {
-        @Index(name = "idx_email", columnList = "email")
+        @Index(name = "idx_member_email", columnList = "email")
     })
 public class MemberEntity extends BaseEntity {
 
@@ -61,4 +62,8 @@ public class MemberEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private OAuthProvider provider;
 
+    @Comment("회원 상태")
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private MemberStatus status;
 }

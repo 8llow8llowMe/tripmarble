@@ -6,11 +6,10 @@ import { toast } from "react-toastify";
 import styles from "./GameList.module.scss";
 // components
 import { GameList } from "@/widgets/game-list/GameList";
-import { MyGamesHorizontal } from "@/widgets/my-games-horizontal/MyGamesHorizontal";
+import { GameListHorizontal } from "@/widgets/game-list-horizontal/GameListHorizontal";
 import Button from "@/shared/ui/common/Button/Button";
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
-// datas
-import { gamesDummy } from "@/entities/games/model/gamesDummy";
+
 // stores
 import { useAppSelector } from "@/entities/users/model";
 import useMyGameList from "@/entities/games/hooks/useMyGameList";
@@ -33,14 +32,14 @@ export default function Game() {
   const games = data?.data.dataBody.contents;
 
   return (
-    <div className={styles.mainContainer}>
+    <div className={`${styles.mainContainer} appPage`}>
       <div className={styles.titleAndButton}>
         <div className={styles.sectionTitle}>모든 게임</div>
         <Button
           radius="md"
           bgColor="primary"
           paddingSize="md"
-          width="200px"
+          width="180px"
           height="50px"
           onClick={handleCreateClick}
         >
@@ -53,9 +52,9 @@ export default function Game() {
         </div>
       )}
 
-      <MyGamesHorizontal type={"WAITING"} />
-      <MyGamesHorizontal type={"ONGOING"} />
-      <MyGamesHorizontal type={"ENDED"} />
+      <GameListHorizontal type={"ONGOING"} />
+      <GameListHorizontal type={"WAITING"} />
+      <GameListHorizontal type={"ENDED"} />
 
       <CreateGameModal
         isOpen={isCreateModalOpen}

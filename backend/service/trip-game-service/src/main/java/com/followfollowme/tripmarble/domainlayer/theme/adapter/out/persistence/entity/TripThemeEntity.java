@@ -25,7 +25,7 @@ public class TripThemeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Comment("여행 테마 아이디")
+    @Comment("여행 테마 ID")
     private Long id;
 
     @Comment("테마명")

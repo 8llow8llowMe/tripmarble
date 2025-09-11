@@ -1,8 +1,7 @@
 import EndedGameScreen from '@/screens/Game/EndedGameScreen';
 import GameHomeScreen from '@/screens/Game/GameHomeScreen';
 import GameListScreen from '@/screens/Game/GameListScreen';
-import GameMissionAuthScreen from '@/screens/Game/GameMissionAuthScreen';
-import OngoingGameScreen from '@/screens/Game/OngoingGameScreen';
+import GameDetailScreen from '@/screens/Game/GameDetailScreen';
 import { GamePlayStackParamList } from '@/types/navigation/navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -22,24 +21,14 @@ export default function GamePlayStackNavigator() {
         options={{ headerShown: false }}
       />
       <GamePlayStack.Screen
-        name="OngoingGameScreen"
-        component={OngoingGameScreen}
+        name="GameDetailScreen"
+        component={GameDetailScreen}
         options={{ headerShown: false }}
       />
       <GamePlayStack.Screen
         name="GameListScreen"
         component={GameListScreen}
         options={{ headerShown: false }}
-      />
-      <GamePlayStack.Screen
-        name="GameMissionAuthScreen"
-        component={GameMissionAuthScreen}
-        options={{
-          headerShown: false,
-          presentation: 'transparentModal',
-          animation: 'slide_from_bottom',
-          contentStyle: { backgroundColor: 'transparent' },
-        }}
       />
     </GamePlayStack.Navigator>
   );

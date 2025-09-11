@@ -9,11 +9,12 @@ import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import java.io.InputStream;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.InputStream;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +28,9 @@ public class ProfileImageProcessor {
             String originalName = imageFile.getOriginalFilename();
             String objectName = UUID.randomUUID() + "_" + originalName;
 
-            // 1. 버킷 이름과 object 경로 생성
-            String bucketName = MinioBucket.TEMP_PROFILE_IMAGE.fullName(
-                minioProperties.bucketPrefix());
-            String objectPath = MinioBucket.TEMP_PROFILE_IMAGE.objectPath(objectName);
+            // 1. 단일 버킷, temp 폴더에 업로드
+            String bucketName = minioProperties.bucketPrefix();
+            String objectPath = MinioBucket.PROFILE_TEMP_IMAGES.objectPath(objectName);
 
             // 2. InputStream을 try-with-resources로 안전하게 열고 업로드
             try (InputStream in = imageFile.getInputStream()) {
@@ -57,30 +57,27 @@ public class ProfileImageProcessor {
 
     public String promoteToReal(String tempImageUrl) {
         try {
-            // 1. 파일명만 파싱
             String objectName = extractObjectName(tempImageUrl);
+            String bucketName = minioProperties.bucketPrefix();
 
-            String realBucket = MinioBucket.REAL_PROFILE_IMAGE.fullName(minioProperties.bucketPrefix());
-            String tempBucket = MinioBucket.TEMP_PROFILE_IMAGE.fullName(minioProperties.bucketPrefix());
-            String srcObject = MinioBucket.TEMP_PROFILE_IMAGE.objectPath(objectName);
-            String destObject = MinioBucket.REAL_PROFILE_IMAGE.objectPath(objectName);
+            // 같은 버킷 내에서 temp -> real 폴더로 이동
+            String srcObject = MinioBucket.PROFILE_TEMP_IMAGES.objectPath(objectName);
+            String destObject = MinioBucket.PROFILE_REAL_IMAGES.objectPath(objectName);
 
-            // 2. CopySource 및 CopyObjectArgs 생성하고 복사 실행
             CopySource source = CopySource.builder()
-                .bucket(tempBucket)
+                .bucket(bucketName)
                 .object(srcObject)
                 .build();
 
             minioClient.copyObject(
                 CopyObjectArgs.builder()
-                    .bucket(realBucket)
+                    .bucket(bucketName)
                     .object(destObject)
                     .source(source)
                     .build()
             );
 
-            // 3. real URL 생성 후 반환
-            return minioProperties.publicUrl() + "/" + realBucket + "/" + destObject;
+            return minioProperties.publicUrl() + "/" + bucketName + "/" + destObject;
 
         } catch (Exception e) {
             throw new MemberException(MemberErrorCode.UPLOAD_PROFILE_IMAGE_FAILED, e);

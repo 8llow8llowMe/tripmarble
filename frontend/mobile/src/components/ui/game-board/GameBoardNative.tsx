@@ -1,3 +1,4 @@
+import { palette } from '@/constants/colors';
 import { TripGameTileView } from '@/hooks/game/useGetGameTiles';
 import React, {
   forwardRef,
@@ -14,6 +15,8 @@ import Svg, { Rect, Text as SvgText, TSpan, Defs, ClipPath } from 'react-native-
 type Props = {
   count?: number; // 한 변 칸 수 (기본 5)
   tiles: TripGameTileView[];
+  visits?: Record<string, { order: number; status: 'SUCCESS' | 'PENDING' | 'SKIPPED' | 'FAIL' }>;
+  initialIndex: number;
   onCellPress?: (tile: TripGameTileView, index: number) => void;
   pieceSource?: any; // require('.../Logo.png') 또는 { uri: ... }
   size?: number; // 한 칸 크기 (기본 80)
@@ -68,7 +71,16 @@ export type GameBoardHandle = {
   getIndex: () => number;
 };
 const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNative(
-  { count = 5, tiles, onCellPress, pieceSource, size = 80, onIndexChange }: Props,
+  {
+    count = 5,
+    initialIndex,
+    tiles,
+    visits = {},
+    onCellPress,
+    pieceSource,
+    size = 80,
+    onIndexChange,
+  }: Props,
   ref,
 ) {
   const PADDING_LEFT = 0;
@@ -86,7 +98,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
   // 좌표 → 타일 매핑 (시작칸 비우고 GO)
   const boardData = useMemo(() => {
     const toKey = (r: number, c: number) => `${r},${c}`;
-    const map = new Map<string, { index: number; type: string; title: string }>();
+    const map = new Map<string, { index: number; type: string; title: string; tileId?: string }>();
 
     // start-go 예약
     const startPos = logicalPositions[0];
@@ -106,7 +118,12 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
             : t.missionTypeCode === 'CHECKIN_GPS'
               ? 'CHECKIN_GPS'
               : 'normal';
-      map.set(toKey(pos.row, pos.col), { index: i, type, title: t.tripSpotName });
+      map.set(toKey(pos.row, pos.col), {
+        index: i,
+        type,
+        title: t.tripSpotName,
+        tileId: t.tripGameTileId,
+      });
     }
 
     // 렌더 순서로 배열 만들되, 각 셀에 매핑된 payload를 넣기
@@ -115,9 +132,10 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
       return {
         row,
         col,
-        index: payload?.index ?? -1,
-        type: payload?.type ?? 'normal',
-        title: payload?.title ?? '',
+        index: (payload as any)?.index ?? -1,
+        type: (payload as any)?.type ?? 'normal',
+        title: (payload as any)?.title ?? '',
+        tileId: (payload as any)?.tileId ?? undefined,
       };
     });
   }, [renderPositions, logicalPositions, tiles]);
@@ -201,12 +219,15 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
     }
   };
 
-  // 초기 말 위치 = 시작칸(오른쪽 아래) 중앙
+  // 초기 말 위치
   useEffect(() => {
     if (!isLayoutReady || logicalPositions.length === 0) return;
-    const start = logicalPositions[0];
+    // guard: keep index in range
+    const safe = Math.max(0, Math.min(initialIndex, logicalPositions.length - 1));
+    const start = logicalPositions[safe];
+    setCurrentIndex(safe);
     setPieceXY(getCenterXY(start.row, start.col));
-  }, [isLayoutReady, logicalPositions]);
+  }, [isLayoutReady, logicalPositions, initialIndex]);
 
   // 한 글자 픽셀폭 추정: 한글/전각 ~ 0.95 * fontSize, ascii ~ 0.55 * fontSize
   const charWidth = (ch: string, fontSize: number) =>
@@ -291,7 +312,7 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
     >
       <Svg width={width} height={height}>
         {/* 배경 */}
-        <Rect x={0} y={0} width={width} height={height} fill="#ecf1fe" />
+        <Rect x={0} y={0} width={width} height={height} fill="#fff" />
         {/* 셀들 그리기 (3D 효과 대신 상/하 투톤) */}
         {boardData.map((cell) => {
           const x = cell.col * CELL + PADDING_LEFT;
@@ -310,6 +331,8 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
           const clipId = `clip-${cell.row}-${cell.col}`;
           const bandH = Math.round(CELL * 0.18); // CELL=80 기준 약 14px
 
+          // 방문 이력 하이라이트: 상태별 반투명 오버레이 + 순서 배지
+          const visit = cell.tileId ? visits[cell.tileId as string] : undefined;
           return (
             <Fragment key={`${cell.row}-${cell.col}`}>
               {/* 공통 클립패스: 동일한 라운드 코너 유지 */}
@@ -344,6 +367,56 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
                 opacity={0.8}
                 clipPath={`url(#main-${clipId})`}
               />
+
+              {/* 방문 이력 오버레이 및 순서 배지 */}
+              {visit &&
+                (() => {
+                  const tint =
+                    visit.status === 'SUCCESS'
+                      ? '#34D399'
+                      : visit.status === 'PENDING'
+                        ? '#F59E0B'
+                        : visit.status === 'SKIPPED'
+                          ? '#ff3535'
+                          : '#EF4444';
+                  return (
+                    <>
+                      {/* 상태별 반투명 오버레이 */}
+                      <Rect
+                        x={x}
+                        y={y}
+                        width={CELL}
+                        height={TILE_H}
+                        rx={16}
+                        ry={16}
+                        fill={palette.mainColor}
+                        opacity={1}
+                        clipPath={`url(#main-${clipId})`}
+                      />
+                      {/* 순서 배지 */}
+                      <Rect
+                        x={x + 4}
+                        y={y + 4}
+                        width={22}
+                        height={22}
+                        rx={11}
+                        ry={11}
+                        fill={tint}
+                        opacity={0.85}
+                      />
+                      <SvgText
+                        x={x + 14.5}
+                        y={y + 19}
+                        fontSize={12}
+                        fontWeight="800"
+                        fill={palette.white}
+                        textAnchor="middle"
+                      >
+                        {String(visit.order)}
+                      </SvgText>
+                    </>
+                  );
+                })()}
 
               {/* 텍스트 (GO 전용) */}
               {cell.type === 'start-go' ? (

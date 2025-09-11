@@ -16,7 +16,6 @@ export function useCanvasDrag(
       if (e.target !== canvas) return;
       isDragging.current = true;
       lastPos.current = { x: e.clientX, y: e.clientY };
-      canvas.style.cursor = "grabbing";
     }
 
     function onPointerMove(e: PointerEvent) {
@@ -33,10 +32,9 @@ export function useCanvasDrag(
     function endDrag() {
       if (!canvas) return;
       isDragging.current = false;
-      canvas.style.cursor = "grab";
     }
 
-    canvas.style.cursor = "grab";
+    // keep default cursor; GameBoard manages pointer on tiles
     canvas.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", endDrag);
@@ -46,5 +44,5 @@ export function useCanvasDrag(
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", endDrag);
     };
-  }, []);
+  }, [canvasRef, wrapperRef]);
 }

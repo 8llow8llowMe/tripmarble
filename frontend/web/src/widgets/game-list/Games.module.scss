@@ -4,7 +4,6 @@
   gap: 38px;
   align-items: stretch;
   min-height: 340px;
-  margin-top: 14px;
 
   @media (max-width: 700px) {
     flex-direction: column;
@@ -15,7 +14,7 @@
 
 .leftBigImage {
   position: relative;
-  flex: 0 0 48%;
+  flex: 0 0 33%;
   min-width: 220px;
   aspect-ratio: 1.7 / 1;
   border-radius: 18px;
@@ -26,7 +25,7 @@
   @media (max-width: 700px) {
     min-width: 0;
     width: 100%;
-    aspect-ratio: 1.5 / 1;
+    aspect-ratio: 1 / 1.25;
     margin-bottom: 12px;
   }
   &:hover {
@@ -43,7 +42,7 @@
   padding: 38px 32px 24px 32px;
   background: linear-gradient(
     180deg,
-    rgba(30, 40, 60, 0.02) 10%,
+    rgba(30, 40, 60, 0.02) 0%,
     rgba(22, 29, 43, 0.9) 100%
   );
   color: #fff;
@@ -84,72 +83,91 @@
 
 .listColumn {
   flex: 1 1 360px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: auto;
   gap: 22px;
   min-width: 0;
-  justify-content: flex-start;
+  align-content: start;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }
 
 .card {
   background: #fff;
   border-radius: 16px;
-  padding: 22px 26px;
+  overflow: hidden;
   display: flex;
-  align-items: center;
-  gap: 20px;
+  flex-direction: column;
   box-shadow: 0 4px 16px rgba(100, 120, 140, 0.08);
-  transition: box-shadow 0.15s;
+  transition: box-shadow 0.15s, transform 0.15s;
   cursor: pointer;
 
   &:hover {
-    box-shadow: 0 8px 20px rgba(90, 120, 180, 0.16);
-    transform: translateY(-2px) scale(1.025);
+    box-shadow: 0 10px 24px rgba(90, 120, 180, 0.16);
+    transform: translateY(-2px);
   }
 }
 
-.cardImage {
-  width: 60px;
-  height: 60px;
-  border-radius: 12px;
-  object-fit: cover;
-  background: #e3e3e3;
-  border: 1.5px solid #e5e7eb;
+.thumb {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #eef3fb;
 }
 
 .cardContent {
-  flex: 1;
-  min-width: 0;
+  padding: 14px 16px 16px 16px;
 }
 
 .cardTitle {
-  font-size: 1.08rem;
-  font-weight: 700;
-  margin-bottom: 2px;
-  line-height: 1.2;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.3;
   color: #20262e;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .cardDesc {
-  font-size: 0.98rem;
-  color: #768198;
-  margin-bottom: 2px;
-  line-height: 1.32;
-  text-overflow: ellipsis;
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: #6f7a90;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  white-space: nowrap;
 }
 
 .tag {
-  font-size: 0.78rem;
-  color: #5c9cfb;
-  font-weight: 600;
-  margin-bottom: 3px;
+  font-size: 0.75rem;
+  color: #3f7cf6;
+  font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e8f0ff;
+  margin-bottom: 8px;
+}
+
+.cardMeta {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardDate {
+  font-size: 0.9rem;
+  color: #8895a9;
 }
 
 .horizontalList {

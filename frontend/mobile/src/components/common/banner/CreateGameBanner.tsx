@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#f4f6ff',
     overflow: 'hidden',
   },
   title: { fontSize: 18, fontWeight: '800', color: '#111827' },

@@ -39,3 +39,16 @@ eureka:
 # Swagger
 swagger:
   server-url: http://localhost:8000
+
+# Snowflake
+snowflake:
+  datacenter-id: 1
+  worker-id: 1
+
+# Security Resource Server
+security:
+  oauth2:
+    resource-server:
+      jwt:
+        access-key: ENC(YDO9DGO7lP8iCqeTNW/SXWCv0697ep+bbGvMnjoJfMDEtWy1Zq/yfZDsovoggEcmLLOtZfHSpLYoRO0YEUlrOl3CvD5KWXo55haCMx7cZMg=)
+

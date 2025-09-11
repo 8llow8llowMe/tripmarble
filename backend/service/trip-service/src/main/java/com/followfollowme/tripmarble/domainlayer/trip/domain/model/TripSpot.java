@@ -2,6 +2,8 @@ package com.followfollowme.tripmarble.domainlayer.trip.domain.model;
 
 import lombok.Builder;
 
+import java.time.LocalDateTime;
+
 @Builder
 public record TripSpot(
     long id,
@@ -27,7 +29,9 @@ public record TripSpot(
     String lclsSystm3,
     String firstImage,
     String firstImage2,
-    String cpyrhtDivCd
+    String cpyrhtDivCd,
+    LocalDateTime createdTime,
+    LocalDateTime modifiedTime
 ) {
 
 }

@@ -8,9 +8,11 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,20 +20,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-    name = "trip_game_move_log"
+    name = "trip_game_move_log",
+    indexes = {
+        @Index(name = "idx_trip_game_move_log_trip_game_tile_id", columnList = "trip_game_tile_id"),
+        @Index(name = "idx_trip_game_move_log_trip_game_member_id", columnList = "trip_game_member_id"),
+        @Index(name = "idx_trip_game_move_log_arrived_at_id", columnList = "arrived_at, id")
+    }
 )
 public class TripGameMoveLogEntity extends BaseEntity {
 
     @Id
-    @Comment("게임 이동 로그 (타임라인) 아이디")
+    @Comment("게임 이동 로그 (타임라인) ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -63,4 +68,7 @@ public class TripGameMoveLogEntity extends BaseEntity {
 
     @Comment("미션 처리 완료 시간 (성공/실패/스킵 등 상태 변경 시간)")
     private LocalDateTime missionProcessedAt;
+
+    @Comment("미션 관련 참조 ID (리뷰 ID 등)")
+    private Long missionReferenceId;
 }

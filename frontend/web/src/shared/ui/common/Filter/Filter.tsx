@@ -28,12 +28,13 @@ const Filter: React.FC<FilterProps> = ({ options, selected, onChange }) => {
             selected.includes(option.contentTypeId) ? styles.active : ""
           }`}
           type="button"
+          aria-pressed={selected.includes(option.contentTypeId)}
           onClick={() => handleToggle(option.contentTypeId)}
         >
-          <div className={styles.checkCircle}>
+          <span className={styles.checkCircle} aria-hidden>
             {selected.includes(option.contentTypeId) && <CheckIcon />}
-          </div>
-          <div className={styles.label}>{option.contentTypeName}</div>
+          </span>
+          <span className={styles.label}>{option.contentTypeName}</span>
         </button>
       ))}
     </div>

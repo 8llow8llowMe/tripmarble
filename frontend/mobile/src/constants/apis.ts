@@ -9,6 +9,7 @@ const END_POINTS = {
   //USER
   USER: {
     INFO: `/members/me`,
+    WITHDRAW: `/members/me/withdraw`,
   },
 
   //TRIP
@@ -34,13 +35,21 @@ const END_POINTS = {
   GAME: {
     LIST_TRIP_THEMES: '/trip-themes',
     LIST_DIFFICULTY: '/trip-games/difficulties',
-    LIST_MY_GAMES: '/trip-games',
+    LIST_GAMES_INFO: '/trip-games',
 
     CREATE: '/trip-games',
+    DETAIL: (tripGameId: string) => `/trip-games/${tripGameId}`,
     START: (tripGameId: string) => `/trip-games/${tripGameId}/start`,
     TILES: (tripGameId: string) => `/trip-games/${tripGameId}/tiles`,
     DICE: (tripGameId: string) => `/trip-games/${tripGameId}/dice`,
     FORCE_END: (tripGameId: string) => `/trip-games/${tripGameId}/force-end`,
+    MOVE_LOGS: (tripGameId: string) => `/trip-games/${tripGameId}/move-logs`,
+    MOVE_LOGS_SUCCESS: (tripGameId: string, tripGameMoveLogId: string) =>
+      `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/success`,
+    MOVE_LOGS_FAIL: (tripGameId: string, tripGameMoveLogId: string) =>
+      `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/fail`,
+    MOVE_LOGS_SKIP: (tripGameId: string, tripGameMoveLogId: string) =>
+      `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/skip`,
   },
 };
 

@@ -36,3 +36,15 @@ eureka:
     fetch-registry: true # 유레카 클라이언트가 유레카 서버로부터 인스턴스 레지스트리 주기적으로 받아올지 여부 (default: true)
     registry-fetch-interval-seconds: 30 # 레지스트리 몇 초마다 가져올지 (부하 줄이기, default: 30)
     initial-instance-info-replication-interval-seconds: 5 # 유레카 서버에 처음 등록할 때까지 대기 시간
+
+# Snowflake
+snowflake:
+  datacenter-id: ${SNOWFLAKE_DATACENTER_ID}
+  worker-id: ${SNOWFLAKE_WORKER_ID}
+
+# Security Resource Server
+security:
+  oauth2:
+    resource-server:
+      jwt:
+        access-key: ${JWT_ACCESS_KEY}

@@ -8,9 +8,14 @@ const Footer = () => {
           © 2025 TripMarble. All rights reserved.
         </span>
         <nav className={styles.nav}>
-          <a href="#">이용약관</a>
-          <a href="#">개인정보처리방침</a>
-          <a href="#">문의하기</a>
+          <a href="/policy/terms">이용약관</a>
+          <a href="/policy/privacy">개인정보처리방침</a>
+          <a
+            href="mailto:followfollowme@gmail.com?subject=TripMarble%20문의"
+            rel="noopener noreferrer"
+          >
+            문의하기
+          </a>
         </nav>
       </div>
     </footer>

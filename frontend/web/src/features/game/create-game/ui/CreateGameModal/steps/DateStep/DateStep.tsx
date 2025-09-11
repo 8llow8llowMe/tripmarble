@@ -30,7 +30,7 @@ interface DateStepProps {
 export default function DateStep({ value, onChange, label }: DateStepProps) {
   const [start, end] = value || [null, null];
   return (
-    <div>
+    <div className={styles.dateStepWrapper}>
       <DatePicker
         locale={ko}
         calendarClassName={styles.customCalendar}

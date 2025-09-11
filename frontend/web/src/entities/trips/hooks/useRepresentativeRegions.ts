@@ -7,7 +7,7 @@ import { AxiosResponse } from "axios";
 export interface RegionsRepresentativeResponse {
   representativeRegionId: number;
   representativeRegionName: string;
-  imageUrl: string | null;
+  representativeRegionImageUrl: string | null;
   regionId: number | null;
   sigunguId: number | null;
 }

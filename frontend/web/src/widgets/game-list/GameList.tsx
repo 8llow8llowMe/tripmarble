@@ -1,19 +1,17 @@
 import Image from "next/image";
 import styles from "./Games.module.scss";
 import Link from "next/link";
+import Card from "@/shared/ui/common/Card/Card";
 import { GameSummary } from "@/entities/games/hooks/useMyGameList";
 
 export function GameList({ games }: { games: GameSummary[] }) {
   const mainGame = games[0];
-  const listGames = games.slice(1, 6);
+  const listGames = games.slice(1, 5);
 
   return (
     <div className={styles.gamesContainer}>
       <div className={styles.leftBigImage} style={{ cursor: "pointer" }}>
-        <Link
-          key={mainGame.tripGameId}
-          href={`/game-history/${mainGame.tripGameId}`}
-        >
+        <Link key={mainGame.tripGameId} href={`/game/${mainGame.tripGameId}`}>
           <Image
             src={
               mainGame?.representativeRegionImageUrl || "/images/no-image.png"
@@ -21,7 +19,7 @@ export function GameList({ games }: { games: GameSummary[] }) {
             alt="대표 게임 이미지"
             fill
             style={{ objectFit: "cover" }}
-            sizes="(max-width: 900px) 100vw, 48vw"
+            sizes="(max-width: 900px) 100vw, 24vw"
             priority
           />
           {/* 오버레이 정보 */}
@@ -40,34 +38,17 @@ export function GameList({ games }: { games: GameSummary[] }) {
       </div>
       <div className={styles.listColumn}>
         {listGames.map((game) => (
-          <Link key={game.tripGameId} href={`/game-history/${game.tripGameId}`}>
-            <div
-              className={styles.card}
-              key={game.tripGameId}
-              style={{ cursor: "pointer" }}
-            >
-              <Image
-                className={styles.cardImage}
-                src={
-                  game.representativeRegionImageUrl || "/images/no-image.png"
-                }
-                alt="게임 대표 이미지"
-                width={60}
-                height={60}
-              />
-              <div className={styles.cardContent}>
-                <div className={styles.tag}>
-                  {game.representativeRegionName}
-                </div>
-                <div className={styles.cardTitle}>{game.title}</div>
-                {/* <div className={styles.cardDesc}>{game.description}</div> */}
-                <div className={styles.cardDesc}>
-                  여행지에서 다양한 미션에 도전하세요!
-                </div>
-                <div className={styles.cardDate}>{game.startedAt}</div>
-              </div>
-            </div>
-          </Link>
+          <Card
+            key={game.tripGameId}
+            href={`/game/${game.tripGameId}`}
+            imageUrl={
+              game.representativeRegionImageUrl || "/images/no-image.png"
+            }
+            regionName={game.representativeRegionName}
+            title={game.title}
+            description="여행지에서 다양한 미션에 도전하세요!"
+            date={game.startedAt}
+          />
         ))}
       </div>
     </div>

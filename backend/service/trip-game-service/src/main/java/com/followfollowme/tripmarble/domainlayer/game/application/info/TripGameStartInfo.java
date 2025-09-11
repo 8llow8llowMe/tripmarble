@@ -1,19 +1,19 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.info;
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
-import java.util.List;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
 import lombok.Builder;
 
 @Builder
 public record TripGameStartInfo(
-    TripGame tripGame,
-    List<TripGameMemberWithProfileInfo> members
+    long tripGameId,
+    GameStatus status
 ) {
 
-    public static TripGameStartInfo of(TripGame tripGame, List<TripGameMemberWithProfileInfo> members) {
+    public static TripGameStartInfo of(TripGame tripGame) {
         return TripGameStartInfo.builder()
-            .tripGame(tripGame)
-            .members(members)
+            .tripGameId(tripGame.id())
+            .status(tripGame.status())
             .build();
     }
 }

@@ -38,15 +38,16 @@ const defineConfig = (): ExpoConfig => ({
   },
   ios: { supportsTablet: true },
   android: {
+    package: 'com.followfollowme.tripmarble',
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#ffffff',
     },
     edgeToEdgeEnabled: true,
+    jsEngine: 'hermes',
   },
   web: { favicon: './assets/favicon.png' },
   experiments: { reactCanary: true },
-
   extra: {
     APP_ENV: profile,
     EXPO_PUBLIC_AUTH_SERVICE: process.env.EXPO_PUBLIC_AUTH_SERVICE,

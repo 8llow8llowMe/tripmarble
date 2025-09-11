@@ -22,14 +22,14 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "region",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_region_code", columnNames = "region_code")
+        @UniqueConstraint(name = "uk_region_region_code", columnNames = "region_code")
     }
 )
 public class RegionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Comment("시도 아이디 (지역 아이디)")
+    @Comment("시도 ID (지역 ID)")
     private Long id;
 
     @Comment("TourAPI 시도 코드 (자연키)")

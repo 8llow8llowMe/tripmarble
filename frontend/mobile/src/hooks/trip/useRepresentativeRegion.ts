@@ -16,7 +16,7 @@ export interface RepresentativeRegionResponse extends ApiResponseBase {
   dataBody: {
     representativeRegionId: string;
     representativeRegionName: string;
-    imageUrl: string | null;
+    representativeRegionImageUrl: string | null;
     description: string | null;
   };
 }

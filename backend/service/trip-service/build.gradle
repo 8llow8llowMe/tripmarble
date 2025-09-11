@@ -1,6 +1,8 @@
 dependencies {
     implementation project(":core:common-core")
     implementation project(":core:persistence-core")
+    implementation project(":core:security-core")
+
     // Spring Data JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     // Spring MVC
@@ -18,4 +20,10 @@ dependencies {
     // 안전한 QueryDSL 버전 (OpenFeign 포크 사용)
     implementation 'io.github.openfeign.querydsl:querydsl-jpa:6.11'
     annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:6.11:jpa'
+    // Spring Security Resource Server
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    // Feign Client
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 }

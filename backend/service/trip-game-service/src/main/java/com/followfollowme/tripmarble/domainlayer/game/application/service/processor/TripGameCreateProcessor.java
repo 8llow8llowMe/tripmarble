@@ -10,13 +10,14 @@ import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripG
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameThemeMapping;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
 import com.followfollowme.tripmarble.domainlayer.theme.application.port.out.TripThemeRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.theme.domain.model.TripTheme;
 import com.followfollowme.tripmarble.persistence.util.SnowflakeIdGenerator;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class TripGameCreateProcessor {
         TripGame tripGame = TripGame.builder()
             .id(snowflakeIdGenerator.generateId())
             .title(command.title())
-            .status(Status.WAITING)
+            .status(GameStatus.WAITING)
             .difficulty(command.difficulty())
             .startedAt(command.startedAt())
             .endedAt(command.endedAt())

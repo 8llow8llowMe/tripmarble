@@ -9,7 +9,22 @@ export function useCanvasInitialScroll(
     const canvas = canvasRef.current;
     if (!canvas || !wrapper) return;
 
-    wrapper.scrollLeft = canvas.width + 10 - wrapper.clientWidth;
-    wrapper.scrollTop = canvas.height - wrapper.clientHeight;
+    // Center the canvas content within the wrapper on initial mount
+    const centerScroll = () => {
+      const left = Math.max(
+        0,
+        Math.floor((canvas.width - wrapper.clientWidth) / 2)
+      );
+      const top = Math.max(
+        0,
+        Math.floor((canvas.height - wrapper.clientHeight) / 2)
+      );
+      wrapper.scrollLeft = left;
+      wrapper.scrollTop = top;
+    };
+
+    // Defer to ensure wrapper sizes are measured
+    const id = requestAnimationFrame(centerScroll);
+    return () => cancelAnimationFrame(id);
   }, [canvasRef, wrapperRef]);
 }

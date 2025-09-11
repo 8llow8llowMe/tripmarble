@@ -7,7 +7,7 @@ import { fetchMe } from "@/entities/users/model/user/userSlice";
 
 export default function ClientLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const hasHeader = pathname !== "/";
+  const hasHeader = pathname !== "/" && pathname !== "/spots";
 
   const [accessToken, setAccessToken] = useState<string | null>(null);
 

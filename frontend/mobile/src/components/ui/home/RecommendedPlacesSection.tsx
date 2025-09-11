@@ -53,18 +53,17 @@ const shadow = Platform.select({
 const RecommendedPlacesSection = ({
   title,
   data,
-  // onPressItem,
-  onPressMore,
+  onPressItem,
 }: {
   title: string;
   data: typeof DUMMY_PLACES;
-  // onPressItem? (id: number) => void;
-  onPressMore?: () => void;
+  onPressItem: (tripSpotId: string) => void;
 }) => {
   const itemWidth = 220;
+
   return (
     <View style={styles.section}>
-      <SectionHeader title={title} onPressMore={onPressMore} />
+      <SectionHeader title={title} />
       <FlatList
         data={data}
         keyExtractor={(item) => String(item.id)}
@@ -79,7 +78,7 @@ const RecommendedPlacesSection = ({
           <TouchableOpacity
             style={[styles.placeCard, { width: itemWidth }, shadow]}
             activeOpacity={0.9}
-            // onPress={() => onPressItem(item.id)}
+            onPress={() => onPressItem(item.id)}
           >
             <ImageBackground
               source={{ uri: item.image }}
@@ -97,12 +96,12 @@ const RecommendedPlacesSection = ({
                   ))}
                 </View>
                 <View style={{ flex: 1 }} />
-                <TextBox size={17} fontsName="Pretendard700" color="#fff">
+                <TextBox size={17} fontsName="Pretendard700" color={palette.white}>
                   {item.name}
                 </TextBox>
                 <View style={styles.ratingRow}>
                   <Ionicons name="star" size={14} color="#FFD166" />
-                  <TextBox size={14} color="#fff" style={{ marginLeft: 4 }}>
+                  <TextBox size={14} color={palette.white} style={{ marginLeft: 4 }}>
                     {item.score.toFixed(1)}
                   </TextBox>
                 </View>
@@ -120,7 +119,7 @@ export default RecommendedPlacesSection;
 function MiniTag({ text }: { text: string }) {
   return (
     <View style={styles.tag}>
-      <TextBox size={11} color="#fff">
+      <TextBox size={11} color={palette.white}>
         {text}
       </TextBox>
     </View>

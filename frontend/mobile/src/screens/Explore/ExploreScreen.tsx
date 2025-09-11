@@ -48,7 +48,7 @@ export default function ExploreScreen() {
           <View style={styles.overlay} />
         </View>
 
-        <View style={[styles.searchBoxWrapper, { top: bgHeight - searchBoxHeight / 2 }]}>
+        {/* <View style={[styles.searchBoxWrapper, { top: bgHeight - searchBoxHeight / 2 }]}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => navigation.navigate('SearchScreen')}
@@ -58,7 +58,7 @@ export default function ExploreScreen() {
               여행지를 검색해보세요.
             </TextBox>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         <TextBox size={18} fontsName="Pretendard600" style={styles.sectionTitle}>
           지금 인기있는 여행지

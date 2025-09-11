@@ -3,8 +3,6 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.in.web.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
-import java.util.List;
-
 @Builder
 @Schema(description = "여행 게임 시작 응답 DTO")
 public record TripGameStartResponse(
@@ -16,10 +14,7 @@ public record TripGameStartResponse(
     String gameStatusCode,
 
     @Schema(description = "게임 상태 설명", example = "게임 진행 중")
-    String gameStatusDescription,
-
-    @Schema(description = "게임 참여자 목록 (순서 및 정보 포함)")
-    List<TripGameStartMemberView> members
+    String gameStatusDescription
 ) {
 
 }

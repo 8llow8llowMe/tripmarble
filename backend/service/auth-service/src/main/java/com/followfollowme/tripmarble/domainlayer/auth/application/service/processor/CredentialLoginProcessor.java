@@ -22,6 +22,12 @@ public class CredentialLoginProcessor {
         Member member = memberRepositoryPort.findByEmail(command.email())
             .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
 
+        // 상태 검증
+        switch (member.status()) {
+            case WITHDRAWN -> throw new MemberException(MemberErrorCode.MEMBER_ALREADY_WITHDRAWN);
+            case SUSPENDED -> throw new MemberException(MemberErrorCode.MEMBER_SUSPENDED);
+        }
+
         if (!passwordEncoder.matches(command.password(), member.password())) {
             throw new MemberException(MemberErrorCode.NOT_MATCH_PASSWORD);
         }

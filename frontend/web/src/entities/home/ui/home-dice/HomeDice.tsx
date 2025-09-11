@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/entities/users/model";
-import { toast } from "react-toastify";
 // three
 import * as THREE from "three";
 import { PMREMGenerator } from "three";
@@ -18,32 +17,64 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "./HomeDice.module.scss";
 // components
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
-import LiquidButton from "@/shared/ui/common/LiquidButton/LiquidButton";
+import useRepresentativeRegions from "@/entities/trips/hooks/useRepresentativeRegions";
+import noImage from "/public/images/no-image.png";
+import PolaroidStack from "@/entities/home/ui/polaroid-stack/PolaroidStack";
 
 export default function HomeDicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cubeRef = useRef<THREE.Object3D | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
+  const [portalEl, setPortalEl] = useState<HTMLElement | null>(null);
 
   const [loadedCount, setLoadedCount] = useState(0);
   const handlePieceLoaded = () => {
     setLoadedCount((count) => count + 1);
   };
 
+  // Prefetch representative regions early to avoid delay
+  const { data: regionsData } = useRepresentativeRegions();
+  const polaroidItems = (regionsData?.data?.dataBody || [])
+    .slice(0, 6)
+    .map((r: any) => ({
+      id: r.representativeRegionId,
+      name: r.representativeRegionName,
+      imgUrl: r.representativeRegionImageUrl || (noImage as any).src,
+    }));
+
+  // Create a fixed-layer portal element so board isn't affected by parent transforms after routing
   useEffect(() => {
-    if (loadedCount === 5 && boardRef.current) {
-      gsap.to(boardRef.current, {
-        autoAlpha: 1,
-        duration: 0.5,
-        ease: "power2.out",
-      });
-    }
-  }, [loadedCount]);
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    setPortalEl(el);
+    return () => {
+      document.body.removeChild(el);
+      setPortalEl(null);
+    };
+  }, []);
 
   useEffect(() => {
+    if (!portalEl) return;
     window.scrollTo(0, 0);
     gsap.registerPlugin(ScrollTrigger);
     if (!containerRef.current) return;
+    if (polaroidItems.length === 0) return;
+
+    // if (loadedCount === 5 && boardRef.current) {
+    gsap.to(boardRef.current, {
+      autoAlpha: 1,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+    // }
+
+    // Ensure initial hidden state for polaroid stack before timeline runs
+    gsap.set(".polaroid-container", { opacity: 0, pointerEvents: "none" });
+    gsap.set(`.${styles.polaroidHint}`, { autoAlpha: 0 });
+    // Hide cards and set initial transform so fromTo works consistently
+    gsap.set("[data-polaroid-card]", { autoAlpha: 0, y: 180, scale: 0.96 });
+    // Reset bodies (avoid inheriting transforms if hot reloaded)
+    gsap.set("[data-polaroid-body]", { x: 0, y: 0, rotate: 0 });
 
     /** 1) three 기본 세팅 */
     const scene = new THREE.Scene();
@@ -127,6 +158,12 @@ export default function HomeDicePage() {
     };
     gsap.ticker.add(ticker);
 
+    gsap.to(boardRef.current, {
+      autoAlpha: 1,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: ".ux-trigger",
@@ -197,23 +234,30 @@ export default function HomeDicePage() {
 
     tl.to({}, { duration: 1 }); // pause for 1 second at time = 4.2
 
-    tl.to(
-      ".button-container",
-      {
-        opacity: 1,
-        duration: 0.8,
-        ease: "power2.out",
-      },
-      4.2
-    ).to(
-      ".button-container",
-      {
-        opacity: 0,
-        duration: 0.8,
-        ease: "power2.in",
-      },
-      5.2
-    );
+    // 폴라로이드 등장 + 스택 쌓기
+    tl.set(".polaroid-container", { opacity: 1, pointerEvents: "auto" }, 5.2)
+      // 1) 카드 자체를 아래에서 위로 하나씩 등장 (그리드 자리로 등장)
+      .fromTo(
+        "[data-polaroid-card]",
+        { autoAlpha: 0, y: 180, scale: 0.96 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.6,
+          ease: "power3.out",
+          // 아래에서 위로 차례대로 올라오게
+          stagger: { each: 0.28, from: "start" }, // 마지막 카드가 먼저, 처음 카드가 맨 위로 오게 하려면 "start"
+        },
+        5.35
+      )
+      // 폴라로이드가 모두 등장한 뒤, 힌트를 아래에서 위로 페이드 인
+      .fromTo(
+        `.${styles.polaroidHint}`,
+        { autoAlpha: 0, y: 28 },
+        { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" },
+        ">-0.1"
+      );
 
     // 텍스트 애니메이션
 
@@ -271,10 +315,15 @@ export default function HomeDicePage() {
     return () => {
       window.removeEventListener("resize", onResize);
       gsap.ticker.remove(ticker);
+      // Kill all ScrollTriggers created in this scope
       ScrollTrigger.getAll().forEach((t) => t.kill());
-      gsap.set(`.${styles.boardPieces}, .${styles.piece}`, {
-        clearProps: "all",
-      });
+      // Clear only GSAP-related inline styles on our elements if they still exist
+      const toClear = gsap.utils.toArray<HTMLElement>(
+        `.${styles.piece}, .${styles.pieceBox}`
+      );
+      if (toClear.length) {
+        gsap.set(toClear, { clearProps: "transform,opacity,will-change" });
+      }
       cancelAnimationFrame(raf);
       renderer.dispose();
       pmrem?.dispose();
@@ -290,20 +339,22 @@ export default function HomeDicePage() {
         }
       });
     };
-  }, []);
+  }, [polaroidItems.length, loadedCount, portalEl]);
 
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const router = useRouter();
   const user = useAppSelector((state) => state.user.user);
 
-  const handleCreateClick = () => {
-    if (!user) {
-      toast.info("로그인 후 게임을 만들 수 있습니다.");
-      router.push("/login");
-      return;
-    }
-    setCreateModalOpen(true);
-  };
+  // const handleCreateClick = () => {
+  //   if (!user) {
+  //     toast.info("로그인 후 게임을 만들 수 있습니다.");
+  //     router.push("/login");
+  //     return;
+  //   }
+  //   setCreateModalOpen(true);
+  // };
+
+  const boardImageSizes = "(max-width: 860px) 33vw, 520px";
 
   return (
     <>
@@ -325,80 +376,79 @@ export default function HomeDicePage() {
         <div className={`text ${styles.fadeText}`} data-index="1">
           주사위를 굴려 여행을 떠나보세요!
         </div>
-        {/* Board (over canvas) */}
-        <div className={styles.boardLayerWrapper} ref={boardRef}>
-          <Image
-            className={`${styles.piece} ${styles.pOuterLeft}`}
-            src="/images/board/Board01.png"
-            alt="Board outer left"
-            fill
-            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
-            style={{ objectFit: "contain" }}
-            priority
-            onLoad={handlePieceLoaded}
-          />
-          <Image
-            className={`${styles.piece} ${styles.pMidLeft}`}
-            src="/images/board/Board02.png"
-            alt="Board mid left"
-            fill
-            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
-            style={{ objectFit: "contain" }}
-            onLoad={handlePieceLoaded}
-          />
-          <Image
-            className={`${styles.piece} ${styles.pOuterRight}`}
-            src="/images/board/Board05.png"
-            alt="Board outer right"
-            fill
-            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
-            style={{ objectFit: "contain" }}
-            onLoad={handlePieceLoaded}
-          />
-          <Image
-            className={`${styles.piece} ${styles.pMidRight}`}
-            src="/images/board/Board04.png"
-            alt="Board mid right"
-            fill
-            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
-            style={{ objectFit: "contain" }}
-            onLoad={handlePieceLoaded}
-          />
-          <Image
-            className={`${styles.piece} ${styles.pCenter}`}
-            src="/images/board/Board03.png"
-            alt="Board center"
-            fill
-            sizes="(max-width: 700px) 300px, (max-width: 1500px) 400px, 600px"
-            style={{ objectFit: "contain" }}
-            onLoad={handlePieceLoaded}
-          />
+        {/* Board (over canvas) rendered via portal to disconnect from parent transforms */}
+        {portalEl &&
+          createPortal(
+            <div className={styles.boardLayerWrapper} ref={boardRef}>
+              <div className={styles.boardGroup}>
+                <div className={`${styles.pieceBox} ${styles.pOuterLeft}`}>
+                  <Image
+                    className={styles.piece}
+                    src="/images/board/Board01.png"
+                    alt="Board outer left"
+                    fill
+                    sizes={boardImageSizes}
+                    style={{ objectFit: "contain" }}
+                    priority
+                    onLoad={handlePieceLoaded}
+                  />
+                </div>
+                <div className={`${styles.pieceBox} ${styles.pMidLeft}`}>
+                  <Image
+                    className={styles.piece}
+                    src="/images/board/Board02.png"
+                    alt="Board mid left"
+                    fill
+                    sizes={boardImageSizes}
+                    style={{ objectFit: "contain" }}
+                    onLoad={handlePieceLoaded}
+                  />
+                </div>
+                <div className={`${styles.pieceBox} ${styles.pOuterRight}`}>
+                  <Image
+                    className={styles.piece}
+                    src="/images/board/Board05.png"
+                    alt="Board outer right"
+                    fill
+                    sizes={boardImageSizes}
+                    style={{ objectFit: "contain" }}
+                    onLoad={handlePieceLoaded}
+                  />
+                </div>
+                <div className={`${styles.pieceBox} ${styles.pMidRight}`}>
+                  <Image
+                    className={styles.piece}
+                    src="/images/board/Board04.png"
+                    alt="Board mid right"
+                    fill
+                    sizes={boardImageSizes}
+                    style={{ objectFit: "contain" }}
+                    onLoad={handlePieceLoaded}
+                  />
+                </div>
+                <div className={`${styles.pieceBox} ${styles.pCenter}`}>
+                  <Image
+                    className={styles.piece}
+                    src="/images/board/Board03.png"
+                    alt="Board center"
+                    fill
+                    sizes={boardImageSizes}
+                    style={{ objectFit: "contain" }}
+                    onLoad={handlePieceLoaded}
+                  />
+                </div>
+              </div>
+            </div>,
+            portalEl
+          )}
+        {/* 폴라로이드 스택 */}
+        <div className={`polaroid-container ${styles.polaroidContainer}`}>
+          <PolaroidStack items={polaroidItems} />
         </div>
-        {/* 버튼 */}
-        <div className={`button-container ${styles.buttonContainer}`}>
-          <Link href="/recommend">
-            <LiquidButton
-              width="100%"
-              height="100%"
-              fontSize="1.5rem"
-              radius="lg"
-              bgColor="primary"
-              paddingSize="xl"
-            >
-              랜덤 여행지 추천받기
-            </LiquidButton>
-          </Link>
-          <LiquidButton
-            width="100%"
-            height="100%"
-            fontSize="1.5rem"
-            radius="lg"
-            bgColor="primary"
-            paddingSize="xl"
-            onClick={handleCreateClick}
-          >
-            게임 만들기
-          </LiquidButton>
+        <div className={styles.polaroidHint}>
+          <span>사진을 눌러</span>
+          <br className={styles.mobileBr} />
+          <span>여행지를 찾아보세요!</span>
         </div>
         <CreateGameModal
           isOpen={isCreateModalOpen}

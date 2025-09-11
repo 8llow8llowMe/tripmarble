@@ -36,7 +36,7 @@ export default function StepName({ onNext }: { onNext: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  container: { justifyContent: 'center', alignItems: 'flex-start', paddingHorizontal: 24 },
+  container: { justifyContent: 'center', alignItems: 'flex-start', paddingHorizontal: 16 },
   title: { marginBottom: 32 },
   input: {
     width: '100%',

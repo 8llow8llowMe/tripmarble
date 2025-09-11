@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
 import { useForm, FormProvider } from 'react-hook-form';
 
-import SafeAreaScreen from '@/components/layout/SafeAreaScreen';
 import { palette } from '@/constants/colors';
 import {
   SignUpComplete,
@@ -48,7 +47,7 @@ export default function SignUpScreen({ navigation }: any) {
   const goToLogin = () => navigation.replace('Login');
 
   return (
-    <SafeAreaScreen>
+    <SafeAreaView style={styles.safeArea}>
       <SignUpHeader step={step + 1} total={6} onPrev={goPrev} />
       <FormProvider {...methods}>
         <View style={{ flex: 1, backgroundColor: palette.white }}>
@@ -60,6 +59,10 @@ export default function SignUpScreen({ navigation }: any) {
           {step === 5 && <SignUpComplete onGoLogin={goToLogin} />}
         </View>
       </FormProvider>
-    </SafeAreaScreen>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: palette.white },
+});

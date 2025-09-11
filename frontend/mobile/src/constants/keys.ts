@@ -26,9 +26,12 @@ const QUERY_KEY = {
     LIST_DIFFICULTY: 'difficultyList',
     GET_GAME_TILES: 'getGameTiles',
     GAME_START: 'gameStart',
-    MY_GAME_LIST: 'myGameList',
+    GAME_LIST_INFO: 'gameList',
+    GAME_DETAIL_INFO: 'gameDetail',
     GAME_DICE: 'dice',
-    GAME_FORCE_END: 'force-end',
+    GAME_FORCE_END: 'forceEnd',
+    MOVE_LOGS: 'moveLogs',
+    MOVE_LOGS_SUCCESS: 'moveLogsSuccess',
   },
 };
 

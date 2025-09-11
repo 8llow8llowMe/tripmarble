@@ -23,7 +23,7 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "trip_spot_detail",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_tripspot_detail_content_id", columnNames = "content_id")
+        @UniqueConstraint(name = "uk_trip_spot_detail_content_id", columnNames = "content_id")
     }
 )
 public class TripSpotDetailEntity {

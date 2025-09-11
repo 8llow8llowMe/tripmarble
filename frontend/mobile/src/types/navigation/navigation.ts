@@ -34,17 +34,18 @@ export type BottomTabParamList = {
 // === 각 스택 ===
 export type SettingsParamList = {
   SettingsHomeScreen: undefined;
+  LicenseScreen: undefined;
 };
 
 export type GamePlayStackParamList = {
   GameHomeScreen: undefined;
   EndedGameScreen: { tripGameId: string };
-  OngoingGameScreen: { tripGameId: string };
+  GameDetailScreen: { tripGameId: string };
   GameListScreen: { status?: 'WAITING' | 'ONGOING' | 'ENDED' };
   GameMissionAuthScreen: undefined;
 };
 
 export type SpotStackParamList = {
   SpotListScreen: { representativeRegionId: string };
-  SpotDetailScreen: undefined;
+  SpotDetailScreen: { tripSpotId: string };
 };

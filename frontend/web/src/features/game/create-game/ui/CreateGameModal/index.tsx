@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAppDispatch, useAppSelector } from "@/entities/users/model";
 import { toast } from "react-toastify";
 import {
@@ -88,62 +89,79 @@ export default function CreateGameModal({
   const [step, setStep] = useState(0);
   const [hasError, setHasError] = useState(false);
   const { createGame } = useCreateTripGame();
-
-  const [isScrollingByButton, setIsScrollingByButton] = useState(false);
+  const queryClient = useQueryClient();
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const isProgrammaticScroll = useRef(false);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // 다음 스텝 이동 (버튼 클릭)
-  const nextStep = () => {
-    setHasError(false);
-    if (step < steps.length - 1) {
-      const next = step + 1;
-      setStep(next);
-
-      if (containerRef.current && stepRefs.current[next]) {
-        setIsScrollingByButton(true);
-        const targetTop = stepRefs.current[next]!.offsetTop - 90;
+  // Effect to scroll to the current step
+  useEffect(() => {
+    if (containerRef.current) {
+      const targetTop = containerRef.current.clientHeight * step;
+      if (containerRef.current.scrollTop !== targetTop) {
+        isProgrammaticScroll.current = true;
         containerRef.current.scrollTo({
           top: targetTop,
           behavior: "smooth",
         });
 
-        setTimeout(() => {
-          setIsScrollingByButton(false);
-        }, 500);
+        // Reset the flag after the scroll animation is likely to have finished
+        const scrollFinishTimer = setTimeout(() => {
+          isProgrammaticScroll.current = false;
+        }, 1000); // Corresponds to scroll-behavior animation time
+
+        return () => clearTimeout(scrollFinishTimer);
       }
+    }
+  }, [step]);
+
+  // nextStep and prevStep just update the step state
+  const nextStep = useCallback(() => {
+    setHasError(false);
+    if (step < steps.length - 1) {
+      setStep(step + 1);
     } else {
       createGame(form, {
         onSuccess: () => {
           toast.success("게임이 생성되었습니다!");
+          queryClient.invalidateQueries({ queryKey: ["myGameListInfinite"] });
           dispatch(resetGameForm());
           onClose();
         },
         onError: () => toast.error("게임 생성에 실패했습니다."),
       });
     }
-  };
+  }, [createGame, dispatch, form, onClose, step, queryClient]);
 
-  // 이전 스텝 이동 (버튼 클릭)
   const prevStep = () => {
-    const prev = Math.max(0, step - 1);
-    setStep(prev);
-
-    if (containerRef.current && stepRefs.current[prev]) {
-      setIsScrollingByButton(true);
-      const targetTop = stepRefs.current[prev]!.offsetTop - 90;
-      containerRef.current.scrollTo({
-        top: targetTop,
-        behavior: "smooth",
-      });
-      setTimeout(() => {
-        setIsScrollingByButton(false);
-      }, 500);
+    if (step > 0) {
+      setStep(step - 1);
     }
   };
 
-  // 입력값 변경 처리
+  // onScroll handler to update step from manual scrolling
+  const onScroll = () => {
+    if (isProgrammaticScroll.current) {
+      return;
+    }
+
+    if (containerRef.current) {
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+      scrollTimeout.current = setTimeout(() => {
+        const { scrollTop, clientHeight } = containerRef.current!;
+        if (clientHeight > 0) {
+          const currentStep = Math.round(scrollTop / clientHeight);
+          if (currentStep !== step) {
+            setStep(currentStep);
+          }
+        }
+      }, 150);
+    }
+  };
+
   const handleChange = useCallback(
     (key: StepKey, value: StepValueTypeMap[typeof key]) => {
       if (key === "tripPeriod" && Array.isArray(value)) {
@@ -156,77 +174,63 @@ export default function CreateGameModal({
     [dispatch]
   );
 
-  // 모달 닫기 시 초기화
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     dispatch(resetGameForm());
     setStep(0);
     onClose();
-  };
+  }, [dispatch, onClose]);
 
-  // 스텝 변경에 따른 부드러운 스크롤 이동
   useEffect(() => {
-    if (stepRefs.current[step] && containerRef.current) {
-      const targetTop = stepRefs.current[step]!.offsetTop - 90;
-      containerRef.current.scrollTo({
-        top: targetTop,
-        behavior: "smooth",
-      });
-    }
-  }, [step]);
-
-  // 스크롤 시 현재 위치 기반으로 스텝 자동 업데이트
-  const onScroll = useCallback(() => {
-    if (!containerRef.current || isScrollingByButton) return; // 버튼 스크롤 중엔 무시
-
-    const scrollTop = containerRef.current.scrollTop;
-
-    let closestStep = 0;
-    let minDistance = Infinity;
-
-    for (let i = 0; i < stepRefs.current.length; i++) {
-      const el = stepRefs.current[i];
-      if (el) {
-        const offsetTop = el.offsetTop - 90;
-        const distance = Math.abs(scrollTop - offsetTop);
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestStep = i;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        const target = e.target as HTMLElement;
+        const isTyping =
+          target?.tagName === "INPUT" ||
+          target?.tagName === "TEXTAREA" ||
+          (target as HTMLInputElement)?.isContentEditable;
+        if (!isTyping) {
+          e.preventDefault();
+          nextStep();
         }
+      } else if (e.key === "Escape") {
+        handleClose();
       }
-    }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [nextStep, handleClose]);
 
-    if (closestStep !== step) {
-      setStep(closestStep);
-      setHasError(false);
-    }
-  }, [step, isScrollingByButton]);
+  const canNext = !hasError;
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <div className={styles.container}>
-        {/* 진행 바 */}
-        <div className={styles.progress}>
-          <div className={styles.barWrapper}>
-            <div
-              className={styles.bar}
-              style={{ width: `${((step + 1) / steps.length) * 100}%` }}
-            />
+        <div className={styles.header}>
+          <div className={styles.progress}>
+            <div className={styles.barWrapper}>
+              <div
+                className={styles.bar}
+                style={{ width: `${((step + 1) / steps.length) * 100}%` }}
+              />
+            </div>
+          </div>
+          <div className={styles.titleDiv}>
+            <div className={styles.info}>
+              <span className={styles.stepBadge}>{step + 1}</span>
+              {steps[step].label} 선택
+            </div>
+            <div className={styles.counter}>
+              {step + 1} / {steps.length}
+            </div>
           </div>
         </div>
 
-        {/* 제목 및 스텝 인디케이터 */}
-        <div className={styles.titleDiv}>
-          <div className={styles.info}>{steps[step].label} 선택</div>
-          {step + 1} / {steps.length}
-        </div>
-
-        {/* 스텝 컨텐츠 스크롤 컨테이너 */}
         <div
           className={styles.contentContainer}
           ref={containerRef}
           onScroll={onScroll}
         >
-          {steps.map((stepItem, index) => {
+          {steps.map((stepItem) => {
             const StepComp = stepItem.Component;
             const stepValue =
               stepItem.key === "tripPeriod"
@@ -236,13 +240,7 @@ export default function CreateGameModal({
                   ] as StepValueTypeMap[typeof stepItem.key]);
 
             return (
-              <div
-                key={stepItem.key}
-                ref={(el) => {
-                  stepRefs.current[index] = el;
-                }}
-                className={styles.stepComponent}
-              >
+              <div key={stepItem.key} className={styles.stepComponent}>
                 <StepComp
                   value={stepValue}
                   onChange={(value: any) => handleChange(stepItem.key, value)}
@@ -255,18 +253,12 @@ export default function CreateGameModal({
               </div>
             );
           })}
-          {hasError && (
-            <div style={{ color: "red", fontSize: "0.85rem" }}>
-              올바른 {steps[step].label}을 입력해주세요.
-            </div>
-          )}
         </div>
 
-        {/* 버튼 영역 */}
-        <div className={styles.ButtonDiv}>
+        <div className={styles.footer}>
           {step > 0 && (
             <button
-              className={styles.beforeButton}
+              className={styles.secondary}
               onClick={prevStep}
               type="button"
             >
@@ -274,9 +266,9 @@ export default function CreateGameModal({
             </button>
           )}
           <button
-            className={styles.nextButton}
+            className={styles.primary}
             onClick={nextStep}
-            style={step === 0 ? { width: "100%" } : undefined}
+            disabled={!canNext}
             type="button"
           >
             {step !== steps.length - 1 ? "계속하기" : "게임 생성하기"}

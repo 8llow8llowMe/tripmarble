@@ -1,9 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.game.domain.model;
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.MissionResult;
-import lombok.Builder;
-
 import java.time.LocalDateTime;
+import lombok.Builder;
 
 @Builder
 public record TripGameMoveLog(
@@ -14,10 +13,11 @@ public record TripGameMoveLog(
     int dice,
     int turnOrder,
     MissionResult missionResult,
-    LocalDateTime missionProcessedAt
+    LocalDateTime missionProcessedAt,
+    Long missionReferenceId
 ) {
 
-    public TripGameMoveLog updateMissionResult(MissionResult result) {
+    public TripGameMoveLog updateMissionResultWithReference(MissionResult result, Long referenceId) {
         this.missionResult.validateChangeable(); // 상태 전환 가능 여부 검증
 
         LocalDateTime processedAt = switch (result) {
@@ -35,6 +35,7 @@ public record TripGameMoveLog(
             .turnOrder(this.turnOrder)
             .missionResult(result)
             .missionProcessedAt(processedAt)
+            .missionReferenceId(referenceId)
             .build();
     }
 }

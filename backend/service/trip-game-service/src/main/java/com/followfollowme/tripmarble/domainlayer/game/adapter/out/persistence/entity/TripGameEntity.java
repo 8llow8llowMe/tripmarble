@@ -2,13 +2,14 @@ package com.followfollowme.tripmarble.domainlayer.game.adapter.out.persistence.e
 
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Difficulty;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.EndType;
-import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.Status;
+import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
 import com.followfollowme.tripmarble.persistence.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AccessLevel;
@@ -24,12 +25,16 @@ import org.hibernate.annotations.Comment;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-    name = "trip_game"
+    name = "trip_game",
+    indexes = {
+        @Index(name = "idx_trip_game_representative_region_id", columnList = "representative_region_id"),
+        @Index(name = "idx_trip_game_status_id", columnList = "status, id")
+    }
 )
 public class TripGameEntity extends BaseEntity {
 
     @Id
-    @Comment("여행 게임(계획) 아이디")
+    @Comment("여행 게임(계획) ID")
     private Long id;
 
     @Comment("대표 여행지 연관 외래키")
@@ -42,7 +47,7 @@ public class TripGameEntity extends BaseEntity {
     @Comment("게임 상태 여부 (시작 전/진행 중/종료")
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private GameStatus status;
 
     @Comment("난이도")
     @Column(nullable = false)
