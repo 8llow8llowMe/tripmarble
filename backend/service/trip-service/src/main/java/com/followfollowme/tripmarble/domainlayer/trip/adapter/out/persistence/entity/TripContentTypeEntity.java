@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
@@ -23,6 +24,9 @@ import org.hibernate.annotations.Comment;
     name = "trip_content_type",
     uniqueConstraints = {
         @UniqueConstraint(name = "uk_content_type_id", columnNames = "content_type_id")
+    },
+    indexes = {
+        @Index(name = "idx_content_type_id", columnList = "content_type_id")
     }
 )
 public class TripContentTypeEntity {

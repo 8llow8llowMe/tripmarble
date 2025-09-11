@@ -24,10 +24,10 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "trip_spot",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_tripspot_content_id", columnNames = "content_id")
+        @UniqueConstraint(name = "uk_trip_spot_content_id", columnNames = "content_id")
     },
     indexes = {
-        @Index(name = "idx_tripspot_sigungu_content", columnList = "ldong_signgu_cd, contentTypeId")
+        @Index(name = "idx_trip_spot_ldong_signgu_cd_content_type_id", columnList = "ldong_signgu_cd, content_type_id")
     }
 )
 public class TripSpotEntity {

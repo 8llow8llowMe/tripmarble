@@ -25,14 +25,14 @@ import org.hibernate.annotations.Comment;
 @Table(
     name = "sigungu",
     uniqueConstraints = {
-        @UniqueConstraint(name = "uk_region_sigungu_code", columnNames = {"region_id", "sigungu_code"})
+        @UniqueConstraint(name = "uk_sigungu_region_id_sigungu_code", columnNames = {"region_id", "sigungu_code"})
     }
 )
 public class SigunguEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Comment("시군구 아이디")
+    @Comment("시군구 ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

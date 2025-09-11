@@ -5,6 +5,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -20,7 +21,13 @@ import org.hibernate.annotations.Comment;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "representative_region_sigungu_mapping")
+@Table(
+    name = "representative_region_sigungu_mapping",
+    indexes = {
+        @Index(name = "idx_rrsm_representative_region_id", columnList = "representative_region_id"),
+        @Index(name = "idx_rrsm_sigungu_id", columnList = "sigungu_id")
+    }
+)
 public class RepresentativeRegionSigunguMappingEntity {
 
     @Id

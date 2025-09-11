@@ -1,9 +1,11 @@
 package com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity;
 
+import com.followfollowme.tripmarble.persistence.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -19,8 +21,14 @@ import org.hibernate.annotations.Comment;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "trip_spot_review_photo")
-public class TripSpotReviewPhotoEntity {
+@Table(
+    name = "trip_spot_review_photo",
+    indexes = {
+        @Index(name = "idx_trip_spot_review_photo_trip_spot_review_id", columnList = "trip_spot_review_id"),
+        @Index(name = "idx_trip_spot_review_photo_order_no", columnList = "order_no")
+    }
+)
+public class TripSpotReviewPhotoEntity extends BaseEntity {
 
     @Id
     @Comment("여행지 리뷰 사진 ID")

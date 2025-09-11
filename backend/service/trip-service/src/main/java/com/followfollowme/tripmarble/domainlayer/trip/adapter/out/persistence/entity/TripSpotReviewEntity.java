@@ -9,6 +9,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -24,7 +25,13 @@ import org.hibernate.annotations.Comment;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "trip_spot_review")
+@Table(
+    name = "trip_spot_review",
+    indexes = {
+        @Index(name = "idx_trip_spot_review_trip_spot_id", columnList = "trip_spot_id"),
+        @Index(name = "idx_trip_spot_review_member_id", columnList = "member_id")
+    }
+)
 public class TripSpotReviewEntity extends BaseEntity {
 
     @Id
