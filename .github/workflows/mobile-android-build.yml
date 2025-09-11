@@ -22,8 +22,8 @@ jobs:
     env:
       ANDROID_SDK_ROOT: /opt/android-sdk
       ANDROID_HOME: /opt/android-sdk
-      GRADLE_OPTS: -Xmx2048m -XX:MaxMetaspaceSize=512m  # Gradle 메모리 설정
-      NODE_OPTIONS: --max-old-space-size=2048            # Node.js 메모리 설정
+      GRADLE_OPTS: -Xmx6144m -XX:MaxMetaspaceSize=2048m  # Gradle 메모리 설정
+      NODE_OPTIONS: --max-old-space-size=4096 # Node.js 메모리 설정
     
     steps:
       # 5. 코드 체크아웃
@@ -169,9 +169,11 @@ jobs:
           fi
           
           # Gradle 빌드 설정
-          echo "org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m" > android/gradle.properties
+          echo "org.gradle.jvmargs=-Xmx6144m -XX:MaxMetaspaceSize=2048m" > android/gradle.properties
           echo "org.gradle.daemon=false" >> android/gradle.properties
           echo "org.gradle.parallel=true" >> android/gradle.properties
+          echo "org.gradle.configureondemand=true" >> android/gradle.properties
+          echo "org.gradle.caching=true" >> android/gradle.properties
           echo "org.gradle.workers.max=4" >> android/gradle.properties
           echo "android.useAndroidX=true" >> android/gradle.properties
           echo "android.enableJetifier=true" >> android/gradle.properties
