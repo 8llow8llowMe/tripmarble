@@ -119,7 +119,7 @@ jobs:
           fi
           
           # Gradle 빌드 설정
-          cat > android/gradle.properties << EOF
+          cat > android/gradle.properties << 'EOF'
 org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m
 org.gradle.daemon=false
 org.gradle.parallel=true
@@ -221,23 +221,23 @@ EOF
             const buildStatus = '${{ job.status }}';
             const artifactName = buildType === 'release' ? 'app-release-${{ github.event.number }}' : 'app-debug-${{ github.event.number }}';
             
-            # 빌드 결과 댓글 생성
-            let comment = `## 📱 Mobile Build Results\n\n`;
-            comment += `**Build Type:** ${buildType}\n`;
-            comment += `**Target Branch:** ${{ github.base_ref }}\n`;
-            comment += `**Status:** ${buildStatus === 'success' ? 'Success' : 'Failed'}\n\n`;
+            // 빌드 결과 댓글 생성
+            let comment = '## 📱 Mobile Build Results\\n\\n';
+            comment += '**Build Type:** ' + buildType + '\\n';
+            comment += '**Target Branch:** ${{ github.base_ref }}\\n';
+            comment += '**Status:** ' + (buildStatus === 'success' ? 'Success' : 'Failed') + '\\n\\n';
             
             if (buildStatus === 'success') {
-              comment += `**Artifact:** ${artifactName}\n`;
-              comment += `**Download:** Check the Actions tab for download link\n\n`;
+              comment += '**Artifact:** ' + artifactName + '\\n';
+              comment += '**Download:** Check the Actions tab for download link\\n\\n';
               comment += buildType === 'debug' ? 
-                `> Debug build completed. Ready for testing.\n` : 
-                `> Release build completed. Ready for production deployment.\n`;
+                '> Debug build completed. Ready for testing.\\n' : 
+                '> Release build completed. Ready for production deployment.\\n';
             } else {
-              comment += `> Build failed. Check the Actions tab for details.\n`;
+              comment += '> Build failed. Check the Actions tab for details.\\n';
             }
             
-            # PR에 댓글 작성
+            // PR에 댓글 작성
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
