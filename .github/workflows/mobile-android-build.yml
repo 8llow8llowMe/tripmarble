@@ -30,9 +30,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: false  # 서브모듈 비활성화 (수동으로 처리)
-          fetch-depth: 0 
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       # 5-1. 서브모듈 권한 설정 및 업데이트
       - name: Configure Git for submodules
