@@ -132,6 +132,10 @@ jobs:
           # Expo prebuild가 app.config.ts 설정을 자동으로 적용하므로 수동 수정 불필요
           echo "Expo prebuild completed with app.config.ts settings"
 
+          # build.gradle 리포지토리 보정 (jcenter → mavenCentral)
+          sed -i 's/jcenter()/mavenCentral()/g' android/build.gradle
+          sed -i '/repositories {/a\        mavenCentral()' android/build.gradle
+
           # gradle.properties 설정
           echo "org.gradle.jvmargs=-Xmx6144m -XX:MaxMetaspaceSize=2048m" > android/gradle.properties
           echo "org.gradle.daemon=false" >> android/gradle.properties
