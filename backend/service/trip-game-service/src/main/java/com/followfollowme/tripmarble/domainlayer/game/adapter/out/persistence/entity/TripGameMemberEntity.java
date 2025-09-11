@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -21,20 +22,24 @@ import org.hibernate.annotations.Comment;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-    name = "trip_game_member"
+    name = "trip_game_member",
+    indexes = {
+        @Index(name = "idx_trip_game_member_trip_game_id", columnList = "trip_game_id"),
+        @Index(name = "idx_trip_game_member_trip_game_id_member_id", columnList = "trip_game_id, member_id")
+    }
 )
 public class TripGameMemberEntity extends BaseEntity {
 
     @Id
-    @Comment("여행 게임(계획) 참여자 아이디")
+    @Comment("여행 게임(계획) 참여자 ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_game_id", nullable = false)
-    @Comment("여행 게임(계획) 아이디")
+    @Comment("여행 게임(계획) ID")
     private TripGameEntity tripGame;
 
-    @Comment("참여 회원 아이디")
+    @Comment("참여 회원 ID")
     @Column(nullable = false)
     private Long memberId;
 
