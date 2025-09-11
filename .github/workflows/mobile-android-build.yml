@@ -37,11 +37,11 @@ jobs:
         run: |
           # Personal Access Token 존재 여부 확인
           if [ -z "${{ secrets.PERSONAL_ACCESS_TOKEN }}" ]; then
-            echo "❌ PERSONAL_ACCESS_TOKEN is not set!"
+            echo "PERSONAL_ACCESS_TOKEN is not set!"
             echo "Please set PERSONAL_ACCESS_TOKEN in repository secrets"
             exit 1
           else
-            echo "✅ PERSONAL_ACCESS_TOKEN is set"
+            echo "PERSONAL_ACCESS_TOKEN is set"
           fi
           
           # Git 인증 설정
@@ -109,14 +109,12 @@ jobs:
           
           # 환경 파일 존재 확인
           if [ ! -f "$ENV_FILE" ]; then
-            echo "❌ Environment file not found: $ENV_FILE"
+            echo "Environment file not found: $ENV_FILE"
             echo "Available files:"
             ls -la env/ || echo "env directory not found"
             exit 1
           fi
-          echo "✅ Environment file found: $ENV_FILE"
-          echo "Environment file contents:"
-          cat "$ENV_FILE"
+          echo "Environment file found: $ENV_FILE"
       
       # 11. Expo Prebuild (네이티브 코드 생성)
       - name: Prebuild
@@ -150,6 +148,24 @@ jobs:
               tail -n +$((PLUGIN_LINE + 1)) android/app/build.gradle.tmp >> android/app/build.gradle
               rm android/app/build.gradle.tmp
             fi
+          fi
+          
+          # Android 테마 설정 수정 (EdgeToEdge 오류 해결)
+          if [ -f android/app/src/main/res/values/styles.xml ]; then
+            echo "Fixing Android theme configuration..."
+            # EdgeToEdge 테마를 기본 테마로 변경
+            sed -i 's/Theme.EdgeToEdge/Theme.AppCompat.Light.NoActionBar/g' android/app/src/main/res/values/styles.xml
+            sed -i 's/Theme.EdgeToEdge/Theme.AppCompat.Light.NoActionBar/g' android/app/src/main/res/values-night/styles.xml 2>/dev/null || true
+            echo "Android theme configuration fixed"
+          fi
+          
+          # AndroidManifest.xml에서 EdgeToEdge 설정 제거
+          if [ -f android/app/src/main/AndroidManifest.xml ]; then
+            echo "Updating AndroidManifest.xml..."
+            # EdgeToEdge 관련 속성 제거
+            sed -i '/android:enableOnBackInvokedCallback/d' android/app/src/main/AndroidManifest.xml
+            sed -i '/android:windowSoftInputMode/d' android/app/src/main/AndroidManifest.xml
+            echo "AndroidManifest.xml updated"
           fi
           
           # Gradle 빌드 설정
@@ -254,7 +270,7 @@ jobs:
             const artifactName = buildType === 'release' ? 'app-release-${{ github.event.number }}' : 'app-debug-${{ github.event.number }}';
             
             // 빌드 결과 댓글 생성
-            let comment = '## 📱 Mobile Build Results\\n\\n';
+            let comment = '## Mobile Build Results\\n\\n';
             comment += '**Build Type:** ' + buildType + '\\n';
             comment += '**Target Branch:** ${{ github.base_ref }}\\n';
             comment += '**Status:** ' + (buildStatus === 'success' ? 'Success' : 'Failed') + '\\n\\n';
