@@ -3,6 +3,7 @@ package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.controller
 import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewCreateRequest;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewCreateResponse;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewSummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.application.command.TripSpotReviewCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripSpotReviewWebUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
@@ -13,10 +14,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,7 +40,20 @@ public class TripSpotReviewWebController {
         @PathVariable String tripSpotId, @AuthenticationPrincipal MemberLoginActive loginActive,
         @Valid @RequestBody TripSpotReviewCreateRequest request) {
         TripSpotReviewCreateResponse response =
-            tripSpotReviewWebUseCase.createGeneralReviewAndPhotos(Long.parseLong(tripSpotId), loginActive.id(), TripSpotReviewCreateCommand.from(request));
+            tripSpotReviewWebUseCase.createGeneralReviewAndPhotos(Long.parseLong(tripSpotId), loginActive.id(),
+                TripSpotReviewCreateCommand.from(request));
+        return ResponseEntity.ok().body(Response.success(response));
+    }
+
+    @Operation(
+        summary = "여행지 리뷰 종합 요약 조회",
+        description = " 특정 여행지의 리뷰에 대한 종합 요약 정보를 조회하는 기능입니다."
+    )
+    @GetMapping("/summary")
+    public ResponseEntity<Response<TripSpotReviewSummaryResponse>> getTripSpotReviewSummary(
+        @PathVariable String tripSpotId, @RequestParam(defaultValue = "3") int photoLimit) {
+        TripSpotReviewSummaryResponse response =
+            tripSpotReviewWebUseCase.getTripSpotReviewSummary(Long.parseLong(tripSpotId), photoLimit);
         return ResponseEntity.ok().body(Response.success(response));
     }
 }
