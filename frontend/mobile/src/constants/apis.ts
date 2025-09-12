@@ -4,7 +4,7 @@ const END_POINTS = {
   LOGIN: `/auth/login`,
   LOGOUT: `/auth/logout`,
   SEND_CODE: `/auth/mail/send-code`,
-  VERIFY_CODE: `/auth/mail/verfiy-code`,
+  VERIFY_CODE: `/auth/mail/verify-code`,
 
   //USER
   USER: {
