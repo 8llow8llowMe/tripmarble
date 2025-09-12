@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
 
   date: { color: '#E5E7EB', fontSize: 13, marginBottom: 6, fontWeight: '600' },
-  title: { color: palette.white, fontSize: 18, fontWeight: '800', lineHeight: 26 },
+  title: { color: palette.white, fontSize: 18, fontWeight: '600', lineHeight: 26 },
   small: { color: '#E5E7EB', fontSize: 12, marginTop: 6, fontWeight: '600' },
 
   row: { flexDirection: 'row', gap: 8, marginTop: 10 },
