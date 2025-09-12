@@ -24,15 +24,15 @@ for (const k of requiredPublicKeys) {
 }
 
 const defineConfig = (): ExpoConfig => ({
-  name: 'mobile',
-  slug: 'mobile',
+  name: 'TripMarble',
+  slug: 'tripmarble',
   version: '1.0.0',
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'light',
   newArchEnabled: true,
   splash: {
-    image: './assets/splash-icon.png',
+    image: './assets/icon.png',
     resizeMode: 'contain',
     backgroundColor: '#ffffff',
   },
@@ -40,11 +40,11 @@ const defineConfig = (): ExpoConfig => ({
   android: {
     package: 'com.followfollowme.tripmarble',
     adaptiveIcon: {
-      foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#ffffff',
+      foregroundImage: './assets/icon.png',
+      backgroundColor: '#4BA1FD',
     },
     edgeToEdgeEnabled: true,
-    jsEngine: 'hermes',
+    jsEngine: 'jsc',
   },
   web: { favicon: './assets/favicon.png' },
   experiments: { reactCanary: true },
