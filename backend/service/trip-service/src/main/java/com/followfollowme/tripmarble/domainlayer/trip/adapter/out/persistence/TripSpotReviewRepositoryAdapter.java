@@ -14,6 +14,7 @@ import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpotRevie
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -44,5 +45,11 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
             tripSpotReviewRepository.findRatingDistributionByTripSpotId(tripSpotId);
         List<TripSpotReviewPhotoProjection> photos = tripSpotReviewRepository.findSamplePhotosByTripSpotId(tripSpotId, photoLimit);
         return tripSpotReviewSummaryAssembler.toReadModel(summary, distributions, photos);
+    }
+
+    @Override
+    public Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(long tripSpotId, long lastReviewId, int size) {
+        Slice<TripSpotReviewEntity> entitySlice = tripSpotReviewRepository.findReviewsNoOffsetByTripSpotId(tripSpotId, lastReviewId, size);
+        return entitySlice.map(tripSpotReviewMapper::toDomainFromEntity);
     }
 }
