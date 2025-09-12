@@ -18,11 +18,11 @@ const shadow = Platform.select({
 const FriendsBannerSection = ({
   avatars,
   playingCount,
-  onInvite,
+  // onInvite,
 }: {
   avatars: string[];
   playingCount: number;
-  onInvite: () => void;
+  // onInvite: () => void;
 }) => {
   const overlap = -12;
   const avatarViews = useMemo(
@@ -50,7 +50,7 @@ const FriendsBannerSection = ({
           친구 {playingCount}명이 플레이 중
         </TextBox>
       </View>
-      <TouchableOpacity style={styles.inviteBtn} onPress={onInvite} activeOpacity={0.85}>
+      <TouchableOpacity style={styles.inviteBtn} activeOpacity={0.85}>
         <Feather name="user-plus" size={14} color="#fff" />
         <TextBox size={13} color="#fff" style={{ marginLeft: 6 }}>
           초대하기
