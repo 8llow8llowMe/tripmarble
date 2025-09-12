@@ -1,15 +1,20 @@
 package com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence;
 
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.TripSpotReviewEntity;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.projection.TripSpotReviewPhotoProjection;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.projection.TripSpotReviewRatingDistributionProjection;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.projection.TripSpotReviewSummaryProjection;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.repository.TripSpotReviewRepository;
 import com.followfollowme.tripmarble.domainlayer.trip.application.mapper.TripSpotReviewMapper;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotReviewRepositoryPort;
+import com.followfollowme.tripmarble.domainlayer.trip.application.readmodel.TripSpotReviewSummary;
+import com.followfollowme.tripmarble.domainlayer.trip.application.readmodel.TripSpotReviewSummaryAssembler;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpotReview;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -17,6 +22,7 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
 
     private final TripSpotReviewRepository tripSpotReviewRepository;
     private final TripSpotReviewMapper tripSpotReviewMapper;
+    private final TripSpotReviewSummaryAssembler tripSpotReviewSummaryAssembler;
 
     @Override
     public TripSpotReview save(TripSpotReview tripSpotReview, TripSpot tripSpot) {
@@ -32,7 +38,11 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
     }
 
     @Override
-    public Optional<Double> findAverageRatingByTripSpotId(long tripSpotId) {
-        return tripSpotReviewRepository.findAverageRatingByTripSpotId(tripSpotId);
+    public TripSpotReviewSummary findSummaryByTripSpotId(long tripSpotId, int photoLimit) {
+        TripSpotReviewSummaryProjection summary = tripSpotReviewRepository.findSummaryByTripSpotId(tripSpotId).orElse(null);
+        List<TripSpotReviewRatingDistributionProjection> distributions =
+            tripSpotReviewRepository.findRatingDistributionByTripSpotId(tripSpotId);
+        List<TripSpotReviewPhotoProjection> photos = tripSpotReviewRepository.findSamplePhotosByTripSpotId(tripSpotId, photoLimit);
+        return tripSpotReviewSummaryAssembler.toReadModel(summary, distributions, photos);
     }
 }
