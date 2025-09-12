@@ -62,11 +62,11 @@ public class TripSpotEntity {
     private String addr2;
 
     @Comment("X좌표 (경도)")
-    @Column(nullable = false)
+    @Column(name = "map_x", nullable = false)
     private Double mapX;
 
     @Comment("Y좌표 (위도)")
-    @Column(nullable = false)
+    @Column(name = "map_y", nullable = false)
     private Double mapY;
 
     @Comment("지도 레벨")
