@@ -4,13 +4,7 @@ import React from 'react';
 import { ImageBackground, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
-
-const DUMMY_RANDOM_PICK = {
-  contentId: '2710820',
-  originalImageUrl: 'http://tong.visitkorea.or.kr/cms/resource/22/2745222_image2_1.jpg',
-  tripSpotId: '21973',
-  tripSpotName: '설악해수욕장',
-};
+import { DUMMY_RANDOM_PICK } from '@/constants/dummyData';
 
 // 공통 그림자
 const shadow = Platform.select({
@@ -25,26 +19,20 @@ const shadow = Platform.select({
 
 const RandomPickSection = ({
   data,
-  onPress,
+  onPressItem,
 }: {
   data: typeof DUMMY_RANDOM_PICK;
-  onPress?: () => void;
-  onRefresh?: () => void;
+  onPressItem: (tripSpotId: string) => void;
 }) => {
   return (
     <View style={styles.container}>
-      <SectionHeader
-        title="오늘의 랜덤 PICK!"
-        // rightNode={`
-        //   <TouchableOpacity onPress={onRefresh} style={styles.iconBtn} activeOpacity={0.8}>
-        //     <MaterialCommunityIcons name="dice-5-outline" size={18} color={palette.gray600} />
-        //     <TextBox size={13} color={palette.gray600} style={{ marginLeft: 6 }}>
-        //       다시 뽑기
-        //     </TextBox>
-        //   </TouchableOpacity>
-        // }
-      />
-      <TouchableOpacity style={[styles.card, shadow]} activeOpacity={0.9} onPress={onPress}>
+      <SectionHeader title="오늘의 여행 PICK!" />
+
+      <TouchableOpacity
+        style={[styles.card, shadow]}
+        activeOpacity={0.9}
+        onPress={() => onPressItem(data.tripSpotId)}
+      >
         <ImageBackground
           source={{ uri: data.originalImageUrl }}
           style={styles.bg}
