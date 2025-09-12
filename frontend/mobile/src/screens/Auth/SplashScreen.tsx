@@ -1,32 +1,35 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import logo from '../../../assets/splash-icon.png';
+import { Text, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SplashScreen() {
   return (
-    <View style={styles.container}>
-      <Image source={logo} style={styles.logo} resizeMode="contain" />
+    <LinearGradient
+      colors={['#4BA1FD', '#1E88E5']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.container}
+    >
       <Text style={styles.title}>TripMarble</Text>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#4BA1FD',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 30,
-  },
   title: {
+    fontSize: 48,
+    fontWeight: '800',
+    fontStyle: 'italic',
+    letterSpacing: 2,
     color: '#fff',
-    fontSize: 32,
-    fontWeight: '700',
-    letterSpacing: 1.2,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0,0,0,0.25)',
+    textShadowOffset: { width: 1, height: 2 },
+    textShadowRadius: 6,
   },
 });
