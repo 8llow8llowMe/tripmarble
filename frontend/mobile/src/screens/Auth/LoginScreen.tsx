@@ -32,7 +32,7 @@ export default function LoginScreen({ navigation }: any) {
   const {
     control,
     watch,
-    formState: { errors, isValid, isSubmitting },
+    formState: { isValid },
   } = useForm<LoginFormType>({
     mode: 'onChange',
     defaultValues: { email: '', password: '' },
@@ -44,7 +44,7 @@ export default function LoginScreen({ navigation }: any) {
   const dispatch = useAppDispatch();
   const { login, isPending } = useLoginMutaion();
 
-  // 로그인 에러 메시지 상태 추가
+  // 로그인 에러 메시지 상태
   const [loginError, setLoginError] = useState('');
   const [secure, setSecure] = useState(true);
 
@@ -200,14 +200,14 @@ export default function LoginScreen({ navigation }: any) {
           <TouchableOpacity onPress={goToSignUpScreen}>
             <Text style={styles.helpText}>회원가입</Text>
           </TouchableOpacity>
-          <View style={styles.helpDivider} />
+          {/* <View style={styles.helpDivider} />
           <TouchableOpacity>
             <Text style={styles.helpText}>이메일 찾기</Text>
           </TouchableOpacity>
           <View style={styles.helpDivider} />
           <TouchableOpacity>
             <Text style={styles.helpText}>비밀번호 찾기</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* 소셜 로그인 */}

@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   NativeSyntheticEvent,
@@ -11,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
 import useDifficultyListQuery from '@/hooks/game/useDifficultyList';

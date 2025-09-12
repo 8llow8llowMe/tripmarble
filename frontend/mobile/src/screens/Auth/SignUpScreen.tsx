@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useForm, FormProvider } from 'react-hook-form';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { palette } from '@/constants/colors';
 import {
