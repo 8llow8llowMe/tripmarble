@@ -2,28 +2,47 @@ import React from 'react';
 import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function PopularPlacesSection() {
-  const popularPlaces = [
-    { name: '부산', img: 'https://picsum.photos/seed/busan/200' },
-    { name: '제주도', img: 'https://picsum.photos/seed/jeju/200' },
-    { name: '강릉', img: 'https://picsum.photos/seed/gangneung/200' },
-    { name: '경주', img: 'https://picsum.photos/seed/gyeongju/200' },
-  ];
+interface PopularPlacesSectionProps {
+  title: string;
+  data: {
+    representativeRegionId: string;
+    representativeRegionName: string;
+    representativeRegionImageUrl: string | null;
+  }[];
+  onPressItem: (representativeRegionId: string) => void;
+}
 
+export default function PopularPlacesSection({
+  title,
+  data,
+  onPressItem,
+}: PopularPlacesSectionProps) {
   return (
     <View>
       <TextBox size={18} fontsName="Pretendard600" style={{ marginLeft: 16, marginBottom: 12 }}>
-        지금 인기있는 여행지
+        {title}
       </TextBox>
       <View style={styles.wrapper}>
-        {popularPlaces.map((p, idx) => (
-          <TouchableOpacity key={idx} style={styles.item} activeOpacity={0.8}>
-            <View style={styles.circle}>
-              <Image source={{ uri: p.img }} style={styles.image} />
-            </View>
+        {data.map((p, idx) => (
+          <TouchableOpacity
+            key={idx}
+            style={styles.item}
+            activeOpacity={0.8}
+            onPress={() => onPressItem(p.representativeRegionId)}
+          >
+            {p.representativeRegionImageUrl ? (
+              <View style={styles.circle}>
+                <Image source={{ uri: p.representativeRegionImageUrl }} style={styles.image} />
+              </View>
+            ) : (
+              <View style={styles.thumbPh}>
+                <Ionicons name="image" size={20} color={palette.gray400} />
+              </View>
+            )}
             <TextBox size={14} color={palette.gray600}>
-              {p.name}
+              {p.representativeRegionName}
             </TextBox>
           </TouchableOpacity>
         ))}
@@ -42,7 +61,14 @@ const styles = StyleSheet.create({
     borderRadius: CIRCLE / 2,
     overflow: 'hidden',
     marginBottom: 6,
-    backgroundColor: palette.gray100,
   },
   image: { width: '100%', height: '100%' },
+  thumbPh: {
+    width: CIRCLE,
+    height: CIRCLE,
+    borderRadius: CIRCLE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#eef1f6',
+  },
 });

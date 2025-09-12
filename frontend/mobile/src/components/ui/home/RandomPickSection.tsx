@@ -6,10 +6,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
 
 const DUMMY_RANDOM_PICK = {
-  id: '777',
-  name: '속초 대포항',
-  image:
-    'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1600&auto=format&fit=crop',
+  contentId: '2710820',
+  originalImageUrl: 'http://tong.visitkorea.or.kr/cms/resource/22/2745222_image2_1.jpg',
+  tripSpotId: '21973',
+  tripSpotName: '설악해수욕장',
 };
 
 // 공통 그림자
@@ -46,7 +46,7 @@ const RandomPickSection = ({
       />
       <TouchableOpacity style={[styles.card, shadow]} activeOpacity={0.9} onPress={onPress}>
         <ImageBackground
-          source={{ uri: data.image }}
+          source={{ uri: data.originalImageUrl }}
           style={styles.bg}
           imageStyle={{ borderRadius: 16 }}
         >
@@ -57,7 +57,7 @@ const RandomPickSection = ({
           <View style={styles.inner}>
             <MaterialCommunityIcons name="map-marker-radius" size={18} color="#fff" />
             <TextBox size={18} fontsName="Pretendard800" color="#fff" style={{ marginLeft: 8 }}>
-              {data.name}
+              {data.tripSpotName}
             </TextBox>
           </View>
         </ImageBackground>
