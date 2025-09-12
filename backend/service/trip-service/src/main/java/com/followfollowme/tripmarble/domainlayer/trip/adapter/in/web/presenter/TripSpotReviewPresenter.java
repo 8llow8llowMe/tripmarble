@@ -1,11 +1,12 @@
 package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.presenter;
 
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewCreateResponse;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewSummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotReviewCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotReviewPhotoCreateInfo;
-import org.springframework.stereotype.Component;
-
+import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotReviewSummaryInfo;
 import java.util.List;
+import org.springframework.stereotype.Component;
 
 @Component
 public class TripSpotReviewPresenter {
@@ -25,6 +26,25 @@ public class TripSpotReviewPresenter {
             .reviewSourceTypeCode(reviewInfo.sourceType().name())
             .reviewSourceTypeDescription(reviewInfo.sourceType().getDescription())
             .photoUrls(photoUrls)
+            .build();
+    }
+
+    public TripSpotReviewSummaryResponse toSummaryResponse(TripSpotReviewSummaryInfo info) {
+        return TripSpotReviewSummaryResponse.builder()
+            .totalCount(info.totalCount())
+            .averageRating(info.averageRating())
+            .ratingDistributions(info.ratingDistributions().stream()
+                .map(d -> TripSpotReviewSummaryResponse.RatingDistributionResponse.builder()
+                    .rating(d.rating())
+                    .count(d.count())
+                    .build())
+                .toList())
+            .samplePhotos(info.samplePhotos().stream()
+                .map(p -> TripSpotReviewSummaryResponse.PhotoResponse.builder()
+                    .tripSpotReviewPhotoId(p.photoId())
+                    .photoUrl(p.photoUrl())
+                    .build())
+                .toList())
             .build();
     }
 }
