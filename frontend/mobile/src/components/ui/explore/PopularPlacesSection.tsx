@@ -3,6 +3,7 @@ import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
 import { Ionicons } from '@expo/vector-icons';
+import { SectionHeader } from '@/components/layout/header/SectionHeader';
 
 interface PopularPlacesSectionProps {
   title: string;
@@ -20,10 +21,9 @@ export default function PopularPlacesSection({
   onPressItem,
 }: PopularPlacesSectionProps) {
   return (
-    <View>
-      <TextBox size={18} fontsName="Pretendard600" style={{ marginLeft: 16, marginBottom: 12 }}>
-        {title}
-      </TextBox>
+    <View style={styles.container}>
+      <SectionHeader title={title} />
+
       <View style={styles.wrapper}>
         {data.map((p, idx) => (
           <TouchableOpacity
@@ -53,6 +53,7 @@ export default function PopularPlacesSection({
 
 const CIRCLE = 72;
 const styles = StyleSheet.create({
+  container: { marginTop: 32 },
   wrapper: { flexDirection: 'row', justifyContent: 'space-around', paddingHorizontal: 16 },
   item: { alignItems: 'center' },
   circle: {
