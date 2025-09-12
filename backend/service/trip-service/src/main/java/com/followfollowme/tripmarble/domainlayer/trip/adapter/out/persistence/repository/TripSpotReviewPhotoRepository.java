@@ -4,5 +4,5 @@ import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.en
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TripSpotReviewPhotoRepository extends JpaRepository<TripSpotReviewPhotoEntity, Long> {
-    
+
 }
