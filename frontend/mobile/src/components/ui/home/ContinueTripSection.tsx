@@ -4,15 +4,7 @@ import React from 'react';
 import { ImageBackground, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
-
-const DUMMY_CONTINUE_TRIP = {
-  id: '101',
-  title: '여수 2박 3일',
-  day: 2,
-  progress: 68,
-  cover:
-    'https://images.unsplash.com/photo-1526481280698-8fcc13fd345d?q=80&w=1600&auto=format&fit=crop',
-};
+import { GameSummary } from '@/hooks/game/useGameList';
 
 // 공통 그림자
 const shadow = Platform.select({
@@ -25,19 +17,51 @@ const shadow = Platform.select({
   android: { elevation: 3 },
 });
 
+function getTripDay(startedAt: string): number {
+  const start = new Date(startedAt);
+  const today = new Date();
+
+  // 시/분/초 무시하고 일자 기준 차이 계산
+  const diffDays = Math.floor((today.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+
+  return diffDays + 1; // Day 1부터 시작
+}
+
+function getProgress(startedAt: string, endedAt: string): number {
+  const start = new Date(startedAt);
+  const end = new Date(endedAt);
+  const today = new Date();
+
+  if (today <= start) return 0;
+  if (today >= end) return 100;
+
+  const total = end.getTime() - start.getTime();
+  const current = today.getTime() - start.getTime();
+
+  return Math.round((current / total) * 100);
+}
+
 const ContinueTripSection = ({
   data,
-  onContinue,
+  onPressItem,
 }: {
-  data: typeof DUMMY_CONTINUE_TRIP | null;
-  onContinue?: () => void;
+  data: GameSummary;
+  onPressItem: (tripGameId: string) => void;
 }) => {
   if (!data) return null;
+
+  const day = getTripDay(data.startedAt);
+  const progress = getProgress(data.startedAt, data.endedAt);
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={[styles.card, shadow]} activeOpacity={0.9} onPress={onContinue}>
+      <TouchableOpacity
+        style={[styles.card, shadow]}
+        activeOpacity={0.9}
+        onPress={() => onPressItem(data.tripGameId)}
+      >
         <ImageBackground
-          source={{ uri: data.cover }}
+          source={{ uri: data.representativeRegionImageUrl || undefined }}
           style={styles.bg}
           imageStyle={{ borderRadius: 16 }}
         >
@@ -56,10 +80,10 @@ const ContinueTripSection = ({
               color={palette.white}
               style={{ marginTop: 2 }}
             >
-              {data.title} · Day {data.day}
+              {data.title} · Day {day}
             </TextBox>
 
-            <ProgressBar value={data.progress} />
+            <ProgressBar value={progress} />
 
             <View style={styles.cta}>
               <Ionicons name="play-circle" size={18} color={palette.white} />

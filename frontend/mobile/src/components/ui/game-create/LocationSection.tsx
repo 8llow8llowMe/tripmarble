@@ -8,7 +8,7 @@ import NextFloatingButton from './NextFloatingButton';
 type Region = {
   representativeRegionId: string;
   representativeRegionName: string;
-  imageUrl: string | null;
+  representativeRegionImageUrl: string | null;
 };
 
 type Props = {
@@ -54,7 +54,14 @@ export default function LocationSection({
 
       <View style={styles.grid} onLayout={onGridLayout}>
         {regions.map(
-          ({ representativeRegionId: id, representativeRegionName: name, imageUrl }, i) => {
+          (
+            {
+              representativeRegionId: id,
+              representativeRegionName: name,
+              representativeRegionImageUrl: imageUrl,
+            },
+            i,
+          ) => {
             const active = selectedId === id;
             const col = i % COLS;
             const row = Math.floor(i / COLS);
