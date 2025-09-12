@@ -10,7 +10,6 @@ import {
   SafeAreaView,
   StatusBar,
   ImageBackground,
-  Platform,
   ScrollView,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
