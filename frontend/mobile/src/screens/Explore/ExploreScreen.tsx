@@ -1,29 +1,16 @@
 import React from 'react';
-import {
-  View,
-  ScrollView,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  StatusBar,
-  Platform,
-  Dimensions,
-} from 'react-native';
-import gyeongjuImage from '@images/places/gyeongju.png';
+import { View, ScrollView, StyleSheet, StatusBar, Platform, Dimensions } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
-import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import useRepresentativeRegionsListQuery from '@/hooks/trip/useRepresentativeRegionsList';
 import {
   HeroBannerSection,
-  QuickFilterSection,
   PopularPlacesSection,
   TrendKeywordsSection,
-  MagazineSection,
 } from '@/components/ui/explore';
+import { getRandomItems } from '@/utils/random';
 
 const bgHeight = Dimensions.get('window').height * 0.5;
 const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 가능)
@@ -31,8 +18,7 @@ const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 �
 export default function ExploreScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
   const { representativeRegionsList } = useRepresentativeRegionsListQuery();
-
-  console.log('🥸🥸🥸', representativeRegionsList);
+  const randomRepresentativeRegionsList = getRandomItems(representativeRegionsList ?? [], 4);
 
   // 대표여행지 스크린으로 이동
   const goToSpotListScreen = (representativeRegionId: string) => {
@@ -64,9 +50,13 @@ export default function ExploreScreen() {
         <HeroBannerSection />
         {/* <SearchBox /> 검색  */}
         {/* <QuickFilterSection /> */}
-        <PopularPlacesSection />
+        <PopularPlacesSection
+          title="지금 인기있는 여행지"
+          data={randomRepresentativeRegionsList}
+          onPressItem={goToSpotListScreen}
+        />
         <TrendKeywordsSection />
-        <MagazineSection />
+        {/* <MagazineSection /> */}
       </ScrollView>
     </View>
   );

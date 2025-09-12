@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
@@ -69,10 +70,10 @@ const DUMMY_JOURNALS = [
 ];
 
 const DUMMY_RANDOM_PICK = {
-  id: '777',
-  name: '속초 대포항',
-  image:
-    'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1600&auto=format&fit=crop',
+  contentId: '2710820',
+  originalImageUrl: 'http://tong.visitkorea.or.kr/cms/resource/22/2745222_image2_1.jpg',
+  tripSpotId: '21973',
+  tripSpotName: '설악해수욕장',
 };
 
 const DUMMY_FRIENDS = {
@@ -106,12 +107,12 @@ export default function HomeScreen() {
   };
 
   // 게임 목록 스크린으로 이동
-  const goToGameListScreen = (status?: 'WAITING' | 'ONGOING' | 'ENDED') => {
-    navigation.navigate('GamePlayStackNavigator', {
-      screen: 'GameListScreen',
-      params: status ? { status } : {},
-    });
-  };
+  // const goToGameListScreen = (status?: 'WAITING' | 'ONGOING' | 'ENDED') => {
+  //   navigation.navigate('GamePlayStackNavigator', {
+  //     screen: 'GameListScreen',
+  //     params: status ? { status } : {},
+  //   });
+  // };
 
   // 대표여행지 상세 스크린으로 이동
   const goToSpotDetailScreen = (tripSpotId: string) => {
@@ -143,9 +144,13 @@ export default function HomeScreen() {
         {/* <HistorySection
           title="나의 게임 기록"
           data={DUMMY_JOURNALS}
-          // onPressItem={(id) => navigation.navigate('JournalDetail' as never, { id } as never)}
           onPressMore={() => goToGameListScreen()}
         /> */}
+
+        {/* 여행 계속하기 */}
+        {latestTrip && (
+          <ContinueTripSection data={latestTrip} onPressItem={goToGameOngoingScreen} />
+        )}
 
         {/* 랜덤 여행지 추천 */}
         <RandomPickSection
@@ -161,11 +166,6 @@ export default function HomeScreen() {
           data={DUMMY_PLACES}
           onPressItem={goToSpotDetailScreen}
         />
-
-        {/* 여행 계속하기 */}
-        {latestTrip && (
-          <ContinueTripSection data={latestTrip} onPressItem={goToGameOngoingScreen} />
-        )}
 
         {/* 친구와 함께하기 배너 */}
         <FriendsBannerSection
