@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
   StyleSheet,
@@ -14,6 +13,8 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 // hooks
 import { fetchGameStart } from '@/hooks/game/useGameStart';
 import { useGameLists } from '@/hooks/game/useGameList';
@@ -212,7 +213,7 @@ export default function GameHomeScreen() {
           />
 
           {(() => {
-            if (ended.data?.data.dataBody === undefined) {
+            if (!ended.data?.data.dataBody || ended.data?.data.dataBody.contents?.length === 0) {
               return (
                 <EmptyListCard
                   title="종료된 게임이 없어요"
