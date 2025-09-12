@@ -28,13 +28,6 @@ const DUMMY_JOURNALS = [
   },
 ];
 
-const DUMMY_RANDOM_PICK = {
-  id: '777',
-  name: '속초 대포항',
-  image:
-    'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1600&auto=format&fit=crop',
-};
-
 // 공통 그림자
 const shadow = Platform.select({
   ios: {
@@ -49,12 +42,10 @@ const shadow = Platform.select({
 const HistorySection = ({
   title,
   data,
-  onPressItem,
   onPressMore,
 }: {
   title: string;
   data: typeof DUMMY_JOURNALS;
-  onPressItem?: (id: number) => void;
   onPressMore?: () => void;
 }) => {
   const itemWidth = 140;
@@ -71,7 +62,6 @@ const HistorySection = ({
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.9}
-            // onPress={() => onPressItem(item.id)}s
             style={[styles.journalCard, shadow, { width: itemWidth }]}
           >
             <Image source={{ uri: item.photo }} style={styles.journalPhoto} />
@@ -97,14 +87,9 @@ const HistorySection = ({
 
 export default HistorySection;
 
-// ─────────────────────────────────────────────────────────────
-// 스타일
-// ─────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  // Sections
   section: { marginTop: 22 },
 
-  // Journal
   journalCard: {
     backgroundColor: palette.white,
     borderRadius: 12,
