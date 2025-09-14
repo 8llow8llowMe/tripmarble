@@ -5,6 +5,7 @@ import { ImageBackground, Platform, StyleSheet, TouchableOpacity, View } from 'r
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
 import { DUMMY_RANDOM_PICK } from '@/constants/dummyData';
+import { palette } from '@/constants/colors';
 
 // 공통 그림자
 const shadow = Platform.select({
@@ -43,8 +44,8 @@ const RandomPickSection = ({
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.inner}>
-            <MaterialCommunityIcons name="map-marker-radius" size={18} color="#fff" />
-            <TextBox size={18} fontsName="Pretendard800" color="#fff" style={{ marginLeft: 8 }}>
+            <MaterialCommunityIcons name="map-marker-radius" size={18} color={palette.white} />
+            <TextBox size={18} fontsName="Pretendard800" color={palette.white}>
               {data.tripSpotName}
             </TextBox>
           </View>
