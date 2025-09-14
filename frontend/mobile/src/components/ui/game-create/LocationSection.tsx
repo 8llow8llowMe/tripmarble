@@ -157,10 +157,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#EEE',
     borderWidth: 1,
     borderColor: '#D1D5DB',
+    overflow: 'hidden',
   },
   circleActive: {
     backgroundColor: '#E8F3FF',
     borderColor: '#4BA1FD',
+    borderWidth: 2,
   },
 
   image: { width: '100%', height: '100%' },
