@@ -50,12 +50,12 @@ const FriendsBannerSection = ({
           친구 {playingCount}명이 플레이 중
         </TextBox>
       </View>
-      <TouchableOpacity style={styles.inviteBtn} activeOpacity={0.85}>
+      {/* <TouchableOpacity style={styles.inviteBtn} activeOpacity={0.85}>
         <Feather name="user-plus" size={14} color="#fff" />
         <TextBox size={13} color="#fff" style={{ marginLeft: 6 }}>
           초대하기
         </TextBox>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };
