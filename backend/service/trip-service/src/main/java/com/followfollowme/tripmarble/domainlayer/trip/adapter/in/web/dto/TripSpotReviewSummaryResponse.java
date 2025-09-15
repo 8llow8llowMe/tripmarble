@@ -42,7 +42,7 @@ public record TripSpotReviewSummaryResponse(
     public record PhotoResponse(
 
         @Schema(description = "리뷰 사진 ID", example = "101")
-        long tripSpotReviewPhotoId,
+        String tripSpotReviewPhotoId,
 
         @Schema(description = "사진 URL", example = "https://cdn.../review1.jpg")
         String photoUrl
