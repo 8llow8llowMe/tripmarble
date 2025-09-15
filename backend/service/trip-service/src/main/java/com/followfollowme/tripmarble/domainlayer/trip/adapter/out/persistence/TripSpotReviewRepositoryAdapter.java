@@ -48,8 +48,9 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
     }
 
     @Override
-    public Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(long tripSpotId, long lastReviewId, int size) {
-        Slice<TripSpotReviewEntity> entitySlice = tripSpotReviewRepository.findReviewsNoOffsetByTripSpotId(tripSpotId, lastReviewId, size);
+    public Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(long tripSpotId, long lastTripSpotReviewId, int size) {
+        Slice<TripSpotReviewEntity> entitySlice =
+            tripSpotReviewRepository.findReviewsNoOffsetByTripSpotId(tripSpotId, lastTripSpotReviewId, size);
         return entitySlice.map(tripSpotReviewMapper::toDomainFromEntity);
     }
 }
