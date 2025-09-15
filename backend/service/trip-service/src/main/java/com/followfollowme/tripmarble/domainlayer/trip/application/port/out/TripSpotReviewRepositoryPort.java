@@ -14,5 +14,5 @@ public interface TripSpotReviewRepositoryPort {
 
     TripSpotReviewSummary findSummaryByTripSpotId(long tripSpotId, int photoLimit);
 
-    Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(long tripSpotId, long lastReviewId, int size);
+    Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(long tripSpotId, long lastTripSpotReviewId, int size);
 }
