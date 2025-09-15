@@ -22,16 +22,14 @@ public record TripSpotReviewSummaryInfo(
                         .rating(d.rating())
                         .count(d.count())
                         .build())
-                    .toList()
-            )
+                    .toList())
             .samplePhotos(
                 summary.samplePhotos().stream()
                     .map(p -> PhotoInfo.builder()
                         .photoId(p.tripSpotReviewPhotoId())
                         .photoUrl(p.photoUrl())
                         .build())
-                    .toList()
-            )
+                    .toList())
             .build();
     }
 
