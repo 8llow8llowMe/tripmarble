@@ -1,11 +1,13 @@
 package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.controller;
 
 import com.followfollowme.tripmarble.common.dto.Response;
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewAndPhotosResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewCreateRequest;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewSummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.application.command.TripSpotReviewCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripSpotReviewWebUseCase;
+import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -55,5 +57,18 @@ public class TripSpotReviewWebController {
         TripSpotReviewSummaryResponse response =
             tripSpotReviewWebUseCase.getTripSpotReviewSummary(Long.parseLong(tripSpotId), photoLimit);
         return ResponseEntity.ok().body(Response.success(response));
+    }
+
+    @Operation(
+        summary = "여행지 리뷰 목록 조회 (무한 스크롤)",
+        description = "특정 여행지에 대한 리뷰 목록을 최신순으로 조회하는 기능입니다."
+    )
+    @GetMapping
+    public ResponseEntity<Response<SliceResponse<TripSpotReviewAndPhotosResponse>>> getTripSpotReviews(
+        @PathVariable String tripSpotId, @RequestParam(required = false, defaultValue = "0") String lastTripSpotReviewId,
+        @RequestParam(required = false, defaultValue = "10") int size) {
+        SliceResponse<TripSpotReviewAndPhotosResponse> responses =
+            tripSpotReviewWebUseCase.getTripSpotReviews(Long.parseLong(tripSpotId), Long.parseLong(lastTripSpotReviewId), size);
+        return ResponseEntity.ok().body(Response.success(responses));
     }
 }
