@@ -1,8 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.trip.application.info;
 
 import com.followfollowme.tripmarble.domainlayer.trip.application.readmodel.TripSpotReviewSummary;
-import com.followfollowme.tripmarble.domainlayer.trip.application.readmodel.TripSpotReviewSummary.TripSpotReviewPhoto;
-import com.followfollowme.tripmarble.domainlayer.trip.application.readmodel.TripSpotReviewSummary.TripSpotReviewRatingDistribution;
 import java.util.List;
 import lombok.Builder;
 
@@ -18,12 +16,22 @@ public record TripSpotReviewSummaryInfo(
         return TripSpotReviewSummaryInfo.builder()
             .totalCount(summary.totalCount())
             .averageRating(summary.averageRating())
-            .ratingDistributions(summary.ratingDistributions().stream()
-                .map(RatingDistributionInfo::of)
-                .toList())
-            .samplePhotos(summary.samplePhotos().stream()
-                .map(PhotoInfo::of)
-                .toList())
+            .ratingDistributions(
+                summary.ratingDistributions().stream()
+                    .map(d -> RatingDistributionInfo.builder()
+                        .rating(d.rating())
+                        .count(d.count())
+                        .build())
+                    .toList()
+            )
+            .samplePhotos(
+                summary.samplePhotos().stream()
+                    .map(p -> PhotoInfo.builder()
+                        .photoId(p.tripSpotReviewPhotoId())
+                        .photoUrl(p.photoUrl())
+                        .build())
+                    .toList()
+            )
             .build();
     }
 
@@ -33,12 +41,6 @@ public record TripSpotReviewSummaryInfo(
         long count
     ) {
 
-        public static RatingDistributionInfo of(TripSpotReviewRatingDistribution distribution) {
-            return RatingDistributionInfo.builder()
-                .rating(distribution.rating())
-                .count(distribution.count())
-                .build();
-        }
     }
 
     @Builder
@@ -47,11 +49,5 @@ public record TripSpotReviewSummaryInfo(
         String photoUrl
     ) {
 
-        public static PhotoInfo of(TripSpotReviewPhoto photo) {
-            return PhotoInfo.builder()
-                .photoId(photo.tripSpotReviewPhotoId())
-                .photoUrl(photo.photoUrl())
-                .build();
-        }
     }
 }
