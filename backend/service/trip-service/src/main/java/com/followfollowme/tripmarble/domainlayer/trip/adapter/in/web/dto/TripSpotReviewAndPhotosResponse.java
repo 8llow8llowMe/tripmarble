@@ -9,13 +9,13 @@ import lombok.Builder;
 public record TripSpotReviewAndPhotosResponse(
 
     @Schema(description = "리뷰 ID", example = "1001")
-    long tripSpotReviewId,
+    String tripSpotReviewId,
 
     @Schema(description = "여행지 ID", example = "501")
-    long tripSpotId,
+    String tripSpotId,
 
     @Schema(description = "작성자 회원 ID", example = "2001")
-    long memberId,
+    String memberId,
 
     @Schema(description = "리뷰 내용", example = "정말 멋진 장소였어요!")
     String content,
@@ -36,8 +36,9 @@ public record TripSpotReviewAndPhotosResponse(
     @Builder
     @Schema(description = "리뷰 사진 조회 응답 DTO")
     public record PhotoResponse(
+
         @Schema(description = "리뷰 사진 ID", example = "3001")
-        long photoId,
+        String tripSpotReviewPhotoId,
 
         @Schema(description = "사진 URL", example = "https://cdn.../review1.jpg")
         String photoUrl,
