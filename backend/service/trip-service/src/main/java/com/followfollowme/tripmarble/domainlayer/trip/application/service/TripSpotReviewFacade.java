@@ -1,9 +1,11 @@
 package com.followfollowme.tripmarble.domainlayer.trip.application.service;
 
+import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewAndPhotosResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewCreateResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotReviewSummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.presenter.TripSpotReviewPresenter;
 import com.followfollowme.tripmarble.domainlayer.trip.application.command.TripSpotReviewCreateCommand;
+import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotReviewAndPhotosInfo;
 import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotReviewCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotReviewPhotoCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotReviewSummaryInfo;
@@ -11,8 +13,10 @@ import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripSp
 import com.followfollowme.tripmarble.domainlayer.trip.application.service.processor.TripSpotReviewCreateProcessor;
 import com.followfollowme.tripmarble.domainlayer.trip.application.service.processor.TripSpotReviewPhotoCreateProcessor;
 import com.followfollowme.tripmarble.domainlayer.trip.application.service.processor.TripSpotReviewQueryProcessor;
+import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,5 +48,13 @@ public class TripSpotReviewFacade implements TripSpotReviewWebUseCase {
     public TripSpotReviewSummaryResponse getTripSpotReviewSummary(long tripSpotId, int photoLimit) {
         TripSpotReviewSummaryInfo tripSpotReviewSummaryInfo = tripSpotReviewQueryProcessor.getTripSpotReviewSummary(tripSpotId, photoLimit);
         return tripSpotReviewPresenter.toSummaryResponse(tripSpotReviewSummaryInfo);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SliceResponse<TripSpotReviewAndPhotosResponse> getTripSpotReviews(long tripSpotId, long lastTripSpotReviewId, int size) {
+        Slice<TripSpotReviewAndPhotosInfo> tripSpotReviewAndPhotosInfoSlice =
+            tripSpotReviewQueryProcessor.getTripSpotReviews(tripSpotId, lastTripSpotReviewId, size);
+        return tripSpotReviewPresenter.toReviewAndPhotosSliceResponse(tripSpotReviewAndPhotosInfoSlice);
     }
 }
