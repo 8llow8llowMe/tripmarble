@@ -29,6 +29,7 @@ public record TripSpotReviewAndPhotosInfo(
                 .map(p -> PhotoInfo.builder()
                     .photoId(p.id())
                     .photoUrl(p.photoUrl())
+                    .orderNo(p.orderNo())
                     .build())
                 .toList())
             .build();
@@ -37,7 +38,8 @@ public record TripSpotReviewAndPhotosInfo(
     @Builder
     public record PhotoInfo(
         long photoId,
-        String photoUrl
+        String photoUrl,
+        int orderNo
     ) {
 
     }
