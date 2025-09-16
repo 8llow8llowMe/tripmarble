@@ -9,12 +9,12 @@ import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
+import java.io.InputStream;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.InputStream;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -74,6 +74,13 @@ public class ProfileImageProcessor {
                     .bucket(bucketName)
                     .object(destObject)
                     .source(source)
+                    .build()
+            );
+
+            minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .object(srcObject)
                     .build()
             );
 
