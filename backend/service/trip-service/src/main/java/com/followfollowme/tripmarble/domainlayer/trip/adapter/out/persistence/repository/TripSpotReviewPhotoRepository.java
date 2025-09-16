@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface TripSpotReviewPhotoRepository extends JpaRepository<TripSpotReviewPhotoEntity, Long> {
 
     List<TripSpotReviewPhotoEntity> findByTripSpotReviewIdIn(List<Long> tripSpotReviewIds);
+
+    List<TripSpotReviewPhotoEntity> findByTripSpotReviewId(long tripSpotReviewId);
 }
