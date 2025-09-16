@@ -5,6 +5,7 @@ import com.followfollowme.tripmarble.persistence.config.JpaAuditConfig;
 import com.followfollowme.tripmarble.persistence.config.QuerydslConfig;
 import com.followfollowme.tripmarble.persistence.config.SnowflakeConfig;
 import com.followfollowme.tripmarble.security.resourceserver.config.ResourceServerSecurityConfig;
+import com.followfollowme.tripmarble.storage.config.MinioConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
@@ -14,7 +15,8 @@ import org.springframework.context.annotation.Import;
     JpaAuditConfig.class,
     QuerydslConfig.class,
     SnowflakeConfig.class,
-    ResourceServerSecurityConfig.class
+    ResourceServerSecurityConfig.class,
+    MinioConfig.class
 })
 public class TripServiceInfraConfig {
 
