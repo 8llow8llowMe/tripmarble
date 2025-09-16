@@ -48,3 +48,8 @@ security:
     resource-server:
       jwt:
         access-key: ${JWT_ACCESS_KEY}
+
+# Feign Client
+feign-client:
+  target-services:
+    auth-service: ${AUTH_SERVICE_APP_NAME}
