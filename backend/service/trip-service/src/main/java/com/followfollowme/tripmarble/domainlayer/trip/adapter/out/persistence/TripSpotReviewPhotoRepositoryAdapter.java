@@ -30,4 +30,10 @@ public class TripSpotReviewPhotoRepositoryAdapter implements TripSpotReviewPhoto
         List<TripSpotReviewPhotoEntity> entities = tripSpotReviewPhotoRepository.findByTripSpotReviewIdIn(tripSpotReviewIds);
         return tripSpotReviewPhotoMapper.toDomainListFromEntityList(entities);
     }
+
+    @Override
+    public List<TripSpotReviewPhoto> findByTripSpotReviewId(long tripSpotReviewId) {
+        List<TripSpotReviewPhotoEntity> entities = tripSpotReviewPhotoRepository.findByTripSpotReviewId(tripSpotReviewId);
+        return tripSpotReviewPhotoMapper.toDomainListFromEntityList(entities);
+    }
 }
