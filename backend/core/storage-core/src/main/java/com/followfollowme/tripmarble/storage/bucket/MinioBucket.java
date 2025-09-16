@@ -10,7 +10,8 @@ public enum MinioBucket {
     PROFILE_REAL_IMAGES("tripmarble", "profiles/real/images", "실제 프로필 이미지"),
     PROFILE_TEMP_IMAGES("tripmarble", "profiles/temp/images", "임시 프로필 이미지"),
     REPRESENTATIVE_REGION_IMAGES("tripmarble", "representative-regions/images", "대표 여행지 이미지"),
-    UPLOADS_TEMP("tripmarble", "uploads/temp/files", "임시 업로드 파일");
+    REVIEW_REAL_IMAGES("tripmarble", "reviews/real/images", "실제 리뷰 이미지"),
+    REVIEW_TEMP_IMAGES("tripmarble", "reviews/temp/files", "임시 업로드 파일");
 
     private final String bucketName;
     private final String pathPrefix;
