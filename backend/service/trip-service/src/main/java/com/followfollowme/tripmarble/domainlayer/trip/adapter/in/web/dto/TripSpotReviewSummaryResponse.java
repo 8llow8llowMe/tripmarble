@@ -21,7 +21,7 @@ public record TripSpotReviewSummaryResponse(
     @Schema(description = "대표 사진 목록 (최신순/랜덤 3~5장)",
         example = "[{\"tripSpotReviewPhotoId\":101,\"photoUrl\":\"https://cdn.../review1.jpg\"}," +
             "{\"tripSpotReviewPhotoId\":102,\"photoUrl\":\"https://cdn.../review2.jpg\"}]")
-    List<PhotoResponse> samplePhotos
+    List<PhotoSampleResponse> samplePhotos
 ) {
 
     @Builder
@@ -38,8 +38,8 @@ public record TripSpotReviewSummaryResponse(
     }
 
     @Builder
-    @Schema(description = "리뷰 대표 사진 응답 DTO")
-    public record PhotoResponse(
+    @Schema(description = "리뷰 대표 (샘플) 사진 응답 DTO")
+    public record PhotoSampleResponse(
 
         @Schema(description = "리뷰 사진 ID", example = "101")
         String tripSpotReviewPhotoId,
