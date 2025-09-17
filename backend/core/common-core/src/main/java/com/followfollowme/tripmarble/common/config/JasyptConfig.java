@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.common.config;
 
-import com.followfollowme.tripmarble.common.property.JasyptProperties;
+import com.followfollowme.tripmarble.common.properties.JasyptProperties;
 import lombok.RequiredArgsConstructor;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
