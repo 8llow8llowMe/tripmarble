@@ -2,15 +2,14 @@ name: Mobile Android Build
 
 on:
   pull_request:
-    types: [labeled, unlabeled, synchronize] # 라벨 변경, 코드 동기화 시 실행
-    branches: [develop, main] # develop/main 브랜치로의 PR에서만 실행
-    paths: # 모바일 관련 파일 변경 시에만 실행
+    types: [labeled, unlabeled, synchronize] # PR 라벨 변경/동기화 시 실행
+    branches: [develop, main] # develop/main 브랜치 PR에서만 실행
+    paths: # 모바일 관련 파일 변경 시 실행
       - 'frontend/mobile/**'
       - '.github/workflows/mobile-android-build.yml'
 
 jobs:
   build:
-    # 1. 라벨 조건 맞을 때만 실행
     if: contains(github.event.pull_request.labels.*.name, 'frontend-mobile') || contains(github.event.pull_request.labels.*.name, 'mobile')
     runs-on: ubuntu-latest
 
@@ -21,20 +20,20 @@ jobs:
       NODE_OPTIONS: --max-old-space-size=4096
 
     steps:
-      # 2. 코드 체크아웃
+      # 1. 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 3. 서브모듈 초기화
+      # 2. 서브모듈 초기화
       - name: Setup submodules
         run: |
           git config --global url."https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/".insteadOf "https://github.com/"
           git submodule sync --recursive
           git submodule update --init --recursive --force
 
-      # 4. Node.js 설치
+      # 3. Node.js 설치
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -42,14 +41,14 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: 'frontend/mobile/yarn.lock'
 
-      # 5. Java 설치
+      # 4. Java 설치
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      # 6. Android SDK 설치
+      # 5. Android SDK 설치
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -58,12 +57,12 @@ jobs:
           ndk-version: 27.1.12297006
           cmake-version: 3.22.1
 
-      # 7. Yarn 의존성 설치
+      # 6. Yarn 의존성 설치
       - name: Install dependencies
         working-directory: frontend/mobile
         run: yarn install --frozen-lockfile
 
-      # 8. 빌드 타입 결정 (main → release, 나머지 → debug)
+      # 7. 빌드 타입 결정 (main → release, 나머지 → debug)
       - name: Setup build environment
         working-directory: frontend/mobile
         run: |
@@ -74,7 +73,13 @@ jobs:
           fi
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
 
-      # 9. Expo prebuild 및 Gradle 설정 (요청하신 버전)
+      # 8. Keystore 복원
+      - name: Restore Keystore
+        working-directory: frontend/mobile/android/app
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > tripmarble-release-key.jks
+
+      # 9. Expo prebuild 및 Gradle patch
       - name: Prebuild
         working-directory: frontend/mobile
         run: |
@@ -85,56 +90,49 @@ jobs:
           STYLE_DIR="android/app/src/main/res/values"
           mkdir -p "$STYLE_DIR"
 
-          # Edge-to-Edge 전용 스타일만 정의 (중복 방지)
+          # 9-1. edge_to_edge_styles.xml 생성
           printf '<resources>\n' > "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '    <!-- Edge-to-Edge 기본 테마 (AppCompat 기반으로 안전하게) -->\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
+          printf '    <!-- Edge-to-Edge 기본 테마 -->\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '    <style name="Theme.EdgeToEdge" parent="Theme.AppCompat.Light.NoActionBar">\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '        <item name="android:statusBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '        <item name="android:navigationBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '        <item name="android:windowTranslucentStatus">true</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '        <item name="android:windowTranslucentNavigation">true</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '    </style>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '</resources>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
 
-          # styles.xml이 없을 경우 fallback 생성
-          if [ ! -f "$STYLE_DIR/styles.xml" ]; then
-            echo "Creating default styles.xml file..."
-            printf '<resources>\n' > "$STYLE_DIR/styles.xml"
-            printf '    <!-- 기본 앱 테마 -->\n' >> "$STYLE_DIR/styles.xml"
-            printf '    <style name="AppTheme" parent="Theme.EdgeToEdge">\n' >> "$STYLE_DIR/styles.xml"
-            printf '        <item name="android:statusBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/styles.xml"
-            printf '        <item name="android:navigationBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/styles.xml"
-            printf '    </style>\n' >> "$STYLE_DIR/styles.xml"
-            printf '\n' >> "$STYLE_DIR/styles.xml"
-            printf '    <!-- Splash Screen 테마 -->\n' >> "$STYLE_DIR/styles.xml"
-            printf '    <style name="Theme.App.SplashScreen" parent="AppTheme">\n' >> "$STYLE_DIR/styles.xml"
-            printf '        <item name="android:windowBackground">@android:color/white</item>\n' >> "$STYLE_DIR/styles.xml"
-            printf '    </style>\n' >> "$STYLE_DIR/styles.xml"
-            printf '</resources>\n' >> "$STYLE_DIR/styles.xml"
-          fi
-
-          # build.gradle 리포지토리 보정
-          sed -i 's/jcenter()/mavenCentral()/g' android/build.gradle
-          sed -i '/repositories {/a\        mavenCentral()' android/build.gradle
-
-          # gradle.properties 설정
+          # 9-2. gradle.properties 패치
           echo "org.gradle.jvmargs=-Xmx6144m -XX:MaxMetaspaceSize=2048m" > android/gradle.properties
-          echo "org.gradle.daemon=false" >> android/gradle.properties
-          echo "org.gradle.parallel=true" >> android/gradle.properties
-          echo "org.gradle.configureondemand=true" >> android/gradle.properties
-          echo "org.gradle.caching=true" >> android/gradle.properties
-          echo "org.gradle.workers.max=4" >> android/gradle.properties
           echo "android.useAndroidX=true" >> android/gradle.properties
           echo "android.enableJetifier=true" >> android/gradle.properties
           echo "hermesEnabled=true" >> android/gradle.properties
           echo "newArchEnabled=false" >> android/gradle.properties
           echo "NODE_BINARY=$(which node)" >> android/gradle.properties
 
-          # local.properties 설정
+          # 9-3. local.properties 설정
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
 
-      # 10. 안드로이드 빌드 (Release → .aab, Debug → .apk)
+          # 9-4. signingConfig 자동 patch (Gradle)
+          SIGNING_CONFIG="
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file(\"tripmarble-release-key.jks\")
+                      storePassword System.getenv(\"ANDROID_KEYSTORE_PASSWORD\")
+                      keyAlias System.getenv(\"ANDROID_KEY_ALIAS\")
+                      keyPassword System.getenv(\"ANDROID_KEY_PASSWORD\")
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                      minifyEnabled false
+                      shrinkResources false
+                  }
+              }
+          }"
+          echo "$SIGNING_CONFIG" >> android/app/build.gradle
+
+      # 10. 안드로이드 빌드
       - name: Build Android
         working-directory: frontend/mobile/android
         run: |
@@ -147,17 +145,10 @@ jobs:
           fi
 
           echo "Building ${{ env.BUILD_TYPE }} ($BUILD_TASK)"
-
-          ./gradlew clean $BUILD_TASK \
-            --no-daemon \
-            --parallel \
-            --max-workers=4 \
-            --stacktrace \
-            -x test -x lint -x check -x verify
+          ./gradlew clean $BUILD_TASK --no-daemon --stacktrace -x test -x lint -x check -x verify
 
           if [ ! -f "$OUTPUT_PATH" ]; then
             echo "✗ Build failed"
-            find app/build/outputs -name "*.apk" -o -name "*.aab" 2>/dev/null || true
             exit 1
           fi
 
@@ -183,7 +174,7 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
-      # 13. Google Play 업로드 (Release + main 브랜치, 트랙: open)
+      # 13. Google Play 업로드
       - name: Deploy to Google Play (Open Track)
         if: env.BUILD_TYPE == 'release' && github.base_ref == 'main'
         working-directory: frontend/mobile
@@ -191,12 +182,8 @@ jobs:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
           echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" > google-play-service-account.json
-
-          # Fastlane 설치 (유저 경로)
           gem install fastlane --no-document --user-install
           echo "$HOME/.gem/ruby/3.2.0/bin" >> $GITHUB_PATH
-
-          # Open 트랙에 배포 (공모전 URL 즉시 발급 가능)
           fastlane supply \
             --aab android/app/build/outputs/bundle/release/app-release.aab \
             --track open \
@@ -205,37 +192,4 @@ jobs:
             --skip_upload_metadata \
             --skip_upload_images \
             --skip_upload_screenshots
-
           rm -f google-play-service-account.json
-
-      # 14. PR에 결과 코멘트 남기기
-      - name: Comment PR with build results
-        if: always()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const buildType = process.env.BUILD_TYPE;
-            const buildStatus = '${{ job.status }}';
-            const artifactName = buildType === 'release' ? 'app-release-${{ github.event.number }}' : 'app-debug-${{ github.event.number }}';
-
-            let comment = '## Mobile Build Results\n\n';
-            comment += '**Build Type:** ' + buildType + '\n';
-            comment += '**Target Branch:** ${{ github.base_ref }}\n';
-            comment += '**Status:** ' + (buildStatus === 'success' ? 'Success' : 'Failed') + '\n\n';
-
-            if (buildStatus === 'success') {
-              comment += '**Artifact:** ' + artifactName + '\n';
-              comment += '**Download:** Check the Actions tab for download link\n\n';
-              comment += buildType === 'debug' ?
-                '> Debug build completed. Ready for testing.\n' :
-                '> Release build completed. Deployed to Google Play (Open Track).\n';
-            } else {
-              comment += '> Build failed. Check the Actions tab for details.\n';
-            }
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
