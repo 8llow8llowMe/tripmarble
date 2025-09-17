@@ -1,4 +1,5 @@
 name: Mobile Android Build
+
 on:
   pull_request:
     types: [labeled, unlabeled, synchronize]  # 라벨 변경, 코드 동기화 시 실행
@@ -9,41 +10,46 @@ on:
 
 jobs:
   build:
+    # 1. 라벨 조건 맞을 때만 실행
     if: contains(github.event.pull_request.labels.*.name, 'frontend-mobile') || contains(github.event.pull_request.labels.*.name, 'mobile')
-    
     runs-on: ubuntu-latest
-    
+
     env:
       ANDROID_SDK_ROOT: /opt/android-sdk
       ANDROID_HOME: /opt/android-sdk
       GRADLE_OPTS: -Xmx6144m -XX:MaxMetaspaceSize=2048m
       NODE_OPTIONS: --max-old-space-size=4096
-    
+
     steps:
+      # 2. 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
+      # 3. 서브모듈 초기화
       - name: Setup submodules
         run: |
           git config --global url."https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/".insteadOf "https://github.com/"
           git submodule sync --recursive
           git submodule update --init --recursive --force
-      
+
+      # 4. Node.js 설치
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'yarn'
           cache-dependency-path: 'frontend/mobile/yarn.lock'
-      
+
+      # 5. Java 설치
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21' 
-      
+          java-version: '21'
+
+      # 6. Android SDK 설치
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -51,11 +57,13 @@ jobs:
           build-tools: 35.0.0
           ndk-version: 27.1.12297006
           cmake-version: 3.22.1
-      
+
+      # 7. Yarn 의존성 설치
       - name: Install dependencies
         working-directory: frontend/mobile
         run: yarn install --frozen-lockfile
-      
+
+      # 8. 빌드 타입 결정 (main → release, 나머지 → debug)
       - name: Setup build environment
         working-directory: frontend/mobile
         run: |
@@ -64,9 +72,9 @@ jobs:
           else
             BUILD_TYPE="debug"
           fi
-          
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
-      
+
+      # 9. Expo prebuild 및 Gradle 설정 (요청하신 버전)
       - name: Prebuild
         working-directory: frontend/mobile
         run: |
@@ -106,7 +114,6 @@ jobs:
             printf '</resources>\n' >> "$STYLE_DIR/styles.xml"
           fi
 
-
           # build.gradle 리포지토리 보정
           sed -i 's/jcenter()/mavenCentral()/g' android/build.gradle
           sed -i '/repositories {/a\        mavenCentral()' android/build.gradle
@@ -126,7 +133,8 @@ jobs:
 
           # local.properties 설정
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
-      
+
+      # 10. 안드로이드 빌드 (Release → .aab, Debug → .apk)
       - name: Build Android
         working-directory: frontend/mobile/android
         run: |
@@ -137,25 +145,27 @@ jobs:
             BUILD_TASK="assembleDebug"
             OUTPUT_PATH="app/build/outputs/apk/debug/app-debug.apk"
           fi
-          
+
           echo "Building ${{ env.BUILD_TYPE }} ($BUILD_TASK)"
-          
+
           ./gradlew clean $BUILD_TASK \
             --no-daemon \
             --parallel \
             --max-workers=4 \
             --stacktrace \
             -x test -x lint -x check -x verify
+
           if [ ! -f "$OUTPUT_PATH" ]; then
             echo "✗ Build failed"
             find app/build/outputs -name "*.apk" -o -name "*.aab" 2>/dev/null || true
             exit 1
           fi
-          
+
           echo "✓ Build successful"
           ls -lh "$OUTPUT_PATH"
           echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
-      
+
+      # 11. APK 업로드 (Debug 전용)
       - name: Upload APK (Debug)
         if: env.BUILD_TYPE == 'debug'
         uses: actions/upload-artifact@v4
@@ -163,7 +173,8 @@ jobs:
           name: app-debug-${{ github.event.number }}
           path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
-      
+
+      # 12. AAB 업로드 (Release 전용)
       - name: Upload AAB (Release)
         if: env.BUILD_TYPE == 'release'
         uses: actions/upload-artifact@v4
@@ -171,25 +182,32 @@ jobs:
           name: app-release-${{ github.event.number }}
           path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
-      
-      - name: Deploy to Google Play (Release only)
+
+      # 13. Google Play 업로드 (Release + main 브랜치, 트랙: open)
+      - name: Deploy to Google Play (Open Track)
         if: env.BUILD_TYPE == 'release' && github.base_ref == 'main'
         working-directory: frontend/mobile
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
           echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" > google-play-service-account.json
-          gem install fastlane
+
+          # Fastlane 설치 (유저 경로)
+          gem install fastlane --no-document --user-install
+          echo "$HOME/.gem/ruby/3.2.0/bin" >> $GITHUB_PATH
+
+          # Open 트랙에 배포 (공모전 URL 즉시 발급 가능)
           fastlane supply \
             --aab android/app/build/outputs/bundle/release/app-release.aab \
-            --track production \
+            --track open \
             --json_key google-play-service-account.json \
             --skip_upload_metadata \
             --skip_upload_images \
             --skip_upload_screenshots
-          
+
           rm -f google-play-service-account.json
-      
+
+      # 14. PR에 결과 코멘트 남기기
       - name: Comment PR with build results
         if: always()
         uses: actions/github-script@v7
@@ -198,22 +216,22 @@ jobs:
             const buildType = process.env.BUILD_TYPE;
             const buildStatus = '${{ job.status }}';
             const artifactName = buildType === 'release' ? 'app-release-${{ github.event.number }}' : 'app-debug-${{ github.event.number }}';
-            
-            let comment = '## Mobile Build Results\\n\\n';
-            comment += '**Build Type:** ' + buildType + '\\n';
-            comment += '**Target Branch:** ${{ github.base_ref }}\\n';
-            comment += '**Status:** ' + (buildStatus === 'success' ? 'Success' : 'Failed') + '\\n\\n';
-            
+
+            let comment = '## Mobile Build Results\n\n';
+            comment += '**Build Type:** ' + buildType + '\n';
+            comment += '**Target Branch:** ${{ github.base_ref }}\n';
+            comment += '**Status:** ' + (buildStatus === 'success' ? 'Success' : 'Failed') + '\n\n';
+
             if (buildStatus === 'success') {
-              comment += '**Artifact:** ' + artifactName + '\\n';
-              comment += '**Download:** Check the Actions tab for download link\\n\\n';
-              comment += buildType === 'debug' ? 
-                '> Debug build completed. Ready for testing.\\n' : 
-                '> Release build completed. Ready for production deployment.\\n';
+              comment += '**Artifact:** ' + artifactName + '\n';
+              comment += '**Download:** Check the Actions tab for download link\n\n';
+              comment += buildType === 'debug' ?
+                '> Debug build completed. Ready for testing.\n' :
+                '> Release build completed. Deployed to Google Play (Open Track).\n';
             } else {
-              comment += '> Build failed. Check the Actions tab for details.\\n';
+              comment += '> Build failed. Check the Actions tab for details.\n';
             }
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
