@@ -86,7 +86,9 @@ jobs:
       # 8. Gradle signingReport 실행 (signingConfig 올바른지 검증)
       - name: Verify signing config
         working-directory: frontend/mobile/android
-        run: ./gradlew signingReport
+        run: |
+          chmod +x gradlew
+          ./gradlew signingReport
 
       # 9. 안드로이드 빌드
       - name: Build Android
