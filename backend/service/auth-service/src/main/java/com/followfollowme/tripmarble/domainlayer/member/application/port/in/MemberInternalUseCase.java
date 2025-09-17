@@ -6,4 +6,6 @@ import java.util.List;
 public interface MemberInternalUseCase {
 
     List<MemberProfileInternalResponse> getMemberProfiles(List<Long> memberIds);
+
+    MemberProfileInternalResponse getMemberProfiles(long memberId);
 }
