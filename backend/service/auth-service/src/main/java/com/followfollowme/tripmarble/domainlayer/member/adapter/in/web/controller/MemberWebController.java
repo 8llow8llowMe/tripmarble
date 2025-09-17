@@ -10,6 +10,7 @@ import com.followfollowme.tripmarble.domainlayer.member.application.command.Memb
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberWebUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,8 @@ public class MemberWebController {
 
     @Operation(
         summary = "나의 회원 정보 조회",
-        description = "로그인한 나의 회원 정보를 조회 기능입니다."
+        description = "로그인한 나의 회원 정보를 조회 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -59,7 +61,8 @@ public class MemberWebController {
 
     @Operation(
         summary = "임시 프로필 이미지 업로드",
-        description = "로그인한 사용자가 MinIO에 프로필 이미지를 업로드하고, 이미지 URL을 반환 받는 기능입니다."
+        description = "로그인한 사용자가 MinIO에 프로필 이미지를 업로드하고, 이미지 URL을 반환 받는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping(value = "/profile-image/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
@@ -72,7 +75,8 @@ public class MemberWebController {
 
     @Operation(
         summary = "회원정보 수정",
-        description = "닉네임 또는 프로필 이미지를 수정하는 기능입니다."
+        description = "닉네임 또는 프로필 이미지를 수정하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PatchMapping("/me")
     @PreAuthorize("isAuthenticated()")
@@ -84,7 +88,8 @@ public class MemberWebController {
 
     @Operation(
         summary = "회원 탈퇴",
-        description = "로그인한 사용자가 회원 탈퇴(비활성화)하는 기능입니다."
+        description = "로그인한 사용자가 회원 탈퇴(비활성화)하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping("/me/withdraw")
     @PreAuthorize("isAuthenticated()")
