@@ -12,6 +12,7 @@ import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripSp
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -39,7 +40,8 @@ public class TripSpotReviewWebController {
 
     @Operation(
         summary = "여행지 리뷰 등록",
-        description = "특정 여행지에 대한 리뷰(별점, 내용, 사진)를 등록하는 기능입니다."
+        description = "특정 여행지에 대한 리뷰(별점, 내용, 사진)를 등록하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping
     @PreAuthorize("isAuthenticated()")
@@ -54,7 +56,8 @@ public class TripSpotReviewWebController {
 
     @Operation(
         summary = "여행지 리뷰 종합 요약 조회",
-        description = " 특정 여행지의 리뷰에 대한 종합 요약 정보를 조회하는 기능입니다."
+        description = " 특정 여행지의 리뷰에 대한 종합 요약 정보를 조회하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @GetMapping("/summary")
     public ResponseEntity<Response<TripSpotReviewSummaryResponse>> getTripSpotReviewSummary(
@@ -66,7 +69,8 @@ public class TripSpotReviewWebController {
 
     @Operation(
         summary = "여행지 리뷰 목록 조회 (무한 스크롤)",
-        description = "특정 여행지에 대한 리뷰 목록을 최신순으로 조회하는 기능입니다."
+        description = "특정 여행지에 대한 리뷰 목록을 최신순으로 조회하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @GetMapping
     public ResponseEntity<Response<SliceResponse<TripSpotReviewAndPhotosResponse>>> getTripSpotReviews(
@@ -79,7 +83,8 @@ public class TripSpotReviewWebController {
 
     @Operation(
         summary = "여행지 리뷰 상세 조회",
-        description = "특정 여행지 리뷰의 상세 정보를 조회하는 기능입니다."
+        description = "특정 여행지 리뷰의 상세 정보를 조회하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @GetMapping("/{tripSpotReviewId}")
     public ResponseEntity<Response<TripSpotReviewDetailResponse>> getTripSpotReviewDetail(
@@ -91,7 +96,8 @@ public class TripSpotReviewWebController {
 
     @Operation(
         summary = "여행지 리뷰 사진 임시 업로드",
-        description = "리뷰 작성 시 업로드할 사진을 임시 저장소(Minio)에 저장하고 URL을 반환하는 기능입니다."
+        description = "리뷰 작성 시 업로드할 사진을 임시 저장소(Minio)에 저장하고 URL을 반환하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping("/photos/temp")
     @PreAuthorize("isAuthenticated()")
