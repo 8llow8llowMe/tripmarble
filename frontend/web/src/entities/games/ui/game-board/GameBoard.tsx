@@ -16,7 +16,7 @@ import Piece from "@/shared/assets/images/Piece.png";
 import type { StaticImageData } from "next/image";
 import DiceView from "@/entities/games/ui/game-board/diceView";
 
-const CELL_SIZE = 80;
+const CELL_SIZE = 100;
 
 type Props = {
   count?: number;
@@ -171,37 +171,60 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvas.width = CELL_SIZE * count + 15;
-    canvas.height = CELL_SIZE * count + 15;
+    const dpr = window.devicePixelRatio || 1;
+    const HEIGHT_SCALE = 1.3;
+    const X_OFFSET = 10; // same horizontal offset as drawGameBoard3D
+    const EXTRA_TOP = 18; // room for rounded corners/shadow at top
+    const EXTRA_BOTTOM = 16 * HEIGHT_SCALE; // height of the bottom side face
+
+    const cssWidth = CELL_SIZE * count + X_OFFSET * 2 + 5; // true drawn width + small margin
+    const cssHeight =
+      CELL_SIZE * count * HEIGHT_SCALE + EXTRA_TOP + EXTRA_BOTTOM + 10; // true drawn height + paddings
+
+    canvas.width = Math.floor(cssWidth * dpr);
+    canvas.height = Math.floor(cssHeight * dpr);
+    // Keep CSS size in CSS pixels for layout
+    canvas.style.width = cssWidth + "px";
+    canvas.style.height = cssHeight + "px";
+    const ctx2d = ctx; // rename for clarity
+    ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx2d.translate(0, EXTRA_TOP);
+    ctx2d.shadowBlur = 0;
+    ctx2d.shadowColor = "transparent";
 
     // cache clickable rects (top faces only) - stretch top/bottom rows like drawGameBoard3D
     const STRETCH = 1.15;
     cellRectsRef.current = boardData.map((cell) => {
       const isTop = cell.row === 0;
       const isBottom = cell.row === count - 1;
-      const w = CELL_SIZE;
-      let h = CELL_SIZE;
-      let y = cell.row * CELL_SIZE;
+
+      const w = CELL_SIZE; // width not scaled horizontally
+      let h = CELL_SIZE * HEIGHT_SCALE; // base height scaled vertically
+
+      const x = cell.col * CELL_SIZE + X_OFFSET; // match draw X
+      let y = EXTRA_TOP + cell.row * CELL_SIZE * HEIGHT_SCALE; // include top padding
+
       if (isTop) {
-        h = Math.floor(CELL_SIZE * STRETCH);
-        // top row grows inward (down)
+        h = Math.floor(CELL_SIZE * STRETCH * HEIGHT_SCALE);
       } else if (isBottom) {
-        h = Math.floor(CELL_SIZE * STRETCH);
-        // bottom row grows inward (up)
-        y = cell.row * CELL_SIZE - (h - CELL_SIZE);
+        h = Math.floor(CELL_SIZE * STRETCH * HEIGHT_SCALE);
+        y =
+          EXTRA_TOP +
+          cell.row * CELL_SIZE * HEIGHT_SCALE -
+          (h - CELL_SIZE * HEIGHT_SCALE);
       }
-      const x = cell.col * CELL_SIZE;
+
       return { index: cell.index, x, y, w, h };
     });
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ecf1fe";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    drawGameBoard3D(ctx, boardData, count, CELL_SIZE);
+    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+    ctx2d.fillStyle = "#fff";
+    ctx2d.fillRect(0, 0, canvas.width, canvas.height);
+    drawGameBoard3D(ctx2d, boardData, count, CELL_SIZE, 1.3);
 
     // === 말(스프라이트/원) 그리는 함수 ===
     drawPiece(
-      ctx,
+      ctx2d,
       piecePos.x,
       piecePos.y,
       CELL_SIZE,
@@ -219,7 +242,7 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
         const rect = cellRectsRef.current.find((r) => r.index === idx);
         if (!rect) return;
         const cx = rect.x + 18;
-        const cy = rect.y + 18;
+        const cy = rect.y - EXTRA_TOP + 18; // subtract because context was translated by EXTRA_TOP
 
         let color = "#5cc58a"; // success 기본
         if (mark.status === "PENDING") color = "#ff9f43";
@@ -227,17 +250,17 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
         else if (mark.status === "SKIPPED") color = "#aab4c6";
 
         // 원형 배지
-        ctx.beginPath();
-        ctx.fillStyle = color;
-        ctx.arc(cx, cy, 14, 0, Math.PI * 2);
-        ctx.fill();
+        ctx2d.beginPath();
+        ctx2d.fillStyle = color;
+        ctx2d.arc(cx, cy, 14, 0, Math.PI * 2);
+        ctx2d.fill();
 
         // 텍스트
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 12px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(String(mark.order), cx, cy + 1);
+        ctx2d.fillStyle = "#fff";
+        ctx2d.font = "bold 12px sans-serif";
+        ctx2d.textAlign = "center";
+        ctx2d.textBaseline = "middle";
+        ctx2d.fillText(String(mark.order), cx, cy + 1);
       });
     }
   }, [boardData, count, piecePos, imgReadyTick, visitedMarks, tiles]);
@@ -250,7 +273,7 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
 
     const start = getCustomPosition(currentIndex, count);
     const x = start.customX * CELL_SIZE + CELL_SIZE / 2 + 10;
-    const y = start.customY * CELL_SIZE + CELL_SIZE / 2 + 30;
+    const y = start.customY * CELL_SIZE * 1.3 + (CELL_SIZE * 1.3) / 2 + 30;
     setPiecePos({ x, y });
   }, [count, currentIndex, piecePos.x, piecePos.y]);
 
@@ -260,7 +283,7 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     setCurrentIndex(idx);
     const start = getCustomPosition(idx, count);
     const x = start.customX * CELL_SIZE + CELL_SIZE / 2 + 10;
-    const y = start.customY * CELL_SIZE + CELL_SIZE / 2 + 30;
+    const y = start.customY * CELL_SIZE * 1.3 + (CELL_SIZE * 1.3) / 2 + 30;
     setPiecePos({ x, y });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialStepNo, count]);
@@ -320,7 +343,14 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
         const elapsed = timestamp - startTime;
         const t = Math.min(elapsed / duration, 1);
 
-        const { x, y } = getParabolaPoint(from.x, from.y, to.x, to.y, 50, t);
+        const { x, y } = getParabolaPoint(
+          from.x,
+          from.y * 1.3,
+          to.x,
+          to.y * 1.3,
+          50,
+          t
+        );
 
         setPiecePos({ x, y });
 
@@ -363,11 +393,8 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     if (!canvas) return;
     const handleClick = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-
-      const x = (e.clientX - rect.left) * scaleX;
-      const y = (e.clientY - rect.top) * scaleY;
+      const x = e.clientX - rect.left; // CSS pixels
+      const y = e.clientY - rect.top; // CSS pixels
       const hit = cellRectsRef.current.find(
         (r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h
       );
@@ -378,10 +405,8 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     };
     const handleMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      const x = (e.clientX - rect.left) * scaleX;
-      const y = (e.clientY - rect.top) * scaleY;
+      const x = e.clientX - rect.left; // CSS pixels
+      const y = e.clientY - rect.top; // CSS pixels
       const hit = cellRectsRef.current.find(
         (r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h
       );
@@ -405,7 +430,7 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
         <canvas
           ref={canvasRef}
           width={CELL_SIZE * count}
-          height={CELL_SIZE * count}
+          height={CELL_SIZE * count * 1.3 + 25}
           className={styles.canvas}
         />
       </div>

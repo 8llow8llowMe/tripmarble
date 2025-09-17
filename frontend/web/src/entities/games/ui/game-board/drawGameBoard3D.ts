@@ -99,8 +99,14 @@ export function drawGameBoard3D(
   ctx: CanvasRenderingContext2D,
   cells: BoardCell[],
   count: number,
-  cellSize: number
+  cellSize: number,
+  heightScale: number = 1.3
 ) {
+  const H = cellSize * heightScale;
+  const yOf = (row: number) => row * H;
+
+  ctx.imageSmoothingEnabled = true; // images only; harmless for text
+
   cells.forEach((cell) => {
     const row = cell.row;
     const col = cell.col;
@@ -113,45 +119,51 @@ export function drawGameBoard3D(
     draw3DCell(
       ctx,
       col * cellSize + 10,
-      row * cellSize,
+      yOf(row),
       cellSize,
-      cellSize,
+      H,
       main,
       bottom,
       18,
-      16
+      16 * heightScale
     );
 
     // Special START cell: big GO + bottom arrow
     if (cell.type === "start-go") {
-      const cx = col * cellSize + cellSize / 2 + 10;
-      const cy = row * cellSize + cellSize / 2 + 5;
+      const cx = Math.round(col * cellSize + cellSize / 2 + 10);
+      const cy = Math.round(yOf(row) + H / 2 + 5);
 
       ctx.save();
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
-      // GO label
-      ctx.font = "800 28px pretendard";
-      ctx.fillStyle = "#0a8453";
-      ctx.shadowColor = "#ffffffaa";
-      ctx.shadowBlur = 6;
+      // GO label (no shadow blur -> crisper)
+      ctx.font = '800 28px "Pretendard Variable", Pretendard, -apple-system, system-ui, "Segoe UI", Roboto, Arial, sans-serif';
+      ctx.fillStyle = "rgba(10,132,83,0.96)";
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = "transparent";
       ctx.fillText("GO", cx, cy - 6);
 
       // Bottom arrow text
-      ctx.font = "700 14px pretendard";
-      ctx.fillStyle = "#0a8453";
+      ctx.font = '700 14px "Pretendard Variable", Pretendard, -apple-system, system-ui, "Segoe UI", Roboto, Arial, sans-serif';
+      ctx.fillStyle = "rgba(10,132,83,0.96)";
       ctx.shadowBlur = 0;
-      ctx.fillText("<---", cx, row * cellSize + cellSize - 14);
+      ctx.shadowColor = "transparent";
+      ctx.fillText("<---", cx, Math.round(yOf(row) + H - 14));
 
       ctx.restore();
       return; // skip normal title rendering
     }
 
-    // 텍스트 그리기 (중앙, 약간 아래)
+    // 텍스트 그리기 (중앙, 선명하게)
     ctx.save();
-    ctx.font = "400 14px pretendard";
-    ctx.fillStyle = "#222";
+    // 그림자/블러 끄기 (번짐 방지)
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+    // HiDPI에서 글꼴이 로딩되지 않았을 때 기본 폰트로도 선명하게 보이도록 폰트 스택 구성
+    ctx.font =
+      '700 13px "Pretendard Variable", Pretendard, -apple-system, system-ui, "Segoe UI", Roboto, Arial, sans-serif';
+    ctx.fillStyle = "rgba(0,0,0,0.9)";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
@@ -182,8 +194,8 @@ export function drawGameBoard3D(
     }
 
     // 텍스트 위치 계산 (여러 줄 지원)
-    const baseX = col * cellSize + cellSize / 2 + 10;
-    const baseY = row * cellSize + cellSize / 2 + 5;
+    const baseX = Math.round(col * cellSize + cellSize / 2 + 10);
+    const baseY = Math.round(yOf(row) + H / 2 + 5);
     const lineHeight = 16; // 줄간 간격 (px)
     const totalHeight = (lines.length - 1) * lineHeight;
     lines.forEach((line, idx) => {
