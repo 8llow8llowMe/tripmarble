@@ -15,6 +15,7 @@ import com.followfollowme.tripmarble.domainlayer.auth.application.command.TokenR
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.in.AuthUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +50,8 @@ public class AuthWebController {
 
     @Operation(
         summary = "로그아웃",
-        description = "로그인 한 회원을 로그아웃 하는 기능입니다."
+        description = "로그인 한 회원을 로그아웃 하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping("/logout")
     @PreAuthorize("isAuthenticated()")
