@@ -4,14 +4,13 @@ name: Mobile Android Build
 on:
   pull_request:
     types: [labeled, unlabeled, synchronize] # 1. PR 라벨 변경/동기화 시 실행
-    branches: [develop, main]                # 2. develop, main 브랜치 PR에서만 실행
-    paths:                                   # 3. 모바일 관련 코드 변경 시 실행
+    branches: [develop, main] # 2. develop, main 브랜치 PR에서만 실행
+    paths: # 3. 모바일 관련 코드 변경 시 실행
       - 'frontend/mobile/**'
       - '.github/workflows/mobile-android-build.yml'
 
 jobs:
   build:
-    # 4. 라벨 조건 맞을 때만 실행
     if: contains(github.event.pull_request.labels.*.name, 'frontend-mobile') || contains(github.event.pull_request.labels.*.name, 'mobile')
     runs-on: ubuntu-latest
 
@@ -22,20 +21,13 @@ jobs:
       NODE_OPTIONS: --max-old-space-size=4096
 
     steps:
-      # 5. 코드 체크아웃
+      # 1. 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 6. 서브모듈 초기화
-      - name: Setup submodules
-        run: |
-          git config --global url."https://${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          git submodule sync --recursive
-          git submodule update --init --recursive --force
-
-      # 7. Node.js 설치
+      # 2. Node.js 설치
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -43,14 +35,14 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: 'frontend/mobile/yarn.lock'
 
-      # 8. Java 설치
+      # 3. Java 설치
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      # 9. Android SDK 설치
+      # 4. Android SDK 설치
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -59,12 +51,12 @@ jobs:
           ndk-version: 27.1.12297006
           cmake-version: 3.22.1
 
-      # 10. Yarn 의존성 설치
+      # 5. Yarn 의존성 설치
       - name: Install dependencies
         working-directory: frontend/mobile
         run: yarn install --frozen-lockfile
 
-      # 11. 빌드 타입 결정 (main → release, 나머지 → debug)
+      # 6. 빌드 타입 결정
       - name: Setup build environment
         working-directory: frontend/mobile
         run: |
@@ -75,69 +67,14 @@ jobs:
           fi
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
 
-      # 12. Expo prebuild 및 Gradle 초기화
-      - name: Prebuild
-        working-directory: frontend/mobile
-        run: |
-          rm -rf android ios
-          npx expo prebuild --platform android --clean
-          chmod +x android/gradlew
-
-          STYLE_DIR="android/app/src/main/res/values"
-          mkdir -p "$STYLE_DIR"
-
-          # edge_to_edge_styles.xml 생성 (printf 버전)
-          printf '<resources>\n' > "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '    <style name="Theme.EdgeToEdge" parent="Theme.AppCompat.Light.NoActionBar">\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '        <item name="android:statusBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '        <item name="android:navigationBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '    </style>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          printf '</resources>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-
-          # gradle.properties 패치
-          printf 'org.gradle.jvmargs=-Xmx6144m -XX:MaxMetaspaceSize=2048m\n' > android/gradle.properties
-          printf 'android.useAndroidX=true\n' >> android/gradle.properties
-          printf 'android.enableJetifier=true\n' >> android/gradle.properties
-          printf 'hermesEnabled=true\n' >> android/gradle.properties
-          printf 'newArchEnabled=false\n' >> android/gradle.properties
-          printf 'NODE_BINARY=%s\n' "$(which node)" >> android/gradle.properties
-
-          # local.properties 설정
-          printf 'sdk.dir=%s\n' "$ANDROID_SDK_ROOT" > android/local.properties
-
-      # 13. Keystore 복원
+      # 7. Keystore 복원
       - name: Restore Keystore
         working-directory: frontend/mobile
         run: |
-          mkdir -p android/app
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
           ls -lh android/app/tripmarble-release-key.jks
 
-      # 14. build.gradle signingConfig 교체
-      - name: Patch Gradle signingConfig
-        working-directory: frontend/mobile/android/app
-        run: |
-          # release 블록의 signingConfig를 release keystore로 교체
-          sed -i 's|signingConfig signingConfigs.debug|signingConfig signingConfigs.release|' build.gradle
-
-          # signingConfigs.release 블록이 없으면 추가
-          if ! grep -q "signingConfigs.release" build.gradle; then
-            sed -i '/signingConfigs {/a\
-        release {\n\
-            storeFile file("tripmarble-release-key.jks")\n\
-            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")\n\
-            keyAlias System.getenv("ANDROID_KEY_ALIAS")\n\
-            keyPassword System.getenv("ANDROID_KEY_PASSWORD")\n\
-        }' build.gradle
-          fi
-
-          echo "----- build.gradle signingConfigs 부분 -----"
-          grep -A8 "signingConfigs" build.gradle || true
-          echo "----- build.gradle release 부분 -----"
-          grep -A8 "release {" build.gradle || true
-
-      # 15. 안드로이드 빌드
+      # 8. 안드로이드 빌드
       - name: Build Android
         working-directory: frontend/mobile/android
         run: |
@@ -161,7 +98,7 @@ jobs:
           ls -lh "$OUTPUT_PATH"
           echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
 
-      # 16. APK 업로드 (Debug 전용)
+      # 9. APK 업로드 (Debug 전용)
       - name: Upload APK (Debug)
         if: env.BUILD_TYPE == 'debug'
         uses: actions/upload-artifact@v4
@@ -170,7 +107,7 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
 
-      # 17. AAB 업로드 (Release 전용)
+      # 10. AAB 업로드 (Release 전용)
       - name: Upload AAB (Release)
         if: env.BUILD_TYPE == 'release'
         uses: actions/upload-artifact@v4
@@ -179,7 +116,7 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
-      # 18. Google Play 업로드 (open 트랙)
+      # 11. Google Play 업로드 (open 트랙)
       - name: Deploy to Google Play (Open Track)
         if: env.BUILD_TYPE == 'release' && github.base_ref == 'main'
         working-directory: frontend/mobile
