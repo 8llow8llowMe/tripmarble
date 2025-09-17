@@ -1,3 +1,4 @@
+# .github/workflows/mobile-android-build.yml
 name: Mobile Android Build
 
 on:
@@ -85,7 +86,7 @@ jobs:
           STYLE_DIR="android/app/src/main/res/values"
           mkdir -p "$STYLE_DIR"
 
-          # 12-1. edge_to_edge_styles.xml 생성
+          # edge_to_edge_styles.xml 생성 (printf 버전)
           printf '<resources>\n' > "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '    <style name="Theme.EdgeToEdge" parent="Theme.AppCompat.Light.NoActionBar">\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '        <item name="android:statusBarColor">@android:color/transparent</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
@@ -94,16 +95,16 @@ jobs:
           printf '    </style>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '</resources>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
 
-          # 12-2. gradle.properties 패치
-          echo "org.gradle.jvmargs=-Xmx6144m -XX:MaxMetaspaceSize=2048m" > android/gradle.properties
-          echo "android.useAndroidX=true" >> android/gradle.properties
-          echo "android.enableJetifier=true" >> android/gradle.properties
-          echo "hermesEnabled=true" >> android/gradle.properties
-          echo "newArchEnabled=false" >> android/gradle.properties
-          echo "NODE_BINARY=$(which node)" >> android/gradle.properties
+          # gradle.properties 패치
+          printf 'org.gradle.jvmargs=-Xmx6144m -XX:MaxMetaspaceSize=2048m\n' > android/gradle.properties
+          printf 'android.useAndroidX=true\n' >> android/gradle.properties
+          printf 'android.enableJetifier=true\n' >> android/gradle.properties
+          printf 'hermesEnabled=true\n' >> android/gradle.properties
+          printf 'newArchEnabled=false\n' >> android/gradle.properties
+          printf 'NODE_BINARY=%s\n' "$(which node)" >> android/gradle.properties
 
-          # 12-3. local.properties 설정
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+          # local.properties 설정
+          printf 'sdk.dir=%s\n' "$ANDROID_SDK_ROOT" > android/local.properties
 
       # 13. Keystore 복원
       - name: Restore Keystore
@@ -111,25 +112,30 @@ jobs:
         run: |
           mkdir -p android/app
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
+          ls -lh android/app/tripmarble-release-key.jks
 
-      # 14. signingConfig sed 기반 패치
+      # 14. build.gradle signingConfig 추가 (printf)
       - name: Patch Gradle signingConfig
         working-directory: frontend/mobile/android/app
         run: |
-          sed -i '/defaultConfig {/i\
-              signingConfigs {\n\
-                  release {\n\
-                      storeFile file("tripmarble-release-key.jks")\n\
-                      storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")\n\
-                      keyAlias System.getenv("ANDROID_KEY_ALIAS")\n\
-                      keyPassword System.getenv("ANDROID_KEY_PASSWORD")\n\
-                  }\n\
-              }\n\
-          ' build.gradle
+          printf '\nandroid {\n' >> build.gradle
+          printf '    signingConfigs {\n' >> build.gradle
+          printf '        release {\n' >> build.gradle
+          printf '            storeFile file("tripmarble-release-key.jks")\n' >> build.gradle
+          printf '            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")\n' >> build.gradle
+          printf '            keyAlias System.getenv("ANDROID_KEY_ALIAS")\n' >> build.gradle
+          printf '            keyPassword System.getenv("ANDROID_KEY_PASSWORD")\n' >> build.gradle
+          printf '        }\n' >> build.gradle
+          printf '    }\n' >> build.gradle
+          printf '    buildTypes {\n' >> build.gradle
+          printf '        release {\n' >> build.gradle
+          printf '            signingConfig signingConfigs.release\n' >> build.gradle
+          printf '        }\n' >> build.gradle
+          printf '    }\n' >> build.gradle
+          printf '}\n' >> build.gradle
 
-          sed -i '/release {/a\
-                      signingConfig signingConfigs.release\n\
-          ' build.gradle
+          echo "----- build.gradle 전체 출력 -----"
+          cat build.gradle
 
       # 15. 안드로이드 빌드
       - name: Build Android
