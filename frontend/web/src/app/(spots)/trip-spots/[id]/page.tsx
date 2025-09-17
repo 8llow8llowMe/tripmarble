@@ -167,7 +167,7 @@ export default function TripSpotDetail({ params }: Props) {
                     {totalReviews}개의 리뷰
                   </span>
                 </div>
-                {summary?.ratingDistributions?.length ? (
+                {/* {summary?.ratingDistributions?.length ? (
                   <ul className={styles.ratingDistribution}>
                     {summary.ratingDistributions.map(({ rating, count }) => (
                       <li
@@ -179,7 +179,7 @@ export default function TripSpotDetail({ params }: Props) {
                       </li>
                     ))}
                   </ul>
-                ) : null}
+                ) : null} */}
                 {summary?.samplePhotos?.length ? (
                   <div className={styles.samplePhotos}>
                     {summary.samplePhotos.map((photo) => (
