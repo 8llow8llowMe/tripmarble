@@ -16,8 +16,10 @@ import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameSta
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,8 +32,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/trip-games")
@@ -42,7 +42,8 @@ public class TripGameWebController {
 
     @Operation(
         summary = "여행 게임(계획) 난이도 목록 조회",
-        description = "여행 게임(계획) 난이도 목록을 조회하는 기능입니다."
+        description = "여행 게임(계획) 난이도 목록을 조회하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @GetMapping("/difficulties")
     @PreAuthorize("isAuthenticated()")
@@ -53,7 +54,8 @@ public class TripGameWebController {
 
     @Operation(
         summary = "여행 게임(게획) 생성",
-        description = "여행 게임(계획)을 생성하는 기능입니다."
+        description = "여행 게임(계획)을 생성하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping
     @PreAuthorize("isAuthenticated()")
@@ -66,7 +68,8 @@ public class TripGameWebController {
 
     @Operation(
         summary = "여행 게임 시작",
-        description = "게임 방장이 모든 참여자가 준비된 상태에서 게임을 시작하는 기능입니다."
+        description = "게임 방장이 모든 참여자가 준비된 상태에서 게임을 시작하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping("/{tripGameId}/start")
     @PreAuthorize("isAuthenticated()")
@@ -78,7 +81,8 @@ public class TripGameWebController {
 
     @Operation(
         summary = "나의 여행 게임 목록 조회",
-        description = "무한 스크롤 + 상태 필터링이 가능한 나의 여행 게임 목록을 조회합니다."
+        description = "무한 스크롤 + 상태 필터링이 가능한 나의 여행 게임 목록을 조회합니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -92,7 +96,8 @@ public class TripGameWebController {
 
     @Operation(
         summary = "주사위 굴리기",
-        description = "현재 턴의 사용자가 주사위를 굴리는 기능입니다."
+        description = "현재 턴의 사용자가 주사위를 굴리는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping("/{tripGameId}/dice")
     @PreAuthorize("isAuthenticated()")
@@ -104,7 +109,8 @@ public class TripGameWebController {
 
     @Operation(
         summary = "여행 게임 강제 종료",
-        description = "방장 권한으로 게임을 강제로 종료하는 기능입니다."
+        description = "방장 권한으로 게임을 강제로 종료하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping("/{tripGameId}/force-end")
     @PreAuthorize("isAuthenticated()")
@@ -116,7 +122,8 @@ public class TripGameWebController {
 
     @Operation(
         summary = "여행 게임 상세 정보 조회",
-        description = "특정 여행 게임의 상세 정보를 조회합니다. 대표 지역, 테마, 참여자, 현재 턴 순서 등을 포함합니다."
+        description = "특정 여행 게임의 상세 정보를 조회합니다. 대표 지역, 테마, 참여자, 현재 턴 순서 등을 포함합니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @GetMapping("/{tripGameId}")
     @PreAuthorize("isAuthenticated()")
@@ -127,7 +134,8 @@ public class TripGameWebController {
 
     @Operation(
         summary = "야헹 게임 재입장",
-        description = "사용자가 진행 중인 게임에 재입장하는 기능입니다."
+        description = "사용자가 진행 중인 게임에 재입장하는 기능입니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping("/{tripGameId}/rejoin")
     @PreAuthorize("isAuthenticated()")
