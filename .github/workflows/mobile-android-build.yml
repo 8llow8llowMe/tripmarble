@@ -75,9 +75,10 @@ jobs:
 
       # 8. Keystore 복원
       - name: Restore Keystore
-        working-directory: frontend/mobile/android/app
+        working-directory: frontend/mobile
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > tripmarble-release-key.jks
+          mkdir -p android/app
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
 
       # 9. Expo prebuild 및 Gradle patch
       - name: Prebuild
