@@ -77,6 +77,12 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
           ls -lh android/app/tripmarble-release-key.jks
 
+      - name: Debug Keystore Env
+        run: |
+          echo "ANDROID_KEYSTORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"
+          echo "ANDROID_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}"
+          echo "ANDROID_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}"
+
       # 8. 안드로이드 빌드
       - name: Build Android
         working-directory: frontend/mobile/android
