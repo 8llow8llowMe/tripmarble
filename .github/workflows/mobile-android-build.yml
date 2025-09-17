@@ -4,8 +4,8 @@ name: Mobile Android Build
 on:
   pull_request:
     types: [labeled, unlabeled, synchronize] # 1. PR 라벨 변경/동기화 시 실행
-    branches: [develop, main] # 2. develop, main 브랜치 PR에서만 실행
-    paths: # 3. 모바일 관련 코드 변경 시 실행
+    branches: [develop, main]                # 2. develop, main 브랜치 PR에서만 실행
+    paths:                                   # 3. 모바일 관련 코드 변경 시 실행
       - 'frontend/mobile/**'
       - '.github/workflows/mobile-android-build.yml'
 
@@ -114,28 +114,28 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
           ls -lh android/app/tripmarble-release-key.jks
 
-      # 14. build.gradle signingConfig 추가 (printf)
+      # 14. build.gradle signingConfig 교체
       - name: Patch Gradle signingConfig
         working-directory: frontend/mobile/android/app
         run: |
-          printf '\nandroid {\n' >> build.gradle
-          printf '    signingConfigs {\n' >> build.gradle
-          printf '        release {\n' >> build.gradle
-          printf '            storeFile file("tripmarble-release-key.jks")\n' >> build.gradle
-          printf '            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")\n' >> build.gradle
-          printf '            keyAlias System.getenv("ANDROID_KEY_ALIAS")\n' >> build.gradle
-          printf '            keyPassword System.getenv("ANDROID_KEY_PASSWORD")\n' >> build.gradle
-          printf '        }\n' >> build.gradle
-          printf '    }\n' >> build.gradle
-          printf '    buildTypes {\n' >> build.gradle
-          printf '        release {\n' >> build.gradle
-          printf '            signingConfig signingConfigs.release\n' >> build.gradle
-          printf '        }\n' >> build.gradle
-          printf '    }\n' >> build.gradle
-          printf '}\n' >> build.gradle
+          # release 블록의 signingConfig를 release keystore로 교체
+          sed -i 's|signingConfig signingConfigs.debug|signingConfig signingConfigs.release|' build.gradle
 
-          echo "----- build.gradle 전체 출력 -----"
-          cat build.gradle
+          # signingConfigs.release 블록이 없으면 추가
+          if ! grep -q "signingConfigs.release" build.gradle; then
+            sed -i '/signingConfigs {/a\
+        release {\n\
+            storeFile file("tripmarble-release-key.jks")\n\
+            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")\n\
+            keyAlias System.getenv("ANDROID_KEY_ALIAS")\n\
+            keyPassword System.getenv("ANDROID_KEY_PASSWORD")\n\
+        }' build.gradle
+          fi
+
+          echo "----- build.gradle signingConfigs 부분 -----"
+          grep -A8 "signingConfigs" build.gradle || true
+          echo "----- build.gradle release 부분 -----"
+          grep -A8 "release {" build.gradle || true
 
       # 15. 안드로이드 빌드
       - name: Build Android
