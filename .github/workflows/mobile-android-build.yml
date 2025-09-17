@@ -78,6 +78,8 @@ jobs:
       - name: Build Android
         working-directory: frontend/mobile/android
         run: |
+          chmod +x gradlew
+           
           if [ "${{ env.BUILD_TYPE }}" = "release" ]; then
             BUILD_TASK="bundleRelease"
             OUTPUT_PATH="app/build/outputs/bundle/release/app-release.aab"
