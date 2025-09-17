@@ -1,69 +1,369 @@
 .detailPage {
+  width: 960px;
+  max-width: 960px;
+  min-width: 960px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  max-width: 768px;
-  margin: 0 auto;
-  padding: 16px;
+  gap: 24px;
+  color: #1f2933;
   font-family: "Noto Sans KR", sans-serif;
   background-color: #fff;
 }
 
-.imageWrapper {
-  width: 100%;
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.contentWrapper {
-  width: 100%;
+.heroSection {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 0 12px;
+  gap: 20px;
+  width: 100%;
+}
+
+.imageWrapper {
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #f5f7fb;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.primaryInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .spotType {
   font-size: 14px;
-  color: #888;
-}
-
-.spotName {
-  font-size: 24px;
-  font-weight: 700;
+  color: #6b7280;
   margin: 0;
 }
 
-.address {
+.spotName {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+}
+
+.summaryLoading {
   font-size: 14px;
-  color: #555;
+  color: #6b7280;
+}
+
+.reviewSummary {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summaryStats {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.averageRating {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.totalCount {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.ratingDistribution {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ratingDistributionItem {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.samplePhotos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.samplePhoto {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #e5e7eb;
+}
+
+.summaryPlaceholder {
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.tabContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.tabList {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tabButton {
+  border: none;
+  background: transparent;
+  padding: 12px 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.tabButton:hover {
+  color: #2563eb;
+}
+
+.activeTab {
+  color: #111827;
+  border-bottom-color: #2563eb;
+}
+
+.tabPanel {
+  padding-top: 24px;
+  width: 100%;
+  min-width: 100%;
+  flex: 1;
+}
+
+.detailContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  flex: 1;
+}
+
+.infoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.address {
+  font-size: 15px;
+  color: #374151;
+}
+
+.infoItem {
+  font-size: 15px;
+  color: #374151;
+}
+
+.infoLink {
+  font-size: 15px;
+  color: #2563eb;
+  text-decoration: underline;
 }
 
 .description {
   font-size: 16px;
-  line-height: 1.6;
-  color: #333;
+  line-height: 1.7;
+  color: #1f2937;
 }
 
 .buttonRow {
   display: flex;
-  justify-content: center;
-  margin-top: 24px;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
 .scheduleButton {
-  background-color: #0070f3;
+  background-color: #2563eb;
   color: #fff;
   font-size: 16px;
   padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.scheduleButton:hover {
+  background-color: #1d4ed8;
+}
+
+.reviewContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  flex: 1;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.reviewTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.reviewButton {
+  background-color: #111827;
+  color: #fff;
+  font-size: 15px;
+  padding: 10px 16px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
-.scheduleButton:hover {
-  background-color: #005fc2;
+.reviewButton:hover {
+  background-color: #1f2937;
+}
+
+.reviewList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.reviewCard {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #fff;
+}
+
+.reviewMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.reviewRating {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.reviewSource {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.reviewContentText {
+  font-size: 15px;
+  color: #1f2937;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.reviewPhotos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.reviewPhoto {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #e5e7eb;
+}
+
+.loadMoreButton {
+  align-self: center;
+  background-color: #f3f4f6;
+  color: #374151;
+  font-size: 14px;
+  padding: 10px 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.loadMoreButton:hover {
+  background-color: #e5e7eb;
+}
+
+.loadMoreButton:disabled {
+  cursor: not-allowed;
+  background-color: #f9fafb;
+  color: #9ca3af;
+}
+
+.errorState {
+  padding: 48px 0;
+  text-align: center;
+  color: #ef4444;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .detailPage {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 16px 12px 32px;
+  }
+
+  .spotName {
+    font-size: 24px;
+  }
+
+  .summaryStats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .reviewHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .reviewButton {
+    width: 100%;
+    text-align: center;
+  }
 }
