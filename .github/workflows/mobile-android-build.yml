@@ -3,14 +3,15 @@ name: Mobile Android Build
 
 on:
   pull_request:
-    types: [labeled, unlabeled, synchronize] # 1. PR 라벨 변경/동기화 시 실행
-    branches: [develop, main] # 2. develop, main 브랜치 PR에서만 실행
-    paths: # 3. 모바일 관련 코드 변경 시 실행
+    types: [labeled, unlabeled, synchronize] # PR 라벨 변경/동기화 시 실행
+    branches: [develop, main] # develop, main 브랜치 PR에서만 실행
+    paths: # 모바일 코드/워크플로우 변경 시 실행
       - 'frontend/mobile/**'
       - '.github/workflows/mobile-android-build.yml'
 
 jobs:
   build:
+    # 라벨이 'frontend-mobile' 또는 'mobile' 인 경우에만 실행
     if: contains(github.event.pull_request.labels.*.name, 'frontend-mobile') || contains(github.event.pull_request.labels.*.name, 'mobile')
     runs-on: ubuntu-latest
 
@@ -19,6 +20,11 @@ jobs:
       ANDROID_HOME: /opt/android-sdk
       GRADLE_OPTS: -Xmx6144m -XX:MaxMetaspaceSize=2048m
       NODE_OPTIONS: --max-old-space-size=4096
+
+      # keystore 관련 secrets 주입 (Gradle에서 System.getenv로 읽음)
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     steps:
       # 1. 코드 체크아웃
@@ -77,13 +83,12 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
           ls -lh android/app/tripmarble-release-key.jks
 
-      - name: Debug Keystore Env
-        run: |
-          echo "ANDROID_KEYSTORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}"
-          echo "ANDROID_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}"
-          echo "ANDROID_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}"
+      # 8. Gradle signingReport 실행 (signingConfig 올바른지 검증)
+      - name: Verify signing config
+        working-directory: frontend/mobile/android
+        run: ./gradlew signingReport
 
-      # 8. 안드로이드 빌드
+      # 9. 안드로이드 빌드
       - name: Build Android
         working-directory: frontend/mobile/android
         run: |
@@ -109,7 +114,7 @@ jobs:
           ls -lh "$OUTPUT_PATH"
           echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
 
-      # 9. APK 업로드 (Debug 전용)
+      # 10. APK 업로드 (Debug 전용)
       - name: Upload APK (Debug)
         if: env.BUILD_TYPE == 'debug'
         uses: actions/upload-artifact@v4
@@ -118,7 +123,7 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
 
-      # 10. AAB 업로드 (Release 전용)
+      # 11. AAB 업로드 (Release 전용)
       - name: Upload AAB (Release)
         if: env.BUILD_TYPE == 'release'
         uses: actions/upload-artifact@v4
@@ -127,7 +132,7 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
-      # 11. Google Play 업로드 (open 트랙)
+      # 12. Google Play 업로드 (open 트랙)
       - name: Deploy to Google Play (Open Track)
         if: env.BUILD_TYPE == 'release' && github.base_ref == 'main'
         working-directory: frontend/mobile
