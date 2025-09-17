@@ -73,14 +73,7 @@ jobs:
           fi
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
 
-      # 8. Keystore 복원
-      - name: Restore Keystore
-        working-directory: frontend/mobile
-        run: |
-          mkdir -p android/app
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
-
-      # 9. Expo prebuild 및 Gradle patch
+      # 8. Expo prebuild 및 Gradle patch
       - name: Prebuild
         working-directory: frontend/mobile
         run: |
@@ -132,6 +125,13 @@ jobs:
               }
           }"
           echo "$SIGNING_CONFIG" >> android/app/build.gradle
+
+      # 9. Keystore 복원
+      - name: Restore Keystore
+        working-directory: frontend/mobile
+        run: |
+          mkdir -p android/app
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
 
       # 10. 안드로이드 빌드
       - name: Build Android
