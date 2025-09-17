@@ -2,9 +2,9 @@ name: Mobile Android Build
 
 on:
   pull_request:
-    types: [labeled, unlabeled, synchronize]  # 라벨 변경, 코드 동기화 시 실행
-    branches: [develop, main]                 # develop/main 브랜치로의 PR에서만 실행
-    paths:                                    # 모바일 관련 파일 변경 시에만 실행
+    types: [labeled, unlabeled, synchronize] # 라벨 변경, 코드 동기화 시 실행
+    branches: [develop, main] # develop/main 브랜치로의 PR에서만 실행
+    paths: # 모바일 관련 파일 변경 시에만 실행
       - 'frontend/mobile/**'
       - '.github/workflows/mobile-android-build.yml'
 
@@ -96,7 +96,7 @@ jobs:
           printf '        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '    </style>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
           printf '</resources>\n' >> "$STYLE_DIR/edge_to_edge_styles.xml"
-          
+
           # styles.xml이 없을 경우 fallback 생성
           if [ ! -f "$STYLE_DIR/styles.xml" ]; then
             echo "Creating default styles.xml file..."
@@ -201,6 +201,7 @@ jobs:
             --aab android/app/build/outputs/bundle/release/app-release.aab \
             --track open \
             --json_key google-play-service-account.json \
+            --package_name com.followfollowme.tripmarble \
             --skip_upload_metadata \
             --skip_upload_images \
             --skip_upload_screenshots
