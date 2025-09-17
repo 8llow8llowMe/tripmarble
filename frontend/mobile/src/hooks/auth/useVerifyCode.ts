@@ -9,7 +9,7 @@ export interface VerifyCodeRequest {
 }
 
 export interface VerifyCodeResponse extends ApiResponseBase {
-  dataBody: {};
+  dataBody: Record<string, unknown>;
 }
 
 export const postVerifyCode = async ({ email, code }: VerifyCodeRequest) => {

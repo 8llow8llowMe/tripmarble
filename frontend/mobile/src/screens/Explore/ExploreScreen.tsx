@@ -2,37 +2,31 @@ import React from 'react';
 import {
   View,
   ScrollView,
-  Text,
-  Image,
   StyleSheet,
-  TouchableOpacity,
   StatusBar,
   Platform,
   Dimensions,
+  Image,
+  TouchableOpacity,
 } from 'react-native';
-import gyeongjuImage from '@images/places/gyeongju.png';
 
 import { useNavigation } from '@react-navigation/native';
-import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import useRepresentativeRegionsListQuery from '@/hooks/trip/useRepresentativeRegionsList';
-import {
-  HeroBannerSection,
-  QuickFilterSection,
-  PopularPlacesSection,
-  TrendKeywordsSection,
-  MagazineSection,
-} from '@/components/ui/explore';
+import { PopularPlacesSection, TrendKeywordsSection } from '@/components/ui/explore';
+import { getRandomItems } from '@/utils/random';
+import { RandomPickSection } from '@/components/ui/home';
+import { DUMMY_RANDOM_PICK } from '@/constants/dummyData';
 
-const bgHeight = Dimensions.get('window').height * 0.5;
+import jejuImage from '@assets/images/places/jeju2.png';
+const bgHeight = Dimensions.get('window').height * 0.45;
 const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 가능)
 
 export default function ExploreScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
   const { representativeRegionsList } = useRepresentativeRegionsListQuery();
-
-  console.log('🥸🥸🥸', representativeRegionsList);
+  const randomRepresentativeRegionsList = getRandomItems(representativeRegionsList ?? [], 4);
 
   // 대표여행지 스크린으로 이동
   const goToSpotListScreen = (representativeRegionId: string) => {
@@ -42,14 +36,22 @@ export default function ExploreScreen() {
     });
   };
 
+  // 대표여행지 상세 스크린으로 이동
+  const goToSpotDetailScreen = (tripSpotId: string) => {
+    navigation.navigate('SpotStackNavigator', {
+      screen: 'SpotDetailScreen',
+      params: { tripSpotId },
+    });
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: palette.white }}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* <View style={{ position: 'relative' }}>
+        <View style={{ position: 'relative' }}>
           <Image source={jejuImage} style={styles.backgroundImage} />
           <View style={styles.overlay} />
-        </View> */}
+        </View>
         {/* <View style={[styles.searchBoxWrapper, { top: bgHeight - searchBoxHeight / 2 }]}>
           <TouchableOpacity
             activeOpacity={0.7}
@@ -61,18 +63,22 @@ export default function ExploreScreen() {
             </TextBox>
           </TouchableOpacity>
         </View> */}
-        <HeroBannerSection />
-        {/* <SearchBox /> 검색  */}
+
         {/* <QuickFilterSection /> */}
-        <PopularPlacesSection />
+        {/* <MagazineSection /> */}
+
+        <RandomPickSection data={DUMMY_RANDOM_PICK} onPressItem={goToSpotDetailScreen} />
+        <PopularPlacesSection
+          title="지금 인기있는 여행지"
+          data={randomRepresentativeRegionsList}
+          onPressItem={goToSpotListScreen}
+        />
         <TrendKeywordsSection />
-        <MagazineSection />
       </ScrollView>
     </View>
   );
 }
 
-const CIRCLE_SIZE = 70;
 const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 20,
@@ -85,7 +91,6 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    // backgroundColor: "rgba(0,0,0,0.3)",
   },
   searchBoxWrapper: {
     width: '100%',
@@ -106,44 +111,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
     width: '98%',
-  },
-  sectionTitle: {
-    marginTop: searchBoxHeight / 2 + 24,
-    marginBottom: 14,
-    paddingHorizontal: 16,
-  },
-  placeWrapper: {
-    flexDirection: 'row',
-    paddingHorizontal: 26,
-    justifyContent: 'space-between',
-  },
-  placeItem: {
-    alignItems: 'center',
-  },
-  placeCircle: {
-    width: CIRCLE_SIZE,
-    height: CIRCLE_SIZE,
-    borderRadius: CIRCLE_SIZE / 2,
-    borderWidth: 1,
-    borderColor: palette.gray200,
-    backgroundColor: palette.gray50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-    marginBottom: 6,
-  },
-  placeImage: {
-    width: '100%',
-    height: '100%',
-  },
-  placeName: {
-    marginTop: 2,
-  },
-  card: {
-    height: 120,
-    backgroundColor: palette.gray50,
-    borderRadius: 10,
-    marginHorizontal: 16,
-    marginBottom: 12,
   },
 });

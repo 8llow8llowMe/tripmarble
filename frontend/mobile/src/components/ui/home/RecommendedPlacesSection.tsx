@@ -11,33 +11,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
-
-const DUMMY_PLACES = [
-  {
-    id: '1',
-    name: '부산 해운대',
-    image:
-      'https://images.unsplash.com/photo-1517959105821-eaf2591984dd?q=80&w=1600&auto=format&fit=crop',
-    tags: ['바다', '야경'],
-    score: 4.7,
-  },
-  {
-    id: '2',
-    name: '강릉 안목해변',
-    image:
-      'https://images.unsplash.com/photo-1504604792257-22ebeb14f00a?q=80&w=1600&auto=format&fit=crop',
-    tags: ['카페', '여유'],
-    score: 4.5,
-  },
-  {
-    id: '3',
-    name: '제주 성산일출봉',
-    image:
-      'https://images.unsplash.com/photo-1607863680051-7e2d0d0e1a8f?q=80&w=1600&auto=format&fit=crop',
-    tags: ['등산', '자연'],
-    score: 4.8,
-  },
-];
+import { DUMMY_PLACES } from '@/constants/dummyData';
 
 // 공통 그림자
 const shadow = Platform.select({

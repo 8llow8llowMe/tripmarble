@@ -7,10 +7,9 @@ import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripG
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMoveLog;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +24,7 @@ public class TripGameMoveLogQueryProcessor {
             .orElseThrow(() -> new TripGameException(TripGameErrorCode.GAME_NOT_FOUND));
 
         // 2. 이동 로그 목록 조회
-        List<TripGameMoveLog> tripGameMoveLogs = tripGameMoveLogRepositoryPort.findAllByTripGameId(tripGameId);
+        List<TripGameMoveLog> tripGameMoveLogs = tripGameMoveLogRepositoryPort.findAllByTripGameId(tripGame.id());
 
         // 3. Info 변환
         return tripGameMoveLogs.stream()

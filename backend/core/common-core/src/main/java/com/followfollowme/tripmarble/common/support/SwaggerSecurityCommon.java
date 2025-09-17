@@ -1,7 +1,6 @@
 package com.followfollowme.tripmarble.common.support;
 
 import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 
@@ -14,10 +13,5 @@ public class SwaggerSecurityCommon {
                 .type(SecurityScheme.Type.HTTP)
                 .scheme("bearer")
                 .bearerFormat("JWT"));
-    }
-
-    @Bean
-    public SecurityRequirement bearerAuthRequirement() {
-        return new SecurityRequirement().addList("bearerAuth");
     }
 }

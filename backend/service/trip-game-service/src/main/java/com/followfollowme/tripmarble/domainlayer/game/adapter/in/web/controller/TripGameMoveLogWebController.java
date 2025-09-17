@@ -8,6 +8,7 @@ import com.followfollowme.tripmarble.domainlayer.game.application.command.Review
 import com.followfollowme.tripmarble.domainlayer.game.application.port.in.TripGameMoveLogWebUseCase;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -30,7 +31,11 @@ public class TripGameMoveLogWebController {
 
     private final TripGameMoveLogWebUseCase tripGameMoveLogWebUseCase;
 
-    @Operation(summary = "리뷰 미션 처리", description = "리뷰 작성 미션을 성공 처리합니다.")
+    @Operation(
+        summary = "리뷰 미션 처리",
+        description = "리뷰 작성 미션을 성공 처리합니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
+    )
     @PostMapping("/{tripGameMoveLogId}/review")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<MissionResultResponse>> processReviewMission(
@@ -44,7 +49,8 @@ public class TripGameMoveLogWebController {
 
     @Operation(
         summary = "미션 스킵",
-        description = "해당 이동 로그의 미션을 건너뜁니다."
+        description = "해당 이동 로그의 미션을 건너뜁니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping("/{tripGameMoveLogId}/skip")
     @PreAuthorize("isAuthenticated()")
@@ -57,7 +63,8 @@ public class TripGameMoveLogWebController {
 
     @Operation(
         summary = "미션 실패",
-        description = "해당 이동 로그의 미션을 실패 처리합니다."
+        description = "해당 이동 로그의 미션을 실패 처리합니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @PostMapping("/{tripGameMoveLogId}/fail")
     @PreAuthorize("isAuthenticated()")
@@ -70,7 +77,8 @@ public class TripGameMoveLogWebController {
 
     @Operation(
         summary = "게임 이동 로그 목록 조회",
-        description = "특정 여행 게임의 이동 로그(타임라인) 전체를 조회합니다."
+        description = "특정 여행 게임의 이동 로그(타임라인) 전체를 조회합니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @GetMapping
     @PreAuthorize("isAuthenticated()")

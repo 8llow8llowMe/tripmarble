@@ -10,7 +10,6 @@ import {
   SafeAreaView,
   StatusBar,
   ImageBackground,
-  Platform,
   ScrollView,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -166,9 +165,9 @@ const Hero = memo(function Hero({
         <TouchableOpacity onPress={onBack}>
           <Ionicons name="chevron-back" size={28} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={onShare}>
+        {/* <TouchableOpacity onPress={onShare}>
           <Ionicons name="share-outline" size={26} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <View style={styles.heroTextBox}>
         <Text style={styles.heroTitle} numberOfLines={1}>

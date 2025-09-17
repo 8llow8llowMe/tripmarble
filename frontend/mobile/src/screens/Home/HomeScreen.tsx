@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, SafeAreaView, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
@@ -16,73 +17,7 @@ import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
 import { useGameLists } from '@/hooks/game/useGameList';
 import { useAppSelector } from '@/store/store';
 import useTripSpotQuery from '@/hooks/trip/useSpot';
-
-const DUMMY_PLACES = [
-  {
-    id: '1',
-    name: '부산 해운대',
-    image:
-      'https://images.unsplash.com/photo-1517959105821-eaf2591984dd?q=80&w=1600&auto=format&fit=crop',
-    tags: ['바다', '야경'],
-    score: 4.7,
-  },
-  {
-    id: '2',
-    name: '강릉 안목해변',
-    image:
-      'https://images.unsplash.com/photo-1504604792257-22ebeb14f00a?q=80&w=1600&auto=format&fit=crop',
-    tags: ['카페', '여유'],
-    score: 4.5,
-  },
-  {
-    id: '3',
-    name: '제주 성산일출봉',
-    image:
-      'https://images.unsplash.com/photo-1607863680051-7e2d0d0e1a8f?q=80&w=1600&auto=format&fit=crop',
-    tags: ['등산', '자연'],
-    score: 4.8,
-  },
-];
-
-const DUMMY_JOURNALS = [
-  {
-    id: '901',
-    photo:
-      'https://images.unsplash.com/photo-1520975922215-230d7a36cd83?q=80&w=1600&auto=format&fit=crop',
-    title: '부산 첫째 날 기록',
-    date: '2025-08-03',
-  },
-  {
-    id: '902',
-    photo:
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop',
-    title: '카페 투어',
-    date: '2025-08-04',
-  },
-  {
-    id: '903',
-    photo:
-      'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop',
-    title: '야경 스팟',
-    date: '2025-08-05',
-  },
-];
-
-const DUMMY_RANDOM_PICK = {
-  id: '777',
-  name: '속초 대포항',
-  image:
-    'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1600&auto=format&fit=crop',
-};
-
-const DUMMY_FRIENDS = {
-  avatars: [
-    'https://i.pravatar.cc/100?img=1',
-    'https://i.pravatar.cc/100?img=2',
-    'https://i.pravatar.cc/100?img=3',
-  ],
-  playingCount: 3,
-};
+import { DUMMY_FRIENDS, DUMMY_PLACES, DUMMY_RANDOM_PICK } from '@/constants/dummyData';
 
 export default function HomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
@@ -106,12 +41,12 @@ export default function HomeScreen() {
   };
 
   // 게임 목록 스크린으로 이동
-  const goToGameListScreen = (status?: 'WAITING' | 'ONGOING' | 'ENDED') => {
-    navigation.navigate('GamePlayStackNavigator', {
-      screen: 'GameListScreen',
-      params: status ? { status } : {},
-    });
-  };
+  // const goToGameListScreen = (status?: 'WAITING' | 'ONGOING' | 'ENDED') => {
+  //   navigation.navigate('GamePlayStackNavigator', {
+  //     screen: 'GameListScreen',
+  //     params: status ? { status } : {},
+  //   });
+  // };
 
   // 대표여행지 상세 스크린으로 이동
   const goToSpotDetailScreen = (tripSpotId: string) => {
@@ -143,17 +78,13 @@ export default function HomeScreen() {
         {/* <HistorySection
           title="나의 게임 기록"
           data={DUMMY_JOURNALS}
-          // onPressItem={(id) => navigation.navigate('JournalDetail' as never, { id } as never)}
           onPressMore={() => goToGameListScreen()}
         /> */}
 
-        {/* 랜덤 여행지 추천 */}
-        <RandomPickSection
-          data={DUMMY_RANDOM_PICK}
-          // onPress={() =>
-          // navigation.navigate('SpotDetailScreen' as never, { id: DUMMY_RANDOM_PICK.id } as never)
-          // }
-        />
+        {/* 여행 계속하기 */}
+        {latestTrip && (
+          <ContinueTripSection data={latestTrip} onPressItem={goToGameOngoingScreen} />
+        )}
 
         {/* 추천 여행지 */}
         <RecommendedPlacesSection
@@ -162,16 +93,11 @@ export default function HomeScreen() {
           onPressItem={goToSpotDetailScreen}
         />
 
-        {/* 여행 계속하기 */}
-        {latestTrip && (
-          <ContinueTripSection data={latestTrip} onPressItem={goToGameOngoingScreen} />
-        )}
-
-        {/* 친구와 함께하기 배너 */}
+        {/* 친구 초대 배너 */}
         <FriendsBannerSection
           avatars={DUMMY_FRIENDS.avatars}
           playingCount={DUMMY_FRIENDS.playingCount}
-          onInvite={() => navigation.navigate('InviteFriends' as never)}
+          // onInvite={() => navigation.navigate('InviteFriends' as never)}
         />
       </ScrollView>
     </SafeAreaView>

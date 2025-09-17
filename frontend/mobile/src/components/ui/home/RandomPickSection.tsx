@@ -4,13 +4,8 @@ import React from 'react';
 import { ImageBackground, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
-
-const DUMMY_RANDOM_PICK = {
-  id: '777',
-  name: '속초 대포항',
-  image:
-    'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1600&auto=format&fit=crop',
-};
+import { DUMMY_RANDOM_PICK } from '@/constants/dummyData';
+import { palette } from '@/constants/colors';
 
 // 공통 그림자
 const shadow = Platform.select({
@@ -25,28 +20,22 @@ const shadow = Platform.select({
 
 const RandomPickSection = ({
   data,
-  onPress,
+  onPressItem,
 }: {
   data: typeof DUMMY_RANDOM_PICK;
-  onPress?: () => void;
-  onRefresh?: () => void;
+  onPressItem: (tripSpotId: string) => void;
 }) => {
   return (
     <View style={styles.container}>
-      <SectionHeader
-        title="오늘의 랜덤 PICK!"
-        // rightNode={`
-        //   <TouchableOpacity onPress={onRefresh} style={styles.iconBtn} activeOpacity={0.8}>
-        //     <MaterialCommunityIcons name="dice-5-outline" size={18} color={palette.gray600} />
-        //     <TextBox size={13} color={palette.gray600} style={{ marginLeft: 6 }}>
-        //       다시 뽑기
-        //     </TextBox>
-        //   </TouchableOpacity>
-        // }
-      />
-      <TouchableOpacity style={[styles.card, shadow]} activeOpacity={0.9} onPress={onPress}>
+      <SectionHeader title="오늘의 여행 PICK!" />
+
+      <TouchableOpacity
+        style={[styles.card, shadow]}
+        activeOpacity={0.9}
+        onPress={() => onPressItem(data.tripSpotId)}
+      >
         <ImageBackground
-          source={{ uri: data.image }}
+          source={{ uri: data.originalImageUrl }}
           style={styles.bg}
           imageStyle={{ borderRadius: 16 }}
         >
@@ -55,9 +44,9 @@ const RandomPickSection = ({
             style={StyleSheet.absoluteFill}
           />
           <View style={styles.inner}>
-            <MaterialCommunityIcons name="map-marker-radius" size={18} color="#fff" />
-            <TextBox size={18} fontsName="Pretendard800" color="#fff" style={{ marginLeft: 8 }}>
-              {data.name}
+            <MaterialCommunityIcons name="map-marker-radius" size={18} color={palette.white} />
+            <TextBox size={18} fontsName="Pretendard800" color={palette.white}>
+              {data.tripSpotName}
             </TextBox>
           </View>
         </ImageBackground>

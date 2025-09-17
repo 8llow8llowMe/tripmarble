@@ -16,8 +16,12 @@ import { Ionicons } from '@expo/vector-icons';
 import TextBox from '@/components/atom/TextBox';
 import Divider from '@/components/common/Divider';
 import useLogoutMutation from '@/hooks/auth/useLogout';
+import { useNavigation } from '@react-navigation/native';
+import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 
 export default function ProfileHomeScreen() {
+  const navigation = useNavigation<AppNavigatorNavigationProp>();
+
   const { nickname, email, profileImage } = useAppSelector((state) => state.userReducer);
   const user = {
     stats: { trips: 12, reviews: 34, photos: 89, hours: 120 },
@@ -40,6 +44,14 @@ export default function ProfileHomeScreen() {
     );
   };
 
+  // 게임 목록 스크린으로 이동
+  const goToGameListScreen = (status?: 'WAITING' | 'ONGOING' | 'ENDED') => {
+    navigation.navigate('GamePlayStackNavigator', {
+      screen: 'GameListScreen',
+      params: status ? { status } : {},
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -53,16 +65,16 @@ export default function ProfileHomeScreen() {
               <Text style={styles.name}>{nickname}</Text>
               <Text style={styles.email}>{email}</Text>
             </View>
-            <TouchableOpacity style={styles.editBtn}>
+            {/* <TouchableOpacity style={styles.editBtn}>
               <Text style={styles.editBtnText}>프로필 수정</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
-
+          {/* 
           <View style={styles.statsRow}>
             <Stat label="여행" value={user.stats.trips} />
             <Stat label="리뷰" value={user.stats.reviews} />
             <Stat label="사진" value={user.stats.photos} />
-          </View>
+          </View> */}
         </View>
 
         {/* 내 활동 섹션 */}
@@ -72,7 +84,7 @@ export default function ProfileHomeScreen() {
           </TextBox>
 
           <View style={{ gap: 28 }}>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
               <View style={styles.row}>
                 <Ionicons name="chatbubble-ellipses-outline" size={18} color={palette.gray800} />
                 <TextBox size={15}>내 리뷰</TextBox>
@@ -83,8 +95,8 @@ export default function ProfileHomeScreen() {
                 <Ionicons name="bookmark-outline" size={18} color={palette.gray800} />
                 <TextBox size={15}>저장한 장소</TextBox>
               </View>
-            </TouchableOpacity>
-            <TouchableOpacity>
+            </TouchableOpacity> */}
+            <TouchableOpacity onPress={() => goToGameListScreen()}>
               <View style={styles.row}>
                 <Ionicons name="game-controller-outline" size={18} color={palette.gray800} />
                 <TextBox size={15}>게임 기록</TextBox>

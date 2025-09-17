@@ -3,37 +3,7 @@ import React from 'react';
 import { FlatList, Image, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { palette } from '@/constants/colors';
 import { SectionHeader } from '@/components/layout/header/SectionHeader';
-
-const DUMMY_JOURNALS = [
-  {
-    id: '901',
-    photo:
-      'https://images.unsplash.com/photo-1520975922215-230d7a36cd83?q=80&w=1600&auto=format&fit=crop',
-    title: '부산 첫째 날 기록',
-    date: '2025-08-03',
-  },
-  {
-    id: '902',
-    photo:
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop',
-    title: '카페 투어',
-    date: '2025-08-04',
-  },
-  {
-    id: '903',
-    photo:
-      'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=1600&auto=format&fit=crop',
-    title: '야경 스팟',
-    date: '2025-08-05',
-  },
-];
-
-const DUMMY_RANDOM_PICK = {
-  id: '777',
-  name: '속초 대포항',
-  image:
-    'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1600&auto=format&fit=crop',
-};
+import { DUMMY_JOURNALS } from '@/constants/dummyData';
 
 // 공통 그림자
 const shadow = Platform.select({
@@ -49,12 +19,10 @@ const shadow = Platform.select({
 const HistorySection = ({
   title,
   data,
-  onPressItem,
   onPressMore,
 }: {
   title: string;
   data: typeof DUMMY_JOURNALS;
-  onPressItem?: (id: number) => void;
   onPressMore?: () => void;
 }) => {
   const itemWidth = 140;
@@ -71,7 +39,6 @@ const HistorySection = ({
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.9}
-            // onPress={() => onPressItem(item.id)}s
             style={[styles.journalCard, shadow, { width: itemWidth }]}
           >
             <Image source={{ uri: item.photo }} style={styles.journalPhoto} />
@@ -97,14 +64,9 @@ const HistorySection = ({
 
 export default HistorySection;
 
-// ─────────────────────────────────────────────────────────────
-// 스타일
-// ─────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  // Sections
   section: { marginTop: 22 },
 
-  // Journal
   journalCard: {
     backgroundColor: palette.white,
     borderRadius: 12,

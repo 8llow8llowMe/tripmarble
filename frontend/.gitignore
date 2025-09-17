@@ -21,8 +21,6 @@ yarn-error.log*
 # Expo / React Native
 .expo/
 .expo-shared/
-android/
-ios/
 *.apk
 *.aab
 

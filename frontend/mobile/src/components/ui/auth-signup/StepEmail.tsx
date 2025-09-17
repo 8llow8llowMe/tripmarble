@@ -7,19 +7,14 @@ import useVerifyCodeMutaion from '@/hooks/auth/useVerifyCode';
 import useSendCodeMutaion from '@/hooks/auth/useSendCode';
 
 export default function StepEmail({ onNext }: { onNext: () => void }) {
-  const {
-    register,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useFormContext();
+  const { setValue, watch } = useFormContext();
   const email = watch('email');
 
   const [code, setCode] = useState('');
   const [isSent, setIsSent] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [timer, setTimer] = useState(180);
+  const [timer, setTimer] = useState(300);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 이메일 정규식
@@ -48,7 +43,7 @@ export default function StepEmail({ onNext }: { onNext: () => void }) {
     setIsVerified(false);
     setCode('');
     setErrorMsg('');
-    setTimer(180);
+    setTimer(300);
   }, [email]);
 
   // 인증코드 전송
@@ -66,7 +61,7 @@ export default function StepEmail({ onNext }: { onNext: () => void }) {
         },
       );
       setIsSent(true);
-      setTimer(180);
+      setTimer(300);
     } catch (e: any) {
       setErrorMsg(e?.message || '인증코드 전송 실패');
     }
@@ -145,22 +140,22 @@ export default function StepEmail({ onNext }: { onNext: () => void }) {
             value={code}
             onChangeText={setCode}
             keyboardType="number-pad"
-            maxLength={6}
+            maxLength={8}
             editable={!isVerified}
             returnKeyType="done"
           />
           <TouchableOpacity
             style={[
               styles.inlineBtn,
-              code.length === 6 && !isVerified ? styles.activeInlineBtn : styles.inactiveInlineBtn,
+              code.length === 8 && !isVerified ? styles.activeInlineBtn : styles.inactiveInlineBtn,
             ]}
             onPress={handleVerifyCode}
-            disabled={code.length !== 6 || isVerified || verifying}
+            disabled={code.length !== 8 || isVerified || verifying}
           >
             <TextBox
               size={14}
               fontsName="Pretendard700"
-              color={code.length === 6 && !isVerified ? palette.white : palette.gray200}
+              color={code.length === 8 && !isVerified ? palette.white : palette.gray200}
             >
               {verifying ? '확인중...' : isVerified ? '완료' : '인증 확인'}
             </TextBox>
@@ -244,10 +239,9 @@ const styles = StyleSheet.create({
   },
   success: {
     color: palette.mainColor,
-    fontSize: 15,
+    fontSize: 14,
     marginTop: 12,
     marginLeft: 4,
-    fontWeight: 'bold',
   },
   button: {
     width: '100%',
