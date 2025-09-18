@@ -334,8 +334,9 @@ export default function HomeDicePage() {
     return () => {
       window.removeEventListener("resize", onResize);
       gsap.ticker.remove(ticker);
-      // Kill all ScrollTriggers created in this scope
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      // Kill only triggers created by this component
+      tl.scrollTrigger?.kill();
+      tl.kill();
       // Clear only GSAP-related inline styles on our elements if they still exist
       const toClear = gsap.utils.toArray<HTMLElement>(
         `.${styles.piece}, .${styles.pieceBox}`
