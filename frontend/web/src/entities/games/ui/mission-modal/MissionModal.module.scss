@@ -118,3 +118,58 @@
   opacity: 0.5;
   pointer-events: none;
 }
+
+/* 사진 업로드 섹션 */
+.uploadGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.uploadTile {
+  width: 94px;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  border: 1px solid #d8dfea;
+  background: #f6f9ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7a99;
+  font-size: 28px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.thumb {
+  position: relative;
+  width: 94px;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #eef3fb;
+}
+
+.thumbImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removeBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: rgba(255,255,255,0.9);
+  color: #2a2f3a;
+  line-height: 20px;
+  text-align: center;
+  font-weight: 700;
+  cursor: pointer;
+}
