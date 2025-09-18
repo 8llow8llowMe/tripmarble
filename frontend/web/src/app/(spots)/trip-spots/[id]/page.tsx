@@ -3,13 +3,14 @@
 import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 
-import useTripSpotById from "@/entities/trips/hooks/useTripSpotById";
+// import useTripSpotById from "@/entities/trips/hooks/useTripSpotById";
 import useTripSpotReviewSummary from "@/entities/trips/hooks/useTripSpotReviewSummary";
 import useTripSpotReviews from "@/entities/trips/hooks/useTripSpotReviews";
 import { TripSpotDetailResponse } from "@/entities/trips/model/tripsType";
 
 import TripSpotReviewModal from "./TripSpotReviewModal";
 import styles from "./TripSpotDetail.module.scss";
+import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
 
 type Props = {
   params: {
@@ -27,27 +28,90 @@ const TABS: { key: TabKey; label: string }[] = [
 const formatRating = (rating: number) =>
   Number.isInteger(rating) ? rating.toString() : rating.toFixed(1);
 
-const dummySpot: TripSpotDetailResponse = {
-  tripSpotId: 0,
-  tripSpotName: "[백년가게] 더미데이터입니다",
-  contentTypeName: "음식점",
-  description:
-    "1980년부터 행상에서 곰장어 장사를 시작하여 현재 3층 규모의 자가 건물을 보유하고 있다고 하니 그동안의 고객의 사랑을 얼마나 받았을지 가늠이 간다. 부모님 추천 맛집이라는 수식어가 붙을 정도로 오래된 단골 고객들이 많은 곳이다. 특유의 매우면서 묘한 양념 맛이 구수한 곰장어와 어울려 감탄을 자아내는데, 민락동 중앙수산에서 구매한 신선한 곰장어와 국내산 고춧가루를 사용하는 것이 맛에 한몫하는 듯하다. 전국 택배 배송도 가능해, 집에서도 온천 입구 기장 곰장어 맛을 맛볼 수 있다.",
-  homepageUrl: "",
-  phoneNumber: "051-555-6093",
-  address: "부산광역시 동래구 시실로 20 (명륜동)",
-  addressDetail: "",
-  longitude: 0,
-  latitude: 0,
-  imageUrl: "/images/no-image.png",
-  thumbnailImageUrl: "/images/no-image.png",
-};
+const dummySpot: TripSpotDetailResponse[] = [
+  {
+    tripSpotId: 1,
+    tripSpotName: "[백년가게] 신안촌",
+    contentTypeName: "음식점",
+    description:
+      "1986년 개업의 한옥 남도음식 전문점. 홍어삼합, 연포탕, 병어조림, 계절 젓갈과 ‘낙지꾸리’ 같은 남도 토속 메뉴로 유명하다. 온라인/전화 예약이 가능하며 전라남도 출신 주인의 손맛으로 꾸준히 사랑받는 노포다.",
+    homepageUrl: "http://www.신안촌.kr",
+    phoneNumber: "02-725-7744",
+    address: "서울특별시 종로구 사직로12길 8",
+    addressDetail: "",
+    longitude: 0,
+    latitude: 0,
+    imageUrl: "/images/no-image.png",
+    thumbnailImageUrl: "/images/no-image.png",
+  },
+  {
+    tripSpotId: 2,
+    tripSpotName: "[백년가게] 선동보리밥",
+    contentTypeName: "음식점",
+    description:
+      "성북동에 자리한 보리밥 전문점. 채식 친화적인 한 끼로 알려져 있으며 보리밥, 영양돌솥밥, 감자전 등 담백한 메뉴로 지역 주민과 방문객에게 사랑받는다.",
+    homepageUrl: "",
+    phoneNumber: "02-743-2096",
+    address: "서울특별시 성북구 성북로 134-4",
+    addressDetail: "",
+    longitude: 0,
+    latitude: 0,
+    imageUrl: "/images/no-image.png",
+    thumbnailImageUrl: "/images/no-image.png",
+  },
+  {
+    tripSpotId: 3,
+    tripSpotName: "[백년가게] 만포면옥",
+    contentTypeName: "음식점",
+    description:
+      "은평구 구산역 인근의 평양냉면 노포. 메밀향 살아있는 평양냉면과 옛날불고기, 어복쟁반, 녹두지짐 등이 인기다. 넓은 좌석과 주차로 가족·모임 식사에 적합하다.",
+    homepageUrl: "",
+    phoneNumber: "02-389-3917",
+    address: "서울특별시 은평구 연서로 171",
+    addressDetail: "",
+    longitude: 0,
+    latitude: 0,
+    imageUrl: "/images/no-image.png",
+    thumbnailImageUrl: "/images/no-image.png",
+  },
+  {
+    tripSpotId: 4,
+    tripSpotName: "[백년가게] 만석장",
+    contentTypeName: "음식점",
+    description:
+      "두부·쌈밥으로 알려진 한식집. 파주 장단콩으로 만든 수제 두부, 쌈 채소 무한 제공, 황토가마 초벌구이 고기 등이 특징이며 야외 테라스도 운영한다. 2018년 백년가게 선정.",
+    homepageUrl: "",
+    phoneNumber: "02-385-2093",
+    address: "서울특별시 은평구 대서문길 43-10",
+    addressDetail: "",
+    longitude: 0,
+    latitude: 0,
+    imageUrl: "/images/no-image.png",
+    thumbnailImageUrl: "/images/no-image.png",
+  },
+  {
+    tripSpotId: 5,
+    tripSpotName: "[백년가게] 대호정",
+    contentTypeName: "음식점",
+    description:
+      "1982년부터 시흥동을 지켜온 돼지갈비 전문 노포. 육수와 양념을 직접 만들어 일관된 맛을 유지하며, 국내산 생갈비·꽃등심·생버섯불고기 등이 인기 메뉴다.",
+    homepageUrl: "",
+    phoneNumber: "02-808-5200",
+    address: "서울특별시 금천구 시흥대로52길 51",
+    addressDetail: "",
+    longitude: 0,
+    latitude: 0,
+    imageUrl: "/images/no-image.png",
+    thumbnailImageUrl: "/images/no-image.png",
+  },
+];
 
 export default function TripSpotDetail({ params }: Props) {
   const tripSpotId = params.id;
 
   const [activeTab, setActiveTab] = useState<TabKey>("details");
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [isGameCreateOpen, setIsGameCreateOpen] = useState(false);
 
   // const {
   //   data: spotResponse,
@@ -82,7 +146,7 @@ export default function TripSpotDetail({ params }: Props) {
     //   ...dummySpot,
     //   ...fetched,
     // };
-    return dummySpot;
+    return dummySpot[1];
   }, []);
 
   const coverImage =
@@ -120,6 +184,14 @@ export default function TripSpotDetail({ params }: Props) {
     void refetchSummary();
     void refetchReviews();
   }, [refetchReviews, refetchSummary]);
+
+  const handleOpenGameCreate = useCallback(() => {
+    setIsGameCreateOpen(true);
+  }, []);
+
+  const handleCloseGameCreate = useCallback(() => {
+    setIsGameCreateOpen(false);
+  }, []);
 
   // if (isSpotError) {
   //   return (
@@ -249,7 +321,12 @@ export default function TripSpotDetail({ params }: Props) {
                 <p className={styles.description}>{spot.description}</p>
               ) : null}
               <div className={styles.buttonRow}>
-                <button className={styles.scheduleButton}>일정 만들기</button>
+                <button
+                  className={styles.scheduleButton}
+                  onClick={handleOpenGameCreate}
+                >
+                  일정 만들기
+                </button>
               </div>
             </div>
           ) : (
@@ -334,6 +411,10 @@ export default function TripSpotDetail({ params }: Props) {
         isOpen={isReviewModalOpen}
         onClose={handleCloseReviewModal}
         onSuccess={handleReviewCreated}
+      />
+      <CreateGameModal
+        isOpen={isGameCreateOpen}
+        onClose={handleCloseGameCreate}
       />
     </div>
   );
