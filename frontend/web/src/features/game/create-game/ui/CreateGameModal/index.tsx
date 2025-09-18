@@ -128,6 +128,7 @@ export default function CreateGameModal({
           queryClient.invalidateQueries({ queryKey: ["myGameListInfinite"] });
           dispatch(resetGameForm());
           onClose();
+          setStep(0);
         },
         onError: () => toast.error("게임 생성에 실패했습니다."),
       });
