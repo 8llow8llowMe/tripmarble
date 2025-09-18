@@ -110,7 +110,8 @@
 }
 
 .boardContainer {
-  width: auto;
+  /* Responsive board width: shrink on small screens, cap on large */
+  width: clamp(260px, 92vw, 500px);
   max-width: 500px;
   aspect-ratio: 1 / 1.15;
   display: flex;
