@@ -1,9 +1,11 @@
 "use client";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 // query
 import useSignUp from "@/entities/users/hooks/useSignUp";
+import useSendEmailCode from "@/entities/users/hooks/useSendEmailCode";
+import useVerifyEmailCode from "@/entities/users/hooks/useVerifyEmailCode";
 // store
 import { useAppDispatch, useAppSelector } from "@/entities/users/model";
 import { resetForm, updateField } from "@/entities/users/model/form/formSlice";
@@ -32,8 +34,18 @@ export default function SignUpPage() {
   const form = useAppSelector((state) => state.form);
   const [step, setStep] = useState(0);
   const [hasError, setHasError] = useState(false);
+  const [emailCode, setEmailCode] = useState("");
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
 
   const { signUpMutate } = useSignUp();
+  const { sendCodeMutate, isSending } = useSendEmailCode();
+  const { verifyCodeMutate, isVerifying } = useVerifyEmailCode();
+
+  // 이메일이 바뀌면 인증 상태 초기화
+  useEffect(() => {
+    setIsEmailVerified(false);
+    setEmailCode("");
+  }, [form.email]);
 
   const current = useMemo(() => steps[step], [step]);
   const key = useMemo(
@@ -70,6 +82,11 @@ export default function SignUpPage() {
 
   const nextStep = () => {
     if (!validateInput()) {
+      setHasError(true);
+      return;
+    }
+    // 첫 단계(이메일)는 인증 완료 후에만 넘어가도록 제한
+    if (step === 0 && !isEmailVerified) {
       setHasError(true);
       return;
     }
@@ -126,19 +143,84 @@ export default function SignUpPage() {
 
       <div className={styles.contentContainer}>
         <label className={styles.label}>{current.label}</label>
-        <input
-          className={styles.input}
-          type={current.type || "text"}
-          placeholder={current.placeholder}
-          value={value}
-          onChange={handleChange}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") nextStep();
-          }}
-        />
+        {step === 0 ? (
+          <>
+            {/* 이메일 입력 + 전송 버튼 (한 줄) */}
+            <div className={styles.row}>
+              <input
+                className={`${styles.input} ${styles.grow}`}
+                type="text"
+                placeholder={current.placeholder}
+                value={form.email}
+                onChange={handleChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") nextStep();
+                }}
+              />
+              <button
+                className={styles.inlineBtn}
+                type="button"
+                disabled={!validateInput() || isSending || isEmailVerified}
+                onClick={() => sendCodeMutate({ email: form.email })}
+              >
+                {isEmailVerified
+                  ? "인증 완료"
+                  : isSending
+                  ? "전송중..."
+                  : "인증코드 전송"}
+              </button>
+            </div>
+
+            {/* 인증코드 입력 + 확인 버튼 (아래 줄) */}
+            <div className={`${styles.row} ${styles.codeRow}`}>
+              <input
+                className={`${styles.input} ${styles.grow}`}
+                type="text"
+                placeholder="인증코드 입력"
+                value={emailCode}
+                onChange={(e) => setEmailCode(e.target.value)}
+                disabled={isEmailVerified}
+              />
+              <button
+                className={styles.inlineBtn}
+                type="button"
+                disabled={
+                  isVerifying ||
+                  isEmailVerified ||
+                  emailCode.trim().length === 0
+                }
+                onClick={() =>
+                  verifyCodeMutate(
+                    { email: form.email, code: emailCode.trim() },
+                    { onSuccess: () => setIsEmailVerified(true) }
+                  )
+                }
+              >
+                {isEmailVerified
+                  ? "확인됨"
+                  : isVerifying
+                  ? "확인중..."
+                  : "인증 확인"}
+              </button>
+            </div>
+          </>
+        ) : (
+          <input
+            className={styles.input}
+            type={current.type || "text"}
+            placeholder={current.placeholder}
+            value={value}
+            onChange={handleChange}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") nextStep();
+            }}
+          />
+        )}
         {hasError && (
           <div style={{ color: "red", fontSize: "0.85rem" }}>
-            올바른 {current.label}을 입력해주세요.
+            {step === 0 && !isEmailVerified
+              ? "이메일 인증을 완료해주세요."
+              : `올바른 ${current.label}을 입력해주세요.`}
           </div>
         )}
         <button className={styles.nextButton} onClick={nextStep}>
