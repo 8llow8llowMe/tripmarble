@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 3rem;
+  padding: clamp(1rem, 4vw, 3rem);
 }
 
 .title {
@@ -12,9 +12,18 @@
 }
 
 .card {
-  width: 500px;
+  /* Responsive container: fills width on small screens, caps on large */
+  width: 100%;
+  max-width: 500px;
   background: white;
-  padding: 3rem 4rem;
+  /* Reduce padding further on small screens */
+  padding: clamp(0.75rem, 4vw, 2rem) clamp(0.75rem, 4vw, 2rem);
   border-radius: 1rem;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 520px) {
+  // .title {
+  //   display: none;
+  // }
 }

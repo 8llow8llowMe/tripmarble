@@ -54,7 +54,7 @@ export default function LoginPage() {
   return (
     <>
       <form className={styles.form} onSubmit={handleSubmit}>
-        <label className={styles.label}>로그인</label>
+        {/* <label className={styles.label}>로그인</label> */}
         <input
           type="text"
           placeholder="이메일"
