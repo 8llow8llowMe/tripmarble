@@ -39,6 +39,7 @@ const TripSpotReviewModal = ({
   onClose,
   onSuccess,
 }: TripSpotReviewModalProps) => {
+  const MAX_FILES = 5;
   const [rating, setRating] = useState<number>(5);
   const [content, setContent] = useState("");
   const [uploadedPhotos, setUploadedPhotos] = useState<UploadedPhoto[]>([]);
@@ -80,10 +81,17 @@ const TripSpotReviewModal = ({
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
-      const files = event.target.files;
-      if (!files || files.length === 0) {
+      const list = event.target.files;
+      if (!list || list.length === 0) return;
+
+      const remain = MAX_FILES - uploadedPhotos.length;
+      if (remain <= 0) {
+        toast.info(`사진은 최대 ${MAX_FILES}장까지 업로드할 수 있어요.`);
+        event.target.value = "";
         return;
       }
+
+      const files = Array.from(list).slice(0, remain);
 
       try {
         const response = await uploadPhotos({ files });
@@ -93,16 +101,12 @@ const TripSpotReviewModal = ({
           return;
         }
 
-        const fileArray = Array.from(files);
         const newPhotos: UploadedPhoto[] = tempPhotos.map((item, index) => {
-          const file = fileArray[index];
+          const file = files[index];
           const previewUrl = file
             ? URL.createObjectURL(file)
             : item.tempPhotoUrl;
-          return {
-            tempUrl: item.tempPhotoUrl,
-            previewUrl,
-          };
+          return { tempUrl: item.tempPhotoUrl, previewUrl };
         });
 
         setUploadedPhotos((prev) => [...prev, ...newPhotos]);
@@ -112,7 +116,7 @@ const TripSpotReviewModal = ({
         toast.error("이미지 업로드 도중 문제가 발생했습니다.");
       }
     },
-    [uploadPhotos]
+    [uploadPhotos, uploadedPhotos.length]
   );
 
   const handleRemovePhoto = useCallback((tempUrl: string) => {
@@ -168,22 +172,26 @@ const TripSpotReviewModal = ({
         <h2 className={styles.title}>리뷰 작성하기</h2>
 
         <div className={styles.fieldGroup}>
-          <label className={styles.label} htmlFor="rating">
+          <label className={styles.label} htmlFor="rating-stars">
             별점
           </label>
-          <select
-            id="rating"
-            className={styles.select}
-            value={rating}
-            onChange={handleRatingChange}
-            disabled={isActionDisabled}
-          >
-            {RATING_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {formatRatingOption(option)}점
-              </option>
+          <div id="rating-stars" className={styles.stars} aria-label="별점 선택">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <span
+                key={n}
+                role="button"
+                tabIndex={0}
+                className={`${styles.star} ${n <= rating ? styles.starActive : ""}`}
+                onClick={() => setRating(n)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") setRating(n);
+                }}
+                aria-label={`${n}점`}
+              >
+                ★
+              </span>
             ))}
-          </select>
+          </div>
         </div>
 
         <div className={styles.fieldGroup}>
@@ -203,7 +211,7 @@ const TripSpotReviewModal = ({
 
         <div className={styles.fieldGroup}>
           <label className={styles.label} htmlFor="photos">
-            사진 업로드 (선택)
+            사진 첨부 (최대 5장)
           </label>
           <input
             id="photos"
@@ -214,30 +222,34 @@ const TripSpotReviewModal = ({
             onChange={handleFileChange}
             disabled={isActionDisabled}
           />
-          {uploadedPhotos.length ? (
-            <ul className={styles.photoPreviewList}>
-              {uploadedPhotos.map((photo) => (
-                <li key={photo.tempUrl} className={styles.photoPreviewItem}>
-                  <Image
-                    src={photo.previewUrl}
-                    alt="업로드된 리뷰 사진 미리보기"
-                    width={96}
-                    height={96}
-                    className={styles.photoPreviewImage}
-                    unoptimized
-                  />
-                  <button
-                    type="button"
-                    className={styles.photoRemoveButton}
-                    onClick={() => handleRemovePhoto(photo.tempUrl)}
-                    disabled={isActionDisabled}
-                  >
-                    삭제
-                  </button>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <div className={styles.uploadGrid}>
+            {uploadedPhotos.map((photo) => (
+              <div key={photo.tempUrl} className={styles.thumb}>
+                <Image
+                  src={photo.previewUrl}
+                  alt="업로드된 리뷰 사진 미리보기"
+                  fill
+                  sizes="96px"
+                  style={{ objectFit: "cover" }}
+                  unoptimized
+                />
+                <button
+                  type="button"
+                  className={styles.removeBtn}
+                  onClick={() => handleRemovePhoto(photo.tempUrl)}
+                  disabled={isActionDisabled}
+                  aria-label="사진 삭제"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+            {uploadedPhotos.length < MAX_FILES && (
+              <label className={styles.uploadTile} htmlFor="photos">
+                +
+              </label>
+            )}
+          </div>
         </div>
 
         <div className={styles.actionRow}>
