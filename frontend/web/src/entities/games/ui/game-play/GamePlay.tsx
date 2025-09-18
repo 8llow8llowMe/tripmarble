@@ -14,6 +14,7 @@ import useGameDiceMutation from "@/entities/games/hooks/useGameDice";
 import formatDate from "@/shared/hooks/formatDate";
 import useGetMoveLogs from "@/entities/games/hooks/useGetMoveLogs";
 import useReviewMission from "@/entities/games/hooks/useReviewMission";
+import { uploadTripSpotReviewPhotos } from "@/entities/trips/hooks/useUploadTripSpotReviewPhotos";
 import useMoveLogFail from "@/entities/games/hooks/useMoveLogFail";
 import useMoveLogSkip from "@/entities/games/hooks/useMoveLogSkip";
 import useGetGameDetail from "@/entities/games/hooks/useGetGameDetail";
@@ -250,21 +251,44 @@ const GamePlay = ({
   const handleMissionReviewSubmit = async ({
     rating,
     content,
+    files,
   }: {
     rating: number;
     content: string;
+    files?: File[];
   }) => {
     if (!pendingMoveLogId || !missionReadyTileId) return;
     const tile = tripGameTileViews.find(
       (t) => t.tripGameTileId === missionReadyTileId
     );
     if (!tile) return;
+    // 1) 사진이 있다면 임시 업로드하여 URL 획득
+    let photoUrls: string[] | undefined = undefined;
+    try {
+      if (files && files.length > 0) {
+        const res = await uploadTripSpotReviewPhotos(
+          String(tile.tripSpotId),
+          files
+        );
+        const temps = res?.data?.dataBody ?? [];
+        photoUrls = temps
+          .map((t) => t.tempPhotoUrl)
+          .filter(Boolean) as string[];
+      }
+    } catch (e) {
+      // 업로드 실패 시 사용자에게 알리고 리뷰 제출 중단
+      toast.error("사진 업로드에 실패했어요. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
+    // 2) 리뷰 제출 (사진 URL 포함)
     await submitReview({
       tripGameId: tripGameView.tripGameId,
       tripGameMoveLogId: pendingMoveLogId,
       tripSpotId: tile.tripSpotId,
       rating,
       content,
+      photoUrls,
     });
     await Promise.all([
       queryClient.invalidateQueries({
