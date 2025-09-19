@@ -2,23 +2,23 @@ package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.prese
 
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripSpotQueryInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripSpotRandomInternalResponse;
+import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotRandomInfo;
 import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotWithContentTypeNameInfo;
-import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TripSpotInternalPresenter {
 
-    public TripSpotRandomInternalResponse toRandomResponse(TripSpot tripSpot) {
+    public TripSpotRandomInternalResponse toRandomResponse(TripSpotRandomInfo info) {
         return TripSpotRandomInternalResponse.builder()
-            .tripSpotId(tripSpot.id())
-            .tripSpotName(tripSpot.title())
+            .tripSpotId(info.tripSpotId())
+            .tripSpotName(info.tripSpotName())
             .build();
     }
 
-    public List<TripSpotRandomInternalResponse> toRandomResponseList(List<TripSpot> tripSpots) {
-        return tripSpots.stream()
+    public List<TripSpotRandomInternalResponse> toRandomResponseList(List<TripSpotRandomInfo> infos) {
+        return infos.stream()
             .map(this::toRandomResponse)
             .toList();
     }
