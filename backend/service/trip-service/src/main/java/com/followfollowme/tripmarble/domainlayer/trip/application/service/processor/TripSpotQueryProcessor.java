@@ -6,8 +6,10 @@ import com.followfollowme.tripmarble.domainlayer.region.application.port.out.Reg
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.RepresentativeRegionSigunguMappingRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.application.port.out.SigunguRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.region.domain.model.Sigungu;
+import com.followfollowme.tripmarble.domainlayer.trip.application.context.RegionContext;
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripErrorCode;
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripException;
+import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotRandomInfo;
 import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotSimpleInfo;
 import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotWithContentTypeNameInfo;
 import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotWithDetailViewInfo;
@@ -35,29 +37,13 @@ public class TripSpotQueryProcessor {
 
     public Slice<TripSpotSimpleInfo> getTripSpotsByRepresentativeRegionId(
         long representativeRegionId, long lastTripSpotId, int size, Integer contentTypeId) {
-        // 1. 대표지역 ID로 시군구 ID 리스트 조회
-        List<Long> sigunguIds = representativeRegionSigunguMappingRepositoryPort.findSigunguIdsByRepresentativeRegionId(
-            representativeRegionId);
+        RegionContext context = resolveRegionContext(representativeRegionId);
 
-        // 2. 시군구 ID 리스트로 시군구 도메인 리스트 조회
-        List<Sigungu> sigungus = sigunguRepositoryPort.findAllByIdIn(sigunguIds);
-
-        // 3. 시군구 도메인 리스트에서 시군구 코드 리스트 추출 (법정동 시군구 코드 => 자연키)
-        List<Integer> sigunguCodes = sigungus.stream()
-            .map(Sigungu::sigunguCode)
-            .toList();
-
-        // 4. 첫 번째, 시군구의 regionId로 지역 코드 (regionCode) 조회 (법정동 시도 코드 => 자연키)
-        long regionId = sigungus.getFirst().regionId();
-        int regionCode = regionRepositoryPort.findById(regionId)
-            .orElseThrow(() -> new RegionException(RegionErrorCode.REGION_NOT_FOUND))
-            .regionCode();
-
-        // 5. 시도 코드 와 시군구 코드 및 지역 코드 기준으로 여행지 Slice 조회 (No-Offset 방식)
+        // 1. 시도 코드 와 시군구 코드 및 지역 코드 기준으로 여행지 Slice 조회 (No-Offset 방식)
         Slice<TripSpot> slice = tripSpotRepositoryPort.findTripSpotsNoOffsetBySigunguCodesAndLastTripSpotId(
-            regionCode, sigunguCodes, lastTripSpotId, size, contentTypeId);
+            context.regionCode(), context.sigunguCodes(), lastTripSpotId, size, contentTypeId);
 
-        // 6. Slice 의 map 기능으로 Info 변환
+        // 2. Slice 의 map 기능으로 Info 변환
         return slice.map(TripSpotSimpleInfo::of);
     }
 
@@ -84,5 +70,42 @@ public class TripSpotQueryProcessor {
         return tripSpotWithContentTypeNames.stream()
             .map(TripSpotWithContentTypeNameInfo::of)
             .toList();
+    }
+
+    public List<TripSpotRandomInfo> getRandomTripSpots(long representativeRegionId, List<Integer> contentTypeIds, int limit) {
+        RegionContext context = resolveRegionContext(representativeRegionId);
+
+        // 1. 지역 코드 및 시도코드, contentTypeId 목록 (Tour API 전용) 기준으로 랜덤 여행지 조회
+        List<TripSpot> tripSpots = tripSpotRepositoryPort.findRandomTripSpotsBySigunguCodesAndContentTypeIds(
+            context.regionCode(), context.sigunguCodes(), contentTypeIds, limit);
+
+        return tripSpots.stream()
+            .map(TripSpotRandomInfo::of)
+            .toList();
+    }
+
+    private RegionContext resolveRegionContext(long representativeRegionId) {
+        // 1. 대표지역 ID를 이용하여 시군구 ID 목록 조회
+        List<Long> sigunguIds =
+            representativeRegionSigunguMappingRepositoryPort.findSigunguIdsByRepresentativeRegionId(representativeRegionId);
+
+        // 2. 시군구 도메인 조회
+        List<Sigungu> sigungus = sigunguRepositoryPort.findAllByIdIn(sigunguIds);
+
+        // 3. 시군구 코드 추출 (법정동 시군구 코드 => 자연키)
+        List<Integer> sigunguCodes = sigungus.stream()
+            .map(Sigungu::sigunguCode)
+            .toList();
+
+        // 4. 첫 번째, 시군구의 regionId로 지역 코드 (regionCode) 조회 (법정동 시도 코드 => 자연키)
+        long regionId = sigungus.getFirst().regionId();
+        int regionCode = regionRepositoryPort.findById(regionId)
+            .orElseThrow(() -> new RegionException(RegionErrorCode.REGION_NOT_FOUND))
+            .regionCode();
+
+        return RegionContext.builder()
+            .regionCode(regionCode)
+            .sigunguCodes(sigunguCodes)
+            .build();
     }
 }
