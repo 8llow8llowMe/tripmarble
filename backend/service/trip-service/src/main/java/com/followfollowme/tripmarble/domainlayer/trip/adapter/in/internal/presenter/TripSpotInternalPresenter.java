@@ -2,7 +2,7 @@ package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.prese
 
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripSpotQueryInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.internal.dto.TripSpotRandomInternalResponse;
-import com.followfollowme.tripmarble.domainlayer.trip.application.readmodel.TripSpotWithContentTypeName;
+import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotWithContentTypeNameInfo;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -23,18 +23,18 @@ public class TripSpotInternalPresenter {
             .toList();
     }
 
-    public TripSpotQueryInternalResponse toQueryResponse(TripSpotWithContentTypeName tripSpotWithContentTypeName) {
+    public TripSpotQueryInternalResponse toQueryResponse(TripSpotWithContentTypeNameInfo info) {
         return TripSpotQueryInternalResponse.builder()
-            .tripSpotId(tripSpotWithContentTypeName.tripSpotId())
-            .contentTypeName(tripSpotWithContentTypeName.contentTypeName())
-            .tripSpotName(tripSpotWithContentTypeName.tripSpotName())
-            .longitude(tripSpotWithContentTypeName.longitude())
-            .latitude(tripSpotWithContentTypeName.latitude())
+            .tripSpotId(info.tripSpotId())
+            .contentTypeName(info.contentTypeName())
+            .tripSpotName(info.tripSpotName())
+            .longitude(info.longitude())
+            .latitude(info.latitude())
             .build();
     }
 
-    public List<TripSpotQueryInternalResponse> toQueryResponseList(List<TripSpotWithContentTypeName> tripSpotWithContentTypeNames) {
-        return tripSpotWithContentTypeNames.stream()
+    public List<TripSpotQueryInternalResponse> toQueryResponseList(List<TripSpotWithContentTypeNameInfo> infos) {
+        return infos.stream()
             .map(this::toQueryResponse)
             .toList();
     }
