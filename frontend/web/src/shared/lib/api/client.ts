@@ -6,6 +6,8 @@ const PUBLIC_PATHS = [
   "/members/signup",
   "/auth/KAKAO/login",
   "/auth/KAKAO/authorize",
+  "/auth/mail/send-code",
+  "/auth/mail/verify-code",
 ];
 
 export const authApiClient: AxiosInstance = axios.create({

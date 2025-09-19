@@ -19,6 +19,7 @@ import DateStep from "./steps/DateStep/DateStep";
 import RegionStep from "./steps/ResionStep/RegionStep";
 import ThemeStep from "./steps/ThemeStep/ThemeStep";
 import useCreateTripGame from "@/entities/games/hooks/useCreateTripGame";
+import { useRouter } from "next/navigation";
 
 type StepKey =
   | "title"
@@ -84,6 +85,7 @@ export default function CreateGameModal({
   isOpen,
   onClose,
 }: CreateGameModalProps) {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const form = useAppSelector((state) => state.createGame);
   const [step, setStep] = useState(0);
@@ -128,11 +130,13 @@ export default function CreateGameModal({
           queryClient.invalidateQueries({ queryKey: ["myGameListInfinite"] });
           dispatch(resetGameForm());
           onClose();
+          router.push("/game");
+          setStep(0);
         },
         onError: () => toast.error("게임 생성에 실패했습니다."),
       });
     }
-  }, [createGame, dispatch, form, onClose, step, queryClient]);
+  }, [step, createGame, form, queryClient, dispatch, onClose, router]);
 
   const prevStep = () => {
     if (step > 0) {

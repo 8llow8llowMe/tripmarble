@@ -39,7 +39,7 @@ export default function Game() {
           radius="md"
           bgColor="primary"
           paddingSize="md"
-          width="180px"
+          width="clamp(120px, 40vw, 180px)"
           height="50px"
           onClick={handleCreateClick}
         >

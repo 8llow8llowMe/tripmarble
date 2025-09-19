@@ -49,55 +49,62 @@
 }
 
 .fileInput {
-  font-size: 14px;
-  color: #374151;
+  display: none; /* 업로드 타일을 사용하는 경우 숨김 */
 }
 
-.photoPreviewList {
+/* MissionModal과 유사한 업로드 그리드/타일 스타일 */
+.uploadGrid {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  padding: 0;
-  margin: 0;
-  list-style: none;
+  gap: 10px;
 }
 
-.photoPreviewItem {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.uploadTile {
+  width: 94px;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  border: 1px solid #d8dfea;
+  background: #f6f9ff;
+  display: inline-flex;
   align-items: center;
-}
-
-.photoPreviewImage {
-  width: 96px;
-  height: 96px;
-  object-fit: cover;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background-color: #f9fafb;
-}
-
-.photoRemoveButton {
-  background-color: #f3f4f6;
-  color: #6b7280;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 12px;
+  justify-content: center;
+  color: #6b7a99;
+  font-size: 28px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  user-select: none;
 }
 
-.photoRemoveButton:hover {
-  background-color: #e5e7eb;
+.thumb {
+  position: relative;
+  width: 94px;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #eef3fb;
 }
 
-.photoRemoveButton:disabled {
-  cursor: not-allowed;
-  background-color: #f3f4f6;
-  color: #9ca3af;
+.thumbImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removeBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  color: #2a2f3a;
+  line-height: 20px;
+  text-align: center;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .actionRow {
@@ -139,6 +146,23 @@
 .submitButton:disabled {
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+/* MissionModal과 동일한 별점 스타일 */
+.stars {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.star {
+  font-size: 24px;
+  cursor: pointer;
+  color: #d0d7e6;
+  user-select: none;
+}
+
+.starActive {
+  color: #ffb400;
 }
 
 @media (max-width: 480px) {

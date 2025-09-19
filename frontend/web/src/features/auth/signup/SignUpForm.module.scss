@@ -37,6 +37,48 @@
   gap: 1rem;
 }
 
+/* inline layout for email + send button, and code + verify button */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.grow {
+  flex: 1 1 auto;
+}
+
+.inlineBtn {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  background-color: #4d36ff;
+  color: #fff;
+  font-weight: bold;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.inlineBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.codeRow {
+  margin-top: -0.25rem;
+}
+
+@media (max-width: 420px) {
+  .row {
+    gap: 0.4rem;
+  }
+  .inlineBtn {
+    padding: 0.5rem 0.75rem;
+  }
+}
+
 .label {
   font-size: 0.875rem;
   font-weight: 500;

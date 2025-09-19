@@ -168,7 +168,7 @@ export default function HomeDicePage() {
       scrollTrigger: {
         trigger: ".ux-trigger",
         start: "top top",
-        end: "+=3500",
+        end: "+=4600",
         scrub: 0.8,
         pin: ".canvas-wrapper",
         // markers: true,
@@ -257,7 +257,26 @@ export default function HomeDicePage() {
         { autoAlpha: 0, y: 28 },
         { autoAlpha: 1, y: 0, duration: 0.6, ease: "power2.out" },
         ">-0.1"
-      );
+      )
+      // 주사위를 먼저 위로 이동시켜 화면에서 벗어나게
+      .to(cubePos, { y: 6, duration: 1.0, ease: "power2.in" }, ">0.6")
+      // 추가 스크롤에서 폴라로이드/힌트가 위로 사라지도록 처리
+      .to(
+        `.${styles.polaroidHint}`,
+        { y: -40, autoAlpha: 0, duration: 0.5, ease: "power2.in" },
+        ">1"
+      )
+      .to(
+        ".polaroid-container",
+        {
+          y: "-=70vh",
+          autoAlpha: 0,
+          duration: 1.0,
+          ease: "power2.in",
+        },
+        ">-0.2"
+      )
+      .set(".polaroid-container", { pointerEvents: "none" });
 
     // 텍스트 애니메이션
 
@@ -315,8 +334,9 @@ export default function HomeDicePage() {
     return () => {
       window.removeEventListener("resize", onResize);
       gsap.ticker.remove(ticker);
-      // Kill all ScrollTriggers created in this scope
-      ScrollTrigger.getAll().forEach((t) => t.kill());
+      // Kill only triggers created by this component
+      tl.scrollTrigger?.kill();
+      tl.kill();
       // Clear only GSAP-related inline styles on our elements if they still exist
       const toClear = gsap.utils.toArray<HTMLElement>(
         `.${styles.piece}, .${styles.pieceBox}`

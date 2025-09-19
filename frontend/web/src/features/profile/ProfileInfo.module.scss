@@ -13,6 +13,19 @@
   gap: 10px;
 }
 
+@media (max-width: 640px) {
+  .profileHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    width: 100%;
+  }
+  .profileInfo {
+    width: 100%;
+    align-items: flex-start;
+  }
+}
+
 .profileInfo {
   display: flex;
   flex-direction: column;

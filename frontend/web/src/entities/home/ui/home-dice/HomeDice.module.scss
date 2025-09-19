@@ -1,6 +1,6 @@
 .uxTrigger {
   width: 100%;
-  min-height: 5800px;
+  min-height: 7000px;
   background: linear-gradient(180deg, #fafbff 0%, #d7e0fa 100%);
   position: relative;
 }
@@ -77,8 +77,9 @@
   opacity: 0; /* revealed by GSAP */
   pointer-events: none;
   color: #0b1630;
-  font-weight: 800;
-  font-size: clamp(16px, 2.5rem, 24px);
+  font-weight: 600;
+  /* Use viewport-based fluid size so it scales on small screens */
+  font-size: clamp(24px, 4vw + 0.5rem, 36px);
   // font-size: 2.5rem;
   line-height: 1.35;
   text-align: center;
