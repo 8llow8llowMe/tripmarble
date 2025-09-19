@@ -90,6 +90,22 @@ jobs:
           chmod +x gradlew
           ./gradlew signingReport
 
+      # 8.1 버전 코드/네임 설정
+      - name: Set version code and name
+        run: |
+          # versionCode → GitHub Actions run_number 기반 (항상 증가)
+          VERSION_CODE=$((10000 + $GITHUB_RUN_NUMBER))
+
+          # versionName → git 태그 기반, 없으면 기본값
+          if git describe --tags --abbrev=0 >/dev/null 2>&1; then
+            VERSION_NAME=$(git describe --tags --abbrev=0)
+          else
+            VERSION_NAME="1.0.${GITHUB_RUN_NUMBER}"
+          fi
+
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+
       # 9. 안드로이드 빌드
       - name: Build Android
         working-directory: frontend/mobile/android
@@ -105,7 +121,10 @@ jobs:
           fi
 
           echo "Building ${{ env.BUILD_TYPE }} ($BUILD_TASK) with APP_ENV=${{ env.APP_ENV }}"
-          ./gradlew clean $BUILD_TASK --no-daemon --stacktrace -x test -x lint -x check -x verify
+          ./gradlew clean $BUILD_TASK \
+            -PversionCode=${{ env.VERSION_CODE }} \
+            -PversionName=${{ env.VERSION_NAME }} \
+            --no-daemon --stacktrace -x test -x lint -x check -x verify
 
           if [ ! -f "$OUTPUT_PATH" ]; then
             echo "✗ Build failed"
