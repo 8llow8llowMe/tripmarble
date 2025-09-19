@@ -124,9 +124,12 @@ android {
         }
     }
     packagingOptions {
+        // JNI 관련 설정
         jniLibs {
             useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
         }
+        // libc++_shared.so 충돌 방지
+        pickFirst "lib/**/libc++_shared.so"
     }
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
