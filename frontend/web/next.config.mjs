@@ -43,7 +43,7 @@ const nextConfig = {
       { protocol: "https", hostname: "tripmarble-dev.store", pathname: "/**" },
       {
         protocol: "https",
-        hostname: "minio.8llow8llowme.com",
+        hostname: "www.minio.8llow8llowme.com",
         pathname: "/**",
       },
       {
