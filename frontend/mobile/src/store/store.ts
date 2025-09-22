@@ -14,10 +14,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import authReducer from '@/store/redux/auth/auth';
 import userReducer from '@/store/redux/user/user';
+import networkReducer from '@/store/redux/network/network';
 
 const rootReducer = combineReducers({
   authReducer,
   userReducer,
+  networkReducer,
 });
 
 const persistConfig = {
