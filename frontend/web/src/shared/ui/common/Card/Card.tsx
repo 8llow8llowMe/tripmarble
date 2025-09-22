@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import styles from "./Card.module.scss";
 
 type Props = {
@@ -11,23 +10,29 @@ type Props = {
   date?: string;
 };
 
-export default function Card({ href, imageUrl, regionName, title, description, date }: Props) {
+export default function Card({
+  href,
+  imageUrl,
+  regionName,
+  title,
+  description,
+  date,
+}: Props) {
   const Content = (
     <div className={styles.card}>
       <div className={styles.thumb}>
-        <Image
+        <img
           src={imageUrl}
           alt={title}
-          fill
-          sizes="(max-width: 900px) 100vw, 48vw"
-          style={{ objectFit: "cover" }}
+          className={styles.thumbImage}
+          loading="lazy"
         />
       </div>
       <div className={styles.content}>
         {regionName && <div className={styles.tag}>{regionName}</div>}
         <div className={styles.title}>{title}</div>
         {description && <div className={styles.desc}>{description}</div>}
-        {(date) && (
+        {date && (
           <div className={styles.meta}>
             <span className={styles.date}>{date}</span>
           </div>
@@ -38,4 +43,3 @@ export default function Card({ href, imageUrl, regionName, title, description, d
 
   return href ? <Link href={href}>{Content}</Link> : Content;
 }
-

@@ -9,10 +9,12 @@ import styles from "./Home.module.scss";
 import Button from "@/shared/ui/common/Button/Button";
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
 // assets
-import Image from "next/image";
 import { jeju2, seoul2 } from "@/shared/assets/images/places";
 // stores
 import { useAppSelector } from "@/entities/users/model";
+
+const getImageSrc = (asset: string | { src: string }) =>
+  (typeof asset === "string" ? asset : asset.src) || "";
 
 export default function HomePage() {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
@@ -69,12 +71,11 @@ export default function HomePage() {
         </section>
         <section className={styles.parallaxSection2}>
           <div className={styles.content}>
-            <Image
-              src={jeju2}
+            <img
+              src={getImageSrc(jeju2)}
               alt="jeju-image"
-              width={400}
-              height={400}
-              style={{ objectFit: "cover", borderRadius: 8 }}
+              className={styles.featureImage}
+              loading="lazy"
             />
             <div className={styles.textWrapper}>
               <h1 className={styles.title}>전국 여행지를 한눈에</h1>
@@ -87,12 +88,11 @@ export default function HomePage() {
         </section>
         <section className={styles.parallaxSection3}>
           <div className={styles.content}>
-            <Image
-              src={seoul2}
+            <img
+              src={getImageSrc(seoul2)}
               alt="seoul-image"
-              width={400}
-              height={400}
-              style={{ objectFit: "cover", borderRadius: 8 }}
+              className={styles.featureImage}
+              loading="lazy"
             />
             <div className={styles.textWrapper}>
               <h1 className={styles.title}>여행지를 선택해 게임처럼</h1>

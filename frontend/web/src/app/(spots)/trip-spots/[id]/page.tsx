@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useMemo, useState } from "react";
 
 // import useTripSpotById from "@/entities/trips/hooks/useTripSpotById";
@@ -205,13 +204,11 @@ export default function TripSpotDetail({ params }: Props) {
     <div className={styles.detailPage}>
       <div className={styles.heroSection}>
         <div className={styles.imageWrapper}>
-          <Image
+          <img
             src={coverImage}
             alt={`${spot.tripSpotName} 대표 이미지`}
-            width={600}
-            height={400}
-            style={{ objectFit: "cover", width: "100%" }}
-            priority
+            className={styles.heroImage}
+            loading="eager"
           />
         </div>
         <div className={styles.primaryInfo}>
@@ -259,12 +256,11 @@ export default function TripSpotDetail({ params }: Props) {
                         key={photo.tripSpotReviewPhotoId}
                         className={styles.samplePhoto}
                       >
-                        <Image
+                        <img
                           src={photo.photoUrl}
                           alt="리뷰 사진"
-                          fill
-                          sizes="64px"
-                          style={{ objectFit: "cover" }}
+                          className={styles.squareImage}
+                          loading="lazy"
                         />
                       </div>
                     ))}
@@ -371,12 +367,11 @@ export default function TripSpotDetail({ params }: Props) {
                               key={photo.tripSpotReviewPhotoId}
                               className={styles.reviewPhoto}
                             >
-                              <Image
+                              <img
                                 src={photo.photoUrl}
                                 alt="리뷰 사진"
-                                fill
-                                sizes="96px"
-                                style={{ objectFit: "cover" }}
+                                className={styles.squareImage}
+                                loading="lazy"
                               />
                             </div>
                           ))}

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import styles from "../polaroid-stack/PolaroidStack.module.scss";
 
 type Props = {
@@ -18,12 +17,11 @@ export default function PolaroidCard({ id, name, imgUrl, zIndex }: Props) {
         <div className={styles.cardBody}>
           <div className={styles.pin} />
           <div className={styles.thumb}>
-            <Image
+            <img
               src={imgUrl}
               alt={name}
-              fill
-              sizes="(max-width: 768px) 100vw, 420px"
-              style={{ objectFit: "cover" }}
+              className={styles.thumbImage}
+              loading="lazy"
             />
           </div>
           <div className={styles.caption}>{name}</div>

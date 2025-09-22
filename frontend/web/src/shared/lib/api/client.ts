@@ -32,9 +32,15 @@ export const apiClient: AxiosInstance = axios.create({
 
 // 전역 인증 실패 리다이렉트 제어 플래그
 let __authRedirected = false;
+let __skipAuthFailure = false;
+
+export const setSkipAuthFailure = (skip: boolean) => {
+  __skipAuthFailure = skip;
+};
 
 const handleAuthFailure = (message?: string) => {
   if (typeof window === "undefined") return;
+  if (__skipAuthFailure) return;
   if (__authRedirected) return;
   __authRedirected = true;
   try {

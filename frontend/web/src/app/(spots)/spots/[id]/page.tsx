@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 // import { useParams } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { seoul2 } from "@/shared/assets/images/places";
 // style
@@ -12,6 +11,9 @@ import useRepresentativeRegion from "@/entities/trips/hooks/useRepresentativeReg
 import useTripSpotsByRepresentativeRegion from "@/entities/trips/hooks/useTripSpotsByRepresentativeRegion";
 // component
 import Filter from "@/shared/ui/common/Filter/Filter";
+
+const toImageSrc = (value: string | { src: string }) =>
+  (typeof value === "string" ? value : value.src) || "";
 
 type Props = {
   params: {
@@ -58,14 +60,11 @@ export default function SpotDetail({ params }: Props) {
       <div className={`appPage ${styles.spotContainer}`}>
         <section className={styles.spotHeader}>
           <div className={styles.mainImageWrapper}>
-            <Image
-              src={region?.representativeRegionImageUrl || seoul2}
+            <img
+              src={region?.representativeRegionImageUrl || toImageSrc(seoul2)}
               alt="spot-main-image"
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 8rem"
               className={styles.mainImage}
-              style={{ objectFit: "cover" }}
+              loading="eager"
             />
           </div>
           <div className={styles.regionContent}>
@@ -102,13 +101,11 @@ export default function SpotDetail({ params }: Props) {
               >
                 <div className={styles.contentCard}>
                   <div className={styles.cardImage}>
-                    <Image
+                    <img
                       src={spot.originalImageUrl || "/images/no-image.png"}
                       alt={spot.tripSpotName}
-                      fill
-                      priority
-                      sizes="(max-width: 768px) 100vw, 15rem"
-                      style={{ objectFit: "cover" }}
+                      className={styles.cardImageImg}
+                      loading="lazy"
                     />
                   </div>
                   <p className={styles.cardTitle}>{spot.tripSpotName}</p>

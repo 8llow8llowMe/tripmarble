@@ -114,7 +114,12 @@
 }
 
 .piece {
-  /* next/image with fill already uses absolute + inset:0 */
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
   will-change: transform, opacity;
 }
 /* Original vertical offsets were approximately -200/0/220/0/-200px

@@ -26,28 +26,6 @@ const nextConfig = {
       .map((k) => [k, process.env[k]])
   ),
 
-  // next/image domains 설정
-  images: {
-    remotePatterns: [
-      { protocol: "http", hostname: "tong.visitkorea.or.kr", pathname: "/**" },
-      { protocol: "https", hostname: "tong.visitkorea.or.kr", pathname: "/**" },
-      { protocol: "http", hostname: "k.kakaocdn.net", pathname: "/**" },
-      { protocol: "https", hostname: "k.kakaocdn.net", pathname: "/**" },
-      { protocol: "https", hostname: "tripmarble-dev.store", pathname: "/**" },
-      {
-        protocol: "http",
-        hostname: "tripmarble-dev.store",
-        port: "9000",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "www.minio.8llow8llowme.com",
-        pathname: "/**",
-      },
-    ],
-  },
-
   // (옵션) 정적 호스팅 환경에서 404를 줄이기 위한 슬래시 강제. 필요 없으면 제거하세요.
   // trailingSlash: true,
 };

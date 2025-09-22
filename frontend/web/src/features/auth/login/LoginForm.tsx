@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 // style
@@ -39,6 +38,10 @@ export default function LoginPage() {
   };
 
   const { data } = useSocialLoginAutorize("KAKAO");
+
+  const naverIcon = typeof naver === "string" ? naver : naver.src;
+  const kakaoIcon = typeof kakao === "string" ? kakao : kakao.src;
+  const googleIcon = typeof google === "string" ? google : google.src;
 
   function handleKakaoLogin(provider: string) {
     try {
@@ -90,7 +93,7 @@ export default function LoginPage() {
       </form>
       <div className={styles.socialLogin}>
         <div className={styles.socialItem}>
-          <Image src={naver} alt="naver" width={24} height={24} />
+          <img src={naverIcon} alt="naver" width={24} height={24} />
           <div className={styles.socialWord}>
             <a>네이버</a>
             <a>로그인</a>
@@ -100,14 +103,14 @@ export default function LoginPage() {
           className={styles.socialItem}
           onClick={() => handleKakaoLogin("KAKAO")}
         >
-          <Image src={kakao} alt="kakao" width={50} height={24} />
+          <img src={kakaoIcon} alt="kakao" width={50} height={24} />
           <div className={styles.socialWord}>
             <a>카카오</a>
             <a>로그인</a>
           </div>
         </div>
         <div className={styles.socialItem}>
-          <Image src={google} alt="google" width={24} height={24} />
+          <img src={googleIcon} alt="google" width={24} height={24} />
           <div className={styles.socialWord}>
             <a>구글</a>
             <a>로그인</a>
