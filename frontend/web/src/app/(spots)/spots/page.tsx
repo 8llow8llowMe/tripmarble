@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { StaticImageData } from "next/image";
 // styles
 import styles from "./SpotsList.module.scss";
 import noImage from "/public/images/no-image.png";
@@ -21,11 +20,11 @@ export default function Spots() {
       (region: {
         representativeRegionId: number;
         representativeRegionName: string;
-        representativeRegionImageUrl: string | StaticImageData | null;
+        representativeRegionImageUrl: string | null;
       }) => ({
         id: region.representativeRegionId,
         name: region.representativeRegionName,
-        imgUrl: region.representativeRegionImageUrl || noImage,
+        imgUrl: region.representativeRegionImageUrl || noImage.src,
       })
     );
   }, [data]);

@@ -61,6 +61,14 @@
   margin-bottom: 2rem;
 }
 
+.featureImage {
+  width: 400px;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
 .buttonContainer {
   display: flex;
   gap: 1rem;

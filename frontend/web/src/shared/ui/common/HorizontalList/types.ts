@@ -1,9 +1,7 @@
-import { StaticImageData } from "next/image";
-
 export type HorizontalListItem = {
   id: string | number;
   name: string;
-  imgUrl: string | StaticImageData;
+  imgUrl: string;
   subtitle?: string;
 };
 

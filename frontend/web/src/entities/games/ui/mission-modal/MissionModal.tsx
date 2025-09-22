@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import Modal from "@/shared/ui/common/Modal";
 import styles from "./MissionModal.module.scss";
 import type { TripGameTileView } from "@/entities/games/model/gameInfoDummy";
@@ -166,13 +165,11 @@ export default function MissionModal({
                     const url = URL.createObjectURL(f);
                     return (
                       <div key={i} className={styles.thumb}>
-                        <Image
+                        <img
                           src={url}
                           alt={`uploaded-${i}`}
-                          fill
-                          sizes="96px"
-                          style={{ objectFit: "cover" }}
-                          unoptimized
+                          className={styles.thumbImg}
+                          loading="lazy"
                           onLoad={() => URL.revokeObjectURL(url)}
                         />
                         <button

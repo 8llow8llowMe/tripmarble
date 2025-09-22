@@ -5,7 +5,6 @@ import useMyGameList, {
 import { useRouter } from "next/navigation";
 import { fetchGameStart } from "@/entities/games/hooks/useGameStart";
 import CardList from "@/shared/ui/common/CardList/CardList";
-import Image from "next/image";
 import { NoGame } from "@/shared/assets/images";
 
 export function GameListHorizontal({ type }: { type: GameStatus }) {
@@ -31,6 +30,8 @@ export function GameListHorizontal({ type }: { type: GameStatus }) {
     title: game.title,
     date: game.startedAt,
   }));
+
+  const emptyIllustration = typeof NoGame === "string" ? NoGame : NoGame.src;
 
   return (
     <>
@@ -62,13 +63,11 @@ export function GameListHorizontal({ type }: { type: GameStatus }) {
         ) : (
           <div className={styles.emptyState} role="status" aria-live="polite">
             <div className={styles.emptyImageWrapper}>
-              <Image
-                src={NoGame}
+              <img
+                src={emptyIllustration}
                 alt="표시할 게임이 없음"
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, 520px"
-                style={{ objectFit: "cover" }}
+                className={styles.emptyImage}
+                loading="lazy"
               />
               <div className={styles.emptyOverlay}>
                 <div className={styles.emptyText}>

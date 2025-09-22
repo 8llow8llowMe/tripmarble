@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import styles from "./Games.module.scss";
 import { GameSummary } from "@/entities/games/hooks/useMyGameList";
@@ -24,13 +23,11 @@ export function GameList({ games }: { games: GameSummary[] }) {
         items={items}
         renderItem={(item) => (
           <Link href={item.href ?? "#"} className={styles.carouselCard}>
-            <Image
+            <img
               src={item.imageUrl}
               alt={item.title || "대표 게임 이미지"}
-              fill
-              priority
-              sizes="(max-width: 900px) 100vw, 33vw"
-              style={{ objectFit: "cover" }}
+              className={styles.cardImage}
+              loading="lazy"
             />
             <div className={styles.imageOverlay}>
               {item.regionName && (

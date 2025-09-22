@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import Carousel from "@/shared/ui/common/Carousel/Carousel";
 import styles from "./HorizontalList.module.scss";
 import {
@@ -29,13 +28,7 @@ export default function HorizontalList<T>({
         const content = (
           <div className={styles.itemWrapper} style={{ width: itemWidth }}>
             <div className={styles.itemThumb} style={{ height: itemHeight }}>
-              <Image
-                src={item.imgUrl}
-                alt={item.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 240px"
-                style={{ objectFit: "cover" }}
-              />
+              <img src={item.imgUrl} alt={item.name} className={styles.image} />
               <div className={styles.thumbOverlay} />
               <div className={styles.textOverlay}>
                 <div className={styles.thumbTitle}>{item.name}</div>

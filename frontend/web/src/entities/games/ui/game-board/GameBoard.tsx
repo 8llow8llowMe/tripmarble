@@ -13,10 +13,12 @@ import { drawPiece } from "@/entities/games/ui/game-board/drawPiece";
 import { getCustomPosition } from "@/entities/games/ui/game-board/getCustomPosition";
 import type { TripGameTileView } from "@/entities/games/model/gameInfoDummy";
 import Piece from "@/shared/assets/images/Piece.png";
-import type { StaticImageData } from "next/image";
 import DiceView from "@/entities/games/ui/game-board/diceView";
 
 const CELL_SIZE = 100;
+
+const getAssetSrc = (asset: string | { src: string }) =>
+  (typeof asset === "string" ? asset : asset.src) || "";
 
 type Props = {
   count?: number;
@@ -54,7 +56,7 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     if (pieceImageRef.current) return; // 이미 생성됨
 
     const img = new Image() as HTMLImageElement;
-    img.src = (Piece as StaticImageData).src;
+    img.src = getAssetSrc(Piece);
 
     const onReady = () => setImgReadyTick((t) => t + 1);
 

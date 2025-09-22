@@ -1,7 +1,6 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from "react";
-import Image from "next/image";
 import { toast } from "react-toastify";
 
 import useCreateTripSpotReview from "@/entities/trips/hooks/useCreateTripSpotReview";
@@ -175,13 +174,19 @@ const TripSpotReviewModal = ({
           <label className={styles.label} htmlFor="rating-stars">
             별점
           </label>
-          <div id="rating-stars" className={styles.stars} aria-label="별점 선택">
+          <div
+            id="rating-stars"
+            className={styles.stars}
+            aria-label="별점 선택"
+          >
             {[1, 2, 3, 4, 5].map((n) => (
               <span
                 key={n}
                 role="button"
                 tabIndex={0}
-                className={`${styles.star} ${n <= rating ? styles.starActive : ""}`}
+                className={`${styles.star} ${
+                  n <= rating ? styles.starActive : ""
+                }`}
                 onClick={() => setRating(n)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") setRating(n);
@@ -225,13 +230,11 @@ const TripSpotReviewModal = ({
           <div className={styles.uploadGrid}>
             {uploadedPhotos.map((photo) => (
               <div key={photo.tempUrl} className={styles.thumb}>
-                <Image
+                <img
                   src={photo.previewUrl}
                   alt="업로드된 리뷰 사진 미리보기"
-                  fill
-                  sizes="96px"
-                  style={{ objectFit: "cover" }}
-                  unoptimized
+                  className={styles.thumbImg}
+                  loading="lazy"
                 />
                 <button
                   type="button"

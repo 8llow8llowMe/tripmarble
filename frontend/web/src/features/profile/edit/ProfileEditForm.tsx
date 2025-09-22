@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import Modal from "@/shared/ui/common/Modal";
 import styles from "./ProfileEditForm.module.scss";
 import { toast } from "react-toastify";
-import Image from "next/image";
 import { useAppSelector } from "@/entities/users/model";
 import { useRouter } from "next/navigation";
 // apis
@@ -92,7 +91,7 @@ const ProfileEditForm = ({ isOpen, onClose }: ProfileEditFormProps) => {
           />
           <label htmlFor="profileImageUpload">
             {previewImageURL || user?.profileImage ? (
-              <Image
+              <img
                 width={200}
                 height={200}
                 src={previewImageURL || user?.profileImage!}

@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/entities/users/model";
 // three
@@ -20,6 +19,17 @@ import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
 import useRepresentativeRegions from "@/entities/trips/hooks/useRepresentativeRegions";
 import noImage from "/public/images/no-image.png";
 import PolaroidStack from "@/entities/home/ui/polaroid-stack/PolaroidStack";
+
+const getAssetSrc = (asset: string | { src: string }) =>
+  (typeof asset === "string" ? asset : asset.src) || "";
+
+const BOARD_IMAGE_SRCS = [
+  "/images/board/Board01.png",
+  "/images/board/Board02.png",
+  "/images/board/Board05.png",
+  "/images/board/Board04.png",
+  "/images/board/Board03.png",
+] as const;
 
 export default function HomeDicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,7 +49,7 @@ export default function HomeDicePage() {
     .map((r: any) => ({
       id: r.representativeRegionId,
       name: r.representativeRegionName,
-      imgUrl: r.representativeRegionImageUrl || (noImage as any).src,
+      imgUrl: r.representativeRegionImageUrl || getAssetSrc(noImage),
     }));
 
   // Create a fixed-layer portal element so board isn't affected by parent transforms after routing
@@ -376,8 +386,6 @@ export default function HomeDicePage() {
   //   setCreateModalOpen(true);
   // };
 
-  const boardImageSizes = "(max-width: 860px) 33vw, 520px";
-
   return (
     <>
       <div className={`ux-trigger ${styles.uxTrigger}`}>
@@ -404,58 +412,42 @@ export default function HomeDicePage() {
             <div className={styles.boardLayerWrapper} ref={boardRef}>
               <div className={styles.boardGroup}>
                 <div className={`${styles.pieceBox} ${styles.pOuterLeft}`}>
-                  <Image
+                  <img
                     className={styles.piece}
-                    src="/images/board/Board01.png"
+                    src={BOARD_IMAGE_SRCS[0]}
                     alt="Board outer left"
-                    fill
-                    sizes={boardImageSizes}
-                    style={{ objectFit: "contain" }}
-                    priority
                     onLoad={handlePieceLoaded}
                   />
                 </div>
                 <div className={`${styles.pieceBox} ${styles.pMidLeft}`}>
-                  <Image
+                  <img
                     className={styles.piece}
-                    src="/images/board/Board02.png"
+                    src={BOARD_IMAGE_SRCS[1]}
                     alt="Board mid left"
-                    fill
-                    sizes={boardImageSizes}
-                    style={{ objectFit: "contain" }}
                     onLoad={handlePieceLoaded}
                   />
                 </div>
                 <div className={`${styles.pieceBox} ${styles.pOuterRight}`}>
-                  <Image
+                  <img
                     className={styles.piece}
-                    src="/images/board/Board05.png"
+                    src={BOARD_IMAGE_SRCS[2]}
                     alt="Board outer right"
-                    fill
-                    sizes={boardImageSizes}
-                    style={{ objectFit: "contain" }}
                     onLoad={handlePieceLoaded}
                   />
                 </div>
                 <div className={`${styles.pieceBox} ${styles.pMidRight}`}>
-                  <Image
+                  <img
                     className={styles.piece}
-                    src="/images/board/Board04.png"
+                    src={BOARD_IMAGE_SRCS[3]}
                     alt="Board mid right"
-                    fill
-                    sizes={boardImageSizes}
-                    style={{ objectFit: "contain" }}
                     onLoad={handlePieceLoaded}
                   />
                 </div>
                 <div className={`${styles.pieceBox} ${styles.pCenter}`}>
-                  <Image
+                  <img
                     className={styles.piece}
-                    src="/images/board/Board03.png"
+                    src={BOARD_IMAGE_SRCS[4]}
                     alt="Board center"
-                    fill
-                    sizes={boardImageSizes}
-                    style={{ objectFit: "contain" }}
                     onLoad={handlePieceLoaded}
                   />
                 </div>

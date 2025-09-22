@@ -1,11 +1,10 @@
 import Link from "next/link";
 import styles from "./CircleList.module.scss";
-import { StaticImageData } from "next/image";
 
 type SpotItem = {
   id: number;
   name: string;
-  imgUrl: string | StaticImageData;
+  imgUrl: string;
 };
 
 type CircleListProps = {
@@ -25,9 +24,7 @@ export default function CircleList({ baseHref, items }: CircleListProps) {
           <div
             className={styles.circleItem}
             style={{
-              backgroundImage: `url(${
-                typeof item.imgUrl === "string" ? item.imgUrl : item.imgUrl.src
-              })`,
+              backgroundImage: `url(${item.imgUrl})`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
