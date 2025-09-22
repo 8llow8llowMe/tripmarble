@@ -31,7 +31,15 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "tong.visitkorea.or.kr", pathname: "/**" },
       { protocol: "https", hostname: "k.kakaocdn.net", pathname: "/**" },
+      // TripMarble asset host (https)
       { protocol: "https", hostname: "tripmarble-dev.store", pathname: "/**" },
+      // MinIO (http with port 9000)
+      {
+        protocol: "http",
+        hostname: "tripmarble-dev.store",
+        port: "9000",
+        pathname: "/**",
+      },
       {
         protocol: "https",
         hostname: "minio.8llow8llowme.com",
