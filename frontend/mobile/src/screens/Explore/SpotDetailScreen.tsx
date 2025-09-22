@@ -1,17 +1,52 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
 import mapDummy from '@images/places/map.png';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import useTripSpotQuery from '@/hooks/trip/useSpot';
+import { SpotStackParamList } from '@/types/navigation/navigation';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-export default function SpotDetailScreen() {
+type Props = NativeStackScreenProps<SpotStackParamList, 'SpotDetailScreen'>;
+
+export default function SpotDetailScreen({ route }: Props) {
+  const { tripSpotId } = route.params;
   const navigation = useNavigation<AppNavigatorNavigationProp>();
 
+  const { tripSpot, isLoading, isError, refetch } = useTripSpotQuery({ tripSpotId });
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.safeArea, styles.center]}>
+        <ActivityIndicator />
+      </SafeAreaView>
+    );
+  }
+
+  if (isError) {
+    return (
+      <SafeAreaView style={[styles.safeArea, styles.center]}>
+        <Text style={{ color: palette.error }}>데이터를 불러올 수 없습니다.</Text>
+        <TouchableOpacity style={styles.retry} onPress={() => refetch()}>
+          <Text style={styles.retryText}>다시 시도</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   // 더미 데이터
-  const data = {
+  const data = tripSpot?.dataBody || {
     tripSpotName: '제주 성산일출봉',
     contentTypeName: '관광지',
     description:
@@ -47,11 +82,17 @@ export default function SpotDetailScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* 대표 이미지 */}
         <View style={styles.imageWrapper}>
-          <Image
-            source={{ uri: data.thumbnailImageUrl }}
-            style={styles.mainImage}
-            resizeMode="cover"
-          />
+          {/* {data.thumbnailImageUrl ? (
+            <Image
+              source={{ uri: data.thumbnailImageUrl }}
+              style={styles.mainImage}
+              resizeMode="cover"
+            />
+          ) : ( */}
+          <View style={[styles.mainImage, styles.thumbPh]}>
+            <Ionicons name="image" size={20} color={palette.gray400} />
+          </View>
+          {/* )} */}
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={26} color="#222" />
           </TouchableOpacity>
@@ -143,8 +184,26 @@ export default function SpotDetailScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white },
+  center: { alignItems: 'center', justifyContent: 'center' },
+  empty: { padding: 24, textAlign: 'center', color: palette.gray600 },
+  retry: {
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#eef1f6',
+  },
+  retryText: { color: palette.gray800, fontWeight: '600' },
+
   imageWrapper: { position: 'relative' },
   mainImage: { width: '100%', height: 260 },
+  thumbPh: {
+    width: '100%',
+    height: 260,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#eef1f6',
+  },
   backBtn: {
     position: 'absolute',
     top: 20,
