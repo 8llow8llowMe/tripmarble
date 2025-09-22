@@ -56,7 +56,7 @@ const SettingsHomeScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        {/* <View style={styles.section}>
+        <View style={styles.section}>
           <TouchableOpacity>
             <View style={styles.row}>
               <TextBox size={16} fontsName="Pretendard700" style={styles.label}>
@@ -66,7 +66,7 @@ const SettingsHomeScreen = () => {
             </View>
           </TouchableOpacity>
           <Divider />
-        </View> */}
+        </View>
 
         <View style={styles.section}>
           <TextBox size={16} fontsName="Pretendard700" style={styles.label}>
