@@ -28,10 +28,15 @@ const nextConfig = {
 
   // next/image domains 설정 (SSR이므로 unoptimized 제거)
   images: {
-    domains: [
-      "tong.visitkorea.or.kr",
-      "k.kakaocdn.net",
-      "tripmarble-dev.store",
+    remotePatterns: [
+      { protocol: "https", hostname: "tong.visitkorea.or.kr", pathname: "/**" },
+      { protocol: "https", hostname: "k.kakaocdn.net", pathname: "/**" },
+      { protocol: "https", hostname: "tripmarble-dev.store", pathname: "/**" },
+      {
+        protocol: "https",
+        hostname: "minio.8llow8llowme.com",
+        pathname: "/**",
+      },
     ],
   },
 
