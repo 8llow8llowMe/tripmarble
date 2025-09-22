@@ -26,14 +26,14 @@ const nextConfig = {
       .map((k) => [k, process.env[k]])
   ),
 
-  // next/image domains 설정 (SSR이므로 unoptimized 제거)
+  // next/image domains 설정
   images: {
     remotePatterns: [
+      { protocol: "http", hostname: "tong.visitkorea.or.kr", pathname: "/**" },
       { protocol: "https", hostname: "tong.visitkorea.or.kr", pathname: "/**" },
+      { protocol: "http", hostname: "k.kakaocdn.net", pathname: "/**" },
       { protocol: "https", hostname: "k.kakaocdn.net", pathname: "/**" },
-      // TripMarble asset host (https)
       { protocol: "https", hostname: "tripmarble-dev.store", pathname: "/**" },
-      // MinIO (http with port 9000)
       {
         protocol: "http",
         hostname: "tripmarble-dev.store",
@@ -42,7 +42,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "minio.8llow8llowme.com",
+        hostname: "www.minio.8llow8llowme.com",
         pathname: "/**",
       },
     ],
