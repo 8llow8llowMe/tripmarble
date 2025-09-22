@@ -48,7 +48,9 @@ export default function HomeDicePage() {
     document.body.appendChild(el);
     setPortalEl(el);
     return () => {
-      document.body.removeChild(el);
+      if (el && el.isConnected) {
+        el.remove();
+      }
       setPortalEl(null);
     };
   }, []);
