@@ -20,6 +20,7 @@ import { RandomPickSection } from '@/components/ui/home';
 import { DUMMY_RANDOM_PICK } from '@/constants/dummyData';
 
 import jejuImage from '@assets/images/places/jeju2.png';
+import TextBox from '@/components/atom/TextBox';
 const bgHeight = Dimensions.get('window').height * 0.45;
 const searchBoxHeight = 56; // padding+borderRadius 감안, 대략 값(조정 가능)
 
@@ -52,7 +53,7 @@ export default function ExploreScreen() {
           <Image source={jejuImage} style={styles.backgroundImage} />
           <View style={styles.overlay} />
         </View>
-        {/* <View style={[styles.searchBoxWrapper, { top: bgHeight - searchBoxHeight / 2 }]}>
+        <View style={[styles.searchBoxWrapper, { top: bgHeight - searchBoxHeight / 2 }]}>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => navigation.navigate('SearchScreen')}
@@ -62,7 +63,7 @@ export default function ExploreScreen() {
               여행지를 검색해보세요.
             </TextBox>
           </TouchableOpacity>
-        </View> */}
+        </View>
 
         {/* <QuickFilterSection /> */}
         {/* <MagazineSection /> */}

@@ -4,6 +4,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { enableScreens } from 'react-native-screens';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import UseNetworkCheck from '@/hooks/useNetworkCheck';
+import NetworkStatusBar from '@/components/common/NetworkStatusBar';
 
 enableScreens();
 
@@ -14,6 +16,8 @@ export default function App() {
         <Providers>
           <GestureHandlerRootView>
             <BottomSheetModalProvider>
+              <UseNetworkCheck />
+              <NetworkStatusBar />
               <RootNavigation />
             </BottomSheetModalProvider>
           </GestureHandlerRootView>
