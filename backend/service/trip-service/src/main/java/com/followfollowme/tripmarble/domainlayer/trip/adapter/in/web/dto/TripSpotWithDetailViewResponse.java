@@ -32,12 +32,13 @@ public record TripSpotWithDetailViewResponse(
     String addressDetail,
 
     @Schema(description = "경도", example = "126.8928691464")
-    Double longitude,
+    double longitude,
 
     @Schema(description = "위도", example = "36.1899003585")
-    Double latitude,
+    double latitude,
 
     @Schema(description = "여행지 대표 이미지 원본 URL", example = "http://tong.visitkorea.or.kr/~~~.jpg")
     String originalImageUrl
 ) {
+
 }

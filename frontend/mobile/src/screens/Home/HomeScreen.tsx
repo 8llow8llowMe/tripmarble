@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -18,6 +18,18 @@ import { useGameLists } from '@/hooks/game/useGameList';
 import { useAppSelector } from '@/store/store';
 import useTripSpotQuery from '@/hooks/trip/useSpot';
 import { DUMMY_FRIENDS, DUMMY_PLACES, DUMMY_RANDOM_PICK } from '@/constants/dummyData';
+import { Ionicons } from '@expo/vector-icons';
+
+// 공통 그림자
+const shadow = Platform.select({
+  ios: {
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  android: { elevation: 3 },
+});
 
 export default function HomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
@@ -31,6 +43,11 @@ export default function HomeScreen() {
   const latestTrip = ongoingContents.reduce((latest, item) => {
     return new Date(item.startedAt) > new Date(latest.startedAt) ? item : latest;
   }, ongoingContents[0]);
+
+  // 검색 스크린으로 이동
+  const goToSearchScreen = () => {
+    navigation.navigate('SearchScreen');
+  };
 
   // 진행중인 게임 스크린으로 이동
   const goToGameOngoingScreen = (tripGameId: string) => {
@@ -61,6 +78,9 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* 헤더 */}
         <HeaderSection nickname={nickname} />
+        {/* 검색 */}
+        <SearchSection onPress={goToSearchScreen} />
+
         <View style={styles.headerBanner}>
           <GameSummaryBanner
             counts={{
@@ -70,9 +90,6 @@ export default function HomeScreen() {
             }}
           />
         </View>
-
-        {/* 검색 */}
-        {/* <SearchSection onPress={() => navigation.navigate('SearchScreen')} /> */}
 
         {/* 내 기록 */}
         {/* <HistorySection
@@ -117,16 +134,16 @@ function HeaderSection({ nickname }: { nickname?: string }) {
   );
 }
 
-// function SearchSection({ onPress }: { onPress: () => void }) {
-//   return (
-//     <TouchableOpacity style={[styles.searchBox, shadow]} activeOpacity={0.8} onPress={onPress}>
-//       <Ionicons name="search" size={18} color={palette.gray400} />
-//       <TextBox size={15} color={palette.gray400} style={{ marginLeft: 8 }}>
-//         여행지를 검색해보세요
-//       </TextBox>
-//     </TouchableOpacity>
-//   );
-// }
+function SearchSection({ onPress }: { onPress: () => void }) {
+  return (
+    <TouchableOpacity style={[styles.searchBox, shadow]} activeOpacity={0.8} onPress={onPress}>
+      <Ionicons name="search" size={18} color={palette.gray400} />
+      <TextBox size={15} color={palette.gray400} style={{ marginLeft: 8 }}>
+        여행지를 검색해보세요
+      </TextBox>
+    </TouchableOpacity>
+  );
+}
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white },

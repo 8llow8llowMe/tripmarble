@@ -2,8 +2,8 @@ package com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.presenter;
 
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotSimpleResponse;
 import com.followfollowme.tripmarble.domainlayer.trip.adapter.in.web.dto.TripSpotWithDetailViewResponse;
-import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
-import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpotDetail;
+import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotSimpleInfo;
+import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotWithDetailViewInfo;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
@@ -11,32 +11,32 @@ import org.springframework.stereotype.Component;
 @Component
 public class TripSpotPresenter {
 
-    public TripSpotSimpleResponse toSimpleResponse(TripSpot tripSpot) {
+    public TripSpotSimpleResponse toSimpleResponse(TripSpotSimpleInfo info) {
         return TripSpotSimpleResponse.builder()
-            .tripSpotId(String.valueOf(tripSpot.id()))
-            .contentId(String.valueOf(tripSpot.contentId()))
-            .tripSpotName(tripSpot.title())
-            .originalImageUrl(tripSpot.firstImage())
+            .tripSpotId(String.valueOf(info.tripSpotId()))
+            .contentId(String.valueOf(info.contentId()))
+            .tripSpotName(info.tripSpotName())
+            .originalImageUrl(info.originalImageUrl())
             .build();
     }
 
-    public SliceResponse<TripSpotSimpleResponse> toSimpleSliceResponse(Slice<TripSpot> tripSpots) {
-        return SliceResponse.of(tripSpots.map(this::toSimpleResponse));
+    public SliceResponse<TripSpotSimpleResponse> toSimpleSliceResponse(Slice<TripSpotSimpleInfo> infos) {
+        return SliceResponse.of(infos.map(this::toSimpleResponse));
     }
 
-    public TripSpotWithDetailViewResponse toDetailViewResponse(TripSpot tripSpot, TripSpotDetail tripSpotDetail, String contentTypeName) {
+    public TripSpotWithDetailViewResponse toDetailViewResponse(TripSpotWithDetailViewInfo info) {
         return TripSpotWithDetailViewResponse.builder()
-            .tripSpotId(String.valueOf(tripSpot.id()))
-            .tripSpotName(tripSpot.title())
-            .contentTypeName(contentTypeName)
-            .description(tripSpotDetail.overview())
-            .homepageUrl(tripSpotDetail.homepage())
-            .phoneNumber(tripSpot.tel())
-            .address(tripSpot.addr1())
-            .addressDetail(tripSpot.addr2())
-            .longitude(tripSpot.mapX())
-            .latitude(tripSpot.mapY())
-            .originalImageUrl(tripSpot.firstImage())
+            .tripSpotId(String.valueOf(info.tripSpotId()))
+            .tripSpotName(info.tripSpotName())
+            .contentTypeName(info.contentTypeName())
+            .description(info.description())
+            .homepageUrl(info.homepageUrl())
+            .phoneNumber(info.phoneNumber())
+            .address(info.address())
+            .addressDetail(info.addressDetail())
+            .longitude(info.longitude())
+            .latitude(info.latitude())
+            .originalImageUrl(info.originalImageUrl())
             .build();
     }
 }

@@ -46,6 +46,7 @@ export const palette = {
   backgrop: 'rgba(0,0,0, 0.35)',
   borderBottomColor: 'rgba(228, 232, 238, 0.20)',
   reportText: '#F97066',
+  networkError: '#555555',
 
   purple300: '#BDB4FE',
   yellow300: '#FEC84B',
