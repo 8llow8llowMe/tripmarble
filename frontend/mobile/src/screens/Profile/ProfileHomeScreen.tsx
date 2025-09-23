@@ -27,8 +27,8 @@ export default function ProfileHomeScreen() {
     stats: { trips: 12, reviews: 34, photos: 89, hours: 120 },
   };
 
+  // 로그아웃
   const { logout, isPending } = useLogoutMutation();
-
   const confirmLogout = () => {
     Alert.alert(
       '로그아웃',
@@ -52,6 +52,13 @@ export default function ProfileHomeScreen() {
     });
   };
 
+  // 프로필 수정 스크린으로 이동
+  const goToProfileEditScreen = () => {
+    navigation.navigate('SettingsNavigator', {
+      screen: 'ProfileEditScreen',
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -65,7 +72,7 @@ export default function ProfileHomeScreen() {
               <Text style={styles.name}>{nickname}</Text>
               <Text style={styles.email}>{email}</Text>
             </View>
-            <TouchableOpacity style={styles.editBtn}>
+            <TouchableOpacity style={styles.editBtn} onPress={goToProfileEditScreen}>
               <Text style={styles.editBtnText}>프로필 수정</Text>
             </TouchableOpacity>
           </View>
