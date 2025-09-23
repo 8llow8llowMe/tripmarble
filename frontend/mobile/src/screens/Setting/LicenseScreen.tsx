@@ -10,7 +10,6 @@ import {
   StyleSheet,
   Linking,
   TouchableOpacity,
-  Animated,
   Pressable,
 } from 'react-native';
 
