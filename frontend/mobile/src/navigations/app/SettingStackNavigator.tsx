@@ -1,5 +1,6 @@
 import Detailheader from '@/components/layout/header/Detailheader';
-import LicenseScreen from '@/screens/Profile/LicenseScreen';
+import ProfileEditScreen from '@/screens/Profile/ProfileEditScreen';
+import LicenseScreen from '@/screens/Setting/LicenseScreen';
 import SettingsHomeScreen from '@/screens/Setting/SettingsHomeScreen';
 import { SettingsParamList } from '@/types/navigation/navigation';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -18,6 +19,11 @@ export default function SettingStackNavigator() {
         name="LicenseScreen"
         component={LicenseScreen}
         options={{ header: () => <Detailheader title="오픈소스 라이선스" /> }}
+      />
+      <SettingStack.Screen
+        name="ProfileEditScreen"
+        component={ProfileEditScreen}
+        options={{ header: () => <Detailheader title="프로필 수정" /> }}
       />
     </SettingStack.Navigator>
   );
