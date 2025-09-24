@@ -36,6 +36,7 @@ public class MemberUpdateProcessor {
             .profileImageUrl(profileImageUrl)
             .role(member.role())
             .provider(member.provider())
+            .status(member.status())
             .build();
 
         // 4. 저장 (merge) -> update
