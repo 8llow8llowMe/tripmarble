@@ -4,7 +4,7 @@ name: Mobile Android Build
 on:
   pull_request:
     types: [labeled, unlabeled, synchronize] # PR 라벨 변경/동기화 시 실행
-    branches: [develop, main] # develop, main 브랜치 PR에서만 실행
+    branches: [develop, main] # develop, main 브랜치에서만 실행
     paths: # 모바일 코드/워크플로우 변경 시 실행
       - 'frontend/mobile/**'
       - '.github/workflows/mobile-android-build.yml'
@@ -20,6 +20,7 @@ jobs:
       ANDROID_HOME: /opt/android-sdk
       GRADLE_OPTS: -Xmx6144m -XX:MaxMetaspaceSize=2048m
       NODE_OPTIONS: --max-old-space-size=4096
+      ANDROID_NDK_VERSION: 27.1.12297006
 
       # keystore 관련 secrets 주입 (Gradle에서 System.getenv로 읽음)
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -30,10 +31,8 @@ jobs:
       # 1. 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      # 2. Node.js 설치
+      # 2. Node.js 설치 및 Yarn 캐시
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -41,28 +40,53 @@ jobs:
           cache: 'yarn'
           cache-dependency-path: 'frontend/mobile/yarn.lock'
 
-      # 3. Java 설치
+      # 3. Gradle 캐시
+      - name: Cache Gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      # 4. Node_modules 캐시
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: frontend/mobile/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('frontend/mobile/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      # 5. Android NDK 캐시
+      - name: Cache Android NDK
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.ANDROID_SDK_ROOT }}/ndk
+          key: ${{ runner.os }}-ndk-${{ env.ANDROID_NDK_VERSION }}
+
+      # 6. Java 설치
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      # 4. Android SDK 설치
+      # 7. Android SDK 설치
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           api-level: 35
           build-tools: 35.0.0
-          ndk-version: 27.1.12297006
+          ndk-version: ${{ env.ANDROID_NDK_VERSION }}
           cmake-version: 3.22.1
 
-      # 5. Yarn 의존성 설치
+      # 8. Yarn 의존성 설치 (캐시가 있으면 skip됨)
       - name: Install dependencies
         working-directory: frontend/mobile
         run: yarn install --frozen-lockfile
 
-      # 6. 빌드 타입 및 환경 설정
+      # 9. 빌드 타입 및 환경 설정
       - name: Setup build environment
         working-directory: frontend/mobile
         run: |
@@ -76,55 +100,54 @@ jobs:
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
           echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
 
-      # 7. Keystore 복원
+      # 10. Keystore 복원
       - name: Restore Keystore
         working-directory: frontend/mobile
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
           ls -lh android/app/tripmarble-release-key.jks
 
-      # 8. Gradle signingReport 실행 (signingConfig 올바른지 검증)
+      # 11. signingConfig 검증
       - name: Verify signing config
         working-directory: frontend/mobile/android
         run: |
           chmod +x gradlew
-          ./gradlew signingReport
+          ./gradlew signingReport --no-daemon --parallel
 
-      # 8.1 버전 코드/네임 설정
+      # 12. 버전 코드/네임 설정
       - name: Set version code and name
         run: |
-          # versionCode → GitHub Actions run_number 기반 (항상 증가)
           VERSION_CODE=$((10000 + $GITHUB_RUN_NUMBER))
-
-          # versionName → git 태그 기반, 없으면 기본값
           if git describe --tags --abbrev=0 >/dev/null 2>&1; then
             VERSION_NAME=$(git describe --tags --abbrev=0)
           else
             VERSION_NAME="1.0.${GITHUB_RUN_NUMBER}"
           fi
-
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
 
-      # 9. 안드로이드 빌드
+      # 13. 안드로이드 빌드
       - name: Build Android
         working-directory: frontend/mobile/android
         run: |
           chmod +x gradlew
-           
+
           if [ "${{ env.BUILD_TYPE }}" = "release" ]; then
             BUILD_TASK="bundleRelease"
             OUTPUT_PATH="app/build/outputs/bundle/release/app-release.aab"
+            ./gradlew clean $BUILD_TASK \
+              -PversionCode=${{ env.VERSION_CODE }} \
+              -PversionName=${{ env.VERSION_NAME }} \
+              --no-daemon --parallel --stacktrace -x test -x lint -x check -x verify
           else
             BUILD_TASK="assembleDebug"
             OUTPUT_PATH="app/build/outputs/apk/debug/app-debug.apk"
+            # Debug 빌드는 clean 제거 → 속도 증가
+            ./gradlew $BUILD_TASK \
+              -PversionCode=${{ env.VERSION_CODE }} \
+              -PversionName=${{ env.VERSION_NAME }} \
+              --no-daemon --parallel --stacktrace -x test -x lint -x check -x verify
           fi
-
-          echo "Building ${{ env.BUILD_TYPE }} ($BUILD_TASK) with APP_ENV=${{ env.APP_ENV }}"
-          ./gradlew clean $BUILD_TASK \
-            -PversionCode=${{ env.VERSION_CODE }} \
-            -PversionName=${{ env.VERSION_NAME }} \
-            --no-daemon --stacktrace -x test -x lint -x check -x verify
 
           if [ ! -f "$OUTPUT_PATH" ]; then
             echo "✗ Build failed"
@@ -135,7 +158,7 @@ jobs:
           ls -lh "$OUTPUT_PATH"
           echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
 
-      # 10. APK 업로드 (Debug 전용)
+      # 14. APK 업로드 (Debug 전용)
       - name: Upload APK (Debug)
         if: env.BUILD_TYPE == 'debug'
         uses: actions/upload-artifact@v4
@@ -144,7 +167,7 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
 
-      # 11. AAB 업로드 (Release 전용)
+      # 15. AAB 업로드 (Release 전용)
       - name: Upload AAB (Release)
         if: env.BUILD_TYPE == 'release'
         uses: actions/upload-artifact@v4
@@ -153,7 +176,7 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
-      # 12. Google Play 업로드 (open 트랙)
+      # 16. Google Play 업로드 (Open Track)
       - name: Deploy to Google Play (Open Track)
         if: env.BUILD_TYPE == 'release' && github.base_ref == 'main'
         working-directory: frontend/mobile
