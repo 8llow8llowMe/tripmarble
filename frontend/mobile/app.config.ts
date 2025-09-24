@@ -44,7 +44,7 @@ const defineConfig = (): ExpoConfig => ({
       backgroundColor: '#4BA1FD',
     },
     edgeToEdgeEnabled: true,
-    jsEngine: 'jsc',
+    jsEngine: 'hermes',
   },
   web: { favicon: './assets/favicon.png' },
   experiments: { reactCanary: true },
