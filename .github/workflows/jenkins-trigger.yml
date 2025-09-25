@@ -10,40 +10,32 @@ on:
 
 jobs:
   trigger-jenkins:
-    # 2. frontend-mobile 라벨이 있으면 Jenkins 트리거 완전 비활성화
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'frontend-mobile') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check and trigger Jenkins
         run: |
-          # 3. GitHub 이벤트 정보 변수화
+          # 1. GitHub 이벤트 정보 변수화
           action="${{ github.event.action }}"
           labels="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
-          target_branch="${{ github.event.pull_request.base.ref }}"
-          pr_branch="${{ github.event.pull_request.head.ref }}"
+          target_branch="${{ github.event.pull_request.base.ref }}" # ex) develop, main
+          pr_branch="${{ github.event.pull_request.head.ref }}"     # ex) feature/xxx
           pr_number="${{ github.event.pull_request.number }}"
 
-          # 4. 트리거 기본값 (false)
           should_trigger=false
 
-          # 5. frontend-mobile 라벨이면 Jenkins 트리거 건너뜀
+          # 2. frontend-mobile 라벨이면 Jenkins 트리거 제외
           if [[ "$labels" == *"frontend-mobile"* ]]; then
-            echo "Skip: frontend-mobile label detected - use GitHub Actions instead"
+            echo "Skip: frontend-mobile label detected - handled by GitHub Actions"
             exit 0
           fi
 
-          # 6. develop, main 브랜치 타겟이면 Jenkins 트리거 제외 (수동 전용)
-          if [[ "$target_branch" == "develop" || "$target_branch" == "main" ]]; then
-            echo "Skip: target branch is $target_branch (manual only)"
-            exit 0
-          fi
-
-          # 7. 라벨 변경 시 무조건 Jenkins 트리거
+          # 3. 라벨 변경 시 → 무조건 Jenkins 트리거
           if [[ "$action" == "labeled" || "$action" == "unlabeled" ]]; then
             should_trigger=true
             echo "Trigger: Label changed"
 
-          # 8. 코드 push(synchronize) 시, backend/frontend 라벨이 붙어있고 최근 1시간 이내 push라면 Jenkins 트리거
+          # 4. 코드 push(synchronize) 시, backend/frontend 라벨이 붙어있고 최근 1시간 이내 push면 Jenkins 트리거
           elif [[ "$action" == "synchronize" && ("$labels" == *"backend-"* || "$labels" == *"frontend-"*) ]]; then
             commit_time=$(date -d "${{ github.event.pull_request.head.repo.pushed_at }}" +%s)
             current_time=$(date -u +%s)
@@ -53,29 +45,26 @@ jobs:
             else
               echo "Skip: Push is older than 1 hour"
             fi
-          else
-            echo "Skip: No matching condition"
           fi
 
-          # 9. Jenkins 트리거 실행
+          # 5. Jenkins 트리거 실행
           if [[ "$should_trigger" == "true" ]]; then
             echo "=== Jenkins Trigger Start ==="
+            echo "Target branch: $target_branch (PR)"
+            echo "PR branch: $pr_branch (#$pr_number)"
             echo "Labels: $labels"
-            echo "Target: $target_branch"
-            echo "PR: $pr_branch (#$pr_number)"
 
             JENKINS_URL="${{ secrets.JENKINS_URL }}"
             JENKINS_USER="${{ secrets.JENKINS_USER }}"
             JENKINS_TOKEN="${{ secrets.JENKINS_TOKEN }}"
             JENKINS_URL="${JENKINS_URL%/}"
 
-            # 10. 서비스별 Jenkins job 트리거
             trigger_service() {
               local service_name="$1"
               local service_group="$2"
               local job_name="tripmarble-${service_group}-${service_name}"
 
-              echo "Triggering Jenkins job: $job_name for branch $pr_branch"
+              echo "Triggering Jenkins job: $job_name (branch $pr_branch -> $target_branch)"
 
               curl -s -w "HTTP_CODE:%{http_code}" -X POST \
                 --user "$JENKINS_USER:$JENKINS_TOKEN" \
@@ -86,7 +75,7 @@ jobs:
                 --data-urlencode "PR_NUMBER=$pr_number"
             }
 
-            # 11. 라벨별 매핑
+            # 6. 라벨별 Jenkins job 매핑
             [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "auth-service" "backend"
             [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "trip-service" "backend"
             [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "trip-game-service" "backend"
@@ -96,4 +85,6 @@ jobs:
             [[ "$labels" == *"frontend-mobile"* ]] && trigger_service "mobile" "frontend"
 
             echo "=== Jenkins Trigger Completed ==="
+          else
+            echo "Skip: No matching condition"
           fi
