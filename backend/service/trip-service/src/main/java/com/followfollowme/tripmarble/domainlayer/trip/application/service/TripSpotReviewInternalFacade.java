@@ -8,6 +8,7 @@ import com.followfollowme.tripmarble.domainlayer.trip.application.info.TripSpotR
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.in.TripSpotReviewInternalUseCase;
 import com.followfollowme.tripmarble.domainlayer.trip.application.service.processor.TripSpotReviewCreateProcessor;
 import com.followfollowme.tripmarble.domainlayer.trip.application.service.processor.TripSpotReviewPhotoCreateProcessor;
+import com.followfollowme.tripmarble.domainlayer.trip.application.service.processor.TripSpotReviewPhotoUploadProcessor;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class TripSpotReviewInternalFacade implements TripSpotReviewInternalUseCa
 
     private final TripSpotReviewCreateProcessor tripSpotReviewCreateProcessor;
     private final TripSpotReviewPhotoCreateProcessor tripSpotReviewPhotoCreateProcessor;
+    private final TripSpotReviewPhotoUploadProcessor tripSpotReviewPhotoUploadProcessor;
     private final TripSpotReviewInternalPresenter tripSpotReviewInternalPresenter;
 
     @Override
@@ -29,9 +31,12 @@ public class TripSpotReviewInternalFacade implements TripSpotReviewInternalUseCa
         TripSpotReviewCreateInfo reviewCreateInfo = tripSpotReviewCreateProcessor.createMissionReview(tripSpotId, memberId,
             command.content(), command.rating());
 
-        // 2. 사진 저장
+        // 2. temp -> real 변환
+        List<String> realPhotoUrls = tripSpotReviewPhotoUploadProcessor.promoteToReal(command.photoUrls());
+
+        // 3. 사진 저장
         List<TripSpotReviewPhotoCreateInfo> photoCreateInfos = tripSpotReviewPhotoCreateProcessor.createPhotos(
-            reviewCreateInfo.tripSpotReviewId(), command.photoUrls());
+            reviewCreateInfo.tripSpotReviewId(), realPhotoUrls);
 
         return tripSpotReviewInternalPresenter.toCreateResponse(reviewCreateInfo, photoCreateInfos);
     }
