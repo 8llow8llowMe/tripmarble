@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [labeled, unlabeled, synchronize]
     branches: [develop, main]
-    paths-ignore:  # 모바일 관련 파일 변경 시 Jenkins 트리거 제외
+    paths-ignore: # 모바일 관련 파일 변경 시 Jenkins 트리거 제외
       - 'frontend/mobile/**'
       - '.github/workflows/mobile-android-build.yml'
 
@@ -34,7 +34,10 @@ jobs:
           if [[ "$action" == "labeled" || "$action" == "unlabeled" ]]; then
             should_trigger=true
             echo "Trigger: Label changed"
-          elif [[ "$action" == "synchronize" && ("$labels" == *"backend-"* || ("$labels" == *"frontend-"* && "$labels" != *"frontend-mobile"*)) ]]; then
+          elif [[ "$action" == "synchronize" \
+            && "$target_branch" != "develop" \
+            && "$target_branch" != "main" \
+            && ("$labels" == *"backend-"* || ("$labels" == *"frontend-"* && "$labels" != *"frontend-mobile"*)) ]]; then
             # 최근 1시간 이내 push만 허용
             commit_time=$(date -d "${{ github.event.pull_request.head.repo.pushed_at }}" +%s)
             current_time=$(date -u +%s)
