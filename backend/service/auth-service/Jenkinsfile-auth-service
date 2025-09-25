@@ -106,8 +106,10 @@ pipeline {
 
         stage('Build JAR') {
             steps {
-                sh "chmod +x backend/gradlew"
-                sh "backend/gradlew :${params.SERVICE_GROUP}:${params.SERVICE_NAME}:bootJar"
+                dir("backend") {
+                    sh "chmod +x gradlew"
+                    sh "./gradlew :${params.SERVICE_GROUP}:${params.SERVICE_NAME}:bootJar"
+                }
             }
             post {
                 success {
