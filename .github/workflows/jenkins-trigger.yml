@@ -83,7 +83,6 @@ jobs:
             [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "api-gateway" "backend"
             [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "service-discovery" "backend"
             [[ "$labels" == *"frontend-web"* ]] && trigger_service "web" "frontend"
-            [[ "$labels" == *"frontend-mobile"* ]] && trigger_service "mobile" "frontend"
 
             echo "=== Jenkins Trigger Completed ==="
           else
