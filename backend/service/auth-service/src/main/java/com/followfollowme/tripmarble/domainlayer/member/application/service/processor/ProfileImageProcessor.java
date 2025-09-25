@@ -13,9 +13,11 @@ import io.minio.RemoveObjectArgs;
 import java.io.InputStream;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProfileImageProcessor {
@@ -43,7 +45,7 @@ public class ProfileImageProcessor {
                         .build()
                 );
             }
-            // 3. 최정 URL 생성 후 응답 DTO에 담아 반환
+            // 3. 최종 URL 생성 후 응답 DTO에 담아 반환
             String url = minioProperties.publicUrl() + "/" + bucketName + "/" + objectPath;
 
             return MemberProfileUploadResponse.builder()
@@ -51,14 +53,15 @@ public class ProfileImageProcessor {
                 .build();
 
         } catch (Exception e) {
+            log.error("프로필 이미지 업로드 실패: originalName={}", imageFile.getOriginalFilename(), e);
             throw new MemberException(MemberErrorCode.UPLOAD_PROFILE_IMAGE_FAILED);
         }
     }
 
     public String promoteToReal(String tempImageUrl) {
         try {
-            String objectName = extractObjectName(tempImageUrl);
             String bucketName = minioProperties.bucketPrefix();
+            String objectName = extractObjectName(tempImageUrl);
 
             // 같은 버킷 내에서 temp -> real 폴더로 이동
             String srcObject = MinioBucket.PROFILE_TEMP_IMAGES.objectPath(objectName);
@@ -87,11 +90,14 @@ public class ProfileImageProcessor {
             return minioProperties.publicUrl() + "/" + bucketName + "/" + destObject;
 
         } catch (Exception e) {
+            log.error("프로필 이미지 promote 실패: tempImageUrl={}", tempImageUrl, e);
             throw new MemberException(MemberErrorCode.UPLOAD_PROFILE_IMAGE_FAILED, e);
         }
     }
 
     private String extractObjectName(String tempImageUrl) {
-        return tempImageUrl.substring(tempImageUrl.lastIndexOf("/") + 1);
+        String prefix = "/" + minioProperties.bucketPrefix() + "/";
+        String fullPath = tempImageUrl.substring(tempImageUrl.indexOf(prefix) + prefix.length());
+        return fullPath.substring(fullPath.lastIndexOf("/") + 1);
     }
 }
