@@ -104,9 +104,9 @@ jobs:
         working-directory: frontend/mobile
         run: |
           echo "=== Check env file path ==="
-          ls -lh env/
+          ls -lh ../env/
           echo "=== Dump prod env ==="
-          cat env/.env-frontend-mobile-prod
+          cat ../env/.env-frontend-mobile-prod
 
       # 10. 환경변수 확인
       - name: Echo environment variables
