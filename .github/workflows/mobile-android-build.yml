@@ -100,40 +100,21 @@ jobs:
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
           echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
 
-      - name: Debug env file
-        working-directory: frontend/mobile
-        run: |
-          echo "=== Check env file path ==="
-          ls -lh ../env/
-          echo "=== Dump prod env ==="
-          cat ../env/.env-frontend-mobile-prod
-
-      # 10. 환경변수 확인
-      - name: Echo environment variables
-        run: |
-          echo "--------- ENV CHECK ---------"
-          echo "BUILD_TYPE=${{ env.BUILD_TYPE }}"
-          echo "APP_ENV=${{ env.APP_ENV }}"
-          echo "EXPO_PUBLIC_AUTH_SERVICE=${{ env.EXPO_PUBLIC_AUTH_SERVICE }}"
-          echo "EXPO_PUBLIC_API_GATEWAY=${{ env.EXPO_PUBLIC_API_GATEWAY }}"
-          echo "-----------------------------"
-          echo "-----------------------------"
-
-      # 11. Keystore 복원
+      # 10. Keystore 복원
       - name: Restore Keystore
         working-directory: frontend/mobile
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
           ls -lh android/app/tripmarble-release-key.jks
 
-      # 12. signingConfig 검증
+      # 11. signingConfig 검증
       - name: Verify signing config
         working-directory: frontend/mobile/android
         run: |
           chmod +x gradlew
           ./gradlew signingReport --no-daemon --parallel
 
-      # 13. 버전 코드/네임 설정
+      # 12. 버전 코드/네임 설정
       - name: Set version code and name
         run: |
           VERSION_CODE=$((10000 + $GITHUB_RUN_NUMBER))
@@ -145,7 +126,7 @@ jobs:
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
 
-      # 14. 안드로이드 빌드
+      # 13. 안드로이드 빌드
       - name: Build Android
         working-directory: frontend/mobile/android
         env:
@@ -179,7 +160,7 @@ jobs:
           ls -lh "$OUTPUT_PATH"
           echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
 
-      # 15. APK 업로드 (Debug 전용)
+      # 14. APK 업로드 (Debug 전용)
       - name: Upload APK (Debug)
         if: env.BUILD_TYPE == 'debug'
         uses: actions/upload-artifact@v4
@@ -188,7 +169,7 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
 
-      # 16. AAB 업로드 (Release 전용)
+      # 15. AAB 업로드 (Release 전용)
       - name: Upload AAB (Release)
         if: env.BUILD_TYPE == 'release'
         uses: actions/upload-artifact@v4
@@ -197,7 +178,7 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
-      # 17. Google Play 업로드 (Configurable Track)
+      # 16. Google Play 업로드 (Configurable Track)
       - name: Deploy to Google Play (Open Track)
         if: env.BUILD_TYPE == 'release' && github.base_ref == 'main'
         working-directory: frontend/mobile
