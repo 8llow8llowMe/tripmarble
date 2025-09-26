@@ -78,12 +78,37 @@ jobs:
             }
 
             # 8. 라벨별 Jenkins job 매핑
-            [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "auth-service" "backend" "service"
-            [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "trip-service" "backend" "service"
-            [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "trip-game-service" "backend" "service"
-            [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "api-gateway" "backend" "cloud"
-            [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "service-discovery" "backend" "cloud"
-            [[ "$labels" == *"frontend-web"* ]] && trigger_service "web" "frontend" "frontend"
+            echo "Processing labels: $labels"
+            
+            if [[ "$labels" == *"backend-auth-service"* ]]; then
+              echo "Triggering backend-auth-service..."
+              trigger_service "auth-service" "backend" "service"
+            fi
+            
+            if [[ "$labels" == *"backend-trip-service"* ]]; then
+              echo "Triggering backend-trip-service..."
+              trigger_service "trip-service" "backend" "service"
+            fi
+            
+            if [[ "$labels" == *"backend-trip-game-service"* ]]; then
+              echo "Triggering backend-trip-game-service..."
+              trigger_service "trip-game-service" "backend" "service"
+            fi
+            
+            if [[ "$labels" == *"backend-api-gateway"* ]]; then
+              echo "Triggering backend-api-gateway..."
+              trigger_service "api-gateway" "backend" "cloud"
+            fi
+            
+            if [[ "$labels" == *"backend-service-discovery"* ]]; then
+              echo "Triggering backend-service-discovery..."
+              trigger_service "service-discovery" "backend" "cloud"
+            fi
+            
+            if [[ "$labels" == *"frontend-web"* ]]; then
+              echo "Triggering frontend-web..."
+              trigger_service "web" "frontend" "frontend"
+            fi
 
             echo "=== Jenkins Trigger Completed ==="
           else
