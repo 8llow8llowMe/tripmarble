@@ -100,19 +100,6 @@ jobs:
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
           echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
 
-      # 9-1. 환경변수 파일 복사
-      - name: Copy environment variables
-        working-directory: frontend/mobile
-        run: |
-          if [ "${{ github.base_ref }}" = "main" ]; then
-            cp env/.env-frontend-mobile-prod .env
-            echo "✓ Production environment variables copied"
-          else
-            cp env/.env-frontend-mobile-dev .env
-            echo "✓ Development environment variables copied"
-          fi
-          cat .env
-
       # 10. Keystore 복원
       - name: Restore Keystore
         working-directory: frontend/mobile
