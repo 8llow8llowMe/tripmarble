@@ -100,6 +100,14 @@ jobs:
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
           echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
 
+      - name: Debug env file
+        working-directory: frontend/mobile
+        run: |
+          echo "=== Check env file path ==="
+          ls -lh env/
+          echo "=== Dump prod env ==="
+          cat env/.env-frontend-mobile-prod
+
       # 10. 환경변수 확인
       - name: Echo environment variables
         run: |
