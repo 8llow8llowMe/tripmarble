@@ -109,7 +109,7 @@ pipeline {
             steps {
                 dir("${env.BACKEND_DIR}") {
                     sh "chmod +x gradlew"
-                    sh "./gradlew :${env.MODULE_PATH}:bootJar"
+                    sh "./gradlew :${env.MODULE_PATH}:bootJar --no-daemon"
                 }
             }
             post {
