@@ -107,8 +107,17 @@ pipeline {
 
         stage('Build JAR') {
             steps {
+                script {
+                    echo "=== Debug Information ==="
+                    echo "SERVICE_GROUP: ${params.SERVICE_GROUP}"
+                    echo "SERVICE_NAME: ${params.SERVICE_NAME}"
+                    echo "MODULE_PATH: ${env.MODULE_PATH}"
+                    echo "BACKEND_DIR: ${env.BACKEND_DIR}"
+                    echo "========================="
+                }
                 dir("${env.BACKEND_DIR}") {
                     sh "chmod +x gradlew"
+                    sh "./gradlew projects"
                     sh "./gradlew :${env.MODULE_PATH}:bootJar"
                 }
             }
