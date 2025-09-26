@@ -100,7 +100,7 @@ jobs:
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
           echo "APP_ENV=$APP_ENV" >> $GITHUB_ENV
 
-      # 9-1. 환경변수 확인
+      # 10. 환경변수 확인
       - name: Echo environment variables
         run: |
           echo "--------- ENV CHECK ---------"
@@ -111,21 +111,21 @@ jobs:
           echo "-----------------------------"
           echo "-----------------------------"
 
-      # 10. Keystore 복원
+      # 11. Keystore 복원
       - name: Restore Keystore
         working-directory: frontend/mobile
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/tripmarble-release-key.jks
           ls -lh android/app/tripmarble-release-key.jks
 
-      # 11. signingConfig 검증
+      # 12. signingConfig 검증
       - name: Verify signing config
         working-directory: frontend/mobile/android
         run: |
           chmod +x gradlew
           ./gradlew signingReport --no-daemon --parallel
 
-      # 12. 버전 코드/네임 설정
+      # 13. 버전 코드/네임 설정
       - name: Set version code and name
         run: |
           VERSION_CODE=$((10000 + $GITHUB_RUN_NUMBER))
@@ -137,7 +137,7 @@ jobs:
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
 
-      # 13. 안드로이드 빌드
+      # 14. 안드로이드 빌드
       - name: Build Android
         working-directory: frontend/mobile/android
         env:
@@ -171,7 +171,7 @@ jobs:
           ls -lh "$OUTPUT_PATH"
           echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
 
-      # 14. APK 업로드 (Debug 전용)
+      # 15. APK 업로드 (Debug 전용)
       - name: Upload APK (Debug)
         if: env.BUILD_TYPE == 'debug'
         uses: actions/upload-artifact@v4
@@ -180,7 +180,7 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
 
-      # 15. AAB 업로드 (Release 전용)
+      # 16. AAB 업로드 (Release 전용)
       - name: Upload AAB (Release)
         if: env.BUILD_TYPE == 'release'
         uses: actions/upload-artifact@v4
@@ -189,22 +189,27 @@ jobs:
           path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
-      # 16. Google Play 업로드 (Open Track)
+      # 17. Google Play 업로드 (Configurable Track)
       - name: Deploy to Google Play (Open Track)
         if: env.BUILD_TYPE == 'release' && github.base_ref == 'main'
         working-directory: frontend/mobile
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          PLAY_TRACK: ${{ vars.PLAY_TRACK || 'closed' }} # 기본값은 closed, repo/environment secrets/vars에서 변경 가능
         run: |
           echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" > google-play-service-account.json
           gem install fastlane --no-document --user-install
           echo "$HOME/.gem/ruby/3.2.0/bin" >> $GITHUB_PATH
+
+          echo "Deploying to track: $PLAY_TRACK"
+
           fastlane supply \
             --aab android/app/build/outputs/bundle/release/app-release.aab \
-            --track open \
+            --track $PLAY_TRACK \
             --json_key google-play-service-account.json \
             --package_name com.followfollowme.tripmarble \
             --skip_upload_metadata \
             --skip_upload_images \
             --skip_upload_screenshots
-          rm -f google-play-service-account.json
+
+            rm -f google-play-service-account.json
