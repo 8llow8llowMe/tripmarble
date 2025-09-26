@@ -62,6 +62,7 @@ jobs:
             trigger_service() {
               local service_name="$1"
               local service_group="$2"
+              local gradle_group="$3"
               local job_name="tripmarble-${service_group}-${service_name}"
               local pr_job="PR-$pr_number"
 
@@ -70,19 +71,19 @@ jobs:
               curl -s -w "HTTP_CODE:%{http_code}" -X POST \
                 --user "$JENKINS_USER:$JENKINS_TOKEN" \
                 "$JENKINS_URL/job/$job_name/job/$pr_job/buildWithParameters" \
-                --data-urlencode "SERVICE_GROUP=$service_group" \
+                --data-urlencode "SERVICE_GROUP=$gradle_group" \
                 --data-urlencode "SERVICE_NAME=$service_name" \
                 --data-urlencode "TARGET_BRANCH=$target_branch" \
                 --data-urlencode "PR_NUMBER=$pr_number"
             }
 
             # 8. 라벨별 Jenkins job 매핑
-            [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "auth-service" "service"
-            [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "trip-service" "service"
-            [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "trip-game-service" "service"
-            [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "api-gateway" "cloud"
-            [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "service-discovery" "cloud"
-            [[ "$labels" == *"frontend-web"* ]] && trigger_service "web" "frontend"
+            [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "auth-service" "backend" "service"
+            [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "trip-service" "backend" "service"
+            [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "trip-game-service" "backend" "service"
+            [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "api-gateway" "backend" "cloud"
+            [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "service-discovery" "backend" "cloud"
+            [[ "$labels" == *"frontend-web"* ]] && trigger_service "web" "frontend" "frontend"
 
             echo "=== Jenkins Trigger Completed ==="
           else
