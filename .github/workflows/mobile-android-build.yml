@@ -184,7 +184,7 @@ jobs:
         working-directory: frontend/mobile
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          PLAY_TRACK: ${{ vars.PLAY_TRACK || 'closed' }} # 기본값은 closed, repo/environment secrets/vars에서 변경 가능
+          PLAY_TRACK: ${{ vars.PLAY_TRACK || 'alpha' }} # 기본값은 alpha, repo/environment secrets/vars에서 변경 가능
         run: |
           echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" > google-play-service-account.json
           gem install fastlane --no-document --user-install
