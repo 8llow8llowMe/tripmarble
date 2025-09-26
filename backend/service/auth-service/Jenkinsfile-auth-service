@@ -108,12 +108,12 @@ pipeline {
             steps {
                 dir("backend") {
                     sh "chmod +x gradlew"
-                    sh "./gradlew :${params.SERVICE_GROUP}:${params.SERVICE_NAME}:bootJar"
+                    sh "./gradlew :${env.MODULE_PATH}:bootJar"
                 }
             }
             post {
                 success {
-                    archiveArtifacts "backend/${params.SERVICE_GROUP}/${params.SERVICE_NAME}/build/libs/*.jar"
+                    archiveArtifacts "${env.FS_PATH}/build/libs/*.jar"
                 }
             }
         }
