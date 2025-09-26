@@ -32,6 +32,7 @@ pipeline {
 
     // 공통 환경 변수
     environment {
+        BACKEND_DIR = 'backend'
         MODULE_PATH = "${params.SERVICE_GROUP}:${params.SERVICE_NAME}"
         FS_PATH = "backend/${params.SERVICE_GROUP}/${params.SERVICE_NAME}"
         DOCKERFILE = "${params.SERVICE_NAME}.Dockerfile"
@@ -106,9 +107,9 @@ pipeline {
 
         stage('Build JAR') {
             steps {
-                dir("${env.FS_PATH}") {
-                    sh 'chmod +x ../../gradlew'
-                    sh "../../gradlew :${env.MODULE_PATH}:bootJar"
+                dir("${env.BACKEND_DIR}") {
+                    sh "chmod +x gradlew"
+                    sh "./gradlew :${env.MODULE_PATH}:bootJar"
                 }
             }
             post {
