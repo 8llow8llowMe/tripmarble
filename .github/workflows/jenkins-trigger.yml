@@ -77,11 +77,11 @@ jobs:
             }
 
             # 8. 라벨별 Jenkins job 매핑
-            [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "auth-service" "backend"
-            [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "trip-service" "backend"
-            [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "trip-game-service" "backend"
-            [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "api-gateway" "backend"
-            [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "service-discovery" "backend"
+            [[ "$labels" == *"backend-auth-service"* ]] && trigger_service "auth-service" "service"
+            [[ "$labels" == *"backend-trip-service"* ]] && trigger_service "trip-service" "service"
+            [[ "$labels" == *"backend-trip-game-service"* ]] && trigger_service "trip-game-service" "service"
+            [[ "$labels" == *"backend-api-gateway"* ]] && trigger_service "api-gateway" "cloud"
+            [[ "$labels" == *"backend-service-discovery"* ]] && trigger_service "service-discovery" "cloud"
             [[ "$labels" == *"frontend-web"* ]] && trigger_service "web" "frontend"
 
             echo "=== Jenkins Trigger Completed ==="
