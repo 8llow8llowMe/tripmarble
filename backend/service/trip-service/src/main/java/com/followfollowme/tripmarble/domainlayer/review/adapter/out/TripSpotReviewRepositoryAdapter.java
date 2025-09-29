@@ -11,6 +11,7 @@ import com.followfollowme.tripmarble.domainlayer.review.application.readmodel.Tr
 import com.followfollowme.tripmarble.domainlayer.review.application.readmodel.TripSpotReviewSummaryAssembler;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReview;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
+import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -48,9 +49,17 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
     }
 
     @Override
-    public Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(long tripSpotId, long lastTripSpotReviewId, int size) {
+    public Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(
+        long tripSpotId, long lastTripSpotReviewId, int size, OrderType orderType) {
         Slice<TripSpotReviewEntity> entitySlice =
-            tripSpotReviewRepository.findReviewsNoOffsetByTripSpotId(tripSpotId, lastTripSpotReviewId, size);
+            tripSpotReviewRepository.findReviewsNoOffsetByTripSpotId(tripSpotId, lastTripSpotReviewId, size, orderType);
+        return entitySlice.map(tripSpotReviewMapper::toDomainFromEntity);
+    }
+
+    @Override
+    public Slice<TripSpotReview> findReviewsNoOffsetByMemberId(long memberId, long lastTripSpotReviewId, int size, OrderType orderType) {
+        Slice<TripSpotReviewEntity> entitySlice =
+            tripSpotReviewRepository.findReviewsNoOffsetByMemberId(memberId, lastTripSpotReviewId, size, orderType);
         return entitySlice.map(tripSpotReviewMapper::toDomainFromEntity);
     }
 }
