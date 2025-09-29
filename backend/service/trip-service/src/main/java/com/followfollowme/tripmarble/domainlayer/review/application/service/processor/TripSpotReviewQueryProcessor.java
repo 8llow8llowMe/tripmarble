@@ -1,6 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.review.application.service.processor;
 
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.feign.dto.MemberProfileInternalResponse;
+import com.followfollowme.tripmarble.domainlayer.review.application.exception.ReviewErrorCode;
+import com.followfollowme.tripmarble.domainlayer.review.application.exception.ReviewException;
 import com.followfollowme.tripmarble.domainlayer.review.application.info.MemberProfileInfo;
 import com.followfollowme.tripmarble.domainlayer.review.application.info.TripSpotReviewAndPhotosInfo;
 import com.followfollowme.tripmarble.domainlayer.review.application.info.TripSpotReviewDetailInfo;
@@ -15,6 +17,7 @@ import com.followfollowme.tripmarble.domainlayer.trip.application.exception.Trip
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripException;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
+import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,9 +39,11 @@ public class TripSpotReviewQueryProcessor {
         return TripSpotReviewSummaryInfo.of(summary);
     }
 
-    public Slice<TripSpotReviewAndPhotosInfo> getTripSpotReviews(long tripSpotId, long lastTripSpotReviewId, int size) {
+    public Slice<TripSpotReviewAndPhotosInfo> getTripSpotReviews(
+        long tripSpotId, long lastTripSpotReviewId, int size, OrderType orderType) {
         // 1. 리뷰 Slice 조회 (No-Offset 방식)
-        Slice<TripSpotReview> slice = tripSpotReviewRepositoryPort.findReviewsNoOffsetByTripSpotId(tripSpotId, lastTripSpotReviewId, size);
+        Slice<TripSpotReview> slice =
+            tripSpotReviewRepositoryPort.findReviewsNoOffsetByTripSpotId(tripSpotId, lastTripSpotReviewId, size, orderType);
 
         // 2. 리뷰 ID 추출
         List<Long> reviewIds = slice.getContent().stream()
@@ -68,7 +73,7 @@ public class TripSpotReviewQueryProcessor {
 
         // 2. 리뷰 조회
         TripSpotReview review = tripSpotReviewRepositoryPort.findById(tripSpotReviewId)
-            .orElseThrow(() -> new TripException(TripErrorCode.TRIP_SPOT_REVIEW_NOT_FOUND));
+            .orElseThrow(() -> new ReviewException(ReviewErrorCode.TRIP_SPOT_REVIEW_NOT_FOUND));
 
         // 3. 사진 조회
         List<TripSpotReviewPhoto> photos = tripSpotReviewPhotoRepositoryPort.findByTripSpotReviewId(tripSpotReviewId);
