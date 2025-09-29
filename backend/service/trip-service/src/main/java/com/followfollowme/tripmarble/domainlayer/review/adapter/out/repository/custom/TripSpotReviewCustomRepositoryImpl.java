@@ -1,12 +1,15 @@
 package com.followfollowme.tripmarble.domainlayer.review.adapter.out.repository.custom;
 
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.QTripSpotReviewEntity;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.QTripSpotReviewPhotoEntity;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.TripSpotReviewEntity;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewPhotoProjection;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewRatingDistributionProjection;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewSummaryProjection;
-import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.QTripSpotReviewEntity;
-import com.followfollowme.tripmarble.domainlayer.trip.adapter.out.persistence.entity.QTripSpotReviewPhotoEntity;
+import com.followfollowme.tripmarble.persistence.enums.OrderType;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import java.util.Optional;
@@ -69,16 +72,71 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
     }
 
     @Override
-    public Slice<TripSpotReviewEntity> findReviewsNoOffsetByTripSpotId(long tripSpotId, long lastReviewId, int size) {
+    public Slice<TripSpotReviewEntity> findReviewsNoOffsetByTripSpotId(
+        long tripSpotId, long lastReviewId, int size, OrderType orderType) {
         QTripSpotReviewEntity r = QTripSpotReviewEntity.tripSpotReviewEntity;
 
+        // 1. No-Offset 조건 준비
+        BooleanExpression noOffsetCondition = null;
+        if (lastReviewId > 0) {
+            if (orderType == OrderType.DESC) {
+                noOffsetCondition = r.id.lt(lastReviewId);
+            } else {
+                noOffsetCondition = r.id.gt(lastReviewId);
+            }
+        }
+
+        // 2. 최종 where 조건
+        BooleanExpression whereCondition = r.tripSpot.id.eq(tripSpotId)
+            .and(noOffsetCondition);
+
+        // 3. 정렬 조건
+        OrderSpecifier<Long> orderSpecifier =
+            (orderType == OrderType.DESC) ? r.id.desc() : r.id.asc();
+
+        // 4. 조회 실행
         List<TripSpotReviewEntity> rows = queryFactory
             .selectFrom(r)
-            .where(
-                r.tripSpot.id.eq(tripSpotId)
-                    .and(lastReviewId > 0 ? r.id.lt(lastReviewId) : null) // No Offset 조건
-            )
-            .orderBy(r.id.desc()) // 최신순
+            .where(whereCondition)
+            .orderBy(orderSpecifier)
+            .limit(size + 1)
+            .fetch();
+
+        // 5. hasNext 처리
+        boolean hasNext = rows.size() > size;
+        if (hasNext) {
+            rows.removeLast(); // 초과분 하나 제거
+        }
+
+        return new SliceImpl<>(rows, Pageable.unpaged(), hasNext);
+    }
+
+    @Override
+    public Slice<TripSpotReviewEntity> findReviewsNoOffsetByMemberId(long memberId, long lastReviewId, int size, OrderType orderType) {
+        QTripSpotReviewEntity r = QTripSpotReviewEntity.tripSpotReviewEntity;
+
+        // 1. No-Offset 조건 준비
+        BooleanExpression noOffsetCondition = null;
+        if (lastReviewId > 0) {
+            if (orderType == OrderType.DESC) {
+                noOffsetCondition = r.id.lt(lastReviewId);
+            } else {
+                noOffsetCondition = r.id.gt(lastReviewId);
+            }
+        }
+
+        // 2. 최종 where 조건
+        BooleanExpression whereCondition = r.memberId.eq(memberId)
+            .and(noOffsetCondition);
+
+        // 3. 정렬 조건
+        OrderSpecifier<Long> orderSpecifier = (orderType == OrderType.DESC) ? r.id.desc() : r.id.asc();
+
+        // 4. 조회 실행
+        List<TripSpotReviewEntity> rows = queryFactory
+            .selectFrom(r)
+            .where(whereCondition)
+            .orderBy(orderSpecifier)
             .limit(size + 1)
             .fetch();
 

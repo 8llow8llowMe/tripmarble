@@ -4,6 +4,7 @@ import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.TripS
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewPhotoProjection;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewRatingDistributionProjection;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewSummaryProjection;
+import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Slice;
@@ -16,5 +17,7 @@ public interface TripSpotReviewCustomRepository {
 
     List<TripSpotReviewPhotoProjection> findSamplePhotosByTripSpotId(long tripSpotId, int limit);
 
-    Slice<TripSpotReviewEntity> findReviewsNoOffsetByTripSpotId(long tripSpotId, long lastReviewId, int size);
+    Slice<TripSpotReviewEntity> findReviewsNoOffsetByTripSpotId(long tripSpotId, long lastReviewId, int size, OrderType orderType);
+
+    Slice<TripSpotReviewEntity> findReviewsNoOffsetByMemberId(long memberId, long lastReviewId, int size, OrderType orderType);
 }
