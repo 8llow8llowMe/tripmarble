@@ -7,6 +7,7 @@ import com.followfollowme.tripmarble.domainlayer.review.adapter.in.web.dto.TripS
 import com.followfollowme.tripmarble.domainlayer.review.adapter.in.web.dto.TripSpotReviewSummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.review.application.command.TripSpotReviewCreateCommand;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
+import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,7 +17,8 @@ public interface TripSpotReviewWebUseCase {
 
     TripSpotReviewSummaryResponse getTripSpotReviewSummary(long tripSpotId, int photoLimit);
 
-    SliceResponse<TripSpotReviewAndPhotosResponse> getTripSpotReviews(long tripSpotId, long lastTripSpotReviewId, int size);
+    SliceResponse<TripSpotReviewAndPhotosResponse> getTripSpotReviews(
+        long tripSpotId, long lastTripSpotReviewId, int size, OrderType orderType);
 
     TripSpotReviewDetailResponse getTripSpotReviewDetail(long tripSpotId, long tripSpotReviewId);
 
