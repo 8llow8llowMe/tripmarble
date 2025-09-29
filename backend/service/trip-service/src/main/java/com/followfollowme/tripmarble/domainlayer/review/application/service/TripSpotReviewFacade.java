@@ -44,47 +44,58 @@ public class TripSpotReviewFacade implements TripSpotReviewWebUseCase {
         TripSpotReviewCreateInfo reviewCreateInfo = tripSpotReviewCreateProcessor.createGeneralReview(tripSpotId, memberId,
             command.content(), command.rating());
 
-        // 2. temp -> real 변환
+        // 2. temp -> real 변환 (MinIO 경로 이동)
         List<String> realPhotoUrls = tripSpotReviewPhotoUploadProcessor.promoteToReal(command.photoUrls());
 
-        // 3. 사진 저장
+        // 3. 리뷰 사진 저장
         List<TripSpotReviewPhotoCreateInfo> photoCreateInfos = tripSpotReviewPhotoCreateProcessor.createPhotos(
             reviewCreateInfo.tripSpotReviewId(), realPhotoUrls);
 
-        // 4. Presenter 변환
+        // 4. Presenter를 통해 Info -> Response 반환
         return tripSpotReviewPresenter.toCreateResponse(reviewCreateInfo, photoCreateInfos);
     }
 
     @Override
     @Transactional(readOnly = true)
     public TripSpotReviewSummaryResponse getTripSpotReviewSummary(long tripSpotId, int photoLimit) {
+        // 1. 요약 데이터 조회 (평균 평점, 리뷰 개수, 샘플 사진 등)
         TripSpotReviewSummaryInfo tripSpotReviewSummaryInfo = tripSpotReviewQueryProcessor.getTripSpotReviewSummary(tripSpotId, photoLimit);
+
+        // 2. Presenter를 통해 Info -> Response 반환
         return tripSpotReviewPresenter.toSummaryResponse(tripSpotReviewSummaryInfo);
     }
 
     @Override
     @Transactional(readOnly = true)
     public SliceResponse<TripSpotReviewAndPhotosResponse> getTripSpotReviews(
-        long tripSpotId, long lastTripSpotReviewId, int size, OrderType orderType
-    ) {
+        long tripSpotId, long lastTripSpotReviewId, int size, OrderType orderType) {
+        // 1. 리뷰 목록 + 사진 정보 조회 (No-Offset 방식)
         Slice<TripSpotReviewAndPhotosInfo> tripSpotReviewAndPhotosInfoSlice =
             tripSpotReviewQueryProcessor.getTripSpotReviews(tripSpotId, lastTripSpotReviewId, size, orderType);
+
+        // 2. Presenter를 통해 Info -> Response 반환
         return tripSpotReviewPresenter.toReviewAndPhotosSliceResponse(tripSpotReviewAndPhotosInfoSlice);
     }
 
     @Override
     @Transactional(readOnly = true)
     public TripSpotReviewDetailResponse getTripSpotReviewDetail(long tripSpotId, long tripSpotReviewId) {
+        // 1. 단일 리뷰 상세 정보 + 사진 + 작성자 프로필 조회
         TripSpotReviewDetailInfo tripSpotReviewDetailInfo =
             tripSpotReviewQueryProcessor.getTripSpotReviewDetail(tripSpotId, tripSpotReviewId);
+
+        // 2. Presenter를 통해 Info -> Response 반환
         return tripSpotReviewPresenter.toDetailResponse(tripSpotReviewDetailInfo);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<TripSpotReviewPhotoUploadResponse> uploadTempReviewPhotos(long tripSpotId, List<MultipartFile> imageFiles) {
+        // 1. 사진들을 MinIO Temp 저장소에 업로드
         List<TripSpotReviewPhotoUploadInfo> tripSpotReviewPhotoUploadInfos =
             tripSpotReviewPhotoUploadProcessor.uploadTempReviewPhotos(tripSpotId, imageFiles);
+
+        // 2. Presenter 변환 → 응답 DTO 리스트 생성
         return tripSpotReviewPresenter.toUploadResponses(tripSpotReviewPhotoUploadInfos);
     }
 }
