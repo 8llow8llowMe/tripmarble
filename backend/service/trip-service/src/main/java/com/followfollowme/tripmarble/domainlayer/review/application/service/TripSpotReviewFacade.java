@@ -19,6 +19,7 @@ import com.followfollowme.tripmarble.domainlayer.review.application.service.proc
 import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.TripSpotReviewPhotoUploadProcessor;
 import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.TripSpotReviewQueryProcessor;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
+import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
@@ -63,9 +64,11 @@ public class TripSpotReviewFacade implements TripSpotReviewWebUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public SliceResponse<TripSpotReviewAndPhotosResponse> getTripSpotReviews(long tripSpotId, long lastTripSpotReviewId, int size) {
+    public SliceResponse<TripSpotReviewAndPhotosResponse> getTripSpotReviews(
+        long tripSpotId, long lastTripSpotReviewId, int size, OrderType orderType
+    ) {
         Slice<TripSpotReviewAndPhotosInfo> tripSpotReviewAndPhotosInfoSlice =
-            tripSpotReviewQueryProcessor.getTripSpotReviews(tripSpotId, lastTripSpotReviewId, size);
+            tripSpotReviewQueryProcessor.getTripSpotReviews(tripSpotId, lastTripSpotReviewId, size, orderType);
         return tripSpotReviewPresenter.toReviewAndPhotosSliceResponse(tripSpotReviewAndPhotosInfoSlice);
     }
 
