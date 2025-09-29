@@ -1,5 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.review.application.service.processor;
 
+import com.followfollowme.tripmarble.domainlayer.review.application.exception.ReviewErrorCode;
+import com.followfollowme.tripmarble.domainlayer.review.application.exception.ReviewException;
 import com.followfollowme.tripmarble.domainlayer.review.application.info.TripSpotReviewPhotoUploadInfo;
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripErrorCode;
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripException;
@@ -77,7 +79,7 @@ public class TripSpotReviewPhotoUploadProcessor {
 
         } catch (Exception e) {
             log.error("리뷰 사진 임시 업로드 실패: originalName={}", imageFile.getOriginalFilename(), e);
-            throw new TripException(TripErrorCode.UPLOAD_REVIEW_PHOTO_FAILED);
+            throw new ReviewException(ReviewErrorCode.UPLOAD_REVIEW_PHOTO_FAILED);
         }
     }
 
@@ -116,7 +118,7 @@ public class TripSpotReviewPhotoUploadProcessor {
             // 5. 최종 public URL 반환
             return minioProperties.publicUrl() + "/" + bucketName + "/" + destObject;
         } catch (Exception e) {
-            throw new TripException(TripErrorCode.UPLOAD_REVIEW_PHOTO_FAILED);
+            throw new ReviewException(ReviewErrorCode.UPLOAD_REVIEW_PHOTO_FAILED);
         }
     }
 
