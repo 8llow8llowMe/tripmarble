@@ -31,13 +31,14 @@ public class TripSpotReviewInternalFacade implements TripSpotReviewInternalUseCa
         TripSpotReviewCreateInfo reviewCreateInfo = tripSpotReviewCreateProcessor.createMissionReview(tripSpotId, memberId,
             command.content(), command.rating());
 
-        // 2. temp -> real 변환
+        // 2. temp -> real 변환 (MinIO 경로 이동)
         List<String> realPhotoUrls = tripSpotReviewPhotoUploadProcessor.promoteToReal(command.photoUrls());
 
         // 3. 사진 저장
         List<TripSpotReviewPhotoCreateInfo> photoCreateInfos = tripSpotReviewPhotoCreateProcessor.createPhotos(
             reviewCreateInfo.tripSpotReviewId(), realPhotoUrls);
 
+        // 4. Presenter를 통해 Info -> Response 반환
         return tripSpotReviewInternalPresenter.toCreateResponse(reviewCreateInfo, photoCreateInfos);
     }
 }
