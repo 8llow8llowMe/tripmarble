@@ -140,6 +140,6 @@ public class TripSpotReviewWebController {
     ) {
         List<TripSpotReviewPhotoUploadResponse> responses =
             tripSpotReviewWebUseCase.uploadTempReviewPhotos(Long.parseLong(tripSpotId), imageFiles);
-        return ResponseEntity.ok().body(Response.success(responses));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Response.success(responses));
     }
 }
