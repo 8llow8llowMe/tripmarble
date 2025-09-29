@@ -3,15 +3,15 @@ package com.followfollowme.tripmarble.global.exception;
 import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.common.exception.ValidationErrorCode;
 import com.followfollowme.tripmarble.domainlayer.region.application.exception.RegionException;
+import com.followfollowme.tripmarble.domainlayer.review.application.exception.ReviewException;
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
@@ -27,6 +27,13 @@ public class TripServiceGlobalExceptionHandler {
     @ExceptionHandler(RegionException.class)
     public ResponseEntity<Response<Void>> regionException(RegionException e) {
         log.error("지역 및 대표 여행지 관련 오류: {}", e.getMessage());
+        return ResponseEntity.status(e.getErrorCode().getHttpStatus())
+            .body(Response.fail(e.getErrorCode().getCode(), e.getMessage()));
+    }
+
+    @ExceptionHandler(ReviewException.class)
+    public ResponseEntity<Response<Void>> reviewException(ReviewException e) {
+        log.error("리뷰 관련 오류: {}", e.getMessage());
         return ResponseEntity.status(e.getErrorCode().getHttpStatus())
             .body(Response.fail(e.getErrorCode().getCode(), e.getMessage()));
     }
