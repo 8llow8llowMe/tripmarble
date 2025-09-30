@@ -8,6 +8,7 @@ import com.followfollowme.tripmarble.domainlayer.trip.application.exception.Trip
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotRepositoryPort;
 import com.followfollowme.tripmarble.storage.bucket.MinioBucket;
 import com.followfollowme.tripmarble.storage.properties.MinioProperties;
+import com.followfollowme.tripmarble.storage.util.MinioPathUtils;
 import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
 import io.minio.MinioClient;
@@ -85,15 +86,20 @@ public class TripSpotReviewPhotoUploadProcessor {
 
     private String promoteSingleToReal(String tempPhotoUrl) {
         try {
-            // 1. 파일명 추출
-            String objectName = extractObjectName(tempPhotoUrl);
+            // 1. 버킷명 추출
             String bucketName = minioProperties.bucketPrefix();
 
-            // 2. temp -> real 경로 지정
+            // 2. temp URL -> objectPath 추출 (공통 유틸 활용)
+            String objectPath = MinioPathUtils.extractObjectPath(tempPhotoUrl, bucketName);
+
+            // 3. 파일명만 분리
+            String objectName = objectPath.substring(objectPath.lastIndexOf("/") + 1);
+
+            // 4. temp -> real 경로 지정
             String srcObject = MinioBucket.REVIEW_TEMP_IMAGES.objectPath(objectName);
             String destObject = MinioBucket.REVIEW_REAL_IMAGES.objectPath(objectName);
 
-            // 3. MinIO copy 실행
+            // 5. MinIO copy 실행
             CopySource source = CopySource.builder()
                 .bucket(bucketName)
                 .object(srcObject)
@@ -107,7 +113,7 @@ public class TripSpotReviewPhotoUploadProcessor {
                     .build()
             );
 
-            // 4. 원본(temp) 오브젝트 삭제
+            // 6. 원본(temp) 오브젝트 삭제
             minioClient.removeObject(
                 RemoveObjectArgs.builder()
                     .bucket(bucketName)
@@ -120,11 +126,5 @@ public class TripSpotReviewPhotoUploadProcessor {
         } catch (Exception e) {
             throw new ReviewException(ReviewErrorCode.UPLOAD_REVIEW_PHOTO_FAILED);
         }
-    }
-
-    private String extractObjectName(String photoUrl) {
-        String prefix = "/" + minioProperties.bucketPrefix() + "/";
-        String fullPath = photoUrl.substring(photoUrl.indexOf(prefix) + prefix.length());
-        return fullPath.substring(fullPath.lastIndexOf("/") + 1);
     }
 }
