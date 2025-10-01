@@ -36,7 +36,9 @@ public class MyReviewDeleteProcessor {
         photos.forEach(photo -> minioFileRemover.remove(photo.photoUrl()));
 
         // 5. 사진 DB 삭제
+        tripSpotReviewPhotoRepositoryPort.deleteAllByTripSpotReviewId(tripSpotReviewId);
 
         // 6. 리뷰 DB 삭제
+        tripSpotReviewRepositoryPort.deleteById(tripSpotReviewId);
     }
 }
