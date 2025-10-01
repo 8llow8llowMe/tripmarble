@@ -36,4 +36,9 @@ public class TripSpotReviewPhotoRepositoryAdapter implements TripSpotReviewPhoto
         List<TripSpotReviewPhotoEntity> entities = tripSpotReviewPhotoRepository.findByTripSpotReviewId(tripSpotReviewId);
         return tripSpotReviewPhotoMapper.toDomainListFromEntityList(entities);
     }
+
+    @Override
+    public void deleteAllByTripSpotReviewId(long tripSpotReviewId) {
+        tripSpotReviewPhotoRepository.deleteAllByTripSpotReviewId(tripSpotReviewId);
+    }
 }
