@@ -11,4 +11,6 @@ public interface TripSpotReviewPhotoRepositoryPort {
     List<TripSpotReviewPhoto> findByTripSpotReviewIdIn(List<Long> tripSpotReviewIds);
 
     List<TripSpotReviewPhoto> findByTripSpotReviewId(long tripSpotReviewId);
+
+    void deleteAllByTripSpotReviewId(long tripSpotReviewId);
 }
