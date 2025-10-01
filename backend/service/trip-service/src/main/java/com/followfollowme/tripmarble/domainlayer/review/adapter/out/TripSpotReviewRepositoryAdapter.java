@@ -62,4 +62,9 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
             tripSpotReviewRepository.findReviewsNoOffsetByMemberId(memberId, lastTripSpotReviewId, size, orderType);
         return entitySlice.map(tripSpotReviewMapper::toDomainFromEntity);
     }
+
+    @Override
+    public void deleteById(long tripSpotReviewId) {
+        tripSpotReviewRepository.deleteById(tripSpotReviewId);
+    }
 }
