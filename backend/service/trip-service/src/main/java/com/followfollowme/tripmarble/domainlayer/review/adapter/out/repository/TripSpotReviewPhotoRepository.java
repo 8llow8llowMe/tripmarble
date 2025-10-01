@@ -9,4 +9,6 @@ public interface TripSpotReviewPhotoRepository extends JpaRepository<TripSpotRev
     List<TripSpotReviewPhotoEntity> findByTripSpotReviewIdIn(List<Long> tripSpotReviewIds);
 
     List<TripSpotReviewPhotoEntity> findByTripSpotReviewId(long tripSpotReviewId);
+
+    void deleteAllByTripSpotReviewId(long tripSpotReviewId);
 }
