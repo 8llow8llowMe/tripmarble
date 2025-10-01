@@ -11,10 +11,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,6 +47,24 @@ public class MyReviewWebController {
         SliceResponse<TripSpotReviewAndPhotosResponse> responses =
             myReviewWebUseCase.getMyTripSpotReviews(loginActive.id(), Long.parseLong(lastTripSpotReviewId), size, orderType);
         return ResponseEntity.ok().body(Response.success(responses));
+    }
+
+    @Operation(
+        summary = "나의 리뷰 삭제",
+        description = "로그인 사용자가 본인이 작성한 특정 리뷰를 삭제합니다. (사진 포함 물리 삭제)",
+        security = {@SecurityRequirement(name = "bearerAuth")}
+    )
+    @ApiResponse(responseCode = "204", description = "리뷰 삭제 성공 (응답 본문 없음)")
+    @ApiResponse(responseCode = "403", description = "본인 리뷰가 아님 (REVIEW_003)")
+    @ApiResponse(responseCode = "404", description = "리뷰 미존재 (REVIEW_001)")
+    @DeleteMapping("/{tripSpotReviewId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteMyTripSpotReview(
+        @AuthenticationPrincipal MemberLoginActive loginActive,
+        @PathVariable String tripSpotReviewId
+    ) {
+        myReviewWebUseCase.deleteMyTripSpotReview(loginActive.id(), Long.parseLong(tripSpotReviewId));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
 
