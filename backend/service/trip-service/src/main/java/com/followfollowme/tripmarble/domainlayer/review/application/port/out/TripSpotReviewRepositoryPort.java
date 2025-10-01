@@ -18,4 +18,6 @@ public interface TripSpotReviewRepositoryPort {
     Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(long tripSpotId, long lastTripSpotReviewId, int size, OrderType orderType);
 
     Slice<TripSpotReview> findReviewsNoOffsetByMemberId(long memberId, long lastTripSpotReviewId, int size, OrderType orderType);
+
+    void deleteById(long tripSpotReviewId);
 }
