@@ -8,4 +8,6 @@ public interface MyReviewWebUseCase {
 
     SliceResponse<TripSpotReviewAndPhotosResponse> getMyTripSpotReviews(
         long memberId, long lastTripSpotReviewId, int size, OrderType orderType);
+
+    void deleteMyTripSpotReview(long memberId, long tripSpotReviewId);
 }
