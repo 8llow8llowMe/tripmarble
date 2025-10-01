@@ -4,6 +4,7 @@ import com.followfollowme.tripmarble.domainlayer.review.adapter.in.web.dto.TripS
 import com.followfollowme.tripmarble.domainlayer.review.adapter.in.web.presenter.TripSpotReviewPresenter;
 import com.followfollowme.tripmarble.domainlayer.review.application.info.TripSpotReviewAndPhotosInfo;
 import com.followfollowme.tripmarble.domainlayer.review.application.port.in.MyReviewWebUseCase;
+import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.MyReviewDeleteProcessor;
 import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.MyReviewQueryProcessor;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import com.followfollowme.tripmarble.persistence.enums.OrderType;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MyReviewFacade implements MyReviewWebUseCase {
 
     private final MyReviewQueryProcessor myReviewQueryProcessor;
+    private final MyReviewDeleteProcessor myReviewDeleteProcessor;
     private final TripSpotReviewPresenter tripSpotReviewPresenter;
 
     @Override
@@ -29,5 +31,12 @@ public class MyReviewFacade implements MyReviewWebUseCase {
 
         // 2. Presenter를 통해 Info -> Response 반환
         return tripSpotReviewPresenter.toReviewAndPhotosSliceResponse(tripSpotReviewAndPhotosInfoSlice);
+    }
+
+    @Override
+    @Transactional
+    public void deleteMyTripSpotReview(long memberId, long tripSpotReviewId) {
+        // 1. 삭제 Processor 실행
+        myReviewDeleteProcessor.deleteMyTripSpotReview(memberId, tripSpotReviewId);
     }
 }
