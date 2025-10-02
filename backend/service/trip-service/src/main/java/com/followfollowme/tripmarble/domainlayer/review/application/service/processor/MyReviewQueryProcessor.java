@@ -5,6 +5,7 @@ import com.followfollowme.tripmarble.domainlayer.review.application.port.out.Tri
 import com.followfollowme.tripmarble.domainlayer.review.application.port.out.TripSpotReviewRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReview;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReviewPhoto;
+import com.followfollowme.tripmarble.domainlayer.review.domain.model.enums.ReviewSourceType;
 import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import java.util.List;
 import java.util.Map;
@@ -20,9 +21,9 @@ public class MyReviewQueryProcessor {
     private final TripSpotReviewRepositoryPort tripSpotReviewRepositoryPort;
     private final TripSpotReviewPhotoRepositoryPort tripSpotReviewPhotoRepositoryPort;
 
-    public Slice<TripSpotReviewAndPhotosInfo> getMyTripSpotReviews(long memberId, long lastReviewId, int size, OrderType orderType) {
+    public Slice<TripSpotReviewAndPhotosInfo> getMyTripSpotReviews(long memberId, ReviewSourceType sourceType, long lastReviewId, int size, OrderType orderType) {
         // 1. 리뷰 Slice 조회
-        Slice<TripSpotReview> slice = tripSpotReviewRepositoryPort.findReviewsNoOffsetByMemberId(memberId, lastReviewId, size, orderType);
+        Slice<TripSpotReview> slice = tripSpotReviewRepositoryPort.findReviewsNoOffsetByMemberId(memberId, sourceType, lastReviewId, size, orderType);
 
         // 2. 리뷰 ID 목록
         List<Long> reviewIds = slice.getContent().stream().map(TripSpotReview::id).toList();
