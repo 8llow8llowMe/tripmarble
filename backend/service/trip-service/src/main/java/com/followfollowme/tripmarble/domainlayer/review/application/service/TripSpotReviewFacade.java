@@ -18,6 +18,7 @@ import com.followfollowme.tripmarble.domainlayer.review.application.service.proc
 import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.TripSpotReviewPhotoCreateProcessor;
 import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.TripSpotReviewPhotoUploadProcessor;
 import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.TripSpotReviewQueryProcessor;
+import com.followfollowme.tripmarble.domainlayer.review.domain.model.enums.ReviewSourceType;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import java.util.List;
@@ -57,9 +58,9 @@ public class TripSpotReviewFacade implements TripSpotReviewWebUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public TripSpotReviewSummaryResponse getTripSpotReviewSummary(long tripSpotId, int photoLimit) {
+    public TripSpotReviewSummaryResponse getTripSpotReviewSummary(long tripSpotId, ReviewSourceType sourceType, int photoLimit) {
         // 1. 요약 데이터 조회 (평균 평점, 리뷰 개수, 샘플 사진 등)
-        TripSpotReviewSummaryInfo tripSpotReviewSummaryInfo = tripSpotReviewQueryProcessor.getTripSpotReviewSummary(tripSpotId, photoLimit);
+        TripSpotReviewSummaryInfo tripSpotReviewSummaryInfo = tripSpotReviewQueryProcessor.getTripSpotReviewSummary(tripSpotId, sourceType, photoLimit);
 
         // 2. Presenter를 통해 Info -> Response 반환
         return tripSpotReviewPresenter.toSummaryResponse(tripSpotReviewSummaryInfo);
@@ -68,10 +69,10 @@ public class TripSpotReviewFacade implements TripSpotReviewWebUseCase {
     @Override
     @Transactional(readOnly = true)
     public SliceResponse<TripSpotReviewAndPhotosResponse> getTripSpotReviews(
-        long tripSpotId, long lastTripSpotReviewId, int size, OrderType orderType) {
+        long tripSpotId, ReviewSourceType sourceType, long lastTripSpotReviewId, int size, OrderType orderType) {
         // 1. 리뷰 목록 + 사진 정보 조회 (No-Offset 방식)
         Slice<TripSpotReviewAndPhotosInfo> tripSpotReviewAndPhotosInfoSlice =
-            tripSpotReviewQueryProcessor.getTripSpotReviews(tripSpotId, lastTripSpotReviewId, size, orderType);
+            tripSpotReviewQueryProcessor.getTripSpotReviews(tripSpotId, sourceType, lastTripSpotReviewId, size, orderType);
 
         // 2. Presenter를 통해 Info -> Response 반환
         return tripSpotReviewPresenter.toReviewAndPhotosSliceResponse(tripSpotReviewAndPhotosInfoSlice);
