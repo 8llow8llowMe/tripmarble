@@ -10,6 +10,7 @@ import com.followfollowme.tripmarble.domainlayer.review.application.port.out.Tri
 import com.followfollowme.tripmarble.domainlayer.review.application.readmodel.TripSpotReviewSummary;
 import com.followfollowme.tripmarble.domainlayer.review.application.readmodel.TripSpotReviewSummaryAssembler;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReview;
+import com.followfollowme.tripmarble.domainlayer.review.domain.model.enums.ReviewSourceType;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
 import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import java.util.List;
@@ -40,26 +41,26 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
     }
 
     @Override
-    public TripSpotReviewSummary findSummaryByTripSpotId(long tripSpotId, int photoLimit) {
-        TripSpotReviewSummaryProjection summary = tripSpotReviewRepository.findSummaryByTripSpotId(tripSpotId).orElse(null);
+    public TripSpotReviewSummary findSummaryByTripSpotId(long tripSpotId, ReviewSourceType sourceType, int photoLimit) {
+        TripSpotReviewSummaryProjection summary = tripSpotReviewRepository.findSummaryByTripSpotId(tripSpotId, sourceType).orElse(null);
         List<TripSpotReviewRatingDistributionProjection> distributions =
-            tripSpotReviewRepository.findRatingDistributionByTripSpotId(tripSpotId);
-        List<TripSpotReviewPhotoProjection> photos = tripSpotReviewRepository.findSamplePhotosByTripSpotId(tripSpotId, photoLimit);
+            tripSpotReviewRepository.findRatingDistributionByTripSpotId(tripSpotId, sourceType);
+        List<TripSpotReviewPhotoProjection> photos = tripSpotReviewRepository.findSamplePhotosByTripSpotId(tripSpotId, sourceType, photoLimit);
         return tripSpotReviewSummaryAssembler.toReadModel(summary, distributions, photos);
     }
 
     @Override
     public Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(
-        long tripSpotId, long lastTripSpotReviewId, int size, OrderType orderType) {
+        long tripSpotId, ReviewSourceType sourceType, long lastTripSpotReviewId, int size, OrderType orderType) {
         Slice<TripSpotReviewEntity> entitySlice =
-            tripSpotReviewRepository.findReviewsNoOffsetByTripSpotId(tripSpotId, lastTripSpotReviewId, size, orderType);
+            tripSpotReviewRepository.findReviewsNoOffsetByTripSpotId(tripSpotId, sourceType, lastTripSpotReviewId, size, orderType);
         return entitySlice.map(tripSpotReviewMapper::toDomainFromEntity);
     }
 
     @Override
-    public Slice<TripSpotReview> findReviewsNoOffsetByMemberId(long memberId, long lastTripSpotReviewId, int size, OrderType orderType) {
+    public Slice<TripSpotReview> findReviewsNoOffsetByMemberId(long memberId, ReviewSourceType sourceType, long lastTripSpotReviewId, int size, OrderType orderType) {
         Slice<TripSpotReviewEntity> entitySlice =
-            tripSpotReviewRepository.findReviewsNoOffsetByMemberId(memberId, lastTripSpotReviewId, size, orderType);
+            tripSpotReviewRepository.findReviewsNoOffsetByMemberId(memberId, sourceType, lastTripSpotReviewId, size, orderType);
         return entitySlice.map(tripSpotReviewMapper::toDomainFromEntity);
     }
 
