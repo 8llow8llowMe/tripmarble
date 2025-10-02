@@ -3,6 +3,7 @@ package com.followfollowme.tripmarble.domainlayer.review.adapter.in.web.controll
 import com.followfollowme.tripmarble.common.dto.Response;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.in.web.dto.TripSpotReviewAndPhotosResponse;
 import com.followfollowme.tripmarble.domainlayer.review.application.port.in.MyReviewWebUseCase;
+import com.followfollowme.tripmarble.domainlayer.review.domain.model.enums.ReviewSourceType;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
@@ -32,7 +33,18 @@ public class MyReviewWebController {
 
     @Operation(
         summary = "나의 리뷰 목록 조회 (무한 스크롤)",
-        description = "로그인 사용자가 작성한 여행지 리뷰 목록을 무한 스크롤 방식으로 조회합니다.",
+        description = """
+            로그인 사용자가 작성한 여행지 리뷰 목록을 무한 스크롤 방식으로 조회합니다.
+            
+            **파라미터 설명:**
+            - sourceType (선택): 리뷰 타입 필터링
+              - 미입력: 내가 작성한 전체 리뷰
+              - GENERAL: 일반 여행 리뷰만
+              - GAME_MISSION: 게임 미션 리뷰만
+            - lastTripSpotReviewId: 마지막 조회 리뷰 ID (첫 페이지는 0)
+            - size: 한 번에 가져올 리뷰 개수 (기본값: 10)
+            - orderType: 정렬 순서 (DESC: 최신순, ASC: 오래된순)
+            """,
         security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @ApiResponse(responseCode = "200", description = "나의 리뷰 목록 조회 성공")
@@ -40,12 +52,13 @@ public class MyReviewWebController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Response<SliceResponse<TripSpotReviewAndPhotosResponse>>> getMyTripSpotReviews(
         @AuthenticationPrincipal MemberLoginActive loginActive,
+        @RequestParam(required = false) ReviewSourceType sourceType,
         @RequestParam(required = false, defaultValue = "0") String lastTripSpotReviewId,
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "DESC") OrderType orderType
     ) {
         SliceResponse<TripSpotReviewAndPhotosResponse> responses =
-            myReviewWebUseCase.getMyTripSpotReviews(loginActive.id(), Long.parseLong(lastTripSpotReviewId), size, orderType);
+            myReviewWebUseCase.getMyTripSpotReviews(loginActive.id(), sourceType, Long.parseLong(lastTripSpotReviewId), size, orderType);
         return ResponseEntity.ok().body(Response.success(responses));
     }
 
