@@ -9,6 +9,7 @@ import com.followfollowme.tripmarble.domainlayer.review.adapter.in.web.dto.TripS
 import com.followfollowme.tripmarble.domainlayer.review.adapter.in.web.dto.TripSpotReviewSummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.review.application.command.TripSpotReviewCreateCommand;
 import com.followfollowme.tripmarble.domainlayer.review.application.port.in.TripSpotReviewWebUseCase;
+import com.followfollowme.tripmarble.domainlayer.review.domain.model.enums.ReviewSourceType;
 import com.followfollowme.tripmarble.persistence.dto.SliceResponse;
 import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import com.followfollowme.tripmarble.security.common.dto.MemberLoginActive;
@@ -69,7 +70,16 @@ public class TripSpotReviewWebController {
 
     @Operation(
         summary = "여행지 리뷰 종합 요약 조회",
-        description = " 특정 여행지의 리뷰에 대한 종합 요약 정보를 조회하는 기능입니다.",
+        description = """
+            특정 여행지의 리뷰에 대한 종합 요약 정보를 조회하는 기능입니다.
+            
+            **파라미터 설명:**
+            - sourceType (선택): 리뷰 타입 필터링
+              - 미입력: 전체 리뷰 통계
+              - GENERAL: 일반 여행 리뷰만
+              - GAME_MISSION: 게임 미션 리뷰만
+            - photoLimit: 샘플로 보여줄 사진 개수 (기본값: 3)
+            """,
         security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @ApiResponses(value = {
@@ -78,15 +88,29 @@ public class TripSpotReviewWebController {
     @GetMapping("/summary")
     public ResponseEntity<Response<TripSpotReviewSummaryResponse>> getTripSpotReviewSummary(
         @PathVariable String tripSpotId,
+        @RequestParam(required = false) ReviewSourceType sourceType,
         @RequestParam(defaultValue = "3") int photoLimit
     ) {
-        TripSpotReviewSummaryResponse response = tripSpotReviewWebUseCase.getTripSpotReviewSummary(Long.parseLong(tripSpotId), photoLimit);
+        TripSpotReviewSummaryResponse response = tripSpotReviewWebUseCase.getTripSpotReviewSummary(Long.parseLong(tripSpotId), sourceType,
+            photoLimit);
         return ResponseEntity.ok().body(Response.success(response));
     }
 
     @Operation(
         summary = "여행지 리뷰 목록 조회 (무한 스크롤)",
-        description = "특정 여행지에 대한 리뷰 목록을 최신순으로 조회하는 기능입니다.",
+        description = """
+            여행지 리뷰 목록을 무한 스크롤 형태로 조회하는 기능입니다.
+            
+            **파라미터 설명:**
+            특정 여행지에 대한 리뷰 목록을 무한 스크롤 방식으로 조회하는 기능입니다.
+            - sourceType (선택): 리뷰 타입 필터링
+              - 미입력: 전체 리뷰 조회
+              - GENERAL: 일반 여행 리뷰만
+              - GAME_MISSION: 게임 미션 리뷰만
+            - lastTripSpotReviewId: 마지막 조회 리뷰 ID (첫 페이지는 0)
+            - size: 한 번에 가져올 리뷰 개수 (기본값: 10)
+            - orderType: 정렬 순서 (DESC: 최신순, ASC: 오래된순)
+            """,
         security = {@SecurityRequirement(name = "bearerAuth")}
     )
     @ApiResponses(value = {
@@ -95,12 +119,14 @@ public class TripSpotReviewWebController {
     @GetMapping
     public ResponseEntity<Response<SliceResponse<TripSpotReviewAndPhotosResponse>>> getTripSpotReviews(
         @PathVariable String tripSpotId,
+        @RequestParam(required = false) ReviewSourceType sourceType,
         @RequestParam(required = false, defaultValue = "0") String lastTripSpotReviewId,
         @RequestParam(required = false, defaultValue = "10") int size,
         @RequestParam(required = false, defaultValue = "DESC") OrderType orderType
     ) {
         SliceResponse<TripSpotReviewAndPhotosResponse> responses =
-            tripSpotReviewWebUseCase.getTripSpotReviews(Long.parseLong(tripSpotId), Long.parseLong(lastTripSpotReviewId), size, orderType);
+            tripSpotReviewWebUseCase.getTripSpotReviews(Long.parseLong(tripSpotId), sourceType, Long.parseLong(lastTripSpotReviewId), size,
+                orderType);
         return ResponseEntity.ok().body(Response.success(responses));
     }
 
