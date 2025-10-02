@@ -13,6 +13,7 @@ import com.followfollowme.tripmarble.domainlayer.review.application.port.out.Tri
 import com.followfollowme.tripmarble.domainlayer.review.application.readmodel.TripSpotReviewSummary;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReview;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReviewPhoto;
+import com.followfollowme.tripmarble.domainlayer.review.domain.model.enums.ReviewSourceType;
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripErrorCode;
 import com.followfollowme.tripmarble.domainlayer.trip.application.exception.TripException;
 import com.followfollowme.tripmarble.domainlayer.trip.application.port.out.TripSpotRepositoryPort;
@@ -34,16 +35,16 @@ public class TripSpotReviewQueryProcessor {
     private final TripSpotRepositoryPort tripSpotRepositoryPort;
     private final MemberClientPort memberClientPort;
 
-    public TripSpotReviewSummaryInfo getTripSpotReviewSummary(long tripSpotId, int photoLimit) {
-        TripSpotReviewSummary summary = tripSpotReviewRepositoryPort.findSummaryByTripSpotId(tripSpotId, photoLimit);
+    public TripSpotReviewSummaryInfo getTripSpotReviewSummary(long tripSpotId, ReviewSourceType sourceType, int photoLimit) {
+        TripSpotReviewSummary summary = tripSpotReviewRepositoryPort.findSummaryByTripSpotId(tripSpotId, sourceType, photoLimit);
         return TripSpotReviewSummaryInfo.of(summary);
     }
 
     public Slice<TripSpotReviewAndPhotosInfo> getTripSpotReviews(
-        long tripSpotId, long lastTripSpotReviewId, int size, OrderType orderType) {
+        long tripSpotId, ReviewSourceType sourceType, long lastTripSpotReviewId, int size, OrderType orderType) {
         // 1. 리뷰 Slice 조회 (No-Offset 방식)
         Slice<TripSpotReview> slice =
-            tripSpotReviewRepositoryPort.findReviewsNoOffsetByTripSpotId(tripSpotId, lastTripSpotReviewId, size, orderType);
+            tripSpotReviewRepositoryPort.findReviewsNoOffsetByTripSpotId(tripSpotId, sourceType, lastTripSpotReviewId, size, orderType);
 
         // 2. 리뷰 ID 추출
         List<Long> reviewIds = slice.getContent().stream()
