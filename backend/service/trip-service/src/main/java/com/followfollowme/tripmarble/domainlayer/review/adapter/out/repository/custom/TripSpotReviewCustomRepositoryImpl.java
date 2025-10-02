@@ -6,6 +6,7 @@ import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.TripS
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewPhotoProjection;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewRatingDistributionProjection;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewSummaryProjection;
+import com.followfollowme.tripmarble.domainlayer.review.domain.model.enums.ReviewSourceType;
 import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -26,7 +27,7 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Optional<TripSpotReviewSummaryProjection> findSummaryByTripSpotId(long tripSpotId) {
+    public Optional<TripSpotReviewSummaryProjection> findSummaryByTripSpotId(long tripSpotId, ReviewSourceType sourceType) {
         QTripSpotReviewEntity r = QTripSpotReviewEntity.tripSpotReviewEntity;
 
         TripSpotReviewSummaryProjection result = queryFactory
@@ -35,14 +36,18 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
                 r.rating.avg().coalesce(0.0)
             ))
             .from(r)
-            .where(r.tripSpot.id.eq(tripSpotId))
+            .where(
+                r.tripSpot.id.eq(tripSpotId),
+                eqSourceType(r, sourceType)
+            )
             .fetchOne();
 
         return Optional.ofNullable(result);
     }
 
     @Override
-    public List<TripSpotReviewRatingDistributionProjection> findRatingDistributionByTripSpotId(long tripSpotId) {
+    public List<TripSpotReviewRatingDistributionProjection> findRatingDistributionByTripSpotId(long tripSpotId,
+        ReviewSourceType sourceType) {
         QTripSpotReviewEntity r = QTripSpotReviewEntity.tripSpotReviewEntity;
         return queryFactory
             .select(Projections.constructor(TripSpotReviewRatingDistributionProjection.class,
@@ -50,22 +55,31 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
                 r.count()
             ))
             .from(r)
-            .where(r.tripSpot.id.eq(tripSpotId))
+            .where(
+                r.tripSpot.id.eq(tripSpotId),
+                eqSourceType(r, sourceType)
+            )
             .groupBy(r.rating)
             .orderBy(r.rating.asc())
             .fetch();
     }
 
     @Override
-    public List<TripSpotReviewPhotoProjection> findSamplePhotosByTripSpotId(long tripSpotId, int limit) {
+    public List<TripSpotReviewPhotoProjection> findSamplePhotosByTripSpotId(long tripSpotId, ReviewSourceType sourceType, int limit) {
         QTripSpotReviewPhotoEntity p = QTripSpotReviewPhotoEntity.tripSpotReviewPhotoEntity;
+        QTripSpotReviewEntity r = QTripSpotReviewEntity.tripSpotReviewEntity;
+
         return queryFactory
             .select(Projections.constructor(TripSpotReviewPhotoProjection.class,
                 p.id,
                 p.photoUrl
             ))
             .from(p)
-            .where(p.tripSpotReview.tripSpot.id.eq(tripSpotId))
+            .join(p.tripSpotReview, r)
+            .where(
+                r.tripSpot.id.eq(tripSpotId),
+                eqSourceType(r, sourceType)
+            )
             .orderBy(p.createdAt.desc())
             .limit(limit)
             .fetch();
@@ -73,7 +87,7 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
 
     @Override
     public Slice<TripSpotReviewEntity> findReviewsNoOffsetByTripSpotId(
-        long tripSpotId, long lastReviewId, int size, OrderType orderType) {
+        long tripSpotId, ReviewSourceType sourceType, long lastReviewId, int size, OrderType orderType) {
         QTripSpotReviewEntity r = QTripSpotReviewEntity.tripSpotReviewEntity;
 
         // 1. No-Offset 조건 준비
@@ -88,6 +102,7 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
 
         // 2. 최종 where 조건
         BooleanExpression whereCondition = r.tripSpot.id.eq(tripSpotId)
+            .and(eqSourceType(r, sourceType))
             .and(noOffsetCondition);
 
         // 3. 정렬 조건
@@ -112,7 +127,8 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
     }
 
     @Override
-    public Slice<TripSpotReviewEntity> findReviewsNoOffsetByMemberId(long memberId, long lastReviewId, int size, OrderType orderType) {
+    public Slice<TripSpotReviewEntity> findReviewsNoOffsetByMemberId(long memberId, ReviewSourceType sourceType, long lastReviewId,
+        int size, OrderType orderType) {
         QTripSpotReviewEntity r = QTripSpotReviewEntity.tripSpotReviewEntity;
 
         // 1. No-Offset 조건 준비
@@ -127,6 +143,7 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
 
         // 2. 최종 where 조건
         BooleanExpression whereCondition = r.memberId.eq(memberId)
+            .and(eqSourceType(r, sourceType))
             .and(noOffsetCondition);
 
         // 3. 정렬 조건
@@ -147,5 +164,11 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
         }
 
         return new SliceImpl<>(rows, Pageable.unpaged(), hasNext);
+    }
+
+
+    private BooleanExpression eqSourceType(QTripSpotReviewEntity r, ReviewSourceType sourceType) {
+        // sourceType 필터링 조건 생성 (null인 경우 전체 조회)
+        return sourceType != null ? r.sourceType.eq(sourceType) : null;
     }
 }
