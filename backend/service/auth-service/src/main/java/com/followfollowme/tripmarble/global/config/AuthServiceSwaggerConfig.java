@@ -6,23 +6,20 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
+import java.util.List;
+
 @Configuration
 @Profile("!prod")
-@RequiredArgsConstructor
 @Import(SwaggerSecurityCommon.class)
 public class AuthServiceSwaggerConfig {
 
-    private final SwaggerProperties properties;
-
     @Bean
-    public OpenAPI authOpenAPI(Components components) {
+    public OpenAPI authOpenAPI(Components components, SwaggerProperties properties) {
         return new OpenAPI()
             .components(components)
             .info(new Info()
