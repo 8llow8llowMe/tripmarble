@@ -23,3 +23,18 @@
   font-size: 2rem;
   font-weight: 600;
 }
+
+.mapWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.mapCanvas {
+  width: min(100%, 720px);
+  height: 420px;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(30, 60, 120, 0.08);
+  background: #eef2f7;
+  overflow: hidden;
+}
