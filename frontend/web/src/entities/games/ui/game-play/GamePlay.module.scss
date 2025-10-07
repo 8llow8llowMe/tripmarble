@@ -110,16 +110,17 @@
 }
 
 .boardContainer {
-  /* Responsive board width: shrink on small screens, cap on large */
-  width: clamp(260px, 92vw, 500px);
-  max-width: 500px;
-  aspect-ratio: 1 / 1.15;
-  display: flex;
+  width: auto;
+  max-width: 100%;
+  display: inline-flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 6px 20px rgba(30, 60, 120, 0.08);
+  padding: 24px;
+  overflow: auto;
+  margin: 0 auto;
 }
 
 .boardImage {
@@ -147,6 +148,13 @@
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.timelineEmpty {
+  margin: 18px 0 6px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #7486a1;
 }
 
 .timelineItem {

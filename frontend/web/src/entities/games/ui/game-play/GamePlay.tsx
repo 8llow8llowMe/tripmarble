@@ -547,18 +547,25 @@ const GamePlay = ({
         {activeSection === "timeline" && (
           <div className={styles.timelineBox}>
             <div className={styles.timelineTitle}>타임 라인</div>
-            <ul className={styles.timelineList}>
-              {sortedLogs.map((log) => (
-                <li key={log.tripGameMoveLogId} className={styles.timelineItem}>
-                  <div className={styles.timelineDot} />
-                  <div className={styles.timelineText}>
-                    {`${log.diceValueAtRoll}칸 이동 · ${
-                      log.missionResultDescription
-                    } · ${formatKST(log.arrivedAt)}`}
-                  </div>
-                </li>
-              ))}
-            </ul>
+            {sortedLogs.length > 0 ? (
+              <ul className={styles.timelineList}>
+                {sortedLogs.map((log) => (
+                  <li
+                    key={log.tripGameMoveLogId}
+                    className={styles.timelineItem}
+                  >
+                    <div className={styles.timelineDot} />
+                    <div className={styles.timelineText}>
+                      {`${log.diceValueAtRoll}칸 이동 · ${
+                        log.missionResultDescription
+                      } · ${formatKST(log.arrivedAt)}`}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={styles.timelineEmpty}>게임을 시작해보세요!</p>
+            )}
           </div>
         )}
       </div>
