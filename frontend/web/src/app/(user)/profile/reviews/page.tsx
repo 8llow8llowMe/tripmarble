@@ -6,6 +6,7 @@ import Link from "next/link";
 import styles from "./MyReviewsPage.module.scss";
 import {
   ReviewSourceType,
+  ReviewOrderType,
   useMyReviewsInfinite,
 } from "@/entities/reviews/hooks/useMyReviews";
 import EmptyGameState from "@/widgets/game-empty-state/EmptyGameState";
@@ -24,6 +25,14 @@ const FILTER_OPTIONS: FilterOption[] = [
 const filterLabel = (value: "ALL" | ReviewSourceType) =>
   FILTER_OPTIONS.find((option) => option.value === value)?.label ?? "전체";
 
+const ORDER_OPTIONS: { value: ReviewOrderType; label: string }[] = [
+  { value: "DESC", label: "최신순" },
+  { value: "ASC", label: "오래된순" },
+];
+
+const orderLabel = (value: ReviewOrderType) =>
+  ORDER_OPTIONS.find((option) => option.value === value)?.label ?? "최신순";
+
 const ReviewsPageInner = () => {
   const router = useRouter();
   const pathname = usePathname();
@@ -37,6 +46,11 @@ const ReviewsPageInner = () => {
       : "ALL";
   }, [sourceParam]);
 
+  const orderParam = (searchParams.get("orderType") ?? "DESC").toUpperCase();
+  const validOrder = useMemo<ReviewOrderType>(() => {
+    return orderParam === "ASC" ? "ASC" : "DESC";
+  }, [orderParam]);
+
   const {
     data,
     fetchNextPage,
@@ -47,7 +61,7 @@ const ReviewsPageInner = () => {
   } = useMyReviewsInfinite({
     sourceType: validSource === "ALL" ? undefined : validSource,
     size: 12,
-    orderType: "DESC",
+    orderType: validOrder,
   });
 
   const observerRef = useRef<HTMLDivElement>(null);
@@ -62,18 +76,34 @@ const ReviewsPageInner = () => {
     return () => observer.disconnect();
   }, [hasNextPage, fetchNextPage]);
 
-  const handleFilterChange = (value: "ALL" | ReviewSourceType) => {
+  const updateQuery = (updater: (params: URLSearchParams) => void) => {
     const params = new URLSearchParams(searchParams);
-    if (value === "ALL") {
-      params.delete("sourceType");
-    } else {
-      params.set("sourceType", value);
-    }
+    updater(params);
     const queryString = params.toString();
     startTransition(() => {
       router.replace(queryString ? `${pathname}?${queryString}` : pathname, {
         scroll: false,
       });
+    });
+  };
+
+  const handleSourceChange = (value: "ALL" | ReviewSourceType) => {
+    updateQuery((params) => {
+      if (value === "ALL") {
+        params.delete("sourceType");
+      } else {
+        params.set("sourceType", value);
+      }
+    });
+  };
+
+  const handleOrderChange = (value: ReviewOrderType) => {
+    updateQuery((params) => {
+      if (value === "DESC") {
+        params.delete("orderType");
+      } else {
+        params.set("orderType", value);
+      }
     });
   };
 
@@ -87,26 +117,45 @@ const ReviewsPageInner = () => {
         <div className={styles.titleDiv}>
           <div className={styles.titleRow}>
             <h1 className={styles.title}>내가 쓴 리뷰</h1>
-            <p className={styles.subtitle}>{filterLabel(validSource)}</p>
+            <p className={styles.subtitle}>
+              {filterLabel(validSource)} · {orderLabel(validOrder)}
+            </p>
           </div>
           <Link href="/profile" className={styles.backLink}>
             <span className={styles.backTextFull}>프로필로 돌아가기</span>
             <span className={styles.backTextCompact}>프로필로</span>
           </Link>
         </div>
-        <select
-          className={styles.filterSelect}
-          value={validSource}
-          onChange={(e) =>
-            handleFilterChange(e.target.value as "ALL" | ReviewSourceType)
-          }
-        >
-          {FILTER_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+        <div className={styles.actions}>
+          <select
+            className={styles.filterSelect}
+            value={validSource}
+            onChange={(e) =>
+              handleSourceChange(e.target.value as "ALL" | ReviewSourceType)
+            }
+            aria-label="리뷰 종류 필터"
+          >
+            {FILTER_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <select
+            className={styles.filterSelect}
+            value={validOrder}
+            onChange={(e) =>
+              handleOrderChange(e.target.value as ReviewOrderType)
+            }
+            aria-label="정렬 순서"
+          >
+            {ORDER_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </header>
 
       {isError && (
