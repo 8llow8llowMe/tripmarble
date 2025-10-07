@@ -8,7 +8,9 @@ public record TripSpotSimpleInfo(
     long tripSpotId,
     long contentId,
     String tripSpotName,
-    String originalImageUrl
+    String originalImageUrl,
+    double longitude,
+    double latitude
 ) {
 
     public static TripSpotSimpleInfo of(TripSpot tripSpot) {
@@ -17,6 +19,8 @@ public record TripSpotSimpleInfo(
             .contentId(tripSpot.contentId())
             .tripSpotName(tripSpot.title())
             .originalImageUrl(tripSpot.firstImage())
+            .longitude(tripSpot.mapX())
+            .latitude(tripSpot.mapY())
             .build();
     }
 }
