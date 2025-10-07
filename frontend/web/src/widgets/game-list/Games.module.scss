@@ -85,14 +85,32 @@
   z-index: 2;
   pointer-events: none;
 
+  .overlayMeta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
   .overlayTag {
     font-size: 0.95rem;
     font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
     color: #e1e8fa;
-    margin-bottom: 8px;
     opacity: 0.9;
+  }
+  .statusBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    background-color: rgba(37, 99, 235, 0.18);
+    color: #e4ebf7;
+    border: 1px solid rgba(255, 255, 255, 0.28);
   }
   .overlayTitle {
     font-size: 1.58rem;
