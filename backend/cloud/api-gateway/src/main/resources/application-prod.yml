@@ -33,7 +33,7 @@ spring:
         - id: trip-service
           uri: lb://TRIP-SERVICE-PROD
           predicates:
-            - Path=/api/v1/regions/**, /api/v1/trip-spots/**, /api/v1/trip-content-types/**
+            - Path=/api/v1/regions/**, /api/v1/trip-spots/**, /api/v1/trip-content-types/**, /api/v1/me/reviews/**
         - id: trip-game-service
           uri: lb://TRIP-GAME-SERVICE-PROD
           predicates:
