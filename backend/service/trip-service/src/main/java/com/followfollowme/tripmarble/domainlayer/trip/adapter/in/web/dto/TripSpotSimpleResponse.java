@@ -17,6 +17,12 @@ public record TripSpotSimpleResponse(
     String tripSpotName,
 
     @Schema(description = "여행지 대표 이미지 원본 URL", example = "http://tong.visitkorea.or.kr/~~~.jpg")
-    String originalImageUrl
+    String originalImageUrl,
+
+    @Schema(description = "X좌표 (경도)")
+    double longitude,
+
+    @Schema(description = "Y좌표 (위도)")
+    double latitude
 ) {
 }
