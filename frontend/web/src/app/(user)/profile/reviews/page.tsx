@@ -1,6 +1,13 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useTransition } from "react";
+import {
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import styles from "./MyReviewsPage.module.scss";
@@ -10,6 +17,9 @@ import {
   useMyReviewsInfinite,
 } from "@/entities/reviews/hooks/useMyReviews";
 import EmptyGameState from "@/widgets/game-empty-state/EmptyGameState";
+import { DotThreeIcon } from "@/shared/assets/icons";
+import useDeleteMyReview from "@/entities/reviews/hooks/useDeleteMyReview";
+import type { TripSpotReviewListItem } from "@/entities/trips/hooks/useTripSpotReviews";
 
 type FilterOption = {
   value: "ALL" | ReviewSourceType;
@@ -32,6 +42,112 @@ const ORDER_OPTIONS: { value: ReviewOrderType; label: string }[] = [
 
 const orderLabel = (value: ReviewOrderType) =>
   ORDER_OPTIONS.find((option) => option.value === value)?.label ?? "최신순";
+
+type ReviewCardProps = {
+  review: TripSpotReviewListItem;
+  onDelete: (id: string) => void;
+  isDeleting: boolean;
+};
+
+const ReviewCard = ({ review, onDelete, isDeleting }: ReviewCardProps) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const menuBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        menuBtnRef.current &&
+        !menuBtnRef.current.contains(target)
+      ) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuOpen]);
+
+  const confirmDelete = () => {
+    if (window.confirm("이 리뷰를 삭제할까요? 삭제 후에는 되돌릴 수 없어요.")) {
+      onDelete(review.tripSpotReviewId);
+      setMenuOpen(false);
+    }
+  };
+
+  return (
+    <article className={styles.reviewCard}>
+      <Link
+        href={`/trip-spots/${review.tripSpotId}`}
+        className={styles.cardBody}
+      >
+        <div className={styles.imageWrapper}>
+          <img
+            src={review.photos?.[0]?.photoUrl || "/images/no-image.png"}
+            alt="리뷰 이미지"
+            loading="lazy"
+          />
+        </div>
+        <div className={styles.reviewContent}>
+          <div className={styles.reviewMeta}>
+            <span className={styles.rating}>
+              {typeof review.rating === "number"
+                ? review.rating.toFixed(1)
+                : "0.0"}
+              점
+            </span>
+            <span className={styles.source}>
+              {review.reviewSourceTypeDescription ||
+                (review.reviewSourceTypeCode === "GAME_MISSION"
+                  ? "게임 리뷰"
+                  : "일반 리뷰")}
+            </span>
+          </div>
+          <p className={styles.reviewText}>
+            {review.content?.length
+              ? review.content
+              : "리뷰 내용을 불러오지 못했습니다."}
+          </p>
+        </div>
+      </Link>
+      <div className={styles.cardActions}>
+        <button
+          ref={menuBtnRef}
+          className={styles.moreBtn}
+          aria-label="리뷰 옵션 열기"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setMenuOpen((prev) => !prev);
+          }}
+        >
+          <DotThreeIcon size={20} />
+        </button>
+        {menuOpen && (
+          <div className={styles.menu} ref={menuRef} role="menu">
+            <button
+              className={styles.menuItem}
+              role="menuitem"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                confirmDelete();
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "삭제 중..." : "리뷰 삭제"}
+            </button>
+          </div>
+        )}
+      </div>
+    </article>
+  );
+};
 
 const ReviewsPageInner = () => {
   const router = useRouter();
@@ -110,6 +226,11 @@ const ReviewsPageInner = () => {
   const reviews =
     data?.pages.flatMap((page) => page.data.dataBody.contents) ?? [];
   const showEmpty = !isLoading && reviews.length === 0;
+  const { mutate: deleteReview, isPending: isDeleting } = useDeleteMyReview();
+
+  const handleDeleteReview = (reviewId: string) => {
+    deleteReview(reviewId);
+  };
 
   return (
     <div className={`${styles.pageWrapper} appPage`}>
@@ -169,40 +290,12 @@ const ReviewsPageInner = () => {
       ) : (
         <section className={styles.grid}>
           {reviews.map((review) => (
-            <Link
+            <ReviewCard
               key={review.tripSpotReviewId}
-              href={`/trip-spots/${review.tripSpotId}`}
-              className={styles.reviewCard}
-            >
-              <div className={styles.imageWrapper}>
-                <img
-                  src={review.photos?.[0]?.photoUrl || "/images/no-image.png"}
-                  alt="리뷰 이미지"
-                  loading="lazy"
-                />
-              </div>
-              <div className={styles.reviewContent}>
-                <div className={styles.reviewMeta}>
-                  <span className={styles.rating}>
-                    {typeof review.rating === "number"
-                      ? review.rating.toFixed(1)
-                      : "0.0"}
-                    점
-                  </span>
-                  <span className={styles.source}>
-                    {review.reviewSourceTypeDescription ||
-                      (review.reviewSourceTypeCode === "GAME_MISSION"
-                        ? "게임 리뷰"
-                        : "일반 리뷰")}
-                  </span>
-                </div>
-                <p className={styles.reviewText}>
-                  {review.content?.length
-                    ? review.content
-                    : "리뷰 내용을 불러오지 못했습니다."}
-                </p>
-              </div>
-            </Link>
+              review={review}
+              onDelete={handleDeleteReview}
+              isDeleting={isDeleting}
+            />
           ))}
           <div ref={observerRef} />
         </section>
