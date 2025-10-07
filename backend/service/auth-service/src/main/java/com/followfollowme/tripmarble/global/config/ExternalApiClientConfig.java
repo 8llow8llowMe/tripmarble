@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.global.config;
 
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.KakaoApiClient;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.naver.NaverApiClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -13,6 +14,11 @@ public class ExternalApiClientConfig {
     @Bean
     public KakaoApiClient kakaoApiClient() {
         return createHttpInterface(KakaoApiClient.class);
+    }
+
+    @Bean
+    public NaverApiClient naverApiClient() {
+        return createHttpInterface(NaverApiClient.class);
     }
 
     private <T> T createHttpInterface(Class<T> serviceClass) {
