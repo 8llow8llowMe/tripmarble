@@ -8,6 +8,7 @@ export interface CardListItem {
   href?: string;
   imageUrl: string;
   regionName?: string;
+  status?: string;
   title: string;
   description?: string;
   date?: string;
