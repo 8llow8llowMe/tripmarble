@@ -1,25 +1,36 @@
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
+import { Ionicons } from '@expo/vector-icons';
 
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 
+type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+
 interface ActionItemProps {
   label: string; // 항목 텍스트
-  iconName?: string; // 아이콘 이름
-  textColor?: string; // 아이콘 색상
+  textColor?: string; // 텍스트 색상
+  iconName?: IoniconName; // 아이콘 이름
+  iconColor?: string; // 아이콘 색상
   onPress?: () => void; // 클릭 이벤트
   ActionTestID?: string;
 }
 
-const ActionItem = ({ label, iconName, textColor, onPress, ActionTestID }: ActionItemProps) => (
+const ActionItem = ({
+  label,
+  textColor,
+  iconName,
+  iconColor,
+  onPress,
+  ActionTestID,
+}: ActionItemProps) => (
   <TouchableOpacity onPress={onPress} testID={ActionTestID}>
     <View style={styles.item}>
       <TextBox size={14} fontsName="Pretendard600" color={textColor || palette.black}>
         {label}
       </TextBox>
 
-      {/* {iconName && <MIcon name={iconName} width={20} height={20} />} */}
+      {iconName && <Ionicons name={iconName} size={20} color={iconColor || palette.black} />}
     </View>
   </TouchableOpacity>
 );

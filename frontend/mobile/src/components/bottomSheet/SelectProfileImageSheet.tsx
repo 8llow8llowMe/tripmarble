@@ -1,44 +1,57 @@
-import TextBox from '@/components/atom/TextBox';
-import ActionItem from '@/components/item/ActionItem';
-import { palette } from '@/constants/colors';
-
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { BottomSheetView } from '@gorhom/bottom-sheet';
+import TextBox from '@/components/atom/TextBox';
+import { palette } from '@/constants/colors';
+import ActionItem from '@/components/item/ActionItem';
 
-const SelectProfileImageSheet = () => {
+interface SelectProfileImageSheetProps {
+  onPickImage?: () => void;
+  onTakePhoto?: () => void;
+  onDeleteImage?: () => void;
+}
+
+const SelectProfileImageSheet = ({
+  onPickImage,
+  onTakePhoto,
+  onDeleteImage,
+}: SelectProfileImageSheetProps) => {
   return (
-    <View style={styles.container}>
+    <BottomSheetView style={styles.container}>
       <TextBox size={16} fontsName="Pretendard700" style={{ alignSelf: 'center' }}>
         프로필 사진 선택
       </TextBox>
+
       <View style={styles.list}>
-        <ActionItem label="앨범" iconName="GalleryIcon" />
-        <ActionItem label="카메라" iconName="CameraIcon" />
+        <ActionItem label="앨범" iconName="images-outline" onPress={onPickImage} />
+        <ActionItem label="카메라" iconName="camera-outline" onPress={onTakePhoto} />
       </View>
       <View style={styles.list}>
-        <ActionItem label="현재 사진 삭제" iconName="TrashIcon" textColor="#F63D68" />
+        <ActionItem
+          label="현재 사진 삭제"
+          textColor="#F63D68"
+          iconName="trash-outline"
+          iconColor="#F63D68"
+          onPress={onDeleteImage}
+        />
       </View>
-    </View>
+    </BottomSheetView>
   );
 };
+
+export default SelectProfileImageSheet;
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: palette.white,
     padding: 16,
     gap: 16,
-    flex: 1,
   },
   list: {
     backgroundColor: palette.white,
-    borderRadius: 8,
-  },
-
-  lastItem: {
-    backgroundColor: palette.white,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: palette.gray200,
+    overflow: 'hidden',
   },
 });
-
-export default SelectProfileImageSheet;

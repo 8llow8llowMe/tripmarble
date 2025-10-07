@@ -16,7 +16,6 @@ import { useBottomSheetBase } from '@/hooks/useBottomSheetBase';
 import { palette } from '@/constants/colors';
 import SelectProfileImageSheet from '@/components/bottomSheet/SelectProfileImageSheet';
 
-// 타입 정의
 interface UserProfile {
   email: string;
   name: string;
@@ -52,7 +51,7 @@ const ProfileEditScreen = () => {
 
   // 📸 앨범 선택
   const handlePickImage = async () => {
-    // closeSheet();
+    closeSelectProfileImageSheet();
     const granted = await requestMediaPermission();
     if (!granted) return;
 
@@ -70,7 +69,7 @@ const ProfileEditScreen = () => {
 
   // 📷 카메라 촬영
   const handleTakePhoto = async () => {
-    // closeSheet();
+    closeSelectProfileImageSheet();
     const granted = await requestCameraPermission();
     if (!granted) return;
 
@@ -109,19 +108,19 @@ const ProfileEditScreen = () => {
         </TouchableOpacity>
 
         {/* 이메일 */}
-        {/* <View style={styles.field}>
+        <View style={styles.field}>
           <Text style={styles.label}>이메일</Text>
           <Text style={styles.value}>{profile.email}</Text>
-        </View> */}
+        </View>
 
         {/* 이름 */}
-        {/* <View style={styles.field}>
+        <View style={styles.field}>
           <Text style={styles.label}>이름</Text>
           <Text style={styles.value}>{profile.name}</Text>
-        </View> */}
+        </View>
 
         {/* 닉네임 */}
-        {/* <View style={styles.field}>
+        <View style={styles.field}>
           <Text style={styles.label}>닉네임</Text>
           <TextInput
             style={styles.input}
@@ -129,14 +128,13 @@ const ProfileEditScreen = () => {
             onChangeText={setNickname}
             placeholder="닉네임 입력"
           />
-        </View> */}
+        </View>
 
         {/* 저장 버튼 */}
-        {/* <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>저장하기</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </ScrollView>
-
       <BottomSheetModal
         ref={selectProfileImageSheetRef}
         handleStyle={{
@@ -145,10 +143,10 @@ const ProfileEditScreen = () => {
           borderTopRightRadius: 12,
         }}
         index={0}
-        snapPoints={[605]}
+        snapPoints={[277]}
         backdropComponent={renderBackdrop}
       >
-        <SelectProfileImageSheet />
+        <SelectProfileImageSheet onPickImage={handlePickImage} onTakePhoto={handleTakePhoto} />
       </BottomSheetModal>
     </SafeAreaView>
   );
