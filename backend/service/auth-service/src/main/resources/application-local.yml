@@ -95,3 +95,13 @@ oauth:
       - profile_image
       - account_email
       - name
+
+  naver:
+    client-id: ENC(AQno3Aik1iI/f9j03+t0LtoULXdwtjLR1V9pKDiTE+o=)
+    client-secret: ENC(VRBROIuUZe9IqGY9hEBh06OZX2xCqpdK)
+    redirect-uri: http://localhost:8080/auth/callback/naver
+    scope:
+      - nickname
+      - profile_image
+      - email
+      - name
