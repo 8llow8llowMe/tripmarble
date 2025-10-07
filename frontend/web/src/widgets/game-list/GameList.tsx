@@ -5,8 +5,17 @@ import styles from "./Games.module.scss";
 import { GameSummary } from "@/entities/games/hooks/useMyGameList";
 import Carousel from "@/shared/ui/common/Carousel/Carousel";
 import type { CardListItem } from "@/shared/ui/common/CardList/CardList";
+import EmptyGameState from "@/widgets/game-empty-state/EmptyGameState";
 
 export function GameList({ games }: { games: GameSummary[] }) {
+  if (!games?.length) {
+    return (
+      <div className={styles.gamesContainer}>
+        <EmptyGameState />
+      </div>
+    );
+  }
+
   const items: CardListItem[] = games.map((game) => ({
     id: String(game.tripGameId),
     href: `/game/${game.tripGameId}`,
