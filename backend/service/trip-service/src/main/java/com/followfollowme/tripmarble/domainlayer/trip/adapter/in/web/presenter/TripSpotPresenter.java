@@ -17,6 +17,8 @@ public class TripSpotPresenter {
             .contentId(String.valueOf(info.contentId()))
             .tripSpotName(info.tripSpotName())
             .originalImageUrl(info.originalImageUrl())
+            .longitude(info.longitude())
+            .latitude(info.latitude())
             .build();
     }
 
