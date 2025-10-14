@@ -1,7 +1,6 @@
-// src/common/hooks/usePermissions.ts
 import { Alert, Linking } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-// import * as Location from "expo-location";
+import * as Location from 'expo-location';
 
 /**
  * 공통 권한 요청 처리
@@ -31,7 +30,7 @@ export const requestMediaPermission = async () => {
   return await ensureGranted(() => ImagePicker.requestMediaLibraryPermissionsAsync());
 };
 
-// // 📍 위치 권한
-// export const requestLocationPermission = async () => {
-//   return await ensureGranted(() => Location.requestForegroundPermissionsAsync());
-// };
+// 📍 위치 권한
+export const requestLocationPermission = async () => {
+  return await ensureGranted(() => Location.requestForegroundPermissionsAsync());
+};
