@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Alert, SafeAreaView } from 'react-native';
 import { BottomSheetView } from '@gorhom/bottom-sheet';
 import { palette } from '@/constants/colors';
@@ -7,7 +7,6 @@ import * as ImagePicker from 'expo-image-picker';
 import useMoveLogsSuccessMutation from '@/hooks/game/useMoveLogsSuccess';
 import { useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEY } from '@/constants/keys';
-// components
 import GameSheetHeader from '@/components/ui/game-mission/GameSheetHeader';
 import GameTabs from '@/components/ui/game-mission/GameTabs';
 import MissionReviewForm from '@/components/ui/game-mission/MissionReviewForm';
@@ -15,6 +14,7 @@ import MissionLocationForm from '@/components/ui/game-mission/MissionLocationFor
 import SubmitButton from '@/components/ui/game-mission/SubmitButton';
 import { TouchableOpacity } from 'react-native';
 import useMoveLogsSkipMutation from '@/hooks/game/useMoveLogsSkip';
+import { CurrentLocation, getCurrentLocation } from '@/utils/location';
 
 export interface GameMissionAuthSheetProps {
   tile: any;
@@ -52,6 +52,16 @@ export function GameMissionAuthSheetContent({
   const [images, setImages] = useState<string[]>([]);
   const [locationVerified, setLocationVerified] = useState<boolean>(false);
 
+  const [currentLoc, setCurrentLoc] = useState<CurrentLocation | null>(null); // 현재 위치
+  const [locLoading, setLocLoading] = useState(false); // 현재 위치 불러오는 로딩 상태
+
+  // 위치 미리 불러오기
+  useEffect(() => {
+    if (activeTab === 'mission' && mode === 'location') {
+      refreshLocation();
+    }
+  }, [activeTab, mode]);
+
   const canSubmit =
     allowMission &&
     ((mode === 'review' && rating > 0 && review.trim().length >= 20) ||
@@ -88,6 +98,29 @@ export function GameMissionAuthSheetContent({
 
   const removeImage = (idx: number) => setImages((prev) => prev.filter((_, i) => i !== idx));
 
+  async function refreshLocation() {
+    setLocLoading(true);
+    try {
+      const loc = await getCurrentLocation();
+      if (loc) setCurrentLoc(loc);
+    } finally {
+      setLocLoading(false);
+    }
+  }
+
+  // 📍 위치 인증
+  async function handleVerifyLocation() {
+    // 기존에 받아둔 값이 있으면 재사용, 없으면 한번 더 취득
+    const loc = currentLoc ?? (await getCurrentLocation());
+    if (!loc) return;
+
+    console.log('🍏 loc', loc);
+
+    // 서버 인증 호출 자리
+    // await verifyLocationAPI({ tripGameId, tripGameMoveLogId: pendingMoveLogId!, ...loc });
+
+    setLocationVerified(true);
+  }
   return (
     <BottomSheetView style={styles.sheetContainer}>
       <SafeAreaView style={styles.safeArea}>
@@ -147,7 +180,10 @@ export function GameMissionAuthSheetContent({
               {mode === 'location' && (
                 <MissionLocationForm
                   verified={locationVerified}
-                  onVerify={() => setLocationVerified(true)}
+                  onVerify={handleVerifyLocation}
+                  current={currentLoc} // ✅ 내려줌
+                  loading={locLoading} // ✅ 스피너 표시용
+                  onRefresh={refreshLocation} // ✅ "내 위치로" 재시도
                 />
               )}
 
