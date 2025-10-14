@@ -1,20 +1,70 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { palette } from '@/constants/colors';
+import KakaoMap from '@/components/ui/map/KakaoMap';
 
 type Props = {
   verified: boolean;
   onVerify: () => void;
+  current?: { lat: number; lng: number } | null;
+  loading?: boolean;
+  onRefresh?: () => void;
 };
 
-export default function MissionLocationForm({ verified, onVerify }: Props) {
+export default function MissionLocationForm({
+  verified,
+  onVerify,
+  current,
+  loading,
+  onRefresh,
+}: Props) {
   return (
     <View style={styles.card}>
       <Text style={styles.label}>현재 위치 인증</Text>
-      <Text style={styles.helper}>GPS 권한 요청 및 반경 체크는 추후 연결</Text>
-      <TouchableOpacity style={styles.secondaryBtn} onPress={onVerify}>
-        <Text style={styles.secondaryBtnText}>{verified ? '위치 인증됨 ✓' : '위치 인증하기'}</Text>
-      </TouchableOpacity>
+
+      {/* 1) 미니맵 프리뷰 */}
+      {current ? (
+        <KakaoMap
+          latitude={current.lat}
+          longitude={current.lng}
+          debugOverlay
+          onErrorMsg={(m) => console.warn('[KAKAO_MAP_ERROR]', m)}
+          onReady={() => console.log('KAKAO READY')}
+        />
+      ) : (
+        <View
+          style={{
+            height: 220,
+            borderRadius: 12,
+            backgroundColor: '#F2F4F6',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 8,
+          }}
+        >
+          <Text style={{ color: '#8A8F98' }}>
+            {loading ? '현재 위치 불러오는 중…' : '위치를 불러오지 못했습니다'}
+          </Text>
+        </View>
+      )}
+
+      <Text style={styles.helper}>지도에서 현재 위치를 확인한 뒤 인증하세요.</Text>
+
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <TouchableOpacity style={styles.secondaryBtn} onPress={onRefresh} disabled={loading}>
+          <Text style={styles.secondaryBtnText}>{loading ? '새로고침 중…' : '내 위치로'}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.secondaryBtn, { backgroundColor: palette.mainColor }]}
+          onPress={onVerify}
+          disabled={!current}
+        >
+          <Text style={[styles.secondaryBtnText, { color: '#fff' }]}>
+            {verified ? '위치 인증됨 ✓' : '이 위치로 인증'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
