@@ -14,6 +14,12 @@ x-trip-game-service-environment: &trip_game_service_environment
   TRIP_SERVICE_APP_NAME: ${TRIP_SERVICE_APP_NAME}
   AUTH_SERVICE_APP_NAME: ${AUTH_SERVICE_APP_NAME}
 
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "2"
+
 services:
   trip-game-service-dev:
     container_name: trip-game-service-dev
@@ -26,6 +32,8 @@ services:
       <<: *trip_game_service_environment
       TRIP_MARBLE_DOMAIN: ${TRIP_MARBLE_DOMAIN_DEV}
       API_GATEWAY_PORT: ${API_GATEWAY_PORT_DEV}
+    logging:
+      <<: *default-logging
     networks:
       - 8llow8llowme-net
 
@@ -37,7 +45,9 @@ services:
     ports:
       - "${TRIP_GAME_SERVICE_PORT_PROD}:${TRIP_GAME_SERVICE_PORT}" # host:container
     environment:
-      <<: *trip_game_service_environment
+      <<: *trip_game_service_environment  
+    logging:
+      <<: *default-logging
     networks:
       - 8llow8llowme-net
 
