@@ -18,6 +18,12 @@ x-trip-service-environment: &trip_service_environment
   MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
   MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
 
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "2"
+
 services:
   trip-service-dev:
     container_name: trip-service-dev
@@ -30,6 +36,8 @@ services:
       <<: *trip_service_environment
       TRIP_MARBLE_DOMAIN: ${TRIP_MARBLE_DOMAIN_DEV}
       API_GATEWAY_PORT: ${API_GATEWAY_PORT_DEV}
+    logging:
+      <<: *default-logging
     networks:
       - 8llow8llowme-net
 
@@ -42,6 +50,8 @@ services:
       - '${TRIP_SERVICE_PORT_PROD}:${TRIP_SERVICE_PORT}' # host:container
     environment:
       <<: *trip_service_environment
+    logging:
+      <<: *default-logging
     networks:
       - 8llow8llowme-net
 
