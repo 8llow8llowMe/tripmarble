@@ -24,6 +24,11 @@ spring:
           batch_size: 100
         default_batch_fetch_size: 100
 
+  servlet:
+    multipart:
+      max-file-size: ${MULTIPART_MAX_FILE_SIZE}
+      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE}
+
 eureka:
   instance:
     hostname: ${spring.application.name}
