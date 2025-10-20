@@ -53,7 +53,7 @@ const ProfileEditForm = ({ isOpen, onClose }: ProfileEditFormProps) => {
       const finalNickname = nickname || user?.nickname || "";
 
       await updateUserProfileAsync({
-        profileImageUrl: uploadedUrl || user?.profileImage || "",
+        profileImageUrl: uploadedUrl || user?.profileImageUrl || "",
         nickname: finalNickname,
       });
 
@@ -90,11 +90,11 @@ const ProfileEditForm = ({ isOpen, onClose }: ProfileEditFormProps) => {
             id="profileImageUpload"
           />
           <label htmlFor="profileImageUpload">
-            {previewImageURL || user?.profileImage ? (
+            {previewImageURL || user?.profileImageUrl ? (
               <img
                 width={200}
                 height={200}
-                src={previewImageURL || user?.profileImage!}
+                src={previewImageURL || user?.profileImageUrl!}
                 alt="Preview"
               />
             ) : (
