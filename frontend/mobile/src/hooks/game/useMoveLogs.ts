@@ -17,9 +17,7 @@ export interface GameMoveLog {
 }
 
 export interface GameListResponse extends ApiResponseBase {
-  data: {
-    dataBody: GameMoveLog[];
-  };
+  dataBody: GameMoveLog[];
 }
 
 export interface MyGameListParams {
