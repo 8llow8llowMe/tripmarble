@@ -1,21 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Pressable,
-  Alert,
-  SafeAreaView,
-  ScrollView,
-} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { palette } from '@/constants/colors';
-import { Ionicons } from '@expo/vector-icons';
 
 import GameBoardNative, { GameBoardHandle } from '@/components/ui/game-board/GameBoardNative';
-import { GameMissionAuthSheetContent } from '@/components/ui/game/GameMissionAuthSheetContent';
 import DiceView from '@/components/ui/lottie/DiceView';
 import CongratulationView from '@/components/ui/lottie/CongratulationsView';
 
@@ -27,7 +15,7 @@ import useMoveLogsQuery from '@/hooks/game/useMoveLogs';
 import { gameInfoDummy } from '@/utils/gameInfoDummy';
 
 // Subcomponents
-import GameDetailHeader from './GameDetailHeader';
+import GameDetailHeader from '../../layout/header/GameDetailHeader';
 import GameDetailInfo from './GameDetailInfo';
 import GameDetailTabs from './GameDetailTabs';
 import TimelineList from './TimelineList';
@@ -39,11 +27,10 @@ import GameInfoSheet from '@/components/bottomSheet/game/GameInfoSheet';
 
 type Props = {
   tripGameId: string;
-  onBack?: () => void;
   onExit?: () => void; // after force end
 };
 
-export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
+export default function GameDetail({ tripGameId, onExit }: Props) {
   const { gameDetail, isLoading: gameDetailIsLoading } = useGameDetailQuery(tripGameId);
   const detail = (gameDetail as any)?.dataBody ?? undefined;
   const titleFromDetail: string | undefined = detail?.title ?? detail?.representativeRegionName;
@@ -155,44 +142,7 @@ export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
     setIsCurrentTileSelected(sameTile);
   }, [selectedTile, currentTile]);
 
-  // const [activeTab, setActiveTab] = useState<'timeline' | 'guide'>('timeline');
-  // const menuOpacity = useRef(new Animated.Value(0)).current;
-  // const menuScale = useRef(new Animated.Value(0.96)).current;
-  // const [menuVisible, setMenuVisible] = useState(false);
-
-  // const openMenu = () => {
-  //   setMenuVisible(true);
-  //   Animated.parallel([
-  //     Animated.timing(menuOpacity, { toValue: 1, duration: 140, useNativeDriver: true }),
-  //     Animated.spring(menuScale, { toValue: 1, useNativeDriver: true, friction: 7 }),
-  //   ]).start();
-  // };
-  // const closeMenu = () => {
-  //   Animated.parallel([
-  //     Animated.timing(menuOpacity, { toValue: 0, duration: 120, useNativeDriver: true }),
-  //     Animated.timing(menuScale, { toValue: 0.96, duration: 120, useNativeDriver: true }),
-  //   ]).start(({ finished }) => finished && setMenuVisible(false));
-  // };
-
-  // const confirmEndGame = () => {
-  //   closeMenu();
-  //   Alert.alert('게임 종료하기', '정말로 이 게임을 종료할까요?\n종료하면 되돌릴 수 없어요.', [
-  //     { text: '취소', style: 'cancel' },
-  //     {
-  //       text: '종료',
-  //       style: 'destructive',
-  //       onPress: async () => {
-  //         try {
-  //           closeMenu();
-  //           await endGame(tripGameId);
-  //           onExit?.();
-  //         } catch (e) {
-  //           Alert.alert('종료 실패', '게임 종료 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
-  //         }
-  //       },
-  //     },
-  //   ]);
-  // };
+  const [activeTab, setActiveTab] = useState<'timeline' | 'guide'>('timeline');
 
   // const timelineEntries = useMemo(
   //   () =>
@@ -236,9 +186,7 @@ export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
   );
   // 타일 클릭
   const handleTilePress = (tile: any, tapIndex: number) => {
-    // ✅ 선택된 타일 정보 저장
     setSelectedTile(tile);
-
     setActiveSheet('info');
     openSheet();
   };
@@ -261,7 +209,6 @@ export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
   // 미션 인증 방식 선택
   const handlePressMissionAuth = async () => {
     setSelectedTile(null);
-    // ✅ 선택 시트 열기
     setActiveSheet('select');
     openSheet();
   };
@@ -274,18 +221,20 @@ export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
 
   if (!bothReady) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <View style={styles.safeArea}>
         <View style={styles.container}>
           <View style={{ paddingVertical: 28, alignItems: 'center' }}>
             <Text style={{ fontSize: 16, color: '#6B7280' }}>불러오는 중…</Text>
           </View>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
+      <GameDetailHeader tripGameId={tripGameId} title={titleFromDetail} isGameEnd={isGameEnd} />
+
       <ScrollView contentContainerStyle={styles.container}>
         <DiceView
           visible={diceVisible}
@@ -298,13 +247,6 @@ export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
         {confettiVisible && (
           <CongratulationView visible={diceVisible} onFinish={() => setConfettiVisible(false)} />
         )}
-
-        {/* <GameDetailHeader
-          title={titleFromDetail}
-          isGameEnd={isGameEnd}
-          onBack={onBack}
-          onMenu={openMenu}
-        /> */}
 
         <GameDetailInfo
           turnOrder={currentTurnOrderFromDetail}
@@ -334,7 +276,7 @@ export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
 
         {isGameEnd ? (
           <View style={{ paddingVertical: 12 }}>
-            <Text style={{ textAlign: 'center', color: '#4B5563' }}>게임이 종료되었습니다</Text>
+            <Text style={{ textAlign: 'center', color: '#4B5563' }}>게임이 종료되었습니다.</Text>
           </View>
         ) : canMove ? (
           <TouchableOpacity style={styles.button} onPress={handlePressRollDice}>
@@ -365,33 +307,6 @@ export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
               <Text style={styles.guideStep}>step3</Text>
               <Text style={styles.guideText}>한 바퀴 완주 시 게임 종료!</Text>
             </View>
-          </View>
-        )} */}
-
-        {/* {menuVisible && (
-          <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
-            <Pressable
-              style={styles.backdrop}
-              onPress={closeMenu}
-              accessibilityRole="button"
-              accessibilityLabel="메뉴 닫기"
-            />
-            <Animated.View
-              style={[styles.menu, { opacity: menuOpacity, transform: [{ scale: menuScale }] }]}
-              accessible
-              accessibilityLabel="옵션 메뉴"
-            >
-              <TouchableOpacity
-                style={styles.menuItem}
-                onPress={confirmEndGame}
-                disabled={isEnding}
-                accessibilityRole="button"
-                accessibilityLabel="게임 종료하기"
-              >
-                <Ionicons name="flag-outline" size={18} color={palette.red600} />
-                <Text style={styles.menuText}>게임 종료하기</Text>
-              </TouchableOpacity>
-            </Animated.View>
           </View>
         )} */}
       </ScrollView>
@@ -464,7 +379,7 @@ export default function GameDetail({ tripGameId, onBack, onExit }: Props) {
           />
         )}
       </BottomSheetModal>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -484,29 +399,4 @@ const styles = StyleSheet.create({
   guideRow: { flexDirection: 'row', alignItems: 'baseline', marginBottom: 4, gap: 8 },
   guideStep: { width: 60, fontSize: 16, fontWeight: '700', color: palette.mainColor },
   guideText: { fontSize: 16, color: palette.black, flexShrink: 1 },
-  backdrop: { ...StyleSheet.absoluteFillObject },
-  menu: {
-    position: 'absolute',
-    top: 52 + 8,
-    right: 0,
-    minWidth: 176,
-    paddingVertical: 8,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#EFF2F6',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 10,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  menuText: { fontSize: 15, color: palette.gray800, fontWeight: '600' },
 });
