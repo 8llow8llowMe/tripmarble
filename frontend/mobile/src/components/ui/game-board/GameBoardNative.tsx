@@ -11,6 +11,7 @@ import React, {
 } from 'react';
 import { View, Image, StyleSheet, Pressable } from 'react-native';
 import Svg, { Rect, Text as SvgText, TSpan, Defs, ClipPath } from 'react-native-svg';
+import Logo from 'assets/images/Logo.png';
 
 type Props = {
   count?: number; // 한 변 칸 수 (기본 5)
@@ -18,7 +19,6 @@ type Props = {
   visits?: Record<string, { order: number; status: 'SUCCESS' | 'PENDING' | 'SKIPPED' | 'FAIL' }>;
   initialIndex: number;
   onCellPress?: (tile: TripGameTileView, index: number) => void;
-  pieceSource?: any; // require('.../Logo.png') 또는 { uri: ... }
   size?: number; // 한 칸 크기 (기본 80)
   onIndexChange?: (index: number) => void;
 };
@@ -71,16 +71,7 @@ export type GameBoardHandle = {
   getIndex: () => number;
 };
 const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNative(
-  {
-    count = 5,
-    initialIndex,
-    tiles,
-    visits = {},
-    onCellPress,
-    pieceSource,
-    size = 80,
-    onIndexChange,
-  }: Props,
+  { count = 5, initialIndex, tiles, visits = {}, onCellPress, size = 80, onIndexChange }: Props,
   ref,
 ) {
   const PADDING_LEFT = 0;
@@ -477,9 +468,9 @@ const GameBoardNative = forwardRef<GameBoardHandle, Props>(function GameBoardNat
       })}
 
       {/* 말(이미지) — 칸 너비 0.6배, 바닥 맞춤 */}
-      {!!pieceSource && pieceXY && (
+      {!!Logo && pieceXY && (
         <Image
-          source={pieceSource}
+          source={Logo}
           resizeMode="contain"
           style={{
             position: 'absolute',
