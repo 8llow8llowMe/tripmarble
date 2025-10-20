@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
 import Constants from 'expo-constants';
@@ -8,9 +8,6 @@ type KakaoMapProps = {
   longitude: number;
   height?: number; // 기본 240
   zoomLevel?: number; // 작을수록 확대, 기본 5
-  onReady?: () => void;
-  onErrorMsg?: (msg: string) => void; // 상세 에러 전달 (옵션)
-  debugOverlay?: boolean; // 화면에 디버그 텍스트 표시 (옵션)
 };
 
 const ENV_KEY =
@@ -22,9 +19,6 @@ export default function KakaoMap({
   longitude,
   height = 240,
   zoomLevel = 5,
-  onReady,
-  onErrorMsg,
-  debugOverlay = false,
 }: KakaoMapProps) {
   const html = useMemo(
     () => `
@@ -105,38 +99,41 @@ export default function KakaoMap({
   </head>
   <body>
     <div id="map"></div>
-    <button class="fab" onclick="postCenter()">⌖</button>
+    // <button class="fab" onclick="postCenter()">⌖</button>
   </body>
 </html>`,
     [latitude, longitude, zoomLevel],
   );
 
-  const onMessage = (e: WebViewMessageEvent) => {
-    try {
-      const data = JSON.parse(e.nativeEvent.data || '{}');
-      if (data.type === 'ready') onReady?.();
-      if (data.type === 'error') onErrorMsg?.(data.msg || 'unknown_error');
-      // if (data.type === 'center') { ... }
-    } catch {}
-  };
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(
+          `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.EXPO_PUBLIC_KAKAO_MAP}`,
+        );
+        const text = await res.text();
+        console.log('🧭 Kakao SDK response preview:', text.slice(0, 120));
+
+        if (text.includes('AccessDeniedError') || text.includes('domain mismatched')) {
+          console.warn('🚨 카카오 도메인 미등록 문제입니다.');
+        } else {
+          console.log('✅ Kakao SDK 정상 응답 (도메인 허용 OK)');
+        }
+      } catch (e) {
+        console.error('❌ Fetch 실패:', e);
+      }
+    })();
+  }, []);
 
   return (
     <View style={[styles.wrap, { height }]}>
       <WebView
         originWhitelist={['*']}
         source={{ html }}
-        onMessage={onMessage}
         scrollEnabled={false}
         javaScriptEnabled
         domStorageEnabled
       />
-      {debugOverlay && (
-        <View style={styles.debug}>
-          <Text style={styles.debugText}>
-            KEY: {ENV_KEY ? `${ENV_KEY.slice(0, 6)}…` : 'undefined'}
-          </Text>
-        </View>
-      )}
     </View>
   );
 }

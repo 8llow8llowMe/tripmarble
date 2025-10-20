@@ -24,13 +24,7 @@ export default function MissionLocationForm({
 
       {/* 1) 미니맵 프리뷰 */}
       {current ? (
-        <KakaoMap
-          latitude={current.lat}
-          longitude={current.lng}
-          debugOverlay
-          onErrorMsg={(m) => console.warn('[KAKAO_MAP_ERROR]', m)}
-          onReady={() => console.log('KAKAO READY')}
-        />
+        <KakaoMap latitude={current.lat} longitude={current.lng} />
       ) : (
         <View
           style={{
