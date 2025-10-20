@@ -1,32 +1,35 @@
+"use client";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
-// api
 import useSocialLogin from "@/entities/users/hooks/useSocialLogin";
 
 const SocialCallback = () => {
   const params = useParams();
-  const rawProvider = params.provider;
-  const provider =
-    typeof rawProvider === "string"
-      ? rawProvider.toUpperCase()
-      : Array.isArray(rawProvider) && rawProvider.length > 0
-      ? rawProvider[0].toUpperCase()
-      : "";
-
-  const { socialLoginMutate } = useSocialLogin();
   const searchParams = useSearchParams();
+  const { socialLoginMutate } = useSocialLogin();
   const called = useRef(false);
 
   useEffect(() => {
-    if (called.current) return; // 이미 실행했으면 skip
+    if (called.current) return;
     called.current = true;
 
+    const rawProvider = params.provider;
+    const provider =
+      typeof rawProvider === "string"
+        ? rawProvider.toUpperCase()
+        : Array.isArray(rawProvider) && rawProvider.length > 0
+        ? rawProvider[0].toUpperCase()
+        : "";
+
     const code = searchParams.get("code");
-    if (code && provider) {
-      socialLoginMutate({ provider, code });
+
+    if (!provider || !code) {
+      console.warn("❌ Missing provider or code", { provider, code });
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    socialLoginMutate({ provider, code }); // 소셜 로그인
+  }, [params, searchParams, socialLoginMutate]);
 
   return <div>로그인 처리중...</div>;
 };
