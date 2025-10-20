@@ -24,7 +24,9 @@ export const socialLogin = async (
 ): Promise<SocialLoginResponse> => {
   const { data } = await authApiClient.get<SocialLoginResponse>(
     `/auth/${loginData.provider}/login`,
-    { params: loginData }
+    {
+      params: { code: loginData.code },
+    }
   );
   return data;
 };
@@ -32,6 +34,7 @@ export const socialLogin = async (
 const useSocialLogin = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+
   const { mutate: socialLoginMutate } = useMutation<
     SocialLoginResponse,
     Error,
@@ -43,9 +46,10 @@ const useSocialLogin = () => {
 
       localStorage.setItem("accessToken", accessToken);
       if (memberId) localStorage.setItem("memberId", memberId.toString());
-      await dispatch(fetchMe());
 
+      await dispatch(fetchMe());
       router.push("/");
+
       toast.success("환영합니다! 로그인되었습니다.", {
         position: "top-right",
         autoClose: 1200,
@@ -53,13 +57,14 @@ const useSocialLogin = () => {
         closeOnClick: true,
         pauseOnHover: false,
         draggable: false,
-        progress: undefined,
       });
     },
     onError: (error) => {
-      console.log("로그인 에러", error);
+      console.error("❌ 소셜 로그인 에러:", error);
+      toast.error("로그인 중 오류가 발생했습니다.");
     },
   });
+
   return { socialLoginMutate };
 };
 
