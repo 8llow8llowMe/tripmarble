@@ -2,13 +2,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-// style
 import styles from "./LoginForm.module.scss";
-// icon
 import { google, kakao, naver } from "@/shared/assets/images/social-logo";
-// api
 import useLogin from "@/entities/users/hooks/useLogin";
-import useSocialLoginAutorize from "@/entities/users/hooks/useSocialLoginAutorize";
+import { authApiClient } from "@/shared/lib/api/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -37,27 +34,29 @@ export default function LoginPage() {
     }
   };
 
-  const { data } = useSocialLoginAutorize("KAKAO");
+  // 소셜 로그인
+  const handleSocialLogin = async (provider: "KAKAO" | "NAVER") => {
+    try {
+      const res = await authApiClient.get(`/auth/${provider}/authorize`);
+      const authUrl = res.data?.dataBody;
+
+      if (authUrl) {
+        window.location.href = authUrl;
+      } else {
+        console.warn(`${provider} 로그인 URL이 없습니다.`);
+      }
+    } catch (error) {
+      console.error(`${provider} 로그인 URL 요청 실패`, error);
+    }
+  };
 
   const naverIcon = typeof naver === "string" ? naver : naver.src;
   const kakaoIcon = typeof kakao === "string" ? kakao : kakao.src;
   const googleIcon = typeof google === "string" ? google : google.src;
 
-  function handleKakaoLogin(provider: string) {
-    try {
-      const kakaoAuthUrl = data?.data.dataBody;
-      if (kakaoAuthUrl) {
-        window.location.href = kakaoAuthUrl;
-      }
-    } catch (error) {
-      console.error("카카오 로그인 URL 요청 실패", error);
-    }
-  }
-
   return (
     <>
       <form className={styles.form} onSubmit={handleSubmit}>
-        {/* <label className={styles.label}>로그인</label> */}
         <input
           type="text"
           placeholder="이메일"
@@ -81,27 +80,28 @@ export default function LoginPage() {
             />
             이메일 저장
           </label>
-          {/* <div className={styles.links}>
-              <a href="#">아이디 찾기</a>
-              <span> · </span>
-              <a href="#">비밀번호 찾기</a>
-            </div> */}
         </div>
         <button type="submit" className={styles.loginButton}>
           로그인
         </button>
       </form>
+
+      {/* ✅ 소셜 로그인 */}
       <div className={styles.socialLogin}>
-        <div className={styles.socialItem}>
+        <div
+          className={styles.socialItem}
+          onClick={() => handleSocialLogin("NAVER")}
+        >
           <img src={naverIcon} alt="naver" width={24} height={24} />
           <div className={styles.socialWord}>
             <a>네이버</a>
             <a>로그인</a>
           </div>
         </div>
+
         <div
           className={styles.socialItem}
-          onClick={() => handleKakaoLogin("KAKAO")}
+          onClick={() => handleSocialLogin("KAKAO")}
         >
           <img src={kakaoIcon} alt="kakao" width={50} height={24} />
           <div className={styles.socialWord}>
@@ -109,6 +109,7 @@ export default function LoginPage() {
             <a>로그인</a>
           </div>
         </div>
+
         <div className={styles.socialItem}>
           <img src={googleIcon} alt="google" width={24} height={24} />
           <div className={styles.socialWord}>
@@ -117,6 +118,7 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
       <div className={styles.footer}>
         회원 가입하고 <strong>게임을 시작해보세요!</strong>
         <Link href="/signup">회원가입</Link>
