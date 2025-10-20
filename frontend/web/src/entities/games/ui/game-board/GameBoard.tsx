@@ -16,6 +16,22 @@ import Piece from "@/shared/assets/images/Piece.png";
 import DiceView from "@/entities/games/ui/game-board/diceView";
 
 const CELL_SIZE = 100;
+const HEIGHT_SCALE = 1.3;
+const X_OFFSET = 10;
+const EXTRA_TOP = 18;
+const EXTRA_BOTTOM = 16 * HEIGHT_SCALE;
+const CANVAS_WIDTH_MARGIN = 5;
+const CANVAS_HEIGHT_MARGIN = 10;
+const STRETCH = 1.15;
+
+const getBoardDimensions = (count: number) => ({
+  width: CELL_SIZE * count + X_OFFSET * 2 + CANVAS_WIDTH_MARGIN,
+  height:
+    CELL_SIZE * count * HEIGHT_SCALE +
+    EXTRA_TOP +
+    EXTRA_BOTTOM +
+    CANVAS_HEIGHT_MARGIN,
+});
 
 const getAssetSrc = (asset: string | { src: string }) =>
   (typeof asset === "string" ? asset : asset.src) || "";
@@ -50,6 +66,7 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pieceImageRef = useRef<HTMLImageElement | null>(null);
   const [imgReadyTick, setImgReadyTick] = useState(0);
+  const [boardSize, setBoardSize] = useState(() => getBoardDimensions(count));
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -174,20 +191,18 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     if (!ctx) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const HEIGHT_SCALE = 1.3;
-    const X_OFFSET = 10; // same horizontal offset as drawGameBoard3D
-    const EXTRA_TOP = 18; // room for rounded corners/shadow at top
-    const EXTRA_BOTTOM = 16 * HEIGHT_SCALE; // height of the bottom side face
-
-    const cssWidth = CELL_SIZE * count + X_OFFSET * 2 + 5; // true drawn width + small margin
-    const cssHeight =
-      CELL_SIZE * count * HEIGHT_SCALE + EXTRA_TOP + EXTRA_BOTTOM + 10; // true drawn height + paddings
+    const { width: cssWidth, height: cssHeight } = getBoardDimensions(count);
 
     canvas.width = Math.floor(cssWidth * dpr);
     canvas.height = Math.floor(cssHeight * dpr);
     // Keep CSS size in CSS pixels for layout
     canvas.style.width = cssWidth + "px";
     canvas.style.height = cssHeight + "px";
+    setBoardSize((prev) =>
+      prev.width === cssWidth && prev.height === cssHeight
+        ? prev
+        : { width: cssWidth, height: cssHeight }
+    );
     const ctx2d = ctx; // rename for clarity
     ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx2d.translate(0, EXTRA_TOP);
@@ -195,7 +210,6 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     ctx2d.shadowColor = "transparent";
 
     // cache clickable rects (top faces only) - stretch top/bottom rows like drawGameBoard3D
-    const STRETCH = 1.15;
     cellRectsRef.current = boardData.map((cell) => {
       const isTop = cell.row === 0;
       const isBottom = cell.row === count - 1;
@@ -222,7 +236,7 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     ctx2d.clearRect(0, 0, canvas.width, canvas.height);
     ctx2d.fillStyle = "#fff";
     ctx2d.fillRect(0, 0, canvas.width, canvas.height);
-    drawGameBoard3D(ctx2d, boardData, count, CELL_SIZE, 1.3);
+    drawGameBoard3D(ctx2d, boardData, count, CELL_SIZE, HEIGHT_SCALE);
 
     // === 말(스프라이트/원) 그리는 함수 ===
     drawPiece(
@@ -243,8 +257,13 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
         // cellRectsRef에 계산된(스트레치 반영) top-face 사각형을 그대로 사용해 좌표 일치 보장
         const rect = cellRectsRef.current.find((r) => r.index === idx);
         if (!rect) return;
-        const cx = rect.x + 18;
-        const cy = rect.y - EXTRA_TOP + 18; // subtract because context was translated by EXTRA_TOP
+        const cellMeta = boardData.find((cell) => cell.index === idx);
+        const isBottomRow = cellMeta?.row === count - 1;
+        const badgePaddingX = 24;
+        const basePaddingY = 20;
+        const badgePaddingY = isBottomRow ? basePaddingY + 12 : basePaddingY;
+        const cx = rect.x + badgePaddingX;
+        const cy = rect.y - EXTRA_TOP + badgePaddingY; // subtract because context was translated by EXTRA_TOP
 
         let color = "#5cc58a"; // success 기본
         if (mark.status === "PENDING") color = "#ff9f43";
@@ -307,7 +326,6 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
     return { x, y };
   }
   // Adjust piece Y center for stretched top/bottom rows
-  const STRETCH = 1.15;
   const centerForRow = (row: number) => {
     let center = row * CELL_SIZE + CELL_SIZE / 2 + 30;
     if (row === 0) center += ((STRETCH - 1) * CELL_SIZE) / 2;
@@ -428,19 +446,23 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
 
   return (
     <>
-      <div className={styles.boardWrapper} ref={wrapperRef}>
+      <div
+        className={styles.boardWrapper}
+        ref={wrapperRef}
+        style={{ width: boardSize.width, height: boardSize.height }}
+      >
         <canvas
           ref={canvasRef}
-          width={CELL_SIZE * count}
-          height={CELL_SIZE * count * 1.3 + 25}
+          width={boardSize.width}
+          height={boardSize.height}
           className={styles.canvas}
         />
+        <DiceView
+          visible={diceVisible}
+          value={diceValue}
+          onFinish={() => setDiceVisible(false)}
+        />
       </div>
-      <DiceView
-        visible={diceVisible}
-        value={diceValue}
-        onFinish={() => setDiceVisible(false)}
-      />
     </>
   );
 });

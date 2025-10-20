@@ -12,3 +12,40 @@
   flex-direction: column;
   gap: 3rem;
 }
+
+.reviewSection {
+  width: 100%;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1f2a44;
+}
+
+.seeAll {
+  font-size: 0.95rem;
+  color: #4f7df0;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.emptyState {
+  margin-top: 1.5rem;
+}
+
+.reviewMessage {
+  margin-top: 1.5rem;
+  text-align: center;
+  color: #607192;
+  font-size: 0.98rem;
+}

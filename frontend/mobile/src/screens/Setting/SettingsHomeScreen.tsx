@@ -17,8 +17,8 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 const SettingsHomeScreen = () => {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
 
+  // 회원 탈퇴
   const { withdraw, isPending: withdrawPending } = useWithdrawMutaion();
-
   const confirmWithdraw = () => {
     Alert.alert('회원탈퇴', '정말로 탈퇴 하시겠습니까?\n삭제 후에는 복구할 수 없습니다.', [
       { text: '취소', style: 'cancel' },
@@ -47,9 +47,17 @@ const SettingsHomeScreen = () => {
     />
   );
 
+  // 오픈소스 라이선스 스크린으로 이동
   const goToLicenseScreen = () => {
     navigation.navigate('SettingsNavigator', {
       screen: 'LicenseScreen',
+    });
+  };
+
+  // 프로필 수정 스크린으로 이동
+  const goToProfileEditScreen = () => {
+    navigation.navigate('SettingsNavigator', {
+      screen: 'ProfileEditScreen',
     });
   };
 
@@ -57,7 +65,7 @@ const SettingsHomeScreen = () => {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.section}>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={goToProfileEditScreen}>
             <View style={styles.row}>
               <TextBox size={16} fontsName="Pretendard700" style={styles.label}>
                 프로필 수정

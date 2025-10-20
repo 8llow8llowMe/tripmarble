@@ -22,7 +22,6 @@ const UseNetworkCheck = () => {
         if (
           state.isConnected === false ||
           state.isInternetReachable === false ||
-          state.type === 'none' ||
           state.type === 'unknown'
         ) {
           console.log(Platform.OS, '네트워크 연결 끊김');
@@ -62,7 +61,6 @@ const UseNetworkCheck = () => {
         if (
           state.isConnected === false ||
           state.isInternetReachable === false ||
-          state.type === 'none' ||
           state.type === 'unknown'
         ) {
           isNetworkAvailable = false;

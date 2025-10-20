@@ -6,7 +6,7 @@ const UserAvatar = () => {
   const user = useAppSelector((state) => state.user.user);
   // user.profileImageUrl 같은 값이 있으면 그걸 사용, 없으면 기본 로고
   const fallbackLogo = typeof Logo === "string" ? Logo : Logo.src;
-  const profileImage = user?.profileImage || fallbackLogo;
+  const profileImage = user?.profileImageUrl || fallbackLogo;
 
   return (
     <div className={styles.avatar}>

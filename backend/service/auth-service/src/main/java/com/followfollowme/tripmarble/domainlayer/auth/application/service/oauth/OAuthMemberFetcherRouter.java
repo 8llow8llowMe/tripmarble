@@ -5,13 +5,14 @@ import com.followfollowme.tripmarble.domainlayer.auth.application.exception.Auth
 import com.followfollowme.tripmarble.domainlayer.auth.application.exception.AuthException;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.OAuthMemberFetcher;
 import com.followfollowme.tripmarble.domainlayer.member.domain.model.Member;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Component;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Component;
 
 @Primary
 @Component

@@ -5,6 +5,7 @@ import com.followfollowme.tripmarble.domainlayer.member.application.exception.Me
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import com.followfollowme.tripmarble.storage.bucket.MinioBucket;
 import com.followfollowme.tripmarble.storage.properties.MinioProperties;
+import com.followfollowme.tripmarble.storage.util.MinioPathUtils;
 import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
 import io.minio.MinioClient;
@@ -60,13 +61,20 @@ public class ProfileImageProcessor {
 
     public String promoteToReal(String tempImageUrl) {
         try {
+            // 1. 버킷명 추출
             String bucketName = minioProperties.bucketPrefix();
-            String objectName = extractObjectName(tempImageUrl);
 
-            // 같은 버킷 내에서 temp -> real 폴더로 이동
+            // 2. temp URL → objectPath 추출 (공통 유틸 활용)
+            String objectPath = MinioPathUtils.extractObjectPath(tempImageUrl, bucketName);
+
+            // 3. 파일명만 분리
+            String objectName = objectPath.substring(objectPath.lastIndexOf("/") + 1);
+
+            // 4. 같은 버킷 내에서 temp -> real 폴더로 이동
             String srcObject = MinioBucket.PROFILE_TEMP_IMAGES.objectPath(objectName);
             String destObject = MinioBucket.PROFILE_REAL_IMAGES.objectPath(objectName);
 
+            // 5. MinIO copy 실행
             CopySource source = CopySource.builder()
                 .bucket(bucketName)
                 .object(srcObject)
@@ -80,6 +88,7 @@ public class ProfileImageProcessor {
                     .build()
             );
 
+            // 6. 임시(temp)에 저장된 오브젝트 삭제
             minioClient.removeObject(
                 RemoveObjectArgs.builder()
                     .bucket(bucketName)
@@ -87,17 +96,12 @@ public class ProfileImageProcessor {
                     .build()
             );
 
+            // 6. 최종 public URL 반환
             return minioProperties.publicUrl() + "/" + bucketName + "/" + destObject;
 
         } catch (Exception e) {
             log.error("프로필 이미지 promote 실패: tempImageUrl={}", tempImageUrl, e);
             throw new MemberException(MemberErrorCode.UPLOAD_PROFILE_IMAGE_FAILED, e);
         }
-    }
-
-    private String extractObjectName(String tempImageUrl) {
-        String prefix = "/" + minioProperties.bucketPrefix() + "/";
-        String fullPath = tempImageUrl.substring(tempImageUrl.indexOf(prefix) + prefix.length());
-        return fullPath.substring(fullPath.lastIndexOf("/") + 1);
     }
 }

@@ -24,6 +24,11 @@ spring:
           batch_size: 100
         default_batch_fetch_size: 100
 
+  servlet:
+    multipart:
+      max-file-size: 30MB # 파일 하나당 최대 30MB
+      max-request-size: 150MB # 요청 전체 합계 (30MB * 5개)
+
   data:
     redis:
       host: localhost
@@ -94,4 +99,14 @@ oauth:
       - profile_nickname
       - profile_image
       - account_email
+      - name
+
+  naver:
+    client-id: ENC(AQno3Aik1iI/f9j03+t0LtoULXdwtjLR1V9pKDiTE+o=)
+    client-secret: ENC(VRBROIuUZe9IqGY9hEBh06OZX2xCqpdK)
+    redirect-uri: http://localhost:8080/auth/callback/naver
+    scope:
+      - nickname
+      - profile_image
+      - email
       - name

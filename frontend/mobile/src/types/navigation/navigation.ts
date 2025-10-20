@@ -35,6 +35,7 @@ export type BottomTabParamList = {
 export type SettingsParamList = {
   SettingsHomeScreen: undefined;
   LicenseScreen: undefined;
+  ProfileEditScreen: undefined;
 };
 
 export type GamePlayStackParamList = {

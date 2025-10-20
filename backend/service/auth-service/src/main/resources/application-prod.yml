@@ -24,6 +24,11 @@ spring:
           batch_size: 100
         default_batch_fetch_size: 100
 
+  servlet:
+    multipart:
+      max-file-size: ${MULTIPART_MAX_FILE_SIZE}
+      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE}
+
   data:
     redis:
       host: ${REDIS_HOST}
@@ -81,4 +86,14 @@ oauth:
       - profile_nickname
       - profile_image
       - account_email
+      - name
+
+  naver:
+    client-id: ${OAUTH_NAVER_CLIENT_ID} # Rest API 키
+    client-secret: ${OAUTH_NAVER_CLIENT_SECRET}
+    redirect-uri: ${OAUTH_NAVER_REDIRECT_URI}
+    scope:
+      - nickname
+      - profile_image
+      - email
       - name

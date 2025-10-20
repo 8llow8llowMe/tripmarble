@@ -19,6 +19,7 @@ const Header = () => {
   const toggleMenu = () => {
     setIsOpen((prev) => !prev);
   };
+  const closeMenu = () => setIsOpen(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -116,26 +117,45 @@ const Header = () => {
 
       {isOpen && (
         <div className={styles.mobileMenu} ref={menuRef}>
-          <Link href="/search" className={isActive("/search")}>
+          <Link
+            href="/search"
+            className={isActive("/search")}
+            onClick={closeMenu}
+          >
             검색
           </Link>
-          <Link href="/spots" className={isActive("/spots")}>
+          <Link
+            href="/spots"
+            className={isActive("/spots")}
+            onClick={closeMenu}
+          >
             여행지 목록
           </Link>
           <a
             href="/game"
-            onClick={handleGameClick}
+            onClick={(e) => {
+              handleGameClick(e);
+              closeMenu();
+            }}
             className={isActive("/game")}
             style={{ cursor: "pointer" }}
           >
             게임 목록
           </a>
           {user ? (
-            <Link href="/profile" className={isActive("/profile")}>
+            <Link
+              href="/profile"
+              className={isActive("/profile")}
+              onClick={closeMenu}
+            >
               마이페이지
             </Link>
           ) : (
-            <Link href="/login" className={isActive("/login")}>
+            <Link
+              href="/login"
+              className={isActive("/login")}
+              onClick={closeMenu}
+            >
               로그인
             </Link>
           )}

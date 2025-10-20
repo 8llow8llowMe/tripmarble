@@ -24,6 +24,11 @@ spring:
           batch_size: 100
         default_batch_fetch_size: 100
 
+  servlet:
+    multipart:
+      max-file-size: 30MB # 파일 하나당 최대 30MB
+      max-request-size: 150MB # 요청 전체 합계 (30MB * 5개)
+
 # log 관리
 logging:
   level:
@@ -52,3 +57,10 @@ security:
       jwt:
         access-key: ENC(YDO9DGO7lP8iCqeTNW/SXWCv0697ep+bbGvMnjoJfMDEtWy1Zq/yfZDsovoggEcmLLOtZfHSpLYoRO0YEUlrOl3CvD5KWXo55haCMx7cZMg=)
 
+# minio
+minio:
+  internal-url: http://localhost:9000
+  public-url: http://localhost:9000
+  bucket-prefix: tripmarble
+  access-key: ENC(fkrxtIidUHN1LoxCucgcFpBXqSh22NiO)
+  secret-key: ENC(gyy+d4BkG2lphHopsii2hNLjUHutcbZNZcev8D90M08=)

@@ -31,6 +31,9 @@ jobs:
       # 1. 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       # 2. Node.js 설치 및 Yarn 캐시
       - name: Setup Node.js

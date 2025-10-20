@@ -5,13 +5,23 @@ import styles from "./Games.module.scss";
 import { GameSummary } from "@/entities/games/hooks/useMyGameList";
 import Carousel from "@/shared/ui/common/Carousel/Carousel";
 import type { CardListItem } from "@/shared/ui/common/CardList/CardList";
+import EmptyGameState from "@/widgets/game-empty-state/EmptyGameState";
 
 export function GameList({ games }: { games: GameSummary[] }) {
+  if (!games?.length) {
+    return (
+      <div className={styles.gamesContainer}>
+        <EmptyGameState />
+      </div>
+    );
+  }
+
   const items: CardListItem[] = games.map((game) => ({
     id: String(game.tripGameId),
     href: `/game/${game.tripGameId}`,
     imageUrl: game.representativeRegionImageUrl || "/images/no-image.png",
     regionName: game.representativeRegionName,
+    status: game.gameStatus,
     title: game.title,
     description: "여행지에서 다양한 미션에 도전하세요!",
     date: game.startedAt,
@@ -30,8 +40,15 @@ export function GameList({ games }: { games: GameSummary[] }) {
               loading="lazy"
             />
             <div className={styles.imageOverlay}>
-              {item.regionName && (
-                <div className={styles.overlayTag}>{item.regionName}</div>
+              {(item.regionName || item.status) && (
+                <div className={styles.overlayMeta}>
+                  {item.regionName && (
+                    <span className={styles.overlayTag}>{item.regionName}</span>
+                  )}
+                  {item.status && (
+                    <span className={styles.statusBadge}>{item.status}</span>
+                  )}
+                </div>
               )}
               <div className={styles.overlayTitle}>{item.title}</div>
               {item.description && (

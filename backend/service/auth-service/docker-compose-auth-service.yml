@@ -6,6 +6,8 @@ x-auth-service-environment: &auth_service_environment
   DB_URL: ${DB_URL}
   DB_USERNAME: ${DB_USERNAME}
   DB_PASSWORD: ${DB_PASSWORD}
+  MULTIPART_MAX_FILE_SIZE: ${MULTIPART_MAX_FILE_SIZE}
+  MULTIPART_MAX_REQUEST_SIZE: ${MULTIPART_MAX_REQUEST_SIZE}
   REDIS_HOST: ${REDIS_HOST}
   REDIS_PORT: ${REDIS_PORT}
   JWT_ACCESS_KEY: ${JWT_ACCESS_KEY}
@@ -31,6 +33,11 @@ x-auth-service-environment: &auth_service_environment
   SERVICE_DISCOVERY_HOSTNAME: ${SERVICE_DISCOVERY_HOSTNAME}
   SERVICE_DISCOVERY_PORT: ${SERVICE_DISCOVERY_PORT}
 
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "5m"
+    max-file: "2"
 
 services:
   auth-service-dev:
@@ -44,6 +51,8 @@ services:
       <<: *auth_service_environment
       TRIP_MARBLE_DOMAIN: ${TRIP_MARBLE_DOMAIN_DEV}
       AUTH_SERVICE_PORT_DEV: ${AUTH_SERVICE_PORT_DEV}
+    logging:
+      <<: *default-logging
     networks:
       - 8llow8llowme-net
 
@@ -56,6 +65,8 @@ services:
       - "${AUTH_SERVICE_PORT_PROD}:${AUTH_SERVICE_PORT}" # host:container
     environment:
       <<: *auth_service_environment
+    logging:
+      <<: *default-logging
     networks:
       - 8llow8llowme-net
 
