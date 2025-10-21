@@ -4,7 +4,7 @@ import { palette } from '@/constants/colors';
 
 type Props = {
   title: string;
-  onClose: () => void;
+  onClose?: () => void;
 };
 
 export default function GameSheetHeader({ title, onClose }: Props) {
@@ -13,9 +13,6 @@ export default function GameSheetHeader({ title, onClose }: Props) {
       <Text style={styles.title} numberOfLines={2}>
         {title}
       </Text>
-      <TouchableOpacity onPress={onClose} accessibilityLabel="닫기">
-        <Text style={styles.close}>✕</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -25,7 +22,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     marginBottom: 12,
   },
   title: {
