@@ -11,15 +11,14 @@ import com.followfollowme.tripmarble.domainlayer.game.application.readmodel.Trip
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +65,10 @@ public class TripGameQueryProcessor {
             .toList();
 
         return new SliceImpl<>(infos, gameSlice.getPageable(), gameSlice.hasNext());
+    }
+
+    public int getTripGameCountByMember(long memberId) {
+        return tripGameMemberRepositoryPort.countTripGameByMemberId(memberId);
     }
 
     private List<Long> extractGameIds(List<TripGame> games) {
