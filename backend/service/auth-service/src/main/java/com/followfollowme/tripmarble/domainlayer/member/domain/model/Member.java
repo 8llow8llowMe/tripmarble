@@ -46,4 +46,18 @@ public record Member(
             .status(newStatus)
             .build();
     }
+
+    public Member withProvider(OAuthProvider newProvider) {
+        return Member.builder()
+            .id(this.id)
+            .email(this.email)
+            .password(this.password)
+            .name(this.name)
+            .nickname(this.nickname)
+            .profileImageUrl(this.profileImageUrl)
+            .role(this.role)
+            .provider(newProvider)
+            .status(this.status)
+            .build();
+    }
 }
