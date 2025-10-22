@@ -1,9 +1,9 @@
 package com.followfollowme.tripmarble.domainlayer.auth.application.service.processor;
 
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.AuthLoginResponse;
-import com.followfollowme.tripmarble.domainlayer.auth.adapter.in.web.dto.TokenReissueResponse;
 import com.followfollowme.tripmarble.domainlayer.auth.application.exception.AuthErrorCode;
 import com.followfollowme.tripmarble.domainlayer.auth.application.exception.AuthException;
+import com.followfollowme.tripmarble.domainlayer.auth.application.info.JwtTokenIssueInfo;
+import com.followfollowme.tripmarble.domainlayer.auth.application.info.JwtTokenReissueInfo;
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.JwtTokenStorePort;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
@@ -25,7 +25,7 @@ public class JwtTokenProcessor {
     private final JwtTokenStorePort jwtTokenStorePort;
     private final MemberRepositoryPort memberRepositoryPort;
 
-    public AuthLoginResponse issueTokens(long memberId, SecurityRole role) {
+    public JwtTokenIssueInfo issueTokens(long memberId, SecurityRole role) {
         String accessToken = jwtAuthProvider.issueAccessToken(memberId, role);
         String refreshToken = jwtAuthProvider.issueRefreshToken();
 
@@ -35,19 +35,16 @@ public class JwtTokenProcessor {
             log.warn("Redis 연결 실패, RefreshToken 저장 안됨: {}", e.getMessage());
         }
 
-        return AuthLoginResponse.builder()
-            .accessToken(accessToken)
-            .memberId(String.valueOf(memberId))
-            .build();
+        return JwtTokenIssueInfo.of(memberId, role, accessToken);
     }
 
     public void revoke(long memberId) {
         jwtTokenStorePort.find(memberId).ifPresent(token -> jwtTokenStorePort.delete(memberId));
     }
 
-    public TokenReissueResponse reissueTokens(long memberId) {
+    public JwtTokenReissueInfo reissueTokens(long memberId) {
         try {
-            String refreshToken = jwtTokenStorePort.find(memberId)
+            jwtTokenStorePort.find(memberId)
                 .orElseThrow(() -> new AuthException(AuthErrorCode.EXPIRED_REFRESH_TOKEN));
         } catch (RedisInfraException e) {
             throw new AuthException(AuthErrorCode.TOKEN_REISSUE_FAILURE);
@@ -65,8 +62,6 @@ public class JwtTokenProcessor {
             log.warn("Redis 연결 실패, RefreshToken 저장 안됨: {}", e.getMessage());
         }
 
-        return TokenReissueResponse.builder()
-            .accessToken(newAccessToken)
-            .build();
+        return JwtTokenReissueInfo.of(newAccessToken);
     }
 }
