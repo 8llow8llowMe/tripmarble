@@ -45,7 +45,8 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
         TripSpotReviewSummaryProjection summary = tripSpotReviewRepository.findSummaryByTripSpotId(tripSpotId, sourceType).orElse(null);
         List<TripSpotReviewRatingDistributionProjection> distributions =
             tripSpotReviewRepository.findRatingDistributionByTripSpotId(tripSpotId, sourceType);
-        List<TripSpotReviewPhotoProjection> photos = tripSpotReviewRepository.findSamplePhotosByTripSpotId(tripSpotId, sourceType, photoLimit);
+        List<TripSpotReviewPhotoProjection> photos = tripSpotReviewRepository.findSamplePhotosByTripSpotId(tripSpotId, sourceType,
+            photoLimit);
         return tripSpotReviewSummaryAssembler.toReadModel(summary, distributions, photos);
     }
 
@@ -58,7 +59,8 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
     }
 
     @Override
-    public Slice<TripSpotReview> findReviewsNoOffsetByMemberId(long memberId, ReviewSourceType sourceType, long lastTripSpotReviewId, int size, OrderType orderType) {
+    public Slice<TripSpotReview> findReviewsNoOffsetByMemberId(long memberId, ReviewSourceType sourceType, long lastTripSpotReviewId,
+        int size, OrderType orderType) {
         Slice<TripSpotReviewEntity> entitySlice =
             tripSpotReviewRepository.findReviewsNoOffsetByMemberId(memberId, sourceType, lastTripSpotReviewId, size, orderType);
         return entitySlice.map(tripSpotReviewMapper::toDomainFromEntity);
@@ -67,5 +69,10 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
     @Override
     public void deleteById(long tripSpotReviewId) {
         tripSpotReviewRepository.deleteById(tripSpotReviewId);
+    }
+
+    @Override
+    public int countByMemberId(long memberId) {
+        return tripSpotReviewRepository.countByMemberId(memberId);
     }
 }

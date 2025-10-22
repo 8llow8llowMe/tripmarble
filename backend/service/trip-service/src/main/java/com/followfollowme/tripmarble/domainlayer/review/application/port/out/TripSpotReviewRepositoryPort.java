@@ -16,9 +16,13 @@ public interface TripSpotReviewRepositoryPort {
 
     TripSpotReviewSummary findSummaryByTripSpotId(long tripSpotId, ReviewSourceType sourceType, int photoLimit);
 
-    Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(long tripSpotId, ReviewSourceType sourceType, long lastTripSpotReviewId, int size, OrderType orderType);
+    Slice<TripSpotReview> findReviewsNoOffsetByTripSpotId(long tripSpotId, ReviewSourceType sourceType, long lastTripSpotReviewId, int size,
+        OrderType orderType);
 
-    Slice<TripSpotReview> findReviewsNoOffsetByMemberId(long memberId, ReviewSourceType sourceType, long lastTripSpotReviewId, int size, OrderType orderType);
+    Slice<TripSpotReview> findReviewsNoOffsetByMemberId(long memberId, ReviewSourceType sourceType, long lastTripSpotReviewId, int size,
+        OrderType orderType);
 
     void deleteById(long tripSpotReviewId);
+
+    int countByMemberId(long memberId);
 }
