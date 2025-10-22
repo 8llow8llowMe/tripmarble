@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.review.application.service.processor;
 
 import com.followfollowme.tripmarble.domainlayer.review.application.info.TripSpotReviewAndPhotosInfo;
+import com.followfollowme.tripmarble.domainlayer.review.application.info.TripSpotReviewCountInfo;
 import com.followfollowme.tripmarble.domainlayer.review.application.port.out.TripSpotReviewPhotoRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.review.application.port.out.TripSpotReviewRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReview;
@@ -21,9 +22,11 @@ public class MyReviewQueryProcessor {
     private final TripSpotReviewRepositoryPort tripSpotReviewRepositoryPort;
     private final TripSpotReviewPhotoRepositoryPort tripSpotReviewPhotoRepositoryPort;
 
-    public Slice<TripSpotReviewAndPhotosInfo> getMyTripSpotReviews(long memberId, ReviewSourceType sourceType, long lastReviewId, int size, OrderType orderType) {
+    public Slice<TripSpotReviewAndPhotosInfo> getMyTripSpotReviews(long memberId, ReviewSourceType sourceType, long lastReviewId, int size,
+        OrderType orderType) {
         // 1. 리뷰 Slice 조회
-        Slice<TripSpotReview> slice = tripSpotReviewRepositoryPort.findReviewsNoOffsetByMemberId(memberId, sourceType, lastReviewId, size, orderType);
+        Slice<TripSpotReview> slice = tripSpotReviewRepositoryPort.findReviewsNoOffsetByMemberId(memberId, sourceType, lastReviewId, size,
+            orderType);
 
         // 2. 리뷰 ID 목록
         List<Long> reviewIds = slice.getContent().stream().map(TripSpotReview::id).toList();
@@ -39,5 +42,15 @@ public class MyReviewQueryProcessor {
 
         // 4. Info 반환
         return slice.map(review -> TripSpotReviewAndPhotosInfo.of(review, photoMap.getOrDefault(review.id(), List.of())));
+    }
+
+    public TripSpotReviewCountInfo getMyTripSpotReviewAndPhotoCount(long memberId) {
+        int tripSpotReviewCount = tripSpotReviewRepositoryPort.countByMemberId(memberId);
+        int photoCount = tripSpotReviewPhotoRepositoryPort.countByMemberId(memberId);
+        
+        return TripSpotReviewCountInfo.builder()
+            .tripSpotReviewCount(tripSpotReviewCount)
+            .photoCount(photoCount)
+            .build();
     }
 }
