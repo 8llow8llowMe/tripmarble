@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao;
 
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums.OAuthProvider;
+import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.converter.KakaoMemberResponseConverter;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.dto.KakaoMemberResponse;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.dto.KakaoToken;
 import com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.kakao.properties.KakaoOAuthProperties;
@@ -17,6 +18,7 @@ public class KakaoOAuthMemberFetcher implements OAuthMemberFetcher {
 
     private final KakaoApiClient kakaoApiClient;
     private final KakaoOAuthProperties kakaoOAuthProperties;
+    private final KakaoMemberResponseConverter kakaoMemberResponseConverter;
 
     @Override
     public OAuthProvider supports() {
@@ -25,11 +27,15 @@ public class KakaoOAuthMemberFetcher implements OAuthMemberFetcher {
 
     @Override
     public Member fetchMember(OAuthProvider oAuthProvider, String authCode) {
+        // 1. 카카오 액세스 토큰 발급
         KakaoToken token = kakaoApiClient.fetchToken(buildTokenRequestParams(authCode));
+
+        // 2. 사용자 정보 조회
         KakaoMemberResponse memberResponse = kakaoApiClient.fetchMember(
             "Bearer " + token.accessToken());
 
-        return memberResponse.toDomain();
+        // 3. Converter를 통해 외부 응답 -> 도메인 변환
+        return kakaoMemberResponseConverter.toDomain(memberResponse);
     }
 
     private MultiValueMap<String, String> buildTokenRequestParams(String authCode) {
