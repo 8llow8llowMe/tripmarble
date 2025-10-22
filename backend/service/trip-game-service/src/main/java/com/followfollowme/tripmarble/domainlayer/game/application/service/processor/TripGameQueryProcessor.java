@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service.processor;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.RepresentativeRegionInfoInternalResponse;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCountInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.RepresentativeRegionClientPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMemberRepositoryPort;
@@ -67,8 +68,9 @@ public class TripGameQueryProcessor {
         return new SliceImpl<>(infos, gameSlice.getPageable(), gameSlice.hasNext());
     }
 
-    public int getTripGameCountByMember(long memberId) {
-        return tripGameMemberRepositoryPort.countTripGameByMemberId(memberId);
+    public TripGameCountInfo getTripGameCountByMember(long memberId) {
+        int tripGameCount = tripGameMemberRepositoryPort.countTripGameByMemberId(memberId);
+        return TripGameCountInfo.of(memberId, tripGameCount);
     }
 
     private List<Long> extractGameIds(List<TripGame> games) {
