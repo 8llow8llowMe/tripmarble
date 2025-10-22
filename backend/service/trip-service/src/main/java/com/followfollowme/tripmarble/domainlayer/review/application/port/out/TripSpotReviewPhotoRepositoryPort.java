@@ -13,4 +13,6 @@ public interface TripSpotReviewPhotoRepositoryPort {
     List<TripSpotReviewPhoto> findByTripSpotReviewId(long tripSpotReviewId);
 
     void deleteAllByTripSpotReviewId(long tripSpotReviewId);
+
+    int countByMemberId(long memberId);
 }

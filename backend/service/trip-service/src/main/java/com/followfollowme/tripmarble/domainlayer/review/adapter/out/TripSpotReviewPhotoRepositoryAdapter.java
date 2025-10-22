@@ -41,4 +41,9 @@ public class TripSpotReviewPhotoRepositoryAdapter implements TripSpotReviewPhoto
     public void deleteAllByTripSpotReviewId(long tripSpotReviewId) {
         tripSpotReviewPhotoRepository.deleteAllByTripSpotReviewId(tripSpotReviewId);
     }
+
+    @Override
+    public int countByMemberId(long memberId) {
+        return tripSpotReviewPhotoRepository.countByMemberId(memberId);
+    }
 }
