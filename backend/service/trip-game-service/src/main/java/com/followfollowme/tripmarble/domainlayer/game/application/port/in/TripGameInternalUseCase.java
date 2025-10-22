@@ -1,6 +1,8 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.port.in;
 
+import com.followfollowme.tripmarble.domainlayer.game.adapter.in.internal.dto.TripGameCountInternalResponse;
+
 public interface TripGameInternalUseCase {
 
-    int getTripGameCountByMember(long memberId);
+    TripGameCountInternalResponse getTripGameCountByMember(long memberId);
 }
