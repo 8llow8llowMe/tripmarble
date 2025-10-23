@@ -34,4 +34,21 @@ public record TripSpotWithDetailViewInfo(
             .originalImageUrl(tripSpot.firstImage())
             .build();
     }
+
+    // 임시
+    public static TripSpotWithDetailViewInfo of(TripSpot tripSpot, String contentTypeName) {
+        return TripSpotWithDetailViewInfo.builder()
+            .tripSpotId(tripSpot.id())
+            .tripSpotName(tripSpot.title())
+            .contentTypeName(contentTypeName)
+            .description(null)
+            .homepageUrl(null)
+            .phoneNumber(tripSpot.tel())
+            .address(tripSpot.addr1())
+            .addressDetail(tripSpot.addr2())
+            .longitude(tripSpot.mapX())
+            .latitude(tripSpot.mapY())
+            .originalImageUrl(tripSpot.firstImage())
+            .build();
+    }
 }
