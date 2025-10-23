@@ -1,10 +1,14 @@
 package com.followfollowme.tripmarble.domainlayer.member.application.service;
 
 import com.followfollowme.tripmarble.domainlayer.auth.application.service.processor.JwtTokenProcessor;
+import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberActivitySummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberMyInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
+import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.presenter.MemberPresenter;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberUpdateCommand;
+import com.followfollowme.tripmarble.domainlayer.member.application.info.MemberActivitySummaryInfo;
+import com.followfollowme.tripmarble.domainlayer.member.application.info.MemberMyInfo;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.in.MemberWebUseCase;
 import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.MemberInfoProcessor;
 import com.followfollowme.tripmarble.domainlayer.member.application.service.processor.MemberSignupProcessor;
@@ -26,6 +30,7 @@ public class MemberFacade implements MemberWebUseCase {
     private final MemberUpdateProcessor memberUpdateProcessor;
     private final MemberWithdrawProcessor memberWithdrawProcessor;
     private final JwtTokenProcessor jwtTokenProcessor;
+    private final MemberPresenter memberPresenter;
 
     @Override
     @Transactional
@@ -36,7 +41,8 @@ public class MemberFacade implements MemberWebUseCase {
     @Override
     @Transactional(readOnly = true)
     public MemberMyInfoResponse getMyInfo(long memberId) {
-        return memberInfoProcessor.loadMyInfo(memberId);
+        MemberMyInfo memberMyInfo = memberInfoProcessor.loadMyInfo(memberId);
+        return memberPresenter.toMyInfoResponse(memberMyInfo);
     }
 
     @Override
@@ -55,5 +61,12 @@ public class MemberFacade implements MemberWebUseCase {
     public void withdrawMember(long memberId) {
         memberWithdrawProcessor.withdraw(memberId);
         jwtTokenProcessor.revoke(memberId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MemberActivitySummaryResponse getMemberActivitySummary(long memberId) {
+        MemberActivitySummaryInfo memberActivitySummaryInfo = memberInfoProcessor.getMemberActivitySummary(memberId);
+        return memberPresenter.toActivitySummaryResponse(memberActivitySummaryInfo);
     }
 }
