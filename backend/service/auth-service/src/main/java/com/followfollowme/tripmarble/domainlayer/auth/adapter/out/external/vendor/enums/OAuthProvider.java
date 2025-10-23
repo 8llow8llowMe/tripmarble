@@ -1,9 +1,17 @@
 package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.external.vendor.enums;
 
 import java.util.Arrays;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@Getter
+@RequiredArgsConstructor
 public enum OAuthProvider {
-    KAKAO, NAVER;
+
+    KAKAO("카카오"),
+    NAVER("네이버");
+
+    private final String description;
 
     public static OAuthProvider fromName(String providerName) {
         return Arrays.stream(values())

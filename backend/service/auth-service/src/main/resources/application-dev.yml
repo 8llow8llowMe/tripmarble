@@ -111,3 +111,9 @@ management:
   endpoint:
     health:
       show-details: ALWAYS # SBA에서 상세 health 정보까지 보기 위함
+
+# Feign Client
+feign-client:
+  target-services:
+    trip-service: ${TRIP_SERVICE_APP_NAME}
+    trip-game-service: ${TRIP_GAME_SERVICE_APP_NAME}

@@ -86,7 +86,7 @@ oauth:
       - profile_nickname
       - profile_image
       - account_email
-      - name
+  #      - name # 사업자 정보 있어야 해당 정보 가져오기 가능
 
   naver:
     client-id: ${OAUTH_NAVER_CLIENT_ID} # Rest API 키
@@ -97,3 +97,9 @@ oauth:
       - profile_image
       - email
       - name
+
+# Feign Client
+feign-client:
+  target-services:
+    trip-service: ${TRIP_SERVICE_APP_NAME}
+    trip-game-service: ${TRIP_GAME_SERVICE_APP_NAME}

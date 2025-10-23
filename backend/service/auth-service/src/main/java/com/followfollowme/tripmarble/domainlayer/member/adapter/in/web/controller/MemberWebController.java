@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.controller;
 
 import com.followfollowme.tripmarble.common.dto.Response;
+import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberActivitySummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberMyInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberSignupRequest;
@@ -30,7 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members")
-@Tag(name = "회원", description = "회원 관련 API 입니다.")
+@Tag(name = "회원", description = "회원 관련 클라이언트 전용 API 입니다.")
 public class MemberWebController {
 
     private final MemberWebUseCase memberWebUseCase;
@@ -96,5 +97,19 @@ public class MemberWebController {
     public ResponseEntity<Response<Void>> withdrawMember(@AuthenticationPrincipal MemberLoginActive loginActive) {
         memberWebUseCase.withdrawMember(loginActive.id());
         return ResponseEntity.ok().body(Response.success());
+    }
+
+    @Operation(
+        summary = "나의 활동 요약 조회",
+        description = "특정 회원의 여행 게임 수 및 작성한 여행지 리뷰 수 및 리뷰에 첨부된 사진 개수를 조회합니다.",
+        security = {@SecurityRequirement(name = "bearerAuth")}
+    )
+    @GetMapping("/me/activity-summary")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Response<MemberActivitySummaryResponse>> getMyActivitySummary(
+        @AuthenticationPrincipal MemberLoginActive loginActive
+    ) {
+        MemberActivitySummaryResponse summaryResponse = memberWebUseCase.getMemberActivitySummary(loginActive.id());
+        return ResponseEntity.ok().body(Response.success(summaryResponse));
     }
 }

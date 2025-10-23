@@ -1,6 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.game.application.service.processor;
 
 import com.followfollowme.tripmarble.domainlayer.game.adapter.out.feign.dto.RepresentativeRegionInfoInternalResponse;
+import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameCountInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.info.TripGameQueryInfo;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.RepresentativeRegionClientPort;
 import com.followfollowme.tripmarble.domainlayer.game.application.port.out.TripGameMemberRepositoryPort;
@@ -11,15 +12,14 @@ import com.followfollowme.tripmarble.domainlayer.game.application.readmodel.Trip
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGame;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.TripGameMember;
 import com.followfollowme.tripmarble.domainlayer.game.domain.model.enums.GameStatus;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -66,6 +66,11 @@ public class TripGameQueryProcessor {
             .toList();
 
         return new SliceImpl<>(infos, gameSlice.getPageable(), gameSlice.hasNext());
+    }
+
+    public TripGameCountInfo getTripGameCountByMember(long memberId) {
+        int tripGameCount = tripGameMemberRepositoryPort.countTripGameByMemberId(memberId);
+        return TripGameCountInfo.of(memberId, tripGameCount);
     }
 
     private List<Long> extractGameIds(List<TripGame> games) {
