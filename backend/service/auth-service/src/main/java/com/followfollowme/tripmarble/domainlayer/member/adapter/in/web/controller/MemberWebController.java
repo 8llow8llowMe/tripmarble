@@ -31,7 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/members")
-@Tag(name = "회원", description = "회원 관련 API 입니다.")
+@Tag(name = "회원", description = "회원 관련 클라이언트 전용 API 입니다.")
 public class MemberWebController {
 
     private final MemberWebUseCase memberWebUseCase;
