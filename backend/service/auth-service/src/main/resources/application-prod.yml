@@ -97,3 +97,9 @@ oauth:
       - profile_image
       - email
       - name
+
+# Feign Client
+feign-client:
+  target-services:
+    trip-service: ${TRIP_SERVICE_APP_NAME}
+    trip-game-service: ${TRIP_GAME_SERVICE_APP_NAME}
