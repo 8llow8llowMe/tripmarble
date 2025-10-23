@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.member.application.port.in;
 
+import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberActivitySummaryResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberMyInfoResponse;
 import com.followfollowme.tripmarble.domainlayer.member.adapter.in.web.dto.MemberProfileUploadResponse;
 import com.followfollowme.tripmarble.domainlayer.member.application.command.MemberSignupCommand;
@@ -17,4 +18,6 @@ public interface MemberWebUseCase {
     void updateMyInfo(MemberUpdateCommand command);
 
     void withdrawMember(long memberId);
+
+    MemberActivitySummaryResponse getMemberActivitySummary(long memberId);
 }
