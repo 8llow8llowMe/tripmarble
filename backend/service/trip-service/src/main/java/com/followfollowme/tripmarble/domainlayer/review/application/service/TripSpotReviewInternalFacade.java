@@ -1,11 +1,14 @@
 package com.followfollowme.tripmarble.domainlayer.review.application.service;
 
+import com.followfollowme.tripmarble.domainlayer.review.adapter.in.internal.dto.TripSpotReviewCountInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.in.internal.dto.TripSpotReviewCreateInternalResponse;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.in.internal.presenter.TripSpotReviewInternalPresenter;
 import com.followfollowme.tripmarble.domainlayer.review.application.command.TripSpotReviewCreateInternalCommand;
+import com.followfollowme.tripmarble.domainlayer.review.application.info.TripSpotReviewCountInfo;
 import com.followfollowme.tripmarble.domainlayer.review.application.info.TripSpotReviewCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.review.application.info.TripSpotReviewPhotoCreateInfo;
 import com.followfollowme.tripmarble.domainlayer.review.application.port.in.TripSpotReviewInternalUseCase;
+import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.MyReviewQueryProcessor;
 import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.TripSpotReviewCreateProcessor;
 import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.TripSpotReviewPhotoCreateProcessor;
 import com.followfollowme.tripmarble.domainlayer.review.application.service.processor.TripSpotReviewPhotoUploadProcessor;
@@ -21,6 +24,7 @@ public class TripSpotReviewInternalFacade implements TripSpotReviewInternalUseCa
     private final TripSpotReviewCreateProcessor tripSpotReviewCreateProcessor;
     private final TripSpotReviewPhotoCreateProcessor tripSpotReviewPhotoCreateProcessor;
     private final TripSpotReviewPhotoUploadProcessor tripSpotReviewPhotoUploadProcessor;
+    private final MyReviewQueryProcessor myReviewQueryProcessor;
     private final TripSpotReviewInternalPresenter tripSpotReviewInternalPresenter;
 
     @Override
@@ -40,5 +44,12 @@ public class TripSpotReviewInternalFacade implements TripSpotReviewInternalUseCa
 
         // 4. Presenter를 통해 Info -> Response 반환
         return tripSpotReviewInternalPresenter.toCreateResponse(reviewCreateInfo, photoCreateInfos);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TripSpotReviewCountInternalResponse getMyTripSpotReviewAndPhotoCount(long memberId) {
+        TripSpotReviewCountInfo tripSpotReviewCountInfo = myReviewQueryProcessor.getMyTripSpotReviewAndPhotoCount(memberId);
+        return tripSpotReviewInternalPresenter.toCountResponse(tripSpotReviewCountInfo);
     }
 }
