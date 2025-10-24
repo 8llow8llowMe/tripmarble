@@ -1,6 +1,6 @@
 .uxTrigger {
   width: 100%;
-  min-height: 7000px;
+  min-height: 6000px;
   background: linear-gradient(180deg, #fafbff 0%, #d7e0fa 100%);
   position: relative;
 }
@@ -62,7 +62,7 @@
   left: 10%;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 25;
+  z-index: 50;
   opacity: 0;
   pointer-events: auto;
 }

@@ -33,7 +33,6 @@ export default function PolaroidStack({
                 id={item.id}
                 name={item.name}
                 imgUrl={item.imgUrl}
-                zIndex={10 + i}
               />
             </div>
           </div>
