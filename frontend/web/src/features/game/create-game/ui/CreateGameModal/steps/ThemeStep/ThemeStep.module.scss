@@ -18,6 +18,12 @@
   }
 }
 
+.themeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .themeButton {
   font-size: 1.25rem;
   background: #eee;
@@ -36,4 +42,28 @@
   background: #08f;
   color: #fff;
   border: 1px solid rgb(0, 118, 221);
+}
+
+.warningText {
+  margin: 1rem auto 0;
+  padding: 0.5rem 1rem;
+  max-width: 600px;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ff4d4f;
+  background-color: rgba(255, 77, 79, 0.08);
+  border: 1px solid rgba(255, 77, 79, 0.2);
+  border-radius: 8px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
