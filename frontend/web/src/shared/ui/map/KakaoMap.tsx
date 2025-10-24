@@ -118,7 +118,13 @@ const KakaoMap = ({
     }
   }, [center.lat, center.lng, level]);
 
-  return <div ref={containerRef} className={className} style={{ width: "100%", height: "320px" }} />;
+  return (
+    <div
+      ref={containerRef}
+      className={className}
+      style={{ width: "100%", height: "240px" }}
+    />
+  );
 };
 
 export default KakaoMap;
