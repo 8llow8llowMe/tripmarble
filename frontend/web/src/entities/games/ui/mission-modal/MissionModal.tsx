@@ -93,7 +93,7 @@ export default function MissionModal({
       latitude: (fetched as any).latitude ?? 0,
       imageUrl: (fetched as any).imageUrl ?? "/images/no-image.png",
       thumbnailImageUrl:
-        (fetched as any).thumbnailImageUrl ??
+        (fetched as any).originalImageUrl ??
         (fetched as any).imageUrl ??
         "/images/no-image.png",
       originalImageUrl: (fetched as any).originalImageUrl,
@@ -101,6 +101,15 @@ export default function MissionModal({
 
     return normalized;
   }, [spotResponse]);
+
+  const coverImage = useMemo(() => {
+    return (
+      spotDetail?.originalImageUrl ||
+      spotDetail?.thumbnailImageUrl ||
+      spotDetail?.imageUrl ||
+      undefined
+    );
+  }, [spotDetail]);
 
   const {
     data: reviewPages,
@@ -295,6 +304,17 @@ export default function MissionModal({
             }`}
           >
             <div>
+              {coverImage ? (
+                <div className={styles.coverImageBox}>
+                  <img
+                    src={coverImage}
+                    alt={`${spotDetail?.tripSpotName ?? "여행지"} 대표 이미지`}
+                    className={styles.coverImage}
+                    loading="lazy"
+                  />
+                </div>
+              ) : null}
+
               {/* 방문자 리뷰 섹션 */}
               <div className={styles.reviewsSection}>
                 <div className={styles.reviewsHeader}>
