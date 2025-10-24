@@ -34,7 +34,7 @@ export default function Search() {
       <div className={styles.section}>
         <div className={styles.subTitle}>지도로 둘러보기</div>
         <div className={styles.mapWrapper}>
-          <KakaoMap className={styles.mapCanvas} />
+          <KakaoMap className={styles.mapCanvas} height={"40vh"} />
         </div>
       </div>
 
