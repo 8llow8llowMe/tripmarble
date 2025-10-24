@@ -32,3 +32,11 @@
   gap: 32px;
   align-items: flex-start;
 }
+
+.createButton {
+  height: 50px;
+
+  @media (max-width: 700px) {
+    height: 40px;
+  }
+}
