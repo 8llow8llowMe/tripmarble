@@ -118,9 +118,15 @@
   background: #fff;
   border-radius: 18px;
   box-shadow: 0 6px 20px rgba(30, 60, 120, 0.08);
-  padding: 24px;
+  padding: 4px;
   overflow: auto;
   margin: 0 auto;
+}
+
+@media (max-width: 480px) {
+  .boardContainer {
+    padding: 0px;
+  }
 }
 
 .boardImage {
