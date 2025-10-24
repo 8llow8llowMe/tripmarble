@@ -50,20 +50,18 @@ export default function StepEmail({ onNext }: { onNext: () => void }) {
   const handleSendCode = async () => {
     setErrorMsg('');
     try {
-      await sendCode(
-        { email },
-        {
-          onSuccess: (data) => {
-            if (data.dataHeader.success) {
-              console.log('이메일 인증코드 전송 성공');
-            }
-          },
-        },
-      );
-      setIsSent(true);
-      setTimer(300);
+      const data = await sendCode({ email });
+      if (data.dataHeader.success) {
+        console.log('이메일 인증코드 전송 성공');
+        setIsSent(true);
+        setTimer(300);
+      }
     } catch (e: any) {
-      setErrorMsg(e?.message || '인증코드 전송 실패');
+      setErrorMsg(
+        e?.response?.data?.dataHeader?.resultMessage ||
+          e?.message ||
+          '인증코드 전송 도중 오류가 발생했습니다.',
+      );
     }
   };
 
