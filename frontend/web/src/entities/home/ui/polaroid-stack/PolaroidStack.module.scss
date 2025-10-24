@@ -8,6 +8,7 @@
 .card {
   position: relative;
   width: 100%;
+  display: block;
   cursor: pointer;
   user-select: none;
 }
@@ -47,6 +48,7 @@
 }
 
 .pin {
+  pointer-events: none;
   position: absolute;
   width: 14px;
   height: 14px;
