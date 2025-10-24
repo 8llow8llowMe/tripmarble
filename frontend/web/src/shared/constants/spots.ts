@@ -1,8 +1,23 @@
 export const spotsData = [
   {
+    id: 37398,
+    name: "창덕궁과 후원 [유네스코 세계유산]",
+    imgUrl: "http://tong.visitkorea.or.kr/cms/resource/03/3092503_image2_1.jpg",
+  },
+  {
     id: 44210,
     name: "해동용궁사",
     imgUrl: "http://tong.visitkorea.or.kr/cms/resource/35/3499335_image2_1.jpg",
+  },
+  {
+    id: 48863,
+    name: "허균·허난설헌 기념공원",
+    imgUrl: "http://tong.visitkorea.or.kr/cms/resource/11/3493211_image2_1.jpg",
+  },
+  {
+    id: 3725,
+    name: "구룡폭포(소금강)",
+    imgUrl: "http://tong.visitkorea.or.kr/cms/resource/42/3029842_image2_1.jpg",
   },
   {
     id: 47130,
@@ -23,21 +38,6 @@ export const spotsData = [
     id: 1065,
     name: "거북선공원",
     imgUrl: "http://tong.visitkorea.or.kr/cms/resource/95/3372895_image2_1.JPG",
-  },
-  {
-    id: 48863,
-    name: "허균·허난설헌 기념공원",
-    imgUrl: "http://tong.visitkorea.or.kr/cms/resource/11/3493211_image2_1.jpg",
-  },
-  {
-    id: 3725,
-    name: "구룡폭포(소금강)",
-    imgUrl: "http://tong.visitkorea.or.kr/cms/resource/42/3029842_image2_1.jpg",
-  },
-  {
-    id: 37398,
-    name: "창덕궁과 후원 [유네스코 세계유산]",
-    imgUrl: "http://tong.visitkorea.or.kr/cms/resource/03/3092503_image2_1.jpg",
   },
   {
     id: 20921,
