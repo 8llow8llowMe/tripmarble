@@ -5,6 +5,8 @@ const END_POINTS = {
   LOGOUT: `/auth/logout`,
   SEND_CODE: `/auth/mail/send-code`,
   VERIFY_CODE: `/auth/mail/verify-code`,
+  SOCIAL_LOGIN: (provider: string) => `/auth/${provider}/login`,
+  SOCIAL_AUTHORIZE: (provider: string) => `/auth/${provider}/authorize`,
 
   //USER
   USER: {
