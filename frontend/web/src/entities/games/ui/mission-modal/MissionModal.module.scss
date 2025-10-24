@@ -165,11 +165,88 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 1px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
   color: #2a2f3a;
   line-height: 20px;
   text-align: center;
   font-weight: 700;
   cursor: pointer;
+}
+
+/* --- Reviews & Map (moved from inline styles) --- */
+.reviewsSection {
+  margin-top: 20px;
+}
+.reviewsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.reviewsTitle {
+  font-size: 16px;
+  font-weight: 700;
+}
+.reviewsMoreBtn {
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+}
+.reviewsLoading,
+.reviewsEmpty {
+  color: #999;
+}
+.reviewsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.reviewItem {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 12px;
+}
+.reviewMeta {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+}
+.reviewContent {
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 6px 0 8px;
+}
+.reviewPhotos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.reviewPhoto {
+  position: relative;
+  padding-bottom: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f6f7f9;
+}
+.reviewPhotoImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mapFrame {
+  margin-top: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: #d9d9d9;
 }

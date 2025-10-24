@@ -1,9 +1,13 @@
 "use client";
 
 import React, { useMemo, useState, useEffect, useRef } from "react";
+import useTripSpotById from "@/entities/trips/hooks/useTripSpotById";
+import useTripSpotReviews from "@/entities/trips/hooks/useTripSpotReviews";
+import type { TripSpotDetailResponse } from "@/entities/trips/model/tripsType";
 import Modal from "@/shared/ui/common/Modal";
 import styles from "./MissionModal.module.scss";
 import type { TripGameTileView } from "@/entities/games/model/gameInfoDummy";
+import KakaoMap from "@/shared/ui/map/KakaoMap";
 
 type Props = {
   tile: TripGameTileView | null;
@@ -54,6 +58,63 @@ export default function MissionModal({
       setFiles([]);
     }
   }, [isOpen]);
+
+  // 여행지 상세 정보: tile의 tripSpotId로 조회하여 표시 (tile 필드가 비어있는 경우 대응)
+  const tripSpotId = tile?.tripSpotId ? String(tile.tripSpotId) : "";
+  const { data: spotResponse } = useTripSpotById(tripSpotId);
+
+  const spotDetail = useMemo(() => {
+    const fetched = spotResponse?.data?.dataBody as
+      | (Partial<TripSpotDetailResponse> & {
+          originalImageUrl?: string;
+          tripSpotId?: string | number;
+        })
+      | undefined;
+
+    if (!fetched) return undefined;
+
+    const idNum =
+      typeof fetched.tripSpotId === "string"
+        ? Number(fetched.tripSpotId)
+        : typeof fetched.tripSpotId === "number"
+        ? fetched.tripSpotId
+        : 0;
+
+    const normalized: TripSpotDetailResponse & { originalImageUrl?: string } = {
+      tripSpotId: idNum,
+      tripSpotName: fetched.tripSpotName ?? "",
+      contentTypeName: fetched.contentTypeName ?? "",
+      description: fetched.description ?? "",
+      homepageUrl: fetched.homepageUrl ?? "",
+      phoneNumber: fetched.phoneNumber ?? "",
+      address: fetched.address ?? "",
+      addressDetail: fetched.addressDetail ?? "",
+      longitude: (fetched as any).longitude ?? 0,
+      latitude: (fetched as any).latitude ?? 0,
+      imageUrl: (fetched as any).imageUrl ?? "/images/no-image.png",
+      thumbnailImageUrl:
+        (fetched as any).thumbnailImageUrl ??
+        (fetched as any).imageUrl ??
+        "/images/no-image.png",
+      originalImageUrl: (fetched as any).originalImageUrl,
+    };
+
+    return normalized;
+  }, [spotResponse]);
+
+  const {
+    data: reviewPages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isReviewsLoading,
+  } = useTripSpotReviews(tripSpotId);
+
+  const reviews = useMemo(
+    () =>
+      reviewPages?.pages.flatMap((page) => page.data.dataBody.contents) ?? [],
+    [reviewPages]
+  );
 
   const onAddFiles = (list: FileList | null) => {
     if (!list) return;
@@ -234,13 +295,124 @@ export default function MissionModal({
             }`}
           >
             <div>
-              <div className={styles.row}>
-                <div className={styles.label}>미션 유형</div>
-                <div>{tile?.missionTypeDescription ?? "-"}</div>
+              {/* 방문자 리뷰 섹션 */}
+              <div className={styles.reviewsSection}>
+                <div className={styles.reviewsHeader}>
+                  <h3 className={styles.reviewsTitle}>방문자 리뷰</h3>
+                  {hasNextPage && reviews.length ? (
+                    <button
+                      type="button"
+                      onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}
+                      className={styles.reviewsMoreBtn}
+                    >
+                      {isFetchingNextPage ? "불러오는 중…" : "더 보기"}
+                    </button>
+                  ) : null}
+                </div>
+
+                {isReviewsLoading && !reviews.length ? (
+                  <p className={styles.reviewsLoading}>
+                    리뷰를 불러오는 중입니다…
+                  </p>
+                ) : reviews.length ? (
+                  <ul className={styles.reviewsList}>
+                    {reviews.map((review: any) => (
+                      <li
+                        key={review.tripSpotReviewId}
+                        className={styles.reviewItem}
+                      >
+                        <div className={styles.reviewMeta}>
+                          <span style={{ fontWeight: 700 }}>
+                            {review.rating?.toFixed
+                              ? review.rating.toFixed(1)
+                              : review.rating}
+                            점
+                          </span>
+                          <span>{review.reviewSourceTypeDescription}</span>
+                        </div>
+                        {review.content ? (
+                          <p className={styles.reviewContent}>
+                            {review.content}
+                          </p>
+                        ) : null}
+                        {review.photos?.length ? (
+                          <div className={styles.reviewPhotos}>
+                            {review.photos.map((photo: any) => (
+                              <div
+                                key={photo.tripSpotReviewPhotoId}
+                                className={styles.reviewPhoto}
+                              >
+                                <img
+                                  src={photo.photoUrl}
+                                  alt="리뷰 사진"
+                                  className={styles.reviewPhotoImg}
+                                  loading="lazy"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className={styles.reviewsEmpty}>
+                    아직 등록된 리뷰가 없습니다.
+                  </p>
+                )}
               </div>
-              <div className={styles.row}>
-                <div className={styles.label}>단계</div>
-                <div>{tile?.stepNo ?? "-"}</div>
+              <div style={{ marginTop: 16 }}>
+                {spotDetail?.address ? (
+                  <div className={styles.row}>
+                    <div className={styles.label}>주소</div>
+                    <div>{spotDetail?.address}</div>
+                  </div>
+                ) : null}
+
+                {spotDetail?.phoneNumber ? (
+                  <div className={styles.row}>
+                    <div className={styles.label}>전화</div>
+                    <div>{spotDetail?.phoneNumber}</div>
+                  </div>
+                ) : null}
+
+                {spotDetail?.homepageUrl ? (
+                  <div className={styles.row}>
+                    <div className={styles.label}>홈페이지</div>
+                    <a
+                      href={spotDetail?.homepageUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.infoLink}
+                    >
+                      바로가기
+                    </a>
+                  </div>
+                ) : null}
+
+                {spotDetail?.description ? (
+                  <div className={styles.row}>
+                    <div className={styles.label}>설명</div>
+                    <div style={{ whiteSpace: "pre-wrap" }}>
+                      {spotDetail?.description}
+                    </div>
+                  </div>
+                ) : null}
+
+                {typeof spotDetail?.latitude === "number" &&
+                typeof spotDetail?.longitude === "number" &&
+                (spotDetail.latitude !== 0 || spotDetail.longitude !== 0) ? (
+                  <div className={styles.mapFrame}>
+                    <KakaoMap
+                      center={{
+                        lat: spotDetail?.latitude as number,
+                        lng: spotDetail?.longitude as number,
+                      }}
+                      level={6}
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
