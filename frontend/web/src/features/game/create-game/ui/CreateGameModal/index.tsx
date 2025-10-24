@@ -20,6 +20,7 @@ import RegionStep from "./steps/ResionStep/RegionStep";
 import ThemeStep from "./steps/ThemeStep/ThemeStep";
 import useCreateTripGame from "@/entities/games/hooks/useCreateTripGame";
 import { useRouter } from "next/navigation";
+import { fetchGameStart } from "@/entities/games/hooks/useGameStart";
 
 type StepKey =
   | "title"
@@ -125,13 +126,25 @@ export default function CreateGameModal({
       setStep(step + 1);
     } else {
       createGame(form, {
-        onSuccess: () => {
-          toast.success("게임이 생성되었습니다!");
-          queryClient.invalidateQueries({ queryKey: ["myGameListInfinite"] });
-          dispatch(resetGameForm());
-          onClose();
-          router.push("/game");
-          setStep(0);
+        onSuccess: async (res: any) => {
+          try {
+            // 다양한 응답 포맷을 안전하게 처리
+            const gameId = res?.data?.dataBody?.tripGameId ?? null;
+            toast.success("게임이 생성되었습니다!");
+            queryClient.invalidateQueries({ queryKey: ["myGameListInfinite"] });
+            dispatch(resetGameForm());
+            onClose();
+
+            if (gameId != null) {
+              await fetchGameStart(gameId);
+              router.push(`/game/${gameId}`);
+            } else {
+              // 혹시 id를 못 찾으면 목록으로 폴백
+              router.push("/game");
+            }
+          } finally {
+            setStep(0);
+          }
         },
         onError: () => toast.error("게임 생성에 실패했습니다."),
       });
@@ -187,14 +200,16 @@ export default function CreateGameModal({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
-        const target = e.target as HTMLElement;
+        const ae = document.activeElement as HTMLElement | null;
         const isTyping =
-          target?.tagName === "INPUT" ||
-          target?.tagName === "TEXTAREA" ||
-          (target as HTMLInputElement)?.isContentEditable;
+          ae &&
+          (ae.tagName === "INPUT" ||
+            ae.tagName === "TEXTAREA" ||
+            (ae as HTMLElement).isContentEditable);
+
         if (!isTyping) {
           e.preventDefault();
-          nextStep();
+          nextStep(); // 전역은 “입력 중이 아닐 때”에만 동작
         }
       } else if (e.key === "Escape") {
         handleClose();
