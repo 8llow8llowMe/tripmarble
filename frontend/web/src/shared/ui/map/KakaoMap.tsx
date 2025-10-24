@@ -9,6 +9,7 @@ type KakaoMapProps = {
     lng: number;
   };
   level?: number;
+  height?: number | string; // px number or any CSS height string
 };
 
 type KakaoWindow = typeof window & {
@@ -30,6 +31,7 @@ const KakaoMap = ({
   className,
   center = DEFAULT_CENTER,
   level = DEFAULT_LEVEL,
+  height = 240,
 }: KakaoMapProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -118,11 +120,13 @@ const KakaoMap = ({
     }
   }, [center.lat, center.lng, level]);
 
+  const heightStyle = typeof height === "number" ? `${height}px` : height;
+
   return (
     <div
       ref={containerRef}
       className={className}
-      style={{ width: "100%", height: "240px" }}
+      style={{ width: "100%", height: heightStyle }}
     />
   );
 };
