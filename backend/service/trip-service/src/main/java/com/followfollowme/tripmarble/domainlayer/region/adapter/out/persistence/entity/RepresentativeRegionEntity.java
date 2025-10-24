@@ -36,4 +36,16 @@ public class RepresentativeRegionEntity {
     @Comment("대표 여행지 설명")
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Comment("위도")
+    @Column(nullable = false)
+    private Double latitude;
+
+    @Comment("경도")
+    @Column(nullable = false)
+    private Double longitude;
+
+    @Comment("지도 테두리(Polygon/MultiPolygon) GeoJSON 데이터")
+    @Column(columnDefinition = "JSON")
+    private String boundaryGeoJson;
 }
