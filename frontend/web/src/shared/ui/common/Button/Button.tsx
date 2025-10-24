@@ -18,6 +18,7 @@ const Button = ({
   width,
   height,
   fontSize,
+  className,
   ...props
 }: ButtonProps) => {
   const style: React.CSSProperties = {};
@@ -25,11 +26,17 @@ const Button = ({
   if (height) style.height = height;
   if (fontSize) style.fontSize = fontSize;
 
+  const classes = [
+    styles.button,
+    radius && styles[`rounded-${radius}`],
+    paddingSize && styles[`padding-${paddingSize}`],
+    bgColor && styles[`bg-${bgColor}`],
+    className
+  ].filter(Boolean).join(" ");
+
   return (
     <button
-      className={`${styles.button} ${radius && styles[`rounded-${radius}`]} 
-      ${paddingSize && styles[`padding-${paddingSize}`]} 
-      ${bgColor && styles[`bg-${bgColor}`]}`}
+      className={classes}
       {...props}
       style={Object.keys(style).length > 0 ? style : undefined}
     >
