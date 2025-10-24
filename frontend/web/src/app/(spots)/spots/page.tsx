@@ -57,7 +57,7 @@ export default function Spots() {
             title="추천 여행지"
             items={[...spotsData, ...spotsData]}
             baseHref="/trip-spots"
-            itemWidth={250}
+            itemWidth={300}
             itemHeight={300}
           />
         </div>
