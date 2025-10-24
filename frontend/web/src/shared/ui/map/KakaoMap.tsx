@@ -17,6 +17,7 @@ type KakaoWindow = typeof window & {
       load: (callback: () => void) => void;
       LatLng: new (lat: number, lng: number) => any;
       Map: new (container: HTMLElement, options: any) => any;
+      Marker: new (options: any) => any;
     };
   };
 };
@@ -32,6 +33,7 @@ const KakaoMap = ({
 }: KakaoMapProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -62,6 +64,12 @@ const KakaoMap = ({
         };
 
         mapInstanceRef.current = new maps.Map(containerRef.current, options);
+
+        // Create a marker at the center
+        markerRef.current = new maps.Marker({
+          position: kakaoCenter,
+          map: mapInstanceRef.current,
+        });
       });
     };
 
@@ -105,9 +113,12 @@ const KakaoMap = ({
     if (typeof level === "number") {
       mapInstanceRef.current.setLevel(level);
     }
+    if (markerRef.current) {
+      markerRef.current.setPosition(kakaoCenter);
+    }
   }, [center.lat, center.lng, level]);
 
-  return <div ref={containerRef} className={className} />;
+  return <div ref={containerRef} className={className} style={{ width: "100%", height: "320px" }} />;
 };
 
 export default KakaoMap;
