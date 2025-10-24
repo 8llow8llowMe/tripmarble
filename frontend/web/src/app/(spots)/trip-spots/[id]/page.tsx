@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 
-// import useTripSpotById from "@/entities/trips/hooks/useTripSpotById";
+import useTripSpotById from "@/entities/trips/hooks/useTripSpotById";
 import useTripSpotReviewSummary from "@/entities/trips/hooks/useTripSpotReviewSummary";
 import useTripSpotReviews from "@/entities/trips/hooks/useTripSpotReviews";
 import { TripSpotDetailResponse } from "@/entities/trips/model/tripsType";
@@ -10,6 +10,7 @@ import { TripSpotDetailResponse } from "@/entities/trips/model/tripsType";
 import TripSpotReviewModal from "./TripSpotReviewModal";
 import styles from "./TripSpotDetail.module.scss";
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
+import KakaoMap from "@/shared/ui/map/KakaoMap";
 
 type Props = {
   params: {
@@ -112,11 +113,11 @@ export default function TripSpotDetail({ params }: Props) {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [isGameCreateOpen, setIsGameCreateOpen] = useState(false);
 
-  // const {
-  //   data: spotResponse,
-  //   isLoading: isSpotLoading,
-  //   isError: isSpotError,
-  // } = useTripSpotById(tripSpotId);
+  const {
+    data: spotResponse,
+    isLoading: isSpotLoading,
+    isError: isSpotError,
+  } = useTripSpotById(tripSpotId);
 
   const {
     data: summaryResponse,
@@ -134,19 +135,47 @@ export default function TripSpotDetail({ params }: Props) {
   } = useTripSpotReviews(tripSpotId);
 
   const spot = useMemo(() => {
-    // 정상 데이터 있으면 반환, 아니면 더미 반환
-    // const fetched = spotResponse?.data?.dataBody as
-    //   | Partial<TripSpotDetailResponse>
-    //   | undefined;
-    // if (!fetched) {
-    //   return dummySpot;
-    // }
-    // return {
-    //   ...dummySpot,
-    //   ...fetched,
-    // };
-    return dummySpot[1];
-  }, []);
+    const fetched = spotResponse?.data?.dataBody as
+      | (Partial<TripSpotDetailResponse> & {
+          originalImageUrl?: string;
+          tripSpotId?: string | number;
+        })
+      | undefined;
+
+    // 응답 없으면 더미 1개 사용
+    if (!fetched) {
+      return dummySpot[0];
+    }
+
+    // API가 문자열 id를 내려주는 케이스 대응
+    const idNum =
+      typeof fetched.tripSpotId === "string"
+        ? Number(fetched.tripSpotId)
+        : typeof fetched.tripSpotId === "number"
+        ? fetched.tripSpotId
+        : 0;
+
+    // 서버 필드 우선, 누락 시 안전한 기본값 보정
+    const normalized: TripSpotDetailResponse & { originalImageUrl?: string } = {
+      tripSpotId: idNum,
+      tripSpotName: fetched.tripSpotName ?? "",
+      contentTypeName: fetched.contentTypeName ?? "",
+      description: fetched.description ?? "",
+      homepageUrl: fetched.homepageUrl ?? "",
+      phoneNumber: fetched.phoneNumber ?? "",
+      address: fetched.address ?? "",
+      addressDetail: fetched.addressDetail ?? "",
+      longitude: (fetched as any).longitude ?? 0,
+      latitude: (fetched as any).latitude ?? 0,
+      imageUrl: (fetched as any).imageUrl ?? "/images/no-image.png",
+      thumbnailImageUrl:
+        (fetched as any).originalImageUrl ??
+        (fetched as any).imageUrl ??
+        "/images/no-image.png",
+    };
+
+    return normalized;
+  }, [spotResponse]);
 
   const coverImage =
     spot.thumbnailImageUrl || spot.imageUrl || "/images/no-image.png";
@@ -316,6 +345,18 @@ export default function TripSpotDetail({ params }: Props) {
               {spot.description ? (
                 <p className={styles.description}>{spot.description}</p>
               ) : null}
+
+              {typeof spot.latitude === "number" &&
+              typeof spot.longitude === "number" &&
+              (spot.latitude !== 0 || spot.longitude !== 0) ? (
+                <div className={styles.mapWrapper}>
+                  <KakaoMap
+                    center={{ lat: spot.latitude, lng: spot.longitude }}
+                    level={5}
+                  />
+                </div>
+              ) : null}
+
               <div className={styles.buttonRow}>
                 <button
                   className={styles.scheduleButton}

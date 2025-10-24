@@ -46,18 +46,18 @@ export default function Spots() {
             itemWidth={240}
             itemHeight={360}
           />
+          {/* <HorizontalList
+            title="추천 여행지"
+            items={[...spotsData, ...spotsData]}
+            baseHref="/trip-spots"
+            itemWidth={300}
+            itemHeight={180}
+          /> */}
           <HorizontalList
             title="추천 여행지"
             items={[...spotsData, ...spotsData]}
-            baseHref="/spots"
+            baseHref="/trip-spots"
             itemWidth={300}
-            itemHeight={180}
-          />
-          <HorizontalList
-            title="여기저기"
-            items={[...spotsData, ...spotsData]}
-            baseHref="/spots"
-            itemWidth={250}
             itemHeight={300}
           />
         </div>

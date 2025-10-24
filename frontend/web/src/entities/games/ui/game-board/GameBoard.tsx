@@ -195,9 +195,9 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
 
     canvas.width = Math.floor(cssWidth * dpr);
     canvas.height = Math.floor(cssHeight * dpr);
-    // Keep CSS size in CSS pixels for layout
-    canvas.style.width = cssWidth + "px";
-    canvas.style.height = cssHeight + "px";
+    // CSS 크기는 반응형으로 100% 너비, 높이는 비율 유지
+    canvas.style.width = "100%";
+    canvas.style.height = "auto";
     setBoardSize((prev) =>
       prev.width === cssWidth && prev.height === cssHeight
         ? prev
@@ -415,8 +415,12 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left; // CSS pixels
       const y = e.clientY - rect.top; // CSS pixels
+      const scaleX = canvas.clientWidth / boardSize.width;
+      const scaleY = canvas.clientHeight / boardSize.height;
+      const nx = x / scaleX;
+      const ny = y / scaleY;
       const hit = cellRectsRef.current.find(
-        (r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h
+        (r) => nx >= r.x && nx <= r.x + r.w && ny >= r.y && ny <= r.y + r.h
       );
 
       if (hit && hit.index !== -1 && onCellClick) {
@@ -427,8 +431,12 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left; // CSS pixels
       const y = e.clientY - rect.top; // CSS pixels
+      const scaleX = canvas.clientWidth / boardSize.width;
+      const scaleY = canvas.clientHeight / boardSize.height;
+      const nx = x / scaleX;
+      const ny = y / scaleY;
       const hit = cellRectsRef.current.find(
-        (r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h
+        (r) => nx >= r.x && nx <= r.x + r.w && ny >= r.y && ny <= r.y + r.h
       );
       if (hit && hit.index !== -1) {
         canvas.style.cursor = "pointer";
@@ -442,20 +450,21 @@ const GameBoard = forwardRef<GameBoardHandle, Props>(function GameBoard(
       canvas.removeEventListener("click", handleClick);
       canvas.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [tiles, onCellClick, count]);
+  }, [tiles, onCellClick, count, boardSize]);
 
   return (
     <>
       <div
         className={styles.boardWrapper}
         ref={wrapperRef}
-        style={{ width: boardSize.width, height: boardSize.height }}
+        style={{ width: "100%", maxWidth: boardSize.width, height: "auto" }}
       >
         <canvas
           ref={canvasRef}
           width={boardSize.width}
           height={boardSize.height}
           className={styles.canvas}
+          style={{ width: "100%", height: "auto", display: "block" }}
         />
         <DiceView
           visible={diceVisible}

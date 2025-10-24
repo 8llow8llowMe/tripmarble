@@ -40,7 +40,7 @@ export default function Game() {
           bgColor="primary"
           paddingSize="md"
           width="clamp(120px, 40vw, 180px)"
-          height="50px"
+          className={styles.createButton}
           onClick={handleCreateClick}
         >
           게임 만들기

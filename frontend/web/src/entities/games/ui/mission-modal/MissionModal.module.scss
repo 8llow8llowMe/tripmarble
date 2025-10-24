@@ -1,6 +1,19 @@
 .sheet {
-  /* 큰 화면에서는 840px 고정, 작은 화면에서는 뷰포트에 맞춰 축소 */
+  /* 큰 화면: 내용 높이를 유지하되 최대 높이만 뷰포트에 맞춰 제한 */
   width: min(600px, calc(100vw - 40px));
+  max-height: calc(100svh - 40px);
+
+  /* 내부 스크롤을 위해 플렉스 컨테이너 구성 */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 내부 스크롤 컨테이너로 넘김 */
+}
+
+/* 태블릿/모바일: 높이를 더 낮게(약 80vh) 제한 */
+@media (max-width: 1024px) {
+  .sheet {
+    max-height: 80svh;
+  }
 }
 
 .header {
@@ -42,10 +55,13 @@
 .body {
   margin-top: 12px;
   position: relative;
-}
 
-// 탭 패널 표시/숨김 (숨김 상태에서도 측정 가능하도록 레이아웃 제외)
-.tabPanel {
+  /* 내부 스크롤 */
+  flex: 1 1 auto;
+  min-height: 0; /* flex 아이템이 높이를 강제로 늘리지 않도록 */
+  overflow-y: auto;
+  overscroll-behavior: contain; /* 상위로 스크롤 전파 방지 */
+  -webkit-overflow-scrolling: touch; /* iOS 관성 스크롤 */
 }
 
 .tabVisible {
@@ -165,11 +181,102 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 1px solid rgba(0,0,0,0.08);
-  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.9);
   color: #2a2f3a;
   line-height: 20px;
   text-align: center;
   font-weight: 700;
   cursor: pointer;
+}
+
+/* --- Reviews & Map (moved from inline styles) --- */
+.reviewsSection {
+  margin-top: 20px;
+}
+.reviewsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.reviewsTitle {
+  font-size: 16px;
+  font-weight: 700;
+}
+.reviewsMoreBtn {
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+}
+.reviewsLoading,
+.reviewsEmpty {
+  color: #999;
+}
+.reviewsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.reviewItem {
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 12px;
+}
+.reviewMeta {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 6px;
+}
+.reviewContent {
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 6px 0 8px;
+}
+.reviewPhotos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.reviewPhoto {
+  position: relative;
+  padding-bottom: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f6f7f9;
+}
+.reviewPhotoImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mapFrame {
+  margin-top: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: #d9d9d9;
+}
+
+.coverImageBox {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f6f7f9;
+}
+
+.coverImage {
+  display: block;
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
 }
