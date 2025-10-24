@@ -24,22 +24,30 @@ export default function ThemeStep({ value, onChange }: ThemeStepProps) {
       onChange([...(Array.isArray(value) ? value : []), id]);
     }
   };
+
+  const showWarning = Array.isArray(value) && value.length < 2;
+
   return (
-    <div className={styles.themeList}>
-      {themes.map((theme: TripThemesResponse) => (
-        <button
-          key={theme.tripThemeId}
-          type="button"
-          onClick={() => toggleTheme(theme.tripThemeId)}
-          className={
-            Array.isArray(value) && value.includes(theme.tripThemeId)
-              ? `${styles.themeButton} ${styles.selected}`
-              : styles.themeButton
-          }
-        >
-          {theme.tripThemeName}
-        </button>
-      ))}
+    <div className={styles.themeContainer}>
+      <div className={styles.themeList}>
+        {themes.map((theme: TripThemesResponse) => (
+          <button
+            key={theme.tripThemeId}
+            type="button"
+            onClick={() => toggleTheme(theme.tripThemeId)}
+            className={
+              Array.isArray(value) && value.includes(theme.tripThemeId)
+                ? `${styles.themeButton} ${styles.selected}`
+                : styles.themeButton
+            }
+          >
+            {theme.tripThemeName}
+          </button>
+        ))}
+      </div>
+      {showWarning && (
+        <p className={styles.warningText}>테마를 두 개 이상 선택해주세요.</p>
+      )}
     </div>
   );
 }
