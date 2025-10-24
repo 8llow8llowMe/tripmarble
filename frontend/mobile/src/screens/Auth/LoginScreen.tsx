@@ -95,7 +95,7 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   const goToSignUpScreen = () => {
-    navigation.navigate('SignUp');
+    navigation.navigate('SignUpScreen');
   };
 
   return (
@@ -211,14 +211,30 @@ export default function LoginScreen({ navigation }: any) {
         </View>
 
         {/* 소셜 로그인 */}
-        {/* <TouchableOpacity style={styles.naverBtn}>
-          <View style={styles.naverIcon} />
-          <Text style={styles.naverText}>네이버로 로그인</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.appleBtn}>
-          <Ionicons name="logo-apple" size={24} color="#222" />
-          <Text style={styles.appleText}>Apple로 로그인</Text>
-        </TouchableOpacity> */}
+        <View style={{ width: '100%' }}>
+          {/* 네이버 로그인 */}
+          <TouchableOpacity
+            style={styles.naverBtn}
+            onPress={() => navigation.navigate('SocialLoginWebViewScreen', { provider: 'NAVER' })}
+          >
+            <View style={styles.naverIcon} />
+            <Text style={styles.naverText}>네이버로 로그인</Text>
+          </TouchableOpacity>
+
+          {/* 카카오 로그인 */}
+          <TouchableOpacity
+            style={styles.kakaoBtn}
+            onPress={() => navigation.navigate('SocialLoginWebViewScreen', { provider: 'KAKAO' })}
+          >
+            <Image
+              source={{
+                uri: 'https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png',
+              }}
+              style={styles.kakaoIcon}
+            />
+            <Text style={styles.kakaoText}>카카오로 로그인</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* 하단 약관 */}
@@ -330,30 +346,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
     marginHorizontal: 2,
   },
-  naverBtn: {
-    width: '100%',
-    backgroundColor: palette.white,
-    borderWidth: 1,
-    borderColor: '#F2F2F2',
-    borderRadius: 10,
-    paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    justifyContent: 'center',
-  },
-  naverIcon: {
-    width: 24,
-    height: 24,
-    backgroundColor: '#21C208',
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  naverText: {
-    color: '#222',
-    fontWeight: 'bold',
-    fontSize: 17,
-  },
+  // naverBtn: {
+  //   width: '100%',
+  //   backgroundColor: palette.white,
+  //   borderWidth: 1,
+  //   borderColor: '#F2F2F2',
+  //   borderRadius: 10,
+  //   paddingVertical: 16,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   marginBottom: 12,
+  //   justifyContent: 'center',
+  // },
+  // naverIcon: {
+  //   width: 24,
+  //   height: 24,
+  //   backgroundColor: '#21C208',
+  //   borderRadius: 5,
+  //   marginRight: 10,
+  // },
+  // naverText: {
+  //   color: '#222',
+  //   fontWeight: 'bold',
+  //   fontSize: 17,
+  // },
   appleBtn: {
     width: '100%',
     backgroundColor: palette.white,
@@ -389,5 +405,50 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '400',
     marginHorizontal: 2,
+  },
+
+  kakaoBtn: {
+    width: '100%',
+    backgroundColor: '#FEE500',
+    borderRadius: 10,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  kakaoIcon: {
+    width: 22,
+    height: 22,
+    resizeMode: 'contain',
+    marginRight: 10,
+  },
+  kakaoText: {
+    color: '#3C1E1E',
+    fontWeight: 'bold',
+    fontSize: 17,
+  },
+
+  naverBtn: {
+    width: '100%',
+    backgroundColor: '#03C75A',
+    borderRadius: 10,
+    paddingVertical: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  naverIcon: {
+    width: 22,
+    height: 22,
+    backgroundColor: '#fff',
+    borderRadius: 4,
+    marginRight: 10,
+  },
+  naverText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 17,
   },
 });
