@@ -28,6 +28,34 @@ type LoginFormType = {
   password: string;
 };
 
+function SocialButton({
+  onPress,
+  label,
+  icon,
+  testID,
+}: {
+  onPress: () => void;
+  label: string;
+  icon: React.ReactNode;
+  testID?: string;
+}) {
+  return (
+    <TouchableOpacity
+      style={styles.socialBtn}
+      onPress={onPress}
+      testID={testID}
+      activeOpacity={0.8}
+    >
+      <View style={styles.socialInner}>
+        <View style={styles.socialIconBox}>{icon}</View>
+        <Text style={styles.socialText}>{label}</Text>
+        {/* 중앙 정렬 유지용 더미 박스 */}
+        <View style={styles.socialIconBox} />
+      </View>
+    </TouchableOpacity>
+  );
+}
+
 export default function LoginScreen({ navigation }: any) {
   const {
     control,
@@ -106,6 +134,8 @@ export default function LoginScreen({ navigation }: any) {
       <View style={styles.content}>
         {/* 로고 */}
         <Image source={logo} style={styles.logo} />
+        <Text style={styles.slogan}>TripMarble</Text>
+
         {/* 슬로건 */}
         <Text style={styles.slogan}>FIND YOUR NEXT DESTINATION!</Text>
 
@@ -212,28 +242,30 @@ export default function LoginScreen({ navigation }: any) {
 
         {/* 소셜 로그인 */}
         <View style={{ width: '100%' }}>
-          {/* 네이버 로그인 */}
-          <TouchableOpacity
-            style={styles.naverBtn}
+          <SocialButton
+            testID="naver-login"
+            label="네이버로 로그인"
             onPress={() => navigation.navigate('SocialLoginWebViewScreen', { provider: 'NAVER' })}
-          >
-            <View style={styles.naverIcon} />
-            <Text style={styles.naverText}>네이버로 로그인</Text>
-          </TouchableOpacity>
+            icon={
+              <View style={[styles.brandSquare, { backgroundColor: '#03C75A' }]}>
+                <Text style={styles.brandLetter}>N</Text>
+              </View>
+            }
+          />
 
-          {/* 카카오 로그인 */}
-          <TouchableOpacity
-            style={styles.kakaoBtn}
+          <SocialButton
+            testID="kakao-login"
+            label="카카오로 로그인"
             onPress={() => navigation.navigate('SocialLoginWebViewScreen', { provider: 'KAKAO' })}
-          >
-            <Image
-              source={{
-                uri: 'https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png',
-              }}
-              style={styles.kakaoIcon}
-            />
-            <Text style={styles.kakaoText}>카카오로 로그인</Text>
-          </TouchableOpacity>
+            icon={
+              <Image
+                source={{
+                  uri: 'https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_small.png',
+                }}
+                style={styles.brandImage}
+              />
+            }
+          />
         </View>
       </View>
 
@@ -325,8 +357,8 @@ const styles = StyleSheet.create({
   },
   loginBtnText: {
     color: palette.white,
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
   },
   helpRow: {
     flexDirection: 'row',
@@ -346,48 +378,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
     marginHorizontal: 2,
   },
-  // naverBtn: {
-  //   width: '100%',
-  //   backgroundColor: palette.white,
-  //   borderWidth: 1,
-  //   borderColor: '#F2F2F2',
-  //   borderRadius: 10,
-  //   paddingVertical: 16,
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginBottom: 12,
-  //   justifyContent: 'center',
-  // },
-  // naverIcon: {
-  //   width: 24,
-  //   height: 24,
-  //   backgroundColor: '#21C208',
-  //   borderRadius: 5,
-  //   marginRight: 10,
-  // },
-  // naverText: {
-  //   color: '#222',
-  //   fontWeight: 'bold',
-  //   fontSize: 17,
-  // },
-  appleBtn: {
-    width: '100%',
-    backgroundColor: palette.white,
-    borderWidth: 1,
-    borderColor: '#F2F2F2',
-    borderRadius: 10,
-    paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  appleText: {
-    color: '#222',
-    fontWeight: 'bold',
-    fontSize: 17,
-    marginLeft: 8,
-  },
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -407,48 +398,50 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
 
-  kakaoBtn: {
+  /* --- 소셜 공통 버튼(KREAM 스타일) --- */
+  socialBtn: {
     width: '100%',
-    backgroundColor: '#FEE500',
-    borderRadius: 10,
-    paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EDEDED',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
     marginBottom: 12,
   },
-  kakaoIcon: {
-    width: 22,
-    height: 22,
+  socialInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // justifyContent: 'center', // 텍스트 정확히 가운데
+  },
+  socialIconBox: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
+  },
+  brandSquare: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandLetter: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+    fontSize: 14,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  brandImage: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
     resizeMode: 'contain',
-    marginRight: 10,
   },
-  kakaoText: {
-    color: '#3C1E1E',
-    fontWeight: 'bold',
-    fontSize: 17,
-  },
-
-  naverBtn: {
-    width: '100%',
-    backgroundColor: '#03C75A',
-    borderRadius: 10,
-    paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  naverIcon: {
-    width: 22,
-    height: 22,
-    backgroundColor: '#fff',
-    borderRadius: 4,
-    marginRight: 10,
-  },
-  naverText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 17,
+  socialText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#222222',
   },
 });
