@@ -42,7 +42,7 @@ const dummySpot: TripSpotDetailResponse[] = [
     longitude: 0,
     latitude: 0,
     imageUrl: "/images/no-image.png",
-    thumbnailImageUrl: "/images/no-image.png",
+    originalImageUrl: "/images/no-image.png",
   },
   {
     tripSpotId: 2,
@@ -57,7 +57,7 @@ const dummySpot: TripSpotDetailResponse[] = [
     longitude: 0,
     latitude: 0,
     imageUrl: "/images/no-image.png",
-    thumbnailImageUrl: "/images/no-image.png",
+    originalImageUrl: "/images/no-image.png",
   },
   {
     tripSpotId: 3,
@@ -72,7 +72,7 @@ const dummySpot: TripSpotDetailResponse[] = [
     longitude: 0,
     latitude: 0,
     imageUrl: "/images/no-image.png",
-    thumbnailImageUrl: "/images/no-image.png",
+    originalImageUrl: "/images/no-image.png",
   },
   {
     tripSpotId: 4,
@@ -87,7 +87,7 @@ const dummySpot: TripSpotDetailResponse[] = [
     longitude: 0,
     latitude: 0,
     imageUrl: "/images/no-image.png",
-    thumbnailImageUrl: "/images/no-image.png",
+    originalImageUrl: "/images/no-image.png",
   },
   {
     tripSpotId: 5,
@@ -102,7 +102,7 @@ const dummySpot: TripSpotDetailResponse[] = [
     longitude: 0,
     latitude: 0,
     imageUrl: "/images/no-image.png",
-    thumbnailImageUrl: "/images/no-image.png",
+    originalImageUrl: "/images/no-image.png",
   },
 ];
 
@@ -168,7 +168,7 @@ export default function TripSpotDetail({ params }: Props) {
       longitude: (fetched as any).longitude ?? 0,
       latitude: (fetched as any).latitude ?? 0,
       imageUrl: (fetched as any).imageUrl ?? "/images/no-image.png",
-      thumbnailImageUrl:
+      originalImageUrl:
         (fetched as any).originalImageUrl ??
         (fetched as any).imageUrl ??
         "/images/no-image.png",
@@ -178,7 +178,7 @@ export default function TripSpotDetail({ params }: Props) {
   }, [spotResponse]);
 
   const coverImage =
-    spot.thumbnailImageUrl || spot.imageUrl || "/images/no-image.png";
+    spot.originalImageUrl || spot.imageUrl || "/images/no-image.png";
 
   const summary = summaryResponse?.data?.dataBody;
   const totalReviews = summary?.totalCount ?? 0;
