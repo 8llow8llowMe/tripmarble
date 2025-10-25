@@ -1,14 +1,15 @@
-package com.followfollowme.tripmarble.domainlayer.review.adapter.out;
+package com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence;
 
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.TripSpotReviewPhotoEntity;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.repository.TripSpotReviewPhotoRepository;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.entity.TripSpotReviewPhotoEntity;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.repository.TripSpotReviewPhotoRepository;
 import com.followfollowme.tripmarble.domainlayer.review.application.mapper.TripSpotReviewPhotoMapper;
 import com.followfollowme.tripmarble.domainlayer.review.application.port.out.TripSpotReviewPhotoRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReview;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReviewPhoto;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor

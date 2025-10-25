@@ -1,24 +1,25 @@
-package com.followfollowme.tripmarble.domainlayer.review.adapter.out.repository.custom;
+package com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.repository.custom;
 
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.QTripSpotReviewEntity;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.QTripSpotReviewPhotoEntity;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.TripSpotReviewEntity;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewPhotoProjection;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewRatingDistributionProjection;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewSummaryProjection;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.entity.TripSpotReviewEntity;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewPhotoProjection;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewRatingDistributionProjection;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewSummaryProjection;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.enums.ReviewSourceType;
 import com.followfollowme.tripmarble.persistence.enums.OrderType;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -47,7 +48,7 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
 
     @Override
     public List<TripSpotReviewRatingDistributionProjection> findRatingDistributionByTripSpotId(long tripSpotId,
-        ReviewSourceType sourceType) {
+                                                                                               ReviewSourceType sourceType) {
         QTripSpotReviewEntity r = QTripSpotReviewEntity.tripSpotReviewEntity;
         return queryFactory
             .select(Projections.constructor(TripSpotReviewRatingDistributionProjection.class,
@@ -128,7 +129,7 @@ public class TripSpotReviewCustomRepositoryImpl implements TripSpotReviewCustomR
 
     @Override
     public Slice<TripSpotReviewEntity> findReviewsNoOffsetByMemberId(long memberId, ReviewSourceType sourceType, long lastReviewId,
-        int size, OrderType orderType) {
+                                                                     int size, OrderType orderType) {
         QTripSpotReviewEntity r = QTripSpotReviewEntity.tripSpotReviewEntity;
 
         // 1. No-Offset 조건 준비

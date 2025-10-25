@@ -1,6 +1,6 @@
 package com.followfollowme.tripmarble.domainlayer.review.application.mapper;
 
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.TripSpotReviewEntity;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.entity.TripSpotReviewEntity;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReview;
 import com.followfollowme.tripmarble.domainlayer.trip.application.mapper.TripSpotMapper;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;

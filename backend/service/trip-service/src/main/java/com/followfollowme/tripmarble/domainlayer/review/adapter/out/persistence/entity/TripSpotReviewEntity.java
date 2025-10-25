@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity;
+package com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.entity;
 
 
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.enums.ReviewSourceType;
