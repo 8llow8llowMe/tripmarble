@@ -1,11 +1,12 @@
 package com.followfollowme.tripmarble.domainlayer.review.application.mapper;
 
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.TripSpotReviewPhotoEntity;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.entity.TripSpotReviewPhotoEntity;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReview;
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotReviewPhoto;
-import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring", uses = TripSpotReviewMapper.class)
 public interface TripSpotReviewPhotoMapper {
