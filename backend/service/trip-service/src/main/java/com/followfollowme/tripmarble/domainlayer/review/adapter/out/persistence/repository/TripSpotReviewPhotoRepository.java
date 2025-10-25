@@ -1,9 +1,10 @@
-package com.followfollowme.tripmarble.domainlayer.review.adapter.out.repository;
+package com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.repository;
 
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.TripSpotReviewPhotoEntity;
-import java.util.List;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.entity.TripSpotReviewPhotoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 public interface TripSpotReviewPhotoRepository extends JpaRepository<TripSpotReviewPhotoEntity, Long> {
 
