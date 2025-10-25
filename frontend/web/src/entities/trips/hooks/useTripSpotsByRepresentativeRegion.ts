@@ -8,6 +8,8 @@ export interface TripSpot {
   contentId: number;
   tripSpotName: string;
   originalImageUrl: string;
+  latitude?: number | string;
+  longitude?: number | string;
 }
 export interface TripSpotsResponse {
   dataHeader: dataHeader;
