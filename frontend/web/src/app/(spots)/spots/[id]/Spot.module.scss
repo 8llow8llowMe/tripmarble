@@ -1,110 +1,844 @@
-.spotContainer {
-  padding: 32px;
+/* =====================
+   Mobile bottom sheet
+   ===================== */
+.mobileSheet {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50; /* above panels */
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+.mobileSheetOpen {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.spotHeader {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  gap: 2rem;
-  padding: 0 0 32px 0;
-}
-.spotFilter {
-  display: flex;
-  gap: 2rem;
-  padding: 0 0 32px 0;
+.mobileSheetBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 16, 30, 0.35);
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
-.mainImageWrapper {
-  position: relative;
-  width: 50%;
-  max-width: 800px;
-  aspect-ratio: 3 / 2; // 예: 600x400이면 3:2
-  border-radius: 12px;
+.mobileSheetOpen .mobileSheetBackdrop {
+  opacity: 1;
+}
+
+.mobileSheetBody {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 50vh; /* 중간까지 올라옴 */
+  background: #fff;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -20px 40px rgba(15, 22, 35, 0.22);
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
-@media (max-width: 684px) {
-  .spotHeader {
-    flex-direction: column;
+.mobileSheetOpen .mobileSheetBody {
+  transform: translateY(0);
+}
+
+.mobileSheetHandle {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  background: #c7cfdb;
+  border: none;
+}
+
+@media (max-width: 800px) {
+  .detailPanel {
+    display: none;
   }
-  .mainImageWrapper {
-    width: 100%;
+  .listPanel {
+    padding-bottom: 16px;
   }
 }
-
-.mainImage {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
-.regionContent {
-  flex: 1;
+.regionHeader {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.regionTitle {
-  display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
-.title {
-  font-size: clamp(1.6rem, 3.4vw, 2.2rem);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+/* 상단(inline) 토글 버튼은 더 컴팩트하게 */
+.inlineToggle {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+/* 하단(close) 버튼은 기존 크기 유지, 왼쪽 정렬 */
+.blockToggle {
+  align-self: flex-start;
+  margin-top: 6px;
+}
+@mixin glassPanel {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(18px);
+  border-radius: 24px;
+  box-shadow: 0 24px 48px rgba(15, 22, 35, 0.16);
+}
+
+.spotPage {
+  position: relative;
+  width: 100%;
+  height: 87vh;
+  overflow: hidden;
   color: #0f1623;
 }
 
-.description {
-  font-size: clamp(1rem, 1.4vw, 1.125rem);
-  color: #455468;
-  line-height: 1.75;
-}
-
-.contentGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-  gap: 1.5rem;
-}
-
-.contentCard {
+.mapCanvas {
+  position: fixed;
+  inset: 0;
   width: 100%;
-  height: 15rem;
-  background-color: #f7f7f7;
-  border-radius: 12px;
-  border: 2px solid #eeeeee;
-  overflow: hidden;
+  height: 100%;
+  z-index: 0;
+}
+
+.panels {
   position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+  width: min(52vw, 760px);
+  min-width: 560px;
+  height: 100%;
+  padding: 0px 24px;
+  pointer-events: none;
+}
+
+.listPanel,
+.detailPanel {
+  pointer-events: auto;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-.cardImage {
-  position: relative;
-  flex: 1;
+.detailPanel {
+  overflow: hidden;
 }
 
-.cardImageImg {
+.listPanel {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.listPanel {
+  @include glassPanel;
+  flex: 0 0 25vw;
+  min-width: 260px;
+  max-width: 340px;
+}
+
+.detailPanel {
+  @include glassPanel;
+  flex: 0 0 25vw;
+  min-width: 280px;
+  max-width: 360px;
+}
+
+.regionSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 20px 20px 0;
+}
+
+.regionImage {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 18px;
+  object-fit: cover;
+  background: #e3e8f1;
+}
+
+.regionText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.regionTitle {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 800;
+  color: #0f1623;
+}
+
+.regionDescription {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #4a586b;
+}
+
+.toggleDescBtn {
+  align-self: flex-start;
+  padding: 8px 12px;
+  border: 1px solid rgba(15, 22, 35, 0.12);
+  background: #ffffff;
+  color: #13203c;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+
+  &:hover {
+    background: #f7f9fc;
+    box-shadow: 0 6px 18px rgba(15, 22, 35, 0.08);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(15, 22, 35, 0.12);
+  }
+}
+
+.filterSection {
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(15, 22, 35, 0.08);
+  padding: 0 20px 12px;
+  :global(.filterWrap) {
+    gap: 8px;
+  }
+}
+
+.listContent {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible;
+  padding: 0 6px 0 20px;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease,
+    background 0.2s ease;
+  text-align: left;
+  color: inherit;
+}
+
+.listItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 22, 35, 0.14);
+}
+
+.listItemActive {
+  border-color: rgba(62, 117, 255, 0.65);
+  background: rgba(62, 117, 255, 0.12);
+  box-shadow: 0 16px 32px rgba(62, 117, 255, 0.24);
+}
+
+.listItemImage {
+  flex: 0 0 62px;
+  width: 62px;
+  height: 62px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #e3e8f1;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.listItemBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.listItemName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #131f36;
+}
+
+.listItemHint {
+  font-size: 0.85rem;
+  color: #5a6a86;
+}
+
+.listFallback,
+.listLoader,
+.listEnd {
+  padding: 18px 12px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #4a586b;
+}
+
+.listSentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.detailContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  padding-right: 6px;
+  min-height: 0;
+  padding: 22px 20px;
+}
+
+.detailPlaceholder {
+  padding: 32px 12px;
+  text-align: center;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: #5a6a86;
+}
+
+.detailHero {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #e3e8f1;
+  flex: 0 0 auto;
+}
+
+.detailHero img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.cardTitle {
+.detailPrimary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detailBadge {
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(62, 117, 255, 0.12);
+  color: #3e75ff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.detailTitle {
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-weight: 800;
+  color: #13203c;
+}
+
+.reviewSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(62, 117, 255, 0.12),
+    rgba(62, 117, 255, 0.06)
+  );
+}
+
+.summaryPlaceholder {
+  font-size: 0.92rem;
+  color: #5a6a86;
+}
+
+.summaryStats {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.averageRating {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2f57ff;
+}
+
+.totalCount {
+  font-size: 0.9rem;
+  color: #465269;
+}
+
+.ratingDistribution {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #455066;
+}
+
+.ratingDistributionItem {
+  display: flex;
+  justify-content: space-between;
+}
+
+.samplePhotos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.samplePhoto {
+  width: 58px;
+  height: 58px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #e3e8f1;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.tabSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tabList {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid rgba(19, 32, 60, 0.08);
+}
+
+.tabButton {
+  border: none;
+  background: transparent;
+  padding: 10px 4px;
   font-size: 0.95rem;
+  font-weight: 600;
+  color: #5a6a86;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.tabButton:hover {
+  color: #3e75ff;
+}
+
+.activeTab {
+  color: #13203c;
+  border-bottom-color: #3e75ff;
+}
+
+.tabPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 160px;
+}
+
+.detailInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.infoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.infoRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #5a6a86;
+  letter-spacing: 0.04em;
+}
+
+.infoValue {
+  font-size: 0.97rem;
+  color: #13203c;
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 4px;
+  }
+}
+
+.detailDescription {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: #2b374d;
+  white-space: pre-line;
+}
+
+.detailActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.scheduleButton {
+  padding: 13px 18px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(62, 117, 255, 0.18);
+  color: #264cff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.scheduleButton:hover {
+  background: rgba(62, 117, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.detailLink {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #3e75ff, #7b9bff);
+  color: #fff;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.detailLink:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 32px rgba(62, 117, 255, 0.32);
+}
+
+.reviewContent {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.reviewTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #13203c;
+}
+
+.reviewButton {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(62, 117, 255, 0.16);
+  color: #2f57ff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.reviewButton:hover {
+  background: rgba(62, 117, 255, 0.24);
+  transform: translateY(-1px);
+}
+
+.reviewList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0;
+  margin: 0;
+}
+
+.reviewCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(19, 32, 60, 0.04);
+}
+
+.reviewMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #465269;
+}
+
+.reviewRating {
+  font-weight: 700;
+  color: #264cff;
+}
+
+.reviewSource {
   font-weight: 500;
-  text-align: center;
-  padding: 0.5rem;
-  background-color: #fff;
+  color: #5a6a86;
+}
+
+.reviewText {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #2b374d;
+}
+
+.reviewPhotos {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.reviewPhoto {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #e3e8f1;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.loadMoreButton {
+  align-self: center;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(62, 117, 255, 0.16);
+  color: #2f57ff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.loadMoreButton:hover {
+  background: rgba(62, 117, 255, 0.24);
+  transform: translateY(-1px);
+}
+
+.loadMoreButton:disabled {
+  opacity: 0.6;
+  cursor: default;
+  transform: none;
+}
+
+@media (max-width: 1320px) {
+  .panels {
+    width: min(60vw, 760px);
+  }
+}
+
+// @media (max-width: 1100px) {
+//   .spotPage {
+//     height: auto;
+//     min-height: 100vh;
+//   }
+
+//   .mapCanvas {
+//     position: absolute;
+//     height: 60%;
+//   }
+
+//   .panels {
+//     position: relative;
+//     flex-direction: column;
+//     width: 100%;
+//     min-width: 0;
+//     gap: 18px;
+//     padding: 0px 20px;
+//     pointer-events: auto;
+//   }
+
+//   .listPanel,
+//   .detailPanel {
+//     max-width: none;
+//     width: 100%;
+//   }
+
+//   .listPanel,
+//   .detailPanel,
+//   .detailContent,
+//   .listContent {
+//     height: auto;
+//     max-height: none;
+//   }
+// }
+
+@media (max-width: 720px) {
+  .panels {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .listPanel,
+  .detailPanel {
+    padding: 18px;
+  }
+
+  .regionImage {
+    aspect-ratio: 3 / 2;
+  }
+}
+
+.detailCloseBtn {
+  position: sticky; /* stays visible while scrolling content */
+  top: 10px;
+  align-self: flex-end;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 22, 35, 0.12);
+  background: #ffffff;
+  color: #0f1623;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(15, 22, 35, 0.12);
+  transition: transform 0.12s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.detailCloseBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 22, 35, 0.18);
+}
+.detailCloseBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(15, 22, 35, 0.16);
+}
+.detailWrap {
+  flex: 0 0 auto;
+  width: 0;
+  overflow: hidden;
+  transition: width 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.detailWrapClosed {
+  width: 0;
+  pointer-events: none;
+}
+.detailWrapOpen {
+  width: 25vw;
+  min-width: 280px;
+  max-width: 360px;
+}
+/* Panel interior slide/opacity */
+.detailWrap .detailPanel {
+  opacity: 0;
+  transform: translateX(-16px);
+  transition: opacity 0.25s ease,
+    transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.detailWrapOpen .detailPanel {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (max-width: 800px) {
+  .detailWrap {
+    display: none;
+  }
+}
+
+@media (max-width: 800px) {
+  /* Page sizing: allow the whole page to extend beyond 100vh and stack content */
+  .spotPage {
+    /* Keep page height tied to viewport minus header and create a fixed top space for the map */
+    --header-h: 72px;
+    height: calc(100vh - var(--header-h));
+    overflow: hidden;
+    padding-top: 44vh; /* reserve space for the fixed map so panels don't jump */
+  }
+
+  /* Panels stack and start around the middle so the list occupies mid→bottom */
+  .panels {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    gap: 14px;
+    padding: 0 16px 16px;
+    margin-top: 0; /* panels are anchored by spotPage padding-top */
+    pointer-events: auto;
+  }
+
+  /* Only show list panel on mobile (detailWrap is hidden above) */
+  .listPanel {
+    flex: 1 1 auto;
+    max-width: none;
+    width: 100%;
+    padding: 18px;
+    /* viewport minus header minus reserved map space */
+    max-height: calc(100vh - var(--header-h) - 44vh);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Make sure the list content never over-expands horizontally */
+  .listContent {
+    padding: 0 4px 0 6px;
+  }
+
+  .regionImage {
+    display: none;
+  }
 }
