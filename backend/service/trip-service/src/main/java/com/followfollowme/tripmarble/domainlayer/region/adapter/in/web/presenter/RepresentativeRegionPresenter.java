@@ -6,6 +6,7 @@ import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.Repre
 import com.followfollowme.tripmarble.domainlayer.region.application.info.RepresentativeRegionDetailInfo;
 import com.followfollowme.tripmarble.domainlayer.region.application.info.RepresentativeRegionSearchInfo;
 import com.followfollowme.tripmarble.domainlayer.region.application.info.RepresentativeRegionSummaryInfo;
+import com.followfollowme.tripmarble.domainlayer.region.application.util.GeoJsonParserUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class RepresentativeRegionPresenter {
             .description(info.description())
             .longitude(info.longitude())
             .latitude(info.latitude())
-            .boundaryGeoJson(info.boundaryGeoJson())
+            .boundaryGeoJsonItem(GeoJsonParserUtil.parse(info.boundaryGeoJson()))
             .build();
     }
 
