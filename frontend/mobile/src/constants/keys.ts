@@ -34,6 +34,12 @@ const QUERY_KEY = {
     MOVE_LOGS: 'moveLogs',
     MOVE_LOGS_SUCCESS: 'moveLogsSuccess',
   },
+
+  REVIEW: {
+    LIST_REVIEWS: 'reviewsList',
+    DETAIL: 'reviewDetail',
+    SUMMARY: 'reviewSummary',
+  },
 };
 
 export { STORAGE_KEY, QUERY_KEY };
