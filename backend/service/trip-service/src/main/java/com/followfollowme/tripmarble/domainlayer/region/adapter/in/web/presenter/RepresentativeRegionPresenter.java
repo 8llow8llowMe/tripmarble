@@ -33,6 +33,9 @@ public class RepresentativeRegionPresenter {
             .representativeRegionName(info.representativeRegionName())
             .representativeRegionImageUrl(info.representativeRegionImageUrl())
             .description(info.description())
+            .longitude(info.longitude())
+            .latitude(info.latitude())
+            .boundaryGeoJson(info.boundaryGeoJson())
             .build();
     }
 
