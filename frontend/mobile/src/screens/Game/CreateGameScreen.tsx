@@ -225,7 +225,7 @@ export default function CreateGameScreen() {
       {/* 헤더 */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={28} color="#555" />
+          <Ionicons name="arrow-back" size={24} color="#555" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>게임 만들기</Text>
         <TouchableOpacity onPress={handleCreate} disabled={!isFormValid}>
