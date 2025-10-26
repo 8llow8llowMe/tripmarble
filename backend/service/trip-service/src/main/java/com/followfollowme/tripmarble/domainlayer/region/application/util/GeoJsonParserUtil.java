@@ -1,12 +1,15 @@
 package com.followfollowme.tripmarble.domainlayer.region.application.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionDetailResponse.BoundaryGeoJsonItem;
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionDetailResponse.CoordinateGroupItem;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,65 +17,86 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GeoJsonParserUtil {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final JsonFactory factory = new JsonFactory();
 
     public static BoundaryGeoJsonItem parse(String json) {
         if (json == null || json.isBlank())
             return null;
 
-        try {
-            JsonNode root = mapper.readTree(json);
-            String type = root.path("type").asText();
-            JsonNode coordsNode = root.path("coordinates");
+        String type = null;
+        List<CoordinateGroupItem> coordinateGroups = new ArrayList<>();
 
-            List<CoordinateGroupItem> coordinateGroups = extractCoordinateGroups(type, coordsNode);
+        try (JsonParser parser = factory.createParser(new StringReader(json))) {
+
+            // 루트 객체 탐색
+            while (!parser.isClosed() && parser.nextToken() != null) {
+                String fieldName = parser.currentName();
+                if ("type".equals(fieldName)) {
+                    parser.nextToken();
+                    type = parser.getText();
+                } else if ("coordinates".equals(fieldName)) {
+                    parser.nextToken();
+                    coordinateGroups = readCoordinates(parser, type);
+                }
+            }
 
             return BoundaryGeoJsonItem.builder()
                 .type(type)
                 .coordinates(coordinateGroups)
                 .build();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             return null;
         }
     }
 
-    private static List<CoordinateGroupItem> extractCoordinateGroups(String type, JsonNode coordsNode) {
+    private static List<CoordinateGroupItem> readCoordinates(JsonParser parser, String type) throws IOException {
         List<CoordinateGroupItem> groups = new ArrayList<>();
-        if (!coordsNode.isArray())
+
+        if (!parser.isExpectedStartArrayToken())
             return groups;
 
-        for (JsonNode groupNode : coordsNode) {
-            JsonNode ringNode = extractRingNode(type, groupNode);
-            List<List<Double>> points = parsePointsFromRing(ringNode);
-            if (!points.isEmpty()) {
-                points = normalizePolygonRing(points);
+        // Polygon → [ [ [x,y], [x,y], ... ] ]
+        // MultiPolygon → [ [ [ [x,y], ... ] ], [ [x,y], ... ] ]
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            if (parser.currentToken() == JsonToken.START_ARRAY) {
+                List<List<Double>> points = readPolygonPoints(parser, type);
+                if (!points.isEmpty()) {
+                    points = normalizePolygonRing(points);
+                }
+                groups.add(CoordinateGroupItem.builder().points(points).build());
             }
-            groups.add(CoordinateGroupItem.builder().points(points).build());
         }
         return groups;
     }
 
-    private static JsonNode extractRingNode(String type, JsonNode groupNode) {
-        if (type.equalsIgnoreCase("Polygon")) {
-            return groupNode;
-        }
-        if (type.equalsIgnoreCase("MultiPolygon")) {
-            return groupNode.get(0);
-        }
-        return null;
-    }
-
-    private static List<List<Double>> parsePointsFromRing(JsonNode ringNode) {
+    private static List<List<Double>> readPolygonPoints(JsonParser parser, String type) throws IOException {
         List<List<Double>> points = new ArrayList<>();
-        if (ringNode == null || !ringNode.isArray())
-            return points;
 
-        for (JsonNode pointNode : ringNode) {
-            if (pointNode.isArray() && pointNode.size() == 2) {
-                points.add(List.of(pointNode.get(0).asDouble(), pointNode.get(1).asDouble()));
+        // MultiPolygon의 경우 내부 중첩이 한 단계 더 깊음
+        if ("MultiPolygon".equalsIgnoreCase(type)) {
+            parser.nextToken(); // START_ARRAY (outer polygon)
+        }
+
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            if (parser.currentToken() == JsonToken.START_ARRAY) {
+                List<Double> point = new ArrayList<>(2);
+                parser.nextToken(); // X
+                point.add(parser.getDoubleValue());
+                parser.nextToken(); // Y
+                point.add(parser.getDoubleValue());
+                points.add(point);
+
+                // 배열 닫기
+                parser.nextToken(); // END_ARRAY
             }
         }
+
+        // MultiPolygon이면 한 단계 닫기
+        if ("MultiPolygon".equalsIgnoreCase(type)) {
+            parser.nextToken(); // END_ARRAY
+        }
+
         return points;
     }
 
@@ -81,8 +105,10 @@ public class GeoJsonParserUtil {
             return points;
 
         List<List<Double>> normalized = new ArrayList<>(points);
-        if (!points.getFirst().equals(points.getLast())) {
-            normalized.add(points.getFirst());
+        List<Double> first = points.get(0);
+        List<Double> last = points.get(points.size() - 1);
+        if (!first.equals(last)) {
+            normalized.add(new ArrayList<>(first));
         }
 
         double area = calculateSignedArea(normalized);
