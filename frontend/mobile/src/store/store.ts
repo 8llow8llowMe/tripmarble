@@ -15,17 +15,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import authReducer from '@/store/redux/auth/auth';
 import userReducer from '@/store/redux/user/user';
 import networkReducer from '@/store/redux/network/network';
+import recentQueryReducer from '@/store/redux/search/recentQuery';
 
 const rootReducer = combineReducers({
   authReducer,
   userReducer,
   networkReducer,
+  recentQueryReducer,
 });
 
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['authReducer', 'userReducer'],
+  whitelist: ['authReducer', 'userReducer', 'recentQueryReducer'],
   blacklist: [],
 };
 
