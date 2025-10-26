@@ -5,12 +5,18 @@ import { useQuery } from "@tanstack/react-query";
 export const getTripSpotById = (tripSpotId: string) =>
   apiClient.get(`/trip-spots/${tripSpotId}`);
 
-const useTripSpotById = (tripSpotId: string) => {
-  const { data, isLoading, isError } = useQuery({
+const useTripSpotById = (tripSpotId?: string) => {
+  const query = useQuery({
     queryKey: ["tripSpotId", tripSpotId],
-    queryFn: () => getTripSpotById(tripSpotId),
+    queryFn: () => getTripSpotById(String(tripSpotId)),
+    enabled: !!tripSpotId,
   });
-  return { data, isLoading, isError };
+
+  return {
+    data: query.data,
+    isLoading: query.isLoading && !!tripSpotId,
+    isError: query.isError,
+  };
 };
 
 export default useTripSpotById;

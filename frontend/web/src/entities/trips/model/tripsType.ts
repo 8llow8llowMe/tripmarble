@@ -17,5 +17,5 @@ export interface TripSpotDetailResponse {
   longitude: number;
   latitude: number;
   imageUrl: string;
-  thumbnailImageUrl: string;
+  originalImageUrl: string;
 }

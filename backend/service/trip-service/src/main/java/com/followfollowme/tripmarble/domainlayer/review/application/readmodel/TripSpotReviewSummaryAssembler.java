@@ -1,10 +1,11 @@
 package com.followfollowme.tripmarble.domainlayer.review.application.readmodel;
 
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewPhotoProjection;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewRatingDistributionProjection;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewSummaryProjection;
-import java.util.List;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewPhotoProjection;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewRatingDistributionProjection;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewSummaryProjection;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class TripSpotReviewSummaryAssembler {

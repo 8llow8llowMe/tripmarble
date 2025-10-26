@@ -55,7 +55,7 @@ export default function SpotDetailScreen({ route }: Props) {
     phoneNumber: '064-783-0959',
     address: '제주특별자치도 서귀포시 성산읍 성산리 78',
     addressDetail: '임시주소',
-    thumbnailImageUrl: 'http://tong.visitkorea.or.kr/cms/resource/82/2944282_image2_1.bmp',
+    originalImageUrl: 'http://tong.visitkorea.or.kr/cms/resource/82/2944282_image2_1.bmp',
   };
 
   const reviews = [
@@ -82,9 +82,9 @@ export default function SpotDetailScreen({ route }: Props) {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* 대표 이미지 */}
         <View style={styles.imageWrapper}>
-          {/* {data.thumbnailImageUrl ? (
+          {/* {data.originalImageUrl ? (
             <Image
-              source={{ uri: data.thumbnailImageUrl }}
+              source={{ uri: data.originalImageUrl }}
               style={styles.mainImage}
               resizeMode="cover"
             />

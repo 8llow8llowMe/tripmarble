@@ -1,10 +1,10 @@
-package com.followfollowme.tripmarble.domainlayer.review.adapter.out;
+package com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence;
 
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.TripSpotReviewEntity;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewPhotoProjection;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewRatingDistributionProjection;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.projection.TripSpotReviewSummaryProjection;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.repository.TripSpotReviewRepository;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.entity.TripSpotReviewEntity;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewPhotoProjection;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewRatingDistributionProjection;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewSummaryProjection;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.repository.TripSpotReviewRepository;
 import com.followfollowme.tripmarble.domainlayer.review.application.mapper.TripSpotReviewMapper;
 import com.followfollowme.tripmarble.domainlayer.review.application.port.out.TripSpotReviewRepositoryPort;
 import com.followfollowme.tripmarble.domainlayer.review.application.readmodel.TripSpotReviewSummary;
@@ -13,11 +13,12 @@ import com.followfollowme.tripmarble.domainlayer.review.domain.model.TripSpotRev
 import com.followfollowme.tripmarble.domainlayer.review.domain.model.enums.ReviewSourceType;
 import com.followfollowme.tripmarble.domainlayer.trip.domain.model.TripSpot;
 import com.followfollowme.tripmarble.persistence.enums.OrderType;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor

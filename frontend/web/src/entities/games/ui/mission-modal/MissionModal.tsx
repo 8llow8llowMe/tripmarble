@@ -92,23 +92,17 @@ export default function MissionModal({
       longitude: (fetched as any).longitude ?? 0,
       latitude: (fetched as any).latitude ?? 0,
       imageUrl: (fetched as any).imageUrl ?? "/images/no-image.png",
-      thumbnailImageUrl:
+      originalImageUrl:
         (fetched as any).originalImageUrl ??
         (fetched as any).imageUrl ??
         "/images/no-image.png",
-      originalImageUrl: (fetched as any).originalImageUrl,
     };
 
     return normalized;
   }, [spotResponse]);
 
   const coverImage = useMemo(() => {
-    return (
-      spotDetail?.originalImageUrl ||
-      spotDetail?.thumbnailImageUrl ||
-      spotDetail?.imageUrl ||
-      undefined
-    );
+    return spotDetail?.originalImageUrl || spotDetail?.imageUrl || undefined;
   }, [spotDetail]);
 
   const {

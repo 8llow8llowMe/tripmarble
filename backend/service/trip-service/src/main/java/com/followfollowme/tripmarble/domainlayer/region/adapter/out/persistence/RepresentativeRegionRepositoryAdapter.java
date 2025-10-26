@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RepresentativeRepositoryAdapter implements RepresentativeRegionRepositoryPort {
+public class RepresentativeRegionRepositoryAdapter implements RepresentativeRegionRepositoryPort {
 
     private final RepresentativeRegionRepository representativeRegionRepository;
     private final RepresentativeRegionMapper representativeRegionMapper;
