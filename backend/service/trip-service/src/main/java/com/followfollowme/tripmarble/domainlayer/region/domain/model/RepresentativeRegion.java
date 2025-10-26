@@ -4,10 +4,13 @@ import lombok.Builder;
 
 @Builder
 public record RepresentativeRegion(
-    Long id,
+    long id,
     String name,
     String imageUrl,
-    String description
+    String description,
+    double latitude,
+    double longitude,
+    String boundaryGeoJson
 ) {
 
 }
