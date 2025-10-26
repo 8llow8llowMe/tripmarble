@@ -1,24 +1,18 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import TextBox from '@/components/atom/TextBox';
 import { palette } from '@/constants/colors';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
-import {
-  ContinueTripSection,
-  FriendsBannerSection,
-  HistorySection,
-  RandomPickSection,
-  RecommendedPlacesSection,
-} from '@/components/ui/home';
+import { ContinueTripSection, RecommendedPlacesSection } from '@/components/ui/home';
 import GameSummaryBanner from '@/components/common/banner/GameSummaryBanner';
 import { useGameLists } from '@/hooks/game/useGameList';
 import { useAppSelector } from '@/store/store';
 import useTripSpotQuery from '@/hooks/trip/useSpot';
-import { DUMMY_FRIENDS, DUMMY_PLACES, DUMMY_RANDOM_PICK } from '@/constants/dummyData';
+import { DUMMY_PLACES } from '@/constants/dummyData';
 import { Ionicons } from '@expo/vector-icons';
+import SafeAreaScreen from '@/components/layout/SafeAreaScreen';
 
 // 공통 그림자
 const shadow = Platform.select({
@@ -74,7 +68,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaScreen>
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* 헤더 */}
         <HeaderSection nickname={nickname} />
@@ -109,15 +103,8 @@ export default function HomeScreen() {
           data={DUMMY_PLACES}
           onPressItem={goToSpotDetailScreen}
         />
-
-        {/* 친구 초대 배너 */}
-        <FriendsBannerSection
-          avatars={DUMMY_FRIENDS.avatars}
-          playingCount={DUMMY_FRIENDS.playingCount}
-          // onInvite={() => navigation.navigate('InviteFriends' as never)}
-        />
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaScreen>
   );
 }
 
@@ -146,16 +133,11 @@ function SearchSection({ onPress }: { onPress: () => void }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: palette.white },
-  scroll: { paddingBottom: 32 },
-  headerBanner: {
-    marginTop: 6,
-  },
+  scroll: { paddingBottom: 32, backgroundColor: palette.white },
 
   // Header
   headerWrapper: {
     paddingHorizontal: 16,
-    marginTop: 6,
     marginBottom: 14,
   },
 
@@ -168,5 +150,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+
+  headerBanner: {
+    marginTop: 6,
   },
 });
