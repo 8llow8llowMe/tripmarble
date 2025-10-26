@@ -17,6 +17,7 @@ import useTripSpotQuery from '@/hooks/trip/useSpot';
 import { SpotStackParamList } from '@/types/navigation/navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import KakaoMap from '@/components/ui/map/KakaoMap';
+import useReviewSummaryQuery from '@/hooks/review/useReviewSummary';
 
 type Props = NativeStackScreenProps<SpotStackParamList, 'SpotDetailScreen'>;
 
@@ -25,6 +26,7 @@ export default function SpotDetailScreen({ route }: Props) {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
 
   const { tripSpot, isLoading, isError, refetch } = useTripSpotQuery({ tripSpotId });
+  const { reviewSummary } = useReviewSummaryQuery({ tripSpotId });
 
   if (isLoading) {
     return (
@@ -46,7 +48,8 @@ export default function SpotDetailScreen({ route }: Props) {
   }
 
   // "dataBody": {"address": "제주특별자치도 서귀포시 솔동산로 26-6", "addressDetail": "", "contentTypeName": "음식점", "description": null, "homepageUrl": null, "latitude": 33.2427454939, "longitude": 126.5632393864, "originalImageUrl": "http://tong.visitkorea.or.kr/cms/resource/05/2904405_image2_1.jpg", "phoneNumber": null, "tripSpotId": "50492", "tripSpotName": "woody glade"}
-  console.log('🤢🤢 tripSpot', tripSpot);
+  console.log('🤢🤢🤢🤢🤢 tripSpot', tripSpot);
+  console.log('📚📚📚📚📚 reviewSummary', reviewSummary, reviewSummary?.dataBody.totalCount);
 
   // 더미 데이터
   const reviews = [
@@ -146,9 +149,7 @@ export default function SpotDetailScreen({ route }: Props) {
 
       {/* 하단 CTA */}
       <View style={styles.footer}>
-        <View>
-          <Text style={styles.footerSub}>평균 소요시간 45분</Text>
-        </View>
+        <View />
         <TouchableOpacity style={styles.ctaBtn}>
           <Text style={styles.ctaText}>이 지역에서 게임 시작하기</Text>
         </TouchableOpacity>
