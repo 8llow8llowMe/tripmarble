@@ -80,12 +80,14 @@ public class GeoJsonParserUtil {
 
         while (parser.nextToken() != JsonToken.END_ARRAY) {
             if (parser.currentToken() == JsonToken.START_ARRAY) {
-                List<Double> point = new ArrayList<>(2);
-                parser.nextToken(); // X
-                point.add(parser.getDoubleValue());
-                parser.nextToken(); // Y
-                point.add(parser.getDoubleValue());
-                points.add(point);
+                parser.nextToken(); // X (longitude)
+                double lon = parser.getDoubleValue();
+
+                parser.nextToken(); // Y (latitude)
+                double lat = parser.getDoubleValue();
+
+                // 지도용 변환: [latitude, longitude] 순서로 저장
+                points.add(List.of(lat, lon));
 
                 // 배열 닫기
                 parser.nextToken(); // END_ARRAY
