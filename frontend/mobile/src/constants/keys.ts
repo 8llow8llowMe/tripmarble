@@ -8,6 +8,7 @@ const QUERY_KEY = {
   //USER
   USER: {
     INFO: 'userInfo',
+    ACTIVITY_INFO: 'userActivityInfo',
   },
 
   //TRIP
@@ -32,6 +33,12 @@ const QUERY_KEY = {
     GAME_FORCE_END: 'forceEnd',
     MOVE_LOGS: 'moveLogs',
     MOVE_LOGS_SUCCESS: 'moveLogsSuccess',
+  },
+
+  REVIEW: {
+    LIST_REVIEWS: 'reviewsList',
+    DETAIL: 'reviewDetail',
+    SUMMARY: 'reviewSummary',
   },
 };
 

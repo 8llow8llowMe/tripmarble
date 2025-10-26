@@ -28,6 +28,32 @@ type LoginFormType = {
   password: string;
 };
 
+function SocialButton({
+  onPress,
+  label,
+  icon,
+  testID,
+}: {
+  onPress: () => void;
+  label: string;
+  icon: React.ReactNode;
+  testID?: string;
+}) {
+  return (
+    <TouchableOpacity
+      style={styles.socialBtn}
+      onPress={onPress}
+      testID={testID}
+      activeOpacity={0.8}
+    >
+      <View style={styles.socialInner}>
+        <View style={styles.socialIconBox}>{icon}</View>
+        <Text style={styles.socialText}>{label}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
 export default function LoginScreen({ navigation }: any) {
   const {
     control,
@@ -95,7 +121,7 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   const goToSignUpScreen = () => {
-    navigation.navigate('SignUp');
+    navigation.navigate('SignUpScreen');
   };
 
   return (
@@ -106,6 +132,8 @@ export default function LoginScreen({ navigation }: any) {
       <View style={styles.content}>
         {/* 로고 */}
         <Image source={logo} style={styles.logo} />
+        <Text style={styles.title}>TripMarble</Text>
+
         {/* 슬로건 */}
         <Text style={styles.slogan}>FIND YOUR NEXT DESTINATION!</Text>
 
@@ -211,14 +239,32 @@ export default function LoginScreen({ navigation }: any) {
         </View>
 
         {/* 소셜 로그인 */}
-        {/* <TouchableOpacity style={styles.naverBtn}>
-          <View style={styles.naverIcon} />
-          <Text style={styles.naverText}>네이버로 로그인</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.appleBtn}>
-          <Ionicons name="logo-apple" size={24} color="#222" />
-          <Text style={styles.appleText}>Apple로 로그인</Text>
-        </TouchableOpacity> */}
+        <View style={{ width: '100%' }}>
+          <SocialButton
+            testID="naver-login"
+            label="네이버로 로그인"
+            onPress={() => navigation.navigate('SocialLoginWebViewScreen', { provider: 'NAVER' })}
+            icon={
+              <View style={[styles.brandSquare, { backgroundColor: '#03C75A' }]}>
+                <Text style={styles.brandLetter}>N</Text>
+              </View>
+            }
+          />
+
+          <SocialButton
+            testID="kakao-login"
+            label="카카오로 로그인"
+            onPress={() => navigation.navigate('SocialLoginWebViewScreen', { provider: 'KAKAO' })}
+            icon={
+              <Image
+                source={{
+                  uri: 'https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_small.png',
+                }}
+                style={styles.brandImage}
+              />
+            }
+          />
+        </View>
       </View>
 
       {/* 하단 약관 */}
@@ -243,11 +289,17 @@ const styles = StyleSheet.create({
     height: 60,
     resizeMode: 'contain',
     marginTop: 60,
-    marginBottom: 14,
+    marginBottom: 15,
+  },
+  title: {
+    fontSize: 16,
+    color: palette.gray800,
+    fontWeight: '700',
+    marginBottom: 10,
   },
   slogan: {
     fontSize: 13,
-    letterSpacing: 0.7,
+    letterSpacing: 0.3,
     color: palette.gray600,
     fontWeight: '700',
     marginBottom: 50,
@@ -309,8 +361,8 @@ const styles = StyleSheet.create({
   },
   loginBtnText: {
     color: palette.white,
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
   },
   helpRow: {
     flexDirection: 'row',
@@ -330,48 +382,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
     marginHorizontal: 2,
   },
-  naverBtn: {
-    width: '100%',
-    backgroundColor: palette.white,
-    borderWidth: 1,
-    borderColor: '#F2F2F2',
-    borderRadius: 10,
-    paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    justifyContent: 'center',
-  },
-  naverIcon: {
-    width: 24,
-    height: 24,
-    backgroundColor: '#21C208',
-    borderRadius: 5,
-    marginRight: 10,
-  },
-  naverText: {
-    color: '#222',
-    fontWeight: 'bold',
-    fontSize: 17,
-  },
-  appleBtn: {
-    width: '100%',
-    backgroundColor: palette.white,
-    borderWidth: 1,
-    borderColor: '#F2F2F2',
-    borderRadius: 10,
-    paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  appleText: {
-    color: '#222',
-    fontWeight: 'bold',
-    fontSize: 17,
-    marginLeft: 8,
-  },
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -389,5 +400,51 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '400',
     marginHorizontal: 2,
+  },
+
+  socialBtn: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EDEDED',
+    borderRadius: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    marginBottom: 12,
+  },
+  socialInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // justifyContent: 'center', // 텍스트 정확히 가운데
+  },
+  socialIconBox: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
+  },
+  brandSquare: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  brandLetter: {
+    color: palette.white,
+    fontWeight: '900',
+    fontSize: 14,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  brandImage: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    resizeMode: 'contain',
+  },
+  socialText: {
+    color: palette.gray600,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

@@ -24,8 +24,7 @@ export interface TripSpotResponse extends ApiResponseBase {
     addressDetail: string | null;
     longitude: number;
     latitude: number;
-    imageUrl: string | null;
-    thumbnailImageUrl: string | null;
+    originalImageUrl: string | null;
   };
 }
 
