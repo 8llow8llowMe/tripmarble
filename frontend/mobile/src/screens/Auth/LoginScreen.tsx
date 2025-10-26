@@ -49,8 +49,6 @@ function SocialButton({
       <View style={styles.socialInner}>
         <View style={styles.socialIconBox}>{icon}</View>
         <Text style={styles.socialText}>{label}</Text>
-        {/* 중앙 정렬 유지용 더미 박스 */}
-        <View style={styles.socialIconBox} />
       </View>
     </TouchableOpacity>
   );
@@ -134,7 +132,7 @@ export default function LoginScreen({ navigation }: any) {
       <View style={styles.content}>
         {/* 로고 */}
         <Image source={logo} style={styles.logo} />
-        <Text style={styles.slogan}>TripMarble</Text>
+        <Text style={styles.title}>TripMarble</Text>
 
         {/* 슬로건 */}
         <Text style={styles.slogan}>FIND YOUR NEXT DESTINATION!</Text>
@@ -291,11 +289,17 @@ const styles = StyleSheet.create({
     height: 60,
     resizeMode: 'contain',
     marginTop: 60,
-    marginBottom: 14,
+    marginBottom: 15,
+  },
+  title: {
+    fontSize: 16,
+    color: palette.gray800,
+    fontWeight: '700',
+    marginBottom: 10,
   },
   slogan: {
     fontSize: 13,
-    letterSpacing: 0.7,
+    letterSpacing: 0.3,
     color: palette.gray600,
     fontWeight: '700',
     marginBottom: 50,
@@ -398,14 +402,13 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
 
-  /* --- 소셜 공통 버튼(KREAM 스타일) --- */
   socialBtn: {
     width: '100%',
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#EDEDED',
-    borderRadius: 12,
-    paddingVertical: 14,
+    borderRadius: 10,
+    paddingVertical: 16,
     paddingHorizontal: 14,
     marginBottom: 12,
   },
@@ -427,7 +430,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   brandLetter: {
-    color: '#FFFFFF',
+    color: palette.white,
     fontWeight: '900',
     fontSize: 14,
     lineHeight: 24,
@@ -440,8 +443,8 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   socialText: {
+    color: palette.gray600,
     fontSize: 16,
-    fontWeight: '700',
-    color: '#222222',
+    fontWeight: '600',
   },
 });

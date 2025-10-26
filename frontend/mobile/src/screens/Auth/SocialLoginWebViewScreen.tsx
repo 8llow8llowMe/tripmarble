@@ -12,17 +12,6 @@ import { authApiClient } from '@/apis/axiosClient';
 
 type Provider = 'NAVER' | 'KAKAO' | 'GOOGLE';
 
-// 상단 util 함수들 추가
-const extractExistingProvider = (msg?: string) => {
-  // 예: "다른 방식으로 이미 가입된 계정입니다. 기존: NAVER"
-  if (!msg) return null;
-  const m = msg.match(/기존:\s*(KAKAO|NAVER|GOOGLE)/i);
-  return (m?.[1] as Provider) ?? null;
-};
-
-const providerLabel = (p: Provider) =>
-  p === 'KAKAO' ? '카카오' : p === 'NAVER' ? '네이버' : '구글';
-
 export default function SocialLoginWebViewScreen({ route, navigation }: any) {
   const { provider } = route.params as { provider: Provider };
   const [loginUrl, setLoginUrl] = useState<string>('');
@@ -32,7 +21,7 @@ export default function SocialLoginWebViewScreen({ route, navigation }: any) {
   const handledRef = useRef(false); // 중복 처리 방지
   const webviewRef = useRef<WebView>(null);
 
-  // ✅ 콜백 URL 화이트리스트 (localhost → 이후 실서버 도메인 추가)
+  // ✅ 콜백 URL 화이트리스트
   const CALLBACK_WHITELIST = [
     'http://localhost:5173/auth/callback/kakao',
     'http://localhost:5173/auth/callback/naver',
@@ -144,33 +133,15 @@ export default function SocialLoginWebViewScreen({ route, navigation }: any) {
       const resultMessage = err?.response?.data?.dataHeader?.resultMessage;
 
       if (status === 409 && resultCode === 'AUTH_004') {
-        // 다른 소셜로 이미 가입된 경우
-        const existing = extractExistingProvider(
-          typeof resultMessage === 'string' ? resultMessage : '',
-        );
-
-        // Alert
         Alert.alert(
           '이미 가입된 계정',
           typeof resultMessage === 'string'
             ? resultMessage
             : '다른 방식으로 이미 가입된 계정입니다.',
           [
-            existing
-              ? {
-                  text: `${providerLabel(existing)}로 로그인`,
-                  onPress: () => {
-                    // 같은 WebView 스크린에서 곧바로 기존 소셜로 전환
-                    // (replace를 쓰면 back stack 깔끔)
-                    navigation.replace('SocialLoginWebView', { provider: existing });
-                  },
-                }
-              : undefined,
             {
               text: '다른 이메일로 진행',
               onPress: () => {
-                // 원하는 플로우로 분기 (회원가입 화면 등)
-                // navigation.navigate('SignUp'); // 예시
                 navigation.goBack();
               },
               style: 'default',
