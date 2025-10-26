@@ -29,6 +29,11 @@ spring:
       max-file-size: ${MULTIPART_MAX_FILE_SIZE}
       max-request-size: ${MULTIPART_MAX_REQUEST_SIZE}
 
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
 eureka:
   instance:
     hostname: ${spring.application.name}
