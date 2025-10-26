@@ -1,7 +1,6 @@
 package com.followfollowme.tripmarble.redis.config;
 
 import com.followfollowme.tripmarble.redis.properties.RedisProperties;
-import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -27,14 +26,5 @@ public class RedisConfig {
         redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         redisTemplate.setConnectionFactory(redisConnectionFactory(redisProperties));
         return redisTemplate;
-    }
-
-    @Bean
-    public RedisTemplate<String, List<String>> redisTemplateForStringList(RedisConnectionFactory factory) {
-        RedisTemplate<String, List<String>> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory);
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-        return template;
     }
 }
