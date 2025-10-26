@@ -54,6 +54,9 @@ const END_POINTS = {
       `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/fail`,
     MOVE_LOGS_SKIP: (tripGameId: string, tripGameMoveLogId: string) =>
       `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/skip`,
+
+    MISSON_REVIEW: (tripGameId: string, tripGameMoveLogId: string) =>
+      `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/review`,
   },
 
   //REVIEW
