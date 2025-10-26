@@ -1,8 +1,11 @@
 package com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.presenter;
 
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionDetailResponse;
+import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionSearchResponse;
 import com.followfollowme.tripmarble.domainlayer.region.adapter.in.web.dto.RepresentativeRegionSummaryResponse;
-import com.followfollowme.tripmarble.domainlayer.region.domain.model.RepresentativeRegion;
+import com.followfollowme.tripmarble.domainlayer.region.application.info.RepresentativeRegionDetailInfo;
+import com.followfollowme.tripmarble.domainlayer.region.application.info.RepresentativeRegionSearchInfo;
+import com.followfollowme.tripmarble.domainlayer.region.application.info.RepresentativeRegionSummaryInfo;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -10,26 +13,39 @@ import java.util.List;
 @Component
 public class RepresentativeRegionPresenter {
 
-    public RepresentativeRegionSummaryResponse toSummaryResponse(RepresentativeRegion representativeRegion) {
+    public RepresentativeRegionSummaryResponse toSummaryResponse(RepresentativeRegionSummaryInfo info) {
         return RepresentativeRegionSummaryResponse.builder()
-            .representativeRegionId(String.valueOf(representativeRegion.id()))
-            .representativeRegionName(representativeRegion.name())
-            .representativeRegionImageUrl(representativeRegion.imageUrl())
+            .representativeRegionId(String.valueOf(info.representativeRegionId()))
+            .representativeRegionName(info.representativeRegionName())
+            .representativeRegionImageUrl(info.representativeRegionImageUrl())
             .build();
     }
 
-    public List<RepresentativeRegionSummaryResponse> toSummaryResponseList(List<RepresentativeRegion> representativeRegions) {
-        return representativeRegions.stream()
+    public List<RepresentativeRegionSummaryResponse> toSummaryResponseList(List<RepresentativeRegionSummaryInfo> infos) {
+        return infos.stream()
             .map(this::toSummaryResponse)
             .toList();
     }
 
-    public RepresentativeRegionDetailResponse toDetailResponse(RepresentativeRegion representativeRegion) {
+    public RepresentativeRegionDetailResponse toDetailResponse(RepresentativeRegionDetailInfo info) {
         return RepresentativeRegionDetailResponse.builder()
-            .representativeRegionId(String.valueOf(representativeRegion.id()))
-            .representativeRegionName(representativeRegion.name())
-            .representativeRegionImageUrl(representativeRegion.imageUrl())
-            .description(representativeRegion.description())
+            .representativeRegionId(String.valueOf(info.representativeRegionId()))
+            .representativeRegionName(info.representativeRegionName())
+            .representativeRegionImageUrl(info.representativeRegionImageUrl())
+            .description(info.description())
             .build();
+    }
+
+    public RepresentativeRegionSearchResponse toSearchResponse(RepresentativeRegionSearchInfo info) {
+        return RepresentativeRegionSearchResponse.builder()
+            .representativeRegionId(String.valueOf(info.representativeRegionId()))
+            .representativeRegionName(info.representativeRegionName())
+            .build();
+    }
+
+    public List<RepresentativeRegionSearchResponse> toSearchResponseList(List<RepresentativeRegionSearchInfo> infos) {
+        return infos.stream()
+            .map(this::toSearchResponse)
+            .toList();
     }
 }
