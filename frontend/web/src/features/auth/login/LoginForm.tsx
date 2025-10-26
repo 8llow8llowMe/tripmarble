@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import styles from "./LoginForm.module.scss";
-import { google, kakao, naver } from "@/shared/assets/images/social-logo";
+import { kakao, naver } from "@/shared/assets/images/social-logo";
 import useLogin from "@/entities/users/hooks/useLogin";
 import { authApiClient } from "@/shared/lib/api/client";
 
@@ -52,7 +52,7 @@ export default function LoginPage() {
 
   const naverIcon = typeof naver === "string" ? naver : naver.src;
   const kakaoIcon = typeof kakao === "string" ? kakao : kakao.src;
-  const googleIcon = typeof google === "string" ? google : google.src;
+  // const googleIcon = typeof google === "string" ? google : google.src;
 
   return (
     <>
@@ -110,13 +110,13 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className={styles.socialItem}>
+        {/* <div className={styles.socialItem}>
           <img src={googleIcon} alt="google" width={24} height={24} />
           <div className={styles.socialWord}>
             <a>구글</a>
             <a>로그인</a>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className={styles.footer}>
