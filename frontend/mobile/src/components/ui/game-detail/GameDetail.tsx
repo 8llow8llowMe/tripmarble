@@ -192,7 +192,7 @@ export default function GameDetail({ tripGameId, onExit }: Props) {
       info: 520,
       select: 220,
       review: 520,
-      location: 520,
+      location: 220,
     }),
     [],
   );
@@ -382,6 +382,8 @@ export default function GameDetail({ tripGameId, onExit }: Props) {
 
         {activeSheet === 'location' && (
           <MissionLocationSheet
+            tripGameId={tripGameId}
+            tripGameMoveLogId={lastMoveLog.tripGameMoveLogId}
             onClose={closeSheet}
             onSuccess={() => {
               closeSheet();
