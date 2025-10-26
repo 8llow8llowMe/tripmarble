@@ -30,6 +30,7 @@ const END_POINTS = {
     LIST_REPRESENTATIVE_REGIONS: '/regions/representative',
     REPRESENTATIVE_REGION: (representativeRegionId: string) =>
       `/regions/representative/${representativeRegionId}`,
+    SEARCH_REPRESENTATIVE_REGION: `/regions/representative/search`,
 
     // 여행 콘텐츠 타입
     LIST_CONTENT_TYPES: '/trip-content-types',
