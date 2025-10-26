@@ -69,6 +69,16 @@ const END_POINTS = {
       `/trip-spots/${tripSpotId}/reviews/${tripSpotReviewId}`,
     SUMMARY: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews/summary`,
   },
+
+  //REVIEW
+  REVIEW: {
+    LIST_REVIEWS: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews`,
+    WRITE: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews`,
+    UPLOAD_PHOTO: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews/photos/temp`,
+    DETAIL: (tripSpotId: string, tripSpotReviewId: string) =>
+      `/trip-spots/${tripSpotId}/reviews/${tripSpotReviewId}`,
+    SUMMARY: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews/summary`,
+  },
 };
 
 export { END_POINTS };
