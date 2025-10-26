@@ -78,9 +78,9 @@ export default function ProfileHomeScreen() {
               <Text style={styles.name}>{nickname}</Text>
               <Text style={styles.email}>{email}</Text>
             </View>
-            <TouchableOpacity style={styles.editBtn} onPress={goToProfileEditScreen}>
+            {/* <TouchableOpacity style={styles.editBtn} onPress={goToProfileEditScreen}>
               <Text style={styles.editBtnText}>프로필 수정</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           <View style={styles.statsRow}>
