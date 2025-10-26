@@ -11,12 +11,12 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { palette } from '@/constants/colors';
-import mapDummy from '@images/places/map.png';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import useTripSpotQuery from '@/hooks/trip/useSpot';
 import { SpotStackParamList } from '@/types/navigation/navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import KakaoMap from '@/components/ui/map/KakaoMap';
 
 type Props = NativeStackScreenProps<SpotStackParamList, 'SpotDetailScreen'>;
 
@@ -45,19 +45,10 @@ export default function SpotDetailScreen({ route }: Props) {
     );
   }
 
-  // 더미 데이터
-  const data = tripSpot?.dataBody || {
-    tripSpotName: '제주 성산일출봉',
-    contentTypeName: '관광지',
-    description:
-      '제주는 아름다운 바다와 자연경관이 어우러진 대한민국 대표 여행지입니다. 🏝️ 돌하르방과 한라산, 맛있는 흑돼지와 감귤까지 다양한 매력을 경험해보세요!',
-    homepageUrl: 'https://www.visitjeju.net/u/949',
-    phoneNumber: '064-783-0959',
-    address: '제주특별자치도 서귀포시 성산읍 성산리 78',
-    addressDetail: '임시주소',
-    thumbnailImageUrl: 'http://tong.visitkorea.or.kr/cms/resource/82/2944282_image2_1.bmp',
-  };
+  // "dataBody": {"address": "제주특별자치도 서귀포시 솔동산로 26-6", "addressDetail": "", "contentTypeName": "음식점", "description": null, "homepageUrl": null, "latitude": 33.2427454939, "longitude": 126.5632393864, "originalImageUrl": "http://tong.visitkorea.or.kr/cms/resource/05/2904405_image2_1.jpg", "phoneNumber": null, "tripSpotId": "50492", "tripSpotName": "woody glade"}
+  console.log('🤢🤢 tripSpot', tripSpot);
 
+  // 더미 데이터
   const reviews = [
     {
       id: 1,
@@ -82,54 +73,55 @@ export default function SpotDetailScreen({ route }: Props) {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* 대표 이미지 */}
         <View style={styles.imageWrapper}>
-          {/* {data.thumbnailImageUrl ? (
+          {tripSpot?.dataBody.originalImageUrl ? (
             <Image
-              source={{ uri: data.thumbnailImageUrl }}
+              source={{ uri: tripSpot?.dataBody.originalImageUrl }}
               style={styles.mainImage}
               resizeMode="cover"
             />
-          ) : ( */}
-          <View style={[styles.mainImage, styles.thumbPh]}>
-            <Ionicons name="image" size={20} color={palette.gray400} />
-          </View>
-          {/* )} */}
+          ) : (
+            <View style={[styles.mainImage, styles.thumbPh]}>
+              <Ionicons name="image" size={20} color={palette.gray400} />
+            </View>
+          )}
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={26} color="#222" />
           </TouchableOpacity>
-          <View style={styles.topRightBtns}>
-            <TouchableOpacity style={styles.circleBtn}>
-              <Ionicons name="share-outline" size={22} color="#222" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.circleBtn}>
-              <Ionicons name="heart-outline" size={22} color="#222" />
-            </TouchableOpacity>
-          </View>
         </View>
 
         {/* 제목/태그 */}
         <View style={styles.section}>
-          <Text style={styles.title}>{data.tripSpotName}</Text>
+          <Text style={styles.title}>{tripSpot?.dataBody.tripSpotName}</Text>
           <Text style={styles.subtitle}>
-            {data.contentTypeName} · {data.address}
+            {tripSpot?.dataBody.contentTypeName} · {tripSpot?.dataBody.address}
           </Text>
-          <View style={styles.tagsRow}>
-            <Text style={styles.tag}>🌊 바다 전망</Text>
-            <Text style={styles.tag}>🍊 감귤 농장 근처</Text>
-            <Text style={styles.tag}>☕ 카페 거리</Text>
-          </View>
         </View>
-
-        {/* 지도 */}
-        {/* <View style={styles.section}> */}
-        {/* <Text style={styles.sectionTitle}>위치</Text> */}
-        {/* <Image source={mapDummy} style={styles.mapPreview} /> */}
-        {/* </View> */}
 
         {/* 상세 소개 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>상세정보</Text>
-          <Text style={styles.desc}>{data.description}</Text>
-          <Image source={mapDummy} style={styles.mapPreview} />
+          <Text style={styles.desc}>{tripSpot?.dataBody.description}</Text>
+          <View style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <Ionicons name="location" size={18} color={palette.mainColor} />
+              <Text style={styles.infoText}>{tripSpot?.dataBody.address}</Text>
+            </View>
+            {tripSpot?.dataBody.phoneNumber && (
+              <View style={styles.infoRow}>
+                <Ionicons name="call" size={18} color={palette.mainColor} />
+                <Text style={styles.infoText}>{tripSpot?.dataBody.phoneNumber}</Text>
+              </View>
+            )}
+            <TouchableOpacity style={styles.infoRow}>
+              <Ionicons name="globe" size={18} color={palette.mainColor} />
+              <Text style={[styles.infoText, { color: palette.mainColor }]}>홈페이지 바로가기</Text>
+            </TouchableOpacity>
+          </View>
+
+          <KakaoMap
+            latitude={tripSpot?.dataBody.latitude ?? 0}
+            longitude={tripSpot?.dataBody.longitude ?? 0}
+          />
         </View>
 
         {/* 리뷰 */}
@@ -150,28 +142,11 @@ export default function SpotDetailScreen({ route }: Props) {
           ))}
           <Text style={styles.link}>리뷰 전체 보기</Text>
         </View>
-
-        {/* 주요 정보 카드 */}
-        <View style={styles.infoCard}>
-          <View style={styles.infoRow}>
-            <Ionicons name="location" size={18} color={palette.mainColor} />
-            <Text style={styles.infoText}>{data.address}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Ionicons name="call" size={18} color={palette.mainColor} />
-            <Text style={styles.infoText}>{data.phoneNumber}</Text>
-          </View>
-          <TouchableOpacity style={styles.infoRow}>
-            <Ionicons name="globe" size={18} color={palette.mainColor} />
-            <Text style={[styles.infoText, { color: palette.mainColor }]}>홈페이지 바로가기</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
 
       {/* 하단 CTA */}
       <View style={styles.footer}>
         <View>
-          {/* <Text style={styles.footerInfo}>현재 참여자: 3명</Text> */}
           <Text style={styles.footerSub}>평균 소요시간 45분</Text>
         </View>
         <TouchableOpacity style={styles.ctaBtn}>
@@ -185,7 +160,6 @@ export default function SpotDetailScreen({ route }: Props) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: palette.white },
   center: { alignItems: 'center', justifyContent: 'center' },
-  empty: { padding: 24, textAlign: 'center', color: palette.gray600 },
   retry: {
     marginTop: 8,
     paddingHorizontal: 12,
@@ -219,6 +193,7 @@ const styles = StyleSheet.create({
     padding: 6,
     marginLeft: 8,
   },
+
   section: { paddingHorizontal: 20, paddingVertical: 14 },
   title: { fontSize: 22, fontWeight: '700', marginBottom: 4, color: '#222' },
   subtitle: { fontSize: 14, color: '#777', marginBottom: 10 },
@@ -232,11 +207,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginRight: 6,
   },
+
   infoCard: {
     backgroundColor: '#f9f9f9',
     borderRadius: 14,
     padding: 16,
-    marginHorizontal: 20,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOpacity: 0.05,
@@ -244,9 +219,9 @@ const styles = StyleSheet.create({
   },
   infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   infoText: { marginLeft: 10, fontSize: 15, color: '#333' },
+
   sectionTitle: { fontSize: 17, fontWeight: '700', marginBottom: 8, color: '#222' },
   desc: { fontSize: 14, color: '#444', lineHeight: 20 },
-
   link: {
     fontSize: 14,
     color: palette.mainColor,
@@ -260,7 +235,6 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 14,
   },
-
   reviewHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -279,17 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
     marginTop: 8,
   },
-  directionBtn: {
-    flexDirection: 'row',
-    backgroundColor: palette.mainColor,
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    marginTop: 12,
-  },
-  directionText: { color: '#fff', marginLeft: 6, fontSize: 13, fontWeight: '600' },
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
