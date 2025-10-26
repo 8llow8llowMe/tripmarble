@@ -18,14 +18,18 @@ import Divider from '@/components/common/Divider';
 import useLogoutMutation from '@/hooks/auth/useLogout';
 import { useNavigation } from '@react-navigation/native';
 import { AppNavigatorNavigationProp } from '@/types/navigation/screen';
+import useUserActivityInfoQuery from '@/hooks/user/useUserActivityInfo';
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner';
 
 export default function ProfileHomeScreen() {
   const navigation = useNavigation<AppNavigatorNavigationProp>();
 
-  const { nickname, email, profileImage } = useAppSelector((state) => state.userReducer);
-  const user = {
-    stats: { trips: 12, reviews: 34, photos: 89, hours: 120 },
-  };
+  const { memberId, nickname, email, profileImage } = useAppSelector((state) => state.userReducer);
+
+  const { data: activityInfo, isLoading } = useUserActivityInfoQuery({
+    memberId,
+    enableApiCall: !!memberId,
+  });
 
   // 로그아웃
   const { logout, isPending } = useLogoutMutation();
@@ -59,6 +63,8 @@ export default function ProfileHomeScreen() {
     });
   };
 
+  if (isLoading) return <LoadingSpinner />;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container}>
@@ -78,9 +84,9 @@ export default function ProfileHomeScreen() {
           </View>
 
           <View style={styles.statsRow}>
-            <Stat label="여행" value={user.stats.trips} />
-            <Stat label="리뷰" value={user.stats.reviews} />
-            <Stat label="사진" value={user.stats.photos} />
+            <Stat label="여행" value={activityInfo?.dataBody.tripGameCount ?? 0} />
+            <Stat label="리뷰" value={activityInfo?.dataBody.tripSpotReviewCount ?? 0} />
+            <Stat label="사진" value={activityInfo?.dataBody.tripSpotReviewPhotoCount ?? 0} />
           </View>
         </View>
 
@@ -127,7 +133,7 @@ export default function ProfileHomeScreen() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number | string }) {
+function Stat({ label, value }: { label: string; value: number }) {
   return (
     <View style={styles.statBox}>
       <Text style={styles.statValue}>{value}</Text>
