@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +34,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -79,8 +80,7 @@ public class TripSpotReviewWebController {
               - GENERAL: 일반 여행 리뷰만
               - GAME_MISSION: 게임 미션 리뷰만
             - photoLimit: 샘플로 보여줄 사진 개수 (기본값: 3)
-            """,
-        security = {@SecurityRequirement(name = "bearerAuth")}
+            """
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "여행지 리뷰 종합 요약 조회 성공")
@@ -110,8 +110,7 @@ public class TripSpotReviewWebController {
             - lastTripSpotReviewId: 마지막 조회 리뷰 ID (첫 페이지는 0)
             - size: 한 번에 가져올 리뷰 개수 (기본값: 10)
             - orderType: 정렬 순서 (DESC: 최신순, ASC: 오래된순)
-            """,
-        security = {@SecurityRequirement(name = "bearerAuth")}
+            """
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "여행지 리뷰 목록 조회 성공")
@@ -132,8 +131,7 @@ public class TripSpotReviewWebController {
 
     @Operation(
         summary = "여행지 리뷰 상세 조회",
-        description = "특정 여행지 리뷰의 상세 정보를 조회하는 기능입니다.",
-        security = {@SecurityRequirement(name = "bearerAuth")}
+        description = "특정 여행지 리뷰의 상세 정보를 조회하는 기능입니다."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "여행지 리뷰 상세 조회 성공")
