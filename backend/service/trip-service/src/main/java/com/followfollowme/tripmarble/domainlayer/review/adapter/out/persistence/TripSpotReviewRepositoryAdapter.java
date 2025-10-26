@@ -61,7 +61,7 @@ public class TripSpotReviewRepositoryAdapter implements TripSpotReviewRepository
 
     @Override
     public Slice<TripSpotReview> findReviewsNoOffsetByMemberId(long memberId, ReviewSourceType sourceType, long lastTripSpotReviewId,
-                                                               int size, OrderType orderType) {
+        int size, OrderType orderType) {
         Slice<TripSpotReviewEntity> entitySlice =
             tripSpotReviewRepository.findReviewsNoOffsetByMemberId(memberId, sourceType, lastTripSpotReviewId, size, orderType);
         return entitySlice.map(tripSpotReviewMapper::toDomainFromEntity);
