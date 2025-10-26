@@ -7,3 +7,10 @@ export type UserType = {
   role: string;
   provider: null;
 };
+
+export type UserActivityType = {
+  memberId: number;
+  tripGameCount: number;
+  tripSpotReviewCount: number;
+  tripSpotReviewPhotoCount: number;
+};

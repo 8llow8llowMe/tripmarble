@@ -8,6 +8,7 @@ const QUERY_KEY = {
   //USER
   USER: {
     INFO: 'userInfo',
+    ACTIVITY_INFO: 'userActivityInfo',
   },
 
   //TRIP
