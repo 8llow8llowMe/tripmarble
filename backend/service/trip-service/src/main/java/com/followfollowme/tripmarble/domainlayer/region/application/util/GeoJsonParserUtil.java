@@ -27,18 +27,29 @@ public class GeoJsonParserUtil {
         List<CoordinateGroupItem> coordinateGroups = new ArrayList<>();
 
         try (JsonParser parser = factory.createParser(new StringReader(json))) {
+            // 루트 START_OBJECT로 이동
+            if (parser.nextToken() != JsonToken.START_OBJECT)
+                return null;
 
-            // 루트 객체 탐색
-            while (!parser.isClosed() && parser.nextToken() != null) {
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
                 String fieldName = parser.currentName();
+                if (fieldName == null)
+                    continue;
+
+                parser.nextToken(); // 필드 값으로 이동
+
                 if ("type".equals(fieldName)) {
-                    parser.nextToken();
-                    type = parser.getText();
+                    type = parser.getValueAsString();
                 } else if ("coordinates".equals(fieldName)) {
-                    parser.nextToken();
                     coordinateGroups = readCoordinates(parser, type);
+                } else {
+                    // 알 수 없는 필드는 스킵
+                    parser.skipChildren();
                 }
             }
+
+            if (type == null || coordinateGroups.isEmpty())
+                return null;
 
             return BoundaryGeoJsonItem.builder()
                 .type(type)
@@ -52,84 +63,118 @@ public class GeoJsonParserUtil {
 
     private static List<CoordinateGroupItem> readCoordinates(JsonParser parser, String type) throws IOException {
         List<CoordinateGroupItem> groups = new ArrayList<>();
-
-        if (!parser.isExpectedStartArrayToken())
+        if (parser.currentToken() != JsonToken.START_ARRAY) {
+            // coordinates 필드는 항상 배열이어야 한다
             return groups;
-
-        // Polygon → [ [ [x,y], [x,y], ... ] ]
-        // MultiPolygon → [ [ [ [x,y], ... ] ], [ [x,y], ... ] ]
-        while (parser.nextToken() != JsonToken.END_ARRAY) {
-            if (parser.currentToken() == JsonToken.START_ARRAY) {
-                List<List<Double>> points = readPolygonPoints(parser, type);
-                if (!points.isEmpty()) {
-                    points = normalizePolygonRing(points);
-                }
-                groups.add(CoordinateGroupItem.builder().points(points).build());
-            }
         }
+
+        if ("Polygon".equalsIgnoreCase(type)) {
+            // [ [ [x,y], ... ], [hole...], ... ]
+            List<List<List<Double>>> ringsLonLat = readRings(parser);
+            if (!ringsLonLat.isEmpty()) {
+                List<List<Double>> outerLonLat = normalizeRing(ringsLonLat.getFirst()); // 외곽 링만 사용
+                // DTO는 [lat, lon]로 반환
+                groups.add(CoordinateGroupItem.builder()
+                    .points(toLatLon(outerLonLat))
+                    .build());
+            }
+        } else if ("MultiPolygon".equalsIgnoreCase(type)) {
+            // [ [rings...], [rings...], ... ]
+            while (parser.nextToken() != JsonToken.END_ARRAY) { // 각 polygon
+                if (parser.currentToken() == JsonToken.START_ARRAY) {
+                    List<List<List<Double>>> ringsLonLat = readRings(parser);
+                    if (!ringsLonLat.isEmpty()) {
+                        List<List<Double>> outerLonLat = normalizeRing(ringsLonLat.getFirst()); // 외곽 링만 사용
+                        groups.add(CoordinateGroupItem.builder()
+                            .points(toLatLon(outerLonLat))
+                            .build());
+                    }
+                } else {
+                    parser.skipChildren();
+                }
+            }
+        } else {
+            // 지원하지 않는 타입은 스킵
+            parser.skipChildren();
+        }
+
         return groups;
     }
 
-    private static List<List<Double>> readPolygonPoints(JsonParser parser, String type) throws IOException {
-        List<List<Double>> points = new ArrayList<>();
-
-        // MultiPolygon의 경우 내부 중첩이 한 단계 더 깊음
-        if ("MultiPolygon".equalsIgnoreCase(type)) {
-            parser.nextToken(); // START_ARRAY (outer polygon)
-        }
-
-        while (parser.nextToken() != JsonToken.END_ARRAY) {
+    private static List<List<List<Double>>> readRings(JsonParser parser) throws IOException {
+        List<List<List<Double>>> rings = new ArrayList<>();
+        // 현재 토큰: START_ARRAY (rings 배열 시작)
+        while (parser.nextToken() != JsonToken.END_ARRAY) { // 각 ring
             if (parser.currentToken() == JsonToken.START_ARRAY) {
-                parser.nextToken(); // X (longitude)
-                double lon = parser.getDoubleValue();
-
-                parser.nextToken(); // Y (latitude)
-                double lat = parser.getDoubleValue();
-
-                // 지도용 변환: [latitude, longitude] 순서로 저장
-                points.add(List.of(lat, lon));
-
-                // 배열 닫기
-                parser.nextToken(); // END_ARRAY
+                List<List<Double>> ring = new ArrayList<>();
+                while (parser.nextToken() != JsonToken.END_ARRAY) { // 각 position
+                    if (parser.currentToken() == JsonToken.START_ARRAY) {
+                        parser.nextToken(); // x (lon)
+                        double lon = parser.getDoubleValue();
+                        parser.nextToken(); // y (lat)
+                        double lat = parser.getDoubleValue();
+                        // 내부는 [lon, lat]로 유지
+                        ring.add(List.of(lon, lat));
+                        // position 배열 닫기
+                        if (parser.nextToken() != JsonToken.END_ARRAY) {
+                            parser.skipChildren(); // 방어적 스킵
+                        }
+                    } else {
+                        parser.skipChildren();
+                    }
+                }
+                rings.add(ring);
+            } else {
+                parser.skipChildren();
             }
         }
-
-        // MultiPolygon이면 한 단계 닫기
-        if ("MultiPolygon".equalsIgnoreCase(type)) {
-            parser.nextToken(); // END_ARRAY
-        }
-
-        return points;
+        return rings;
     }
 
-    private static List<List<Double>> normalizePolygonRing(List<List<Double>> points) {
-        if (points.isEmpty())
-            return points;
+    private static List<List<Double>> normalizeRing(List<List<Double>> lonLat) {
+        if (lonLat == null || lonLat.isEmpty())
+            return lonLat;
 
-        List<List<Double>> normalized = new ArrayList<>(points);
-        List<Double> first = points.get(0);
-        List<Double> last = points.get(points.size() - 1);
+        List<List<Double>> normalized = new ArrayList<>(lonLat);
+
+        // 닫힘 보장
+        List<Double> first = normalized.getFirst();
+        List<Double> last = normalized.getLast();
         if (!first.equals(last)) {
-            normalized.add(new ArrayList<>(first));
+            normalized.add(List.of(first.get(0), first.get(1)));
         }
 
-        double area = calculateSignedArea(normalized);
-        if (area > 0) {
+        // 방향 정규화: shoelace > 0 이면 CCW (표준 2D 기준)
+        double area2 = signedArea2(normalized); // 면적의 2배(부호 포함)
+        if (area2 < 0) {
+            // 시계(CW)이면 반시계(CCW)로 뒤집기
+            // (마지막 닫힘점은 유지 위해 뒤집고 다시 닫음)
+            normalized.removeLast(); // 닫힘점 제거
             Collections.reverse(normalized);
+            // 다시 닫음
+            List<Double> f = normalized.getFirst();
+            normalized.add(List.of(f.get(0), f.get(1)));
         }
-
         return normalized;
     }
 
-    private static double calculateSignedArea(List<List<Double>> polygon) {
-        double area = 0.0;
-        for (int i = 0; i < polygon.size() - 1; i++) {
-            double x1 = polygon.get(i).get(0);
-            double y1 = polygon.get(i).get(1);
-            double x2 = polygon.get(i + 1).get(0);
-            double y2 = polygon.get(i + 1).get(1);
-            area += (x2 - x1) * (y2 + y1);
+    private static double signedArea2(List<List<Double>> ringLonLat) {
+        double sum = 0.0;
+        for (int i = 0; i < ringLonLat.size() - 1; i++) {
+            double x1 = ringLonLat.get(i).get(0);
+            double y1 = ringLonLat.get(i).get(1);
+            double x2 = ringLonLat.get(i + 1).get(0);
+            double y2 = ringLonLat.get(i + 1).get(1);
+            sum += (x1 * y2 - x2 * y1);
         }
-        return area;
+        return sum;
+    }
+
+    private static List<List<Double>> toLatLon(List<List<Double>> lonLat) {
+        List<List<Double>> latLon = new ArrayList<>(lonLat.size());
+        for (List<Double> p : lonLat) {
+            latLon.add(List.of(p.get(1), p.get(0)));
+        }
+        return latLon;
     }
 }
