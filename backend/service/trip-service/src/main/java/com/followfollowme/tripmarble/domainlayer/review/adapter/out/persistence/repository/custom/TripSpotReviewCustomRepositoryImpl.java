@@ -1,7 +1,7 @@
 package com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.repository.custom;
 
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.QTripSpotReviewEntity;
-import com.followfollowme.tripmarble.domainlayer.review.adapter.out.entity.QTripSpotReviewPhotoEntity;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.entity.QTripSpotReviewEntity;
+import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.entity.QTripSpotReviewPhotoEntity;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.entity.TripSpotReviewEntity;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewPhotoProjection;
 import com.followfollowme.tripmarble.domainlayer.review.adapter.out.persistence.projection.TripSpotReviewRatingDistributionProjection;
