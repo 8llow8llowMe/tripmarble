@@ -52,13 +52,21 @@ export default function GameInfoSheet({ tripSpotId, onStartMission, isCurrentTil
   const rating = reviewSummary?.dataBody?.averageRating;
   const reviewCnt = reviewSummary?.dataBody?.totalCount;
 
+  const handleOpenWebsite = async () => {
+    if (!spot.homepageUrl) return;
+    try {
+      const ok = await Linking.canOpenURL(spot.homepageUrl);
+      if (ok) Linking.openURL(spot.homepageUrl);
+    } catch {}
+  };
+
   return (
     <BottomSheetScrollView
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
       {/* 헤더(이름 + 카테고리 칩) */}
-      <View style={{ gap: 6 }}>
+      <View style={{ gap: 14 }}>
         <Text style={styles.title}>{spot.tripSpotName}</Text>
         <View style={styles.chips}>
           {!!spot.contentTypeName && <Text style={styles.chip}>#{spot.contentTypeName}</Text>}
@@ -92,7 +100,7 @@ export default function GameInfoSheet({ tripSpotId, onStartMission, isCurrentTil
       {/* 지도 카드 - 쿼터 초과 시 내부에서 빈 뷰만 보일 수 있음 */}
       <KakaoMap latitude={spot.latitude} longitude={spot.longitude} />
 
-      {/* 연락처/홈페이지 */}
+      {/* 연락/홈페이지 섹션: 텍스트 표시는 그대로, 바로가기는 홈페이지만 */}
       {(spot.phoneNumber || spot.homepageUrl) && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>연락/홈페이지</Text>
@@ -100,14 +108,9 @@ export default function GameInfoSheet({ tripSpotId, onStartMission, isCurrentTil
           {!!spot.homepageUrl && <Text style={styles.infoText}>🔗 {spot.homepageUrl}</Text>}
 
           <View style={styles.rowActions}>
-            {!!spot.phoneNumber && (
-              <TouchableOpacity style={styles.actionBtn}>
-                <Text style={styles.actionText}>전화</Text>
-              </TouchableOpacity>
-            )}
             {!!spot.homepageUrl && (
-              <TouchableOpacity style={styles.actionBtn}>
-                <Text style={styles.actionText}>웹사이트</Text>
+              <TouchableOpacity style={styles.actionBtn} onPress={handleOpenWebsite}>
+                <Text style={styles.actionText}>홈페이지 바로가기</Text>
               </TouchableOpacity>
             )}
           </View>
