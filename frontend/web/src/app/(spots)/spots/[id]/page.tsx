@@ -37,6 +37,116 @@ type MapMarkerPoint = {
   title: string;
 };
 
+type PolygonCoordinate = {
+  lat: number;
+  lng: number;
+};
+
+type PolygonRing = PolygonCoordinate[];
+type RegionPolygon = PolygonRing[];
+
+type BoundaryGeoJsonItem =
+  | {
+      type?: string;
+      coordinates?: unknown;
+    }
+  | null
+  | undefined;
+
+const MIN_POLYGON_POINTS = 3;
+
+const parseBoundaryPolygons = (
+  boundary: BoundaryGeoJsonItem
+): RegionPolygon[] => {
+  if (!boundary) return [];
+  const { coordinates } = boundary;
+  if (!coordinates) return [];
+
+  let raw: unknown = coordinates;
+  if (typeof raw === "string") {
+    try {
+      raw = JSON.parse(raw);
+    } catch {
+      return [];
+    }
+  }
+
+  const toCoordinate = (point: unknown): PolygonCoordinate | null => {
+    if (Array.isArray(point) && point.length >= 2) {
+      const [latRaw, lngRaw] = point as [unknown, unknown];
+      const lat = Number(latRaw);
+      const lng = Number(lngRaw);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return { lat, lng };
+    }
+    if (point && typeof point === "object") {
+      const record = point as Record<string, unknown>;
+      const lat =
+        typeof record.lat === "number"
+          ? record.lat
+          : typeof record.latitude === "number"
+          ? record.latitude
+          : Number(record.lat ?? record.latitude);
+      const lng =
+        typeof record.lng === "number"
+          ? record.lng
+          : typeof record.longitude === "number"
+          ? record.longitude
+          : Number(record.lng ?? record.longitude);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      return { lat, lng };
+    }
+    return null;
+  };
+
+  const unwrapList = (value: unknown): unknown[] | null => {
+    if (Array.isArray(value)) return value;
+    if (value && typeof value === "object") {
+      const record = value as Record<string, unknown>;
+      if (Array.isArray(record.points)) return record.points;
+      if (Array.isArray(record.coordinates)) return record.coordinates;
+      if (Array.isArray(record.rings)) return record.rings;
+    }
+    return null;
+  };
+
+  const toRing = (data: unknown): PolygonRing | null => {
+    const list = unwrapList(data);
+    if (!list) return null;
+    const coords = list
+      .map(toCoordinate)
+      .filter((coord): coord is PolygonCoordinate => coord !== null);
+    return coords.length >= MIN_POLYGON_POINTS ? coords : null;
+  };
+
+  const toPolygon = (data: unknown): RegionPolygon | null => {
+    const list = unwrapList(data);
+    if (!list) return null;
+    const rings = list
+      .map(toRing)
+      .filter((ring): ring is PolygonRing => ring !== null);
+    return rings.length ? rings : null;
+  };
+
+  const extractPolygons = (data: unknown): RegionPolygon[] => {
+    const ring = toRing(data);
+    if (ring) {
+      return [[ring]];
+    }
+    const polygon = toPolygon(data);
+    if (polygon) {
+      return [polygon];
+    }
+    const list = unwrapList(data);
+    if (!list) return [];
+    return list
+      .flatMap((item) => extractPolygons(item))
+      .filter((poly) => poly.length > 0);
+  };
+
+  return extractPolygons(raw);
+};
+
 type Props = {
   params: {
     id: string;
@@ -163,6 +273,30 @@ export default function SpotDetail({ params }: Props) {
     params.id
   );
   const region = regionRes?.data?.dataBody;
+  const regionBoundaryType = region?.boundaryGeoJsonItem?.type ?? null;
+  const regionBoundaryCoordinates =
+    region?.boundaryGeoJsonItem?.coordinates ?? null;
+  const regionPolygons = useMemo(() => {
+    const polygons = parseBoundaryPolygons({
+      type: regionBoundaryType ?? undefined,
+      coordinates: regionBoundaryCoordinates,
+    });
+    if (!polygons.length) return undefined;
+    return polygons.map((paths, index) => ({
+      id: `${region?.representativeRegionId ?? "region"}-${index}`,
+      paths,
+      strokeColor: "#3F7CF6",
+      strokeOpacity: 0.85,
+      strokeWeight: 3,
+      fillColor: "#98a9ff",
+      fillOpacity: 0.14,
+      zIndex: 4,
+    }));
+  }, [
+    region?.representativeRegionId,
+    regionBoundaryCoordinates,
+    regionBoundaryType,
+  ]);
   const regionDescriptionText = useMemo(() => {
     if (regionLoading) return "지역 정보를 불러오는 중...";
     if (region?.description) return region.description as string;
@@ -310,6 +444,10 @@ export default function SpotDetail({ params }: Props) {
   }, [displayDetail, fallbackCoordinates]);
 
   const displayName = displayDetail?.tripSpotName ?? "여행지 상세 정보";
+  const mapCenterAnchor = useMemo(
+    () => (isMobileSheet ? { x: 0.5, y: 0.5 } : { x: 0.75, y: 0.5 }),
+    [isMobileSheet]
+  );
 
   const hasContactInfo =
     Boolean(displayDetail?.address) ||
@@ -475,12 +613,13 @@ export default function SpotDetail({ params }: Props) {
           className={styles.mapCanvas}
           center={selectedSpotCoordinates}
           markers={markers}
+          polygons={regionPolygons}
           fitToMarkers
           fitBoundsKey={fitBoundsKey}
           onMarkerClick={handleMarkerClick}
-          level={6}
+          level={8}
           height="100%"
-          centerAnchor={{ x: 0.75, y: 0.5 }}
+          centerAnchor={mapCenterAnchor}
           selectedMarkerId={selectedSpotId ?? undefined}
         />
 
