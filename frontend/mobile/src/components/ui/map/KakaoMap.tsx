@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 type KakaoMapProps = {
   latitude: number;
   longitude: number;
-  height?: number; // 기본 240
+  height?: number; // 기본 200
   zoomLevel?: number; // 작을수록 확대, 기본 5
 };
 
@@ -17,7 +17,7 @@ const ENV_KEY =
 export default function KakaoMap({
   latitude,
   longitude,
-  height = 240,
+  height = 200,
   zoomLevel = 5,
 }: KakaoMapProps) {
   const html = useMemo(

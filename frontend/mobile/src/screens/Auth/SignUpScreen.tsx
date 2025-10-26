@@ -40,12 +40,12 @@ export default function SignUpScreen({ navigation }: any) {
   const goNext = () => setStep((s) => s + 1);
   const goPrev = () => {
     if (step === 0) {
-      navigation.replace('Login');
+      navigation.replace('LoginScreen');
     } else {
       setStep((s) => Math.max(0, s - 1));
     }
   };
-  const goToLogin = () => navigation.replace('Login');
+  const goToLogin = () => navigation.replace('LoginScreen');
 
   return (
     <SafeAreaView style={styles.safeArea}>

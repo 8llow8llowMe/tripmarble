@@ -11,6 +11,9 @@ export type RootStackParamList = {
 export type AuthtNavigatorParamList = {
   LoginScreen: undefined;
   SignUpScreen: undefined;
+  NaverLoginWebViewScreen: undefined;
+  KakaoLoginWebViewScreen: undefined;
+  SocialLoginWebViewScreen: { provider: 'NAVER' | 'KAKAO' | 'GOOGLE' };
 };
 
 // === AppNavigator ===
