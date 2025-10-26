@@ -3,9 +3,9 @@ import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator } from 'rea
 import { palette } from '@/constants/colors';
 
 import { getCurrentLocation, CurrentLocation } from '@/utils/location';
-import GameSheetHeader from '@/components/ui/game-mission/GameSheetHeader';
 import KakaoMap from '@/components/ui/map/KakaoMap';
 import { BottomSheetView } from '@gorhom/bottom-sheet';
+import TextBox from '@/components/atom/TextBox';
 
 interface Props {
   onClose: () => void;
@@ -41,15 +41,33 @@ export default function MissionLocationSheet({ onClose, onSuccess }: Props) {
 
     setLocationVerified(true);
   }
-
   return (
     <BottomSheetView style={styles.container}>
-      <GameSheetHeader title="위치 인증" />
+      <TextBox size={16} fontsName="Pretendard700" style={{ alignSelf: 'center' }}>
+        현재 위치 인증
+      </TextBox>
 
       <View style={styles.body}>
         {loading && <ActivityIndicator size="large" color={palette.mainColor} />}
-        {!loading && loc && (
+
+        {/* 1) 미니맵 프리뷰 */}
+        {!loading && loc ? (
           <KakaoMap latitude={loc.lat} longitude={loc.lng} height={260} zoomLevel={4} />
+        ) : (
+          <View
+            style={{
+              height: 220,
+              borderRadius: 12,
+              backgroundColor: '#F2F4F6',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 8,
+            }}
+          >
+            <Text style={{ color: '#8A8F98' }}>
+              {loading ? '현재 위치 불러오는 중…' : '위치를 불러오지 못했습니다'}
+            </Text>
+          </View>
         )}
 
         <TouchableOpacity style={styles.refreshBtn} onPress={refreshLocation}>

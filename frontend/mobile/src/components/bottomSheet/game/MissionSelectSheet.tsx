@@ -22,7 +22,7 @@ export default function MissionSelectSheet({
       </TextBox>
       <View style={styles.list}>
         <ActionItem label="리뷰 작성 인증" iconName="images-outline" onPress={onSelectReview} />
-        <ActionItem label="위치 인증" iconName="images-outline" onPress={onSelectLocation} />
+        <ActionItem label="현재 위치 인증" iconName="images-outline" onPress={onSelectLocation} />
       </View>
     </BottomSheetView>
   );
