@@ -7,8 +7,6 @@ import {
   Image,
   ActivityIndicator,
   StyleSheet,
-  SafeAreaView,
-  StatusBar,
   ImageBackground,
   ScrollView,
 } from 'react-native';
@@ -21,6 +19,8 @@ import useContentTypesListQuery from '@/hooks/trip/useContentTypesList';
 
 import gyeongjuImage from '@images/places/gyeongju.png';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import SafeAreaScreen from '@/components/layout/SafeAreaScreen';
 
 export default function SpotListScreen() {
   const route = useRoute<any>();
@@ -72,69 +72,69 @@ export default function SpotListScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
-
-      <Hero
-        imageUrl={representativeRegion?.dataBody.representativeRegionImageUrl}
-        title={representativeRegion?.dataBody.representativeRegionName ?? ''}
-        desc={representativeRegion?.dataBody.description ?? ''}
-        onBack={() => navigation.goBack()}
-        onShare={() => {}}
-      />
-
-      <View style={{ flex: 1 }}>
-        {contentTypesList && (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.chipsRow}
-          >
-            <Chip
-              label="전체"
-              active={!chipContentTypeId}
-              onPress={() => setChipContentTypeId(null)}
-            />
-            {contentTypesList?.map((c) => (
-              <Chip
-                key={c.contentTypeId}
-                label={c.contentTypeName}
-                active={chipContentTypeId === c.contentTypeId}
-                onPress={() => setChipContentTypeId(c.contentTypeId)}
-              />
-            ))}
-          </ScrollView>
-        )}
-
-        <FlatList
-          data={spots}
-          keyExtractor={(it) => String(it.tripSpotId)}
-          renderItem={({ item, index }) => (
-            <SpotRow
-              rank={index + 1}
-              name={item.tripSpotName}
-              thumb={item.originalImageUrl}
-              onPress={() =>
-                navigation.navigate('SpotDetailScreen', { tripSpotId: item.tripSpotId })
-              }
-            />
-          )}
-          onEndReached={onEnd}
-          onEndReachedThreshold={0.4}
-          refreshing={isRefetching}
-          onRefresh={() => refetch()}
-          contentContainerStyle={{ paddingBottom: 28 }}
-          ListEmptyComponent={<Text style={styles.empty}>목록이 없습니다.</Text>}
-          ListFooterComponent={
-            isFetchingNextPage ? (
-              <View style={{ paddingVertical: 12 }}>
-                <ActivityIndicator />
-              </View>
-            ) : null
-          }
+    <SafeAreaScreen>
+      <View style={styles.container}>
+        <Hero
+          imageUrl={representativeRegion?.dataBody.representativeRegionImageUrl}
+          title={representativeRegion?.dataBody.representativeRegionName ?? ''}
+          desc={representativeRegion?.dataBody.description ?? ''}
+          onBack={() => navigation.goBack()}
+          onShare={() => {}}
         />
+
+        <View style={{ flex: 1 }}>
+          {contentTypesList && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.chipsRow}
+            >
+              <Chip
+                label="전체"
+                active={!chipContentTypeId}
+                onPress={() => setChipContentTypeId(null)}
+              />
+              {contentTypesList?.map((c) => (
+                <Chip
+                  key={c.contentTypeId}
+                  label={c.contentTypeName}
+                  active={chipContentTypeId === c.contentTypeId}
+                  onPress={() => setChipContentTypeId(c.contentTypeId)}
+                />
+              ))}
+            </ScrollView>
+          )}
+
+          <FlatList
+            data={spots}
+            keyExtractor={(it) => String(it.tripSpotId)}
+            renderItem={({ item, index }) => (
+              <SpotRow
+                rank={index + 1}
+                name={item.tripSpotName}
+                thumb={item.originalImageUrl}
+                onPress={() =>
+                  navigation.navigate('SpotDetailScreen', { tripSpotId: item.tripSpotId })
+                }
+              />
+            )}
+            onEndReached={onEnd}
+            onEndReachedThreshold={0.4}
+            refreshing={isRefetching}
+            onRefresh={() => refetch()}
+            contentContainerStyle={{ paddingBottom: 28 }}
+            ListEmptyComponent={<Text style={styles.empty}>목록이 없습니다.</Text>}
+            ListFooterComponent={
+              isFetchingNextPage ? (
+                <View style={{ paddingVertical: 12 }}>
+                  <ActivityIndicator />
+                </View>
+              ) : null
+            }
+          />
+        </View>
       </View>
-    </SafeAreaView>
+    </SafeAreaScreen>
   );
 }
 
@@ -163,11 +163,8 @@ const Hero = memo(function Hero({
       <View style={styles.overlay} />
       <View style={styles.heroTopBar}>
         <TouchableOpacity onPress={onBack}>
-          <Ionicons name="chevron-back" size={28} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        {/* <TouchableOpacity onPress={onShare}>
-          <Ionicons name="share-outline" size={26} color="#fff" />
-        </TouchableOpacity> */}
       </View>
       <View style={styles.heroTextBox}>
         <Text style={styles.heroTitle} numberOfLines={1}>

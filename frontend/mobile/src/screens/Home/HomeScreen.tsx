@@ -13,6 +13,7 @@ import useTripSpotQuery from '@/hooks/trip/useSpot';
 import { DUMMY_PLACES } from '@/constants/dummyData';
 import { Ionicons } from '@expo/vector-icons';
 import SafeAreaScreen from '@/components/layout/SafeAreaScreen';
+import CreateGameBanner from '@/components/common/banner/CreateGameBanner';
 
 // 공통 그림자
 const shadow = Platform.select({
@@ -67,6 +68,11 @@ export default function HomeScreen() {
     });
   };
 
+  // 게임 생성 스크린으로 이동
+  const goToGameCreateScreen = () => {
+    navigation.navigate('CreateGameScreen');
+  };
+
   return (
     <SafeAreaScreen>
       <ScrollView contentContainerStyle={styles.scroll}>
@@ -103,6 +109,11 @@ export default function HomeScreen() {
           data={DUMMY_PLACES}
           onPressItem={goToSpotDetailScreen}
         />
+
+        {/* 게임 생성 배너 */}
+        <View style={{ marginTop: 22 }}>
+          <CreateGameBanner onPress={goToGameCreateScreen} />
+        </View>
       </ScrollView>
     </SafeAreaScreen>
   );
