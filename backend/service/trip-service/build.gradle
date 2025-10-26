@@ -3,6 +3,7 @@ dependencies {
     implementation project(":core:persistence-core")
     implementation project(":core:security-core")
     implementation project(":core:storage-core")
+    implementation project(":core:redis-core")
 
     // Spring Data JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -29,4 +30,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     // MinIO
     implementation 'io.minio:minio:8.5.17'
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 }
