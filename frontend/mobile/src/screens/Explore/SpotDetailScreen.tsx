@@ -51,7 +51,12 @@ export default function SpotDetailScreen({ route }: Props) {
   console.log('🤢🤢🤢🤢🤢 tripSpot', tripSpot);
   console.log('📚📚📚📚📚 reviewSummary', reviewSummary, reviewSummary?.dataBody.totalCount);
 
-  // 더미 데이터
+  // 게임 생성 스크린으로 이동
+  const goToGameCreateScreen = () => {
+    navigation.navigate('CreateGameScreen');
+  };
+
+  // 더미 리뷰 데이터
   const reviews = [
     {
       id: 1,
@@ -88,7 +93,7 @@ export default function SpotDetailScreen({ route }: Props) {
             </View>
           )}
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={26} color="#222" />
+            <Ionicons name="arrow-back" size={23} color="#222" />
           </TouchableOpacity>
         </View>
 
@@ -150,7 +155,7 @@ export default function SpotDetailScreen({ route }: Props) {
       {/* 하단 CTA */}
       <View style={styles.footer}>
         <View />
-        <TouchableOpacity style={styles.ctaBtn}>
+        <TouchableOpacity style={styles.ctaBtn} onPress={goToGameCreateScreen}>
           <Text style={styles.ctaText}>이 지역에서 게임 시작하기</Text>
         </TouchableOpacity>
       </View>
@@ -171,10 +176,10 @@ const styles = StyleSheet.create({
   retryText: { color: palette.gray800, fontWeight: '600' },
 
   imageWrapper: { position: 'relative' },
-  mainImage: { width: '100%', height: 260 },
+  mainImage: { width: '100%', height: 300 },
   thumbPh: {
     width: '100%',
-    height: 260,
+    height: 300,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#eef1f6',
