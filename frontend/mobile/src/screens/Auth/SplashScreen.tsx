@@ -22,10 +22,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 48,
+    fontSize: 42,
     fontWeight: '800',
-    fontStyle: 'italic',
-    letterSpacing: 2,
+    letterSpacing: 1,
     color: '#fff',
     textAlign: 'center',
     textShadowColor: 'rgba(0,0,0,0.25)',

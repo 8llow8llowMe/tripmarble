@@ -130,12 +130,9 @@ export default function LoginScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.content}>
-        {/* 로고 */}
-        <Image source={logo} style={styles.logo} />
-        <Text style={styles.title}>TripMarble</Text>
-
         {/* 슬로건 */}
-        <Text style={styles.slogan}>FIND YOUR NEXT DESTINATION!</Text>
+        <Image source={logo} style={styles.logo} />
+        <Text style={styles.title}>여행을 게임으로, TripMarble</Text>
 
         {/* 이메일 입력 */}
         <Controller
@@ -295,15 +292,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: palette.gray800,
     fontWeight: '700',
-    marginBottom: 10,
-  },
-  slogan: {
-    fontSize: 13,
-    letterSpacing: 0.3,
-    color: palette.gray600,
-    fontWeight: '700',
     marginBottom: 50,
   },
+
   inputWrapper: {
     width: '100%',
     marginBottom: 16,
