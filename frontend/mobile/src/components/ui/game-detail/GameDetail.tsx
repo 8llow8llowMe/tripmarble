@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { BottomSheetBackdrop, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { palette } from '@/constants/colors';
@@ -14,7 +14,6 @@ import useGameDetailQuery from '@/hooks/game/useGameDetail';
 import useMoveLogsQuery from '@/hooks/game/useMoveLogs';
 import { gameInfoDummy } from '@/utils/gameInfoDummy';
 
-// Subcomponents
 import GameDetailHeader from '../../layout/header/GameDetailHeader';
 import GameDetailInfo from './GameDetailInfo';
 import GameDetailTabs from './GameDetailTabs';
@@ -24,6 +23,7 @@ import MissionReviewSheet from '@/components/bottomSheet/game/MissionReviewSheet
 import MissionSelectSheet from '@/components/bottomSheet/game/MissionSelectSheet';
 import MissionLocationSheet from '@/components/bottomSheet/game/MissionLocationSheet';
 import GameInfoSheet from '@/components/bottomSheet/game/GameInfoSheet';
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner';
 
 type Props = {
   tripGameId: string;
@@ -52,10 +52,11 @@ export default function GameDetail({ tripGameId, onExit }: Props) {
 
   const [selectedTile, setSelectedTile] = useState<any>(null); // 선택한 타일
   const [currentTile, setCurrentTile] = useState<any>(null); // 현재 위치 타일
-  // ✅ 선택한 타일이 현재 타일인지 여부
-  const [isCurrentTileSelected, setIsCurrentTileSelected] = useState<boolean>(false);
+  const [isCurrentTileSelected, setIsCurrentTileSelected] = useState<boolean>(false); // ✅ 선택한 타일이 현재 타일인지 여부
 
-  console.log(selectedTile, currentTile);
+  console.log(lastMoveLog);
+  console.log('🐶🐶🐶 currentTile : ', currentTile);
+  console.log('🐱🐱🐱 selectedTile : ', selectedTile);
 
   const orderedLogs = [...moveLogList]
     .filter(
@@ -144,32 +145,32 @@ export default function GameDetail({ tripGameId, onExit }: Props) {
 
   const [activeTab, setActiveTab] = useState<'timeline' | 'guide'>('timeline');
 
-  // const timelineEntries = useMemo(
-  //   () =>
-  //     orderedLogs.map((log, idx) => {
-  //       const tileInfo = tiles.find((t: any) => t?.tripGameTileId === log?.tripGameTileId);
-  //       return {
-  //         id: log?.tripGameMoveLogId ?? `${idx}`,
-  //         order: idx + 1,
-  //         spotName: tileInfo?.tripSpotName ?? '-',
-  //         mission: tileInfo?.missionTypeDescription ?? '-',
-  //         status: (log?.missionResultCode ?? 'PENDING') as any,
-  //         arrivedAt: log?.arrivedAt as string | undefined,
-  //       };
-  //     }),
-  //   [orderedLogs, tiles],
-  // );
+  const timelineEntries = useMemo(
+    () =>
+      orderedLogs.map((log, idx) => {
+        const tileInfo = tiles.find((t: any) => t?.tripGameTileId === log?.tripGameTileId);
+        return {
+          id: log?.tripGameMoveLogId ?? `${idx}`,
+          order: idx + 1,
+          spotName: tileInfo?.tripSpotName ?? '-',
+          mission: tileInfo?.missionTypeDescription ?? '-',
+          status: (log?.missionResultCode ?? 'PENDING') as any,
+          arrivedAt: log?.arrivedAt as string | undefined,
+        };
+      }),
+    [orderedLogs, tiles],
+  );
 
-  // const formatDT = (iso?: string) => {
-  //   if (!iso) return '';
-  //   const d = new Date(iso);
-  //   const yy = d.getFullYear();
-  //   const mm = String(d.getMonth() + 1).padStart(2, '0');
-  //   const dd = String(d.getDate()).padStart(2, '0');
-  //   const HH = String(d.getHours()).padStart(2, '0');
-  //   const MM = String(d.getMinutes()).padStart(2, '0');
-  //   return `${yy}.${mm}.${dd} ${HH}:${MM}`;
-  // };
+  const formatDT = (iso?: string) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const yy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const HH = String(d.getHours()).padStart(2, '0');
+    const MM = String(d.getMinutes()).padStart(2, '0');
+    return `${yy}.${mm}.${dd} ${HH}:${MM}`;
+  };
 
   // 바텀시트
   const { bottomSheetRef, openSheet, closeSheet } = useBottomSheetBase();
@@ -184,6 +185,23 @@ export default function GameDetail({ tripGameId, onExit }: Props) {
       appearsOnIndex={0}
     />
   );
+
+  // ✅ 시트별 고정 높이 (px 단위)
+  const sheetHeights = useMemo(
+    () => ({
+      info: 520,
+      select: 220,
+      review: 520,
+      location: 520,
+    }),
+    [],
+  );
+
+  console.log('🐭🐭🐭 activeSheet', activeSheet);
+
+  // ✅ 현재 활성화된 시트 높이 결정
+  const currentHeight = sheetHeights[activeSheet as keyof typeof sheetHeights] ?? 400;
+
   // 타일 클릭
   const handleTilePress = (tile: any, tapIndex: number) => {
     setSelectedTile(tile);
@@ -220,15 +238,7 @@ export default function GameDetail({ tripGameId, onExit }: Props) {
   const [confettiVisible, setConfettiVisible] = useState(false);
 
   if (!bothReady) {
-    return (
-      <View style={styles.safeArea}>
-        <View style={styles.container}>
-          <View style={{ paddingVertical: 28, alignItems: 'center' }}>
-            <Text style={{ fontSize: 16, color: '#6B7280' }}>불러오는 중…</Text>
-          </View>
-        </View>
-      </View>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
@@ -289,7 +299,7 @@ export default function GameDetail({ tripGameId, onExit }: Props) {
         )}
 
         {/* 게임 설명 */}
-        {/* <GameDetailTabs value={activeTab} onChange={setActiveTab} />
+        <GameDetailTabs value={activeTab} onChange={setActiveTab} />
         {activeTab === 'timeline' ? (
           <TimelineList entries={timelineEntries as any} formatDT={formatDT} />
         ) : (
@@ -308,13 +318,13 @@ export default function GameDetail({ tripGameId, onExit }: Props) {
               <Text style={styles.guideText}>한 바퀴 완주 시 게임 종료!</Text>
             </View>
           </View>
-        )} */}
+        )}
       </ScrollView>
 
       <BottomSheetModal
         ref={bottomSheetRef}
         index={1}
-        snapPoints={['25%', '85%']}
+        snapPoints={[currentHeight]} // px 단위 고정
         handleStyle={{
           backgroundColor: palette.white,
           borderTopLeftRadius: 12,
@@ -325,7 +335,7 @@ export default function GameDetail({ tripGameId, onExit }: Props) {
       >
         {activeSheet === 'info' && (
           <GameInfoSheet
-            tile={selectedTile}
+            tripSpotId={selectedTile.tripSpotId}
             isCurrentTile={isCurrentTileSelected}
             onStartMission={() => {
               // if (!isCurrentTileSelected) return; // 다른 칸 클릭이면 무시
@@ -360,7 +370,8 @@ export default function GameDetail({ tripGameId, onExit }: Props) {
         {activeSheet === 'review' && (
           <MissionReviewSheet
             tripGameId={tripGameId}
-            tripGameMoveLogId={currentTile.tripGameMoveLogId}
+            tripGameMoveLogId={lastMoveLog.tripGameMoveLogId}
+            tripSpotId={currentTile.tripSpotId}
             onClose={closeSheet}
             onSuccess={() => {
               closeSheet();
