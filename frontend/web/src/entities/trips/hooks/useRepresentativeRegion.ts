@@ -9,6 +9,10 @@ export interface RepresentativeRegionDetail {
   representativeRegionName: string;
   representativeRegionImageUrl: string | null;
   description: string | null;
+  boundaryGeoJsonItem: {
+    type: string;
+    coordinates: number[][][] | string | null;
+  } | null;
 }
 
 // 대표 여행지 상세 조회

@@ -1,31 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type MapMarker = {
   id: string | number;
   lat: number;
   lng: number;
   title?: string;
-};
-
-type KakaoMapProps = {
-  className?: string;
-  center?: {
-    lat: number;
-    lng: number;
-  } | null;
-  level?: number;
-  height?: number | string;
-  markers?: MapMarker[];
-  fitToMarkers?: boolean;
-  fitBoundsPadding?: number;
-  fitBoundsKey?: number | string;
-  onMarkerClick?: (markerId: string | number) => void;
-  draggable?: boolean;
-  scrollwheel?: boolean;
-  centerAnchor?: { x: number; y: number };
-  selectedMarkerId?: string | number;
 };
 
 type KakaoWindow = typeof window & {
@@ -58,6 +39,42 @@ type MarkerStoreItem = {
   clickHandler?: () => void;
 };
 
+type PolygonPathCoordinate = {
+  lat: number;
+  lng: number;
+};
+
+type MapPolygon = {
+  id?: string | number;
+  paths: PolygonPathCoordinate[][];
+  strokeColor?: string;
+  strokeOpacity?: number;
+  strokeWeight?: number;
+  fillColor?: string;
+  fillOpacity?: number;
+  zIndex?: number;
+};
+
+type KakaoMapProps = {
+  className?: string;
+  center?: {
+    lat: number;
+    lng: number;
+  } | null;
+  level?: number;
+  height?: number | string;
+  markers?: MapMarker[];
+  fitToMarkers?: boolean;
+  fitBoundsPadding?: number;
+  fitBoundsKey?: number | string;
+  onMarkerClick?: (markerId: string | number) => void;
+  draggable?: boolean;
+  scrollwheel?: boolean;
+  centerAnchor?: { x: number; y: number };
+  selectedMarkerId?: string | number;
+  polygons?: MapPolygon[];
+};
+
 const SCRIPT_ID = "kakao-map-sdk";
 const DEFAULT_CENTER = { lat: 37.5665, lng: 126.978 };
 const DEFAULT_LEVEL = 7;
@@ -69,6 +86,7 @@ const KakaoMap = ({
   level = DEFAULT_LEVEL,
   height = 240,
   markers,
+  polygons,
   fitToMarkers = false,
   fitBoundsPadding = 60,
   fitBoundsKey,
@@ -78,6 +96,7 @@ const KakaoMap = ({
   centerAnchor = DEFAULT_ANCHOR,
   selectedMarkerId,
 }: KakaoMapProps) => {
+  const [isMapReady, setIsMapReady] = useState(false);
   const getBlueDotImage = (maps: any) => {
     // 12x12 blue circle SVG as data URL
     const svg = encodeURIComponent(
@@ -156,13 +175,30 @@ const KakaoMap = ({
     pt.y -= dy;
     return proj.coordsFromPoint(pt);
   };
+
+  const moveToBiasedCenter = (
+    maps: any,
+    map: any,
+    targetLatLng: any,
+    { animate = true }: { animate?: boolean } = {}
+  ) => {
+    if (!maps || !map || !targetLatLng) return;
+    const biased = getBiasedCenterLatLng(maps, map, targetLatLng);
+    if (animate && typeof map.panTo === "function") {
+      map.panTo(biased);
+    } else {
+      map.setCenter(biased);
+    }
+  };
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   const markerStoreRef = useRef<Map<MapMarker["id"], MarkerStoreItem>>(
     new Map()
   );
+  const polygonStoreRef = useRef<Map<string, any>>(new Map());
   const mapsRef = useRef<any>(null);
+  const lastKnownLevelRef = useRef<number | null>(null);
 
   const safeCenter = center ?? DEFAULT_CENTER;
 
@@ -193,6 +229,7 @@ const KakaoMap = ({
       if (!maps || !containerRef.current) return;
 
       mapsRef.current = maps;
+      setIsMapReady(false);
 
       maps.load(() => {
         if (!containerRef.current) return;
@@ -212,17 +249,17 @@ const KakaoMap = ({
         mapInstanceRef.current = new maps.Map(containerRef.current, options);
 
         // After map creation, bias the center if needed
-        const biased = getBiasedCenterLatLng(
-          maps,
-          mapInstanceRef.current,
-          initialCenter
-        );
-        mapInstanceRef.current.setCenter(biased);
+        moveToBiasedCenter(maps, mapInstanceRef.current, initialCenter, {
+          animate: false,
+        });
+        lastKnownLevelRef.current =
+          mapInstanceRef.current.getLevel?.() ?? level;
 
         // Show labels only when zoom level is 7 or less
         maps.event.addListener(mapInstanceRef.current, "zoom_changed", () => {
           const currentLevel = mapInstanceRef.current.getLevel();
           setOverlaysVisible(currentLevel <= 7);
+          lastKnownLevelRef.current = currentLevel;
         });
 
         if (!kakaoMarkers.length) {
@@ -231,6 +268,8 @@ const KakaoMap = ({
             map: mapInstanceRef.current,
           });
         }
+
+        setIsMapReady(true);
       });
     };
 
@@ -292,6 +331,7 @@ const KakaoMap = ({
     mapInstanceRef.current.setCenter(biased);
     if (typeof level === "number") {
       mapInstanceRef.current.setLevel(level);
+      lastKnownLevelRef.current = mapInstanceRef.current.getLevel?.() ?? level;
     }
 
     if (!markerRef.current) {
@@ -303,7 +343,14 @@ const KakaoMap = ({
       markerRef.current.setPosition(nextCenter);
       markerRef.current.setMap(mapInstanceRef.current);
     }
-  }, [safeCenter.lat, safeCenter.lng, level, kakaoMarkers.length]);
+  }, [
+    safeCenter.lat,
+    safeCenter.lng,
+    level,
+    kakaoMarkers.length,
+    centerAnchor.x,
+    centerAnchor.y,
+  ]);
 
   // Update markers whenever markers array changes
   useEffect(() => {
@@ -396,11 +443,61 @@ const KakaoMap = ({
     } catch {}
   }, [kakaoMarkers, onMarkerClick, selectedMarkerId]);
 
+  useEffect(() => {
+    if (!isMapReady) return;
+    if (!mapInstanceRef.current || !mapsRef.current) return;
+
+    const maps = mapsRef.current;
+    const store = polygonStoreRef.current;
+
+    store.forEach((polygon) => polygon.setMap(null));
+    store.clear();
+
+    (polygons ?? []).forEach((polygonData, index) => {
+      const processedPaths = (polygonData.paths ?? [])
+        .map((ring) =>
+          ring
+            .map((coord) => {
+              if (!Number.isFinite(coord.lat) || !Number.isFinite(coord.lng)) {
+                return null;
+              }
+              return new maps.LatLng(coord.lat, coord.lng);
+            })
+            .filter((coord): coord is any => coord !== null)
+        )
+        .filter((ring) => ring.length >= 3);
+
+      if (!processedPaths.length) return;
+
+      const polygon = new maps.Polygon({
+        path: processedPaths,
+        strokeWeight: polygonData.strokeWeight ?? 3,
+        strokeColor: polygonData.strokeColor ?? "#2563eb",
+        strokeOpacity: polygonData.strokeOpacity ?? 0.85,
+        strokeStyle: "solid",
+        fillColor: polygonData.fillColor ?? "#c8d1ff",
+        fillOpacity: polygonData.fillOpacity ?? 0.22,
+        zIndex: polygonData.zIndex ?? 5,
+      });
+
+      polygon.setMap(mapInstanceRef.current);
+      const key =
+        polygonData.id != null
+          ? String(polygonData.id)
+          : `polygon-${index.toString()}`;
+      store.set(key, polygon);
+    });
+
+    return () => {
+      store.forEach((polygon) => polygon.setMap(null));
+      store.clear();
+    };
+  }, [isMapReady, polygons]);
+
   // Fit bounds to markers whenever requested
   useEffect(() => {
     if (!fitToMarkers) return;
     if (!mapInstanceRef.current || !mapsRef.current) return;
-    if (!kakaoMarkers.length) return;
 
     const maps = mapsRef.current;
     const bounds = new maps.LatLngBounds();
@@ -412,17 +509,40 @@ const KakaoMap = ({
       hasPoint = true;
     });
 
+    (polygons ?? []).forEach((polygonData) => {
+      (polygonData.paths ?? []).forEach((ring) => {
+        ring.forEach((coord) => {
+          if (
+            Number.isFinite(coord.lat) &&
+            Number.isFinite(coord.lng) &&
+            !(coord.lat === 0 && coord.lng === 0)
+          ) {
+            const latLng = new maps.LatLng(coord.lat, coord.lng);
+            bounds.extend(latLng);
+            hasPoint = true;
+          }
+        });
+      });
+    });
+
     if (!hasPoint) return;
 
-    if (kakaoMarkers.length === 1) {
-      mapInstanceRef.current.setCenter(
-        new maps.LatLng(kakaoMarkers[0].lat, kakaoMarkers[0].lng)
+    if (kakaoMarkers.length === 1 && !polygons?.length) {
+      const markerCenter = new maps.LatLng(
+        kakaoMarkers[0].lat,
+        kakaoMarkers[0].lng
       );
-      if (typeof level === "number") {
-        mapInstanceRef.current.setLevel(level);
-      }
+      const biasedMarkerCenter = getBiasedCenterLatLng(
+        maps,
+        mapInstanceRef.current,
+        markerCenter
+      );
+      mapInstanceRef.current.setCenter(biasedMarkerCenter);
       return;
     }
+
+    const previousLevel =
+      lastKnownLevelRef.current ?? mapInstanceRef.current.getLevel?.() ?? null;
 
     mapInstanceRef.current.setBounds(
       bounds,
@@ -431,7 +551,33 @@ const KakaoMap = ({
       fitBoundsPadding,
       fitBoundsPadding
     );
-  }, [fitToMarkers, fitBoundsKey, kakaoMarkers, fitBoundsPadding, level]);
+
+    if (previousLevel !== null) {
+      mapInstanceRef.current.setLevel(previousLevel);
+      lastKnownLevelRef.current = previousLevel;
+    }
+
+    if (center) {
+      const targetCenter = new maps.LatLng(center.lat, center.lng);
+      const biasedTargetCenter = getBiasedCenterLatLng(
+        maps,
+        mapInstanceRef.current,
+        targetCenter
+      );
+      mapInstanceRef.current.setCenter(biasedTargetCenter);
+    }
+  }, [
+    fitToMarkers,
+    fitBoundsKey,
+    kakaoMarkers,
+    fitBoundsPadding,
+    level,
+    polygons,
+    center?.lat,
+    center?.lng,
+    centerAnchor.x,
+    centerAnchor.y,
+  ]);
 
   // Allow explicit center changes even when markers exist
   useEffect(() => {
@@ -443,7 +589,27 @@ const KakaoMap = ({
     const target = new maps.LatLng(center.lat, center.lng);
     const biased = getBiasedCenterLatLng(maps, mapInstanceRef.current, target);
     mapInstanceRef.current.panTo(biased);
-  }, [center?.lat, center?.lng, kakaoMarkers.length]);
+  }, [
+    center?.lat,
+    center?.lng,
+    kakaoMarkers.length,
+    centerAnchor.x,
+    centerAnchor.y,
+  ]);
+
+  useEffect(() => {
+    if (!isMapReady) return;
+    if (!mapInstanceRef.current || !mapsRef.current) return;
+    const maps = mapsRef.current;
+    const currentCenter = mapInstanceRef.current.getCenter?.();
+    if (!currentCenter) return;
+    const biased = getBiasedCenterLatLng(
+      maps,
+      mapInstanceRef.current,
+      currentCenter
+    );
+    mapInstanceRef.current.setCenter(biased);
+  }, [centerAnchor.x, centerAnchor.y, isMapReady]);
 
   const heightStyle = typeof height === "number" ? `${height}px` : height;
 
