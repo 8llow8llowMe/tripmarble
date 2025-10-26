@@ -12,6 +12,7 @@ const END_POINTS = {
   USER: {
     INFO: `/members/me`,
     WITHDRAW: `/members/me/withdraw`,
+    ACTIVITY_INFO: `/members/me/activity-summary`,
   },
 
   //TRIP
@@ -34,6 +35,7 @@ const END_POINTS = {
     LIST_CONTENT_TYPES: '/trip-content-types',
   },
 
+  //GAME
   GAME: {
     LIST_TRIP_THEMES: '/trip-themes',
     LIST_DIFFICULTY: '/trip-games/difficulties',
@@ -52,6 +54,16 @@ const END_POINTS = {
       `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/fail`,
     MOVE_LOGS_SKIP: (tripGameId: string, tripGameMoveLogId: string) =>
       `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/skip`,
+  },
+
+  //REVIEW
+  REVIEW: {
+    LIST_REVIEWS: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews`,
+    WRITE: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews`,
+    UPLOAD_PHOTO: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews/photos/temp`,
+    DETAIL: (tripSpotId: string, tripSpotReviewId: string) =>
+      `/trip-spots/${tripSpotId}/reviews/${tripSpotReviewId}`,
+    SUMMARY: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews/summary`,
   },
 };
 
