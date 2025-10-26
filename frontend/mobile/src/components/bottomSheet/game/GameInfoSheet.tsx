@@ -70,20 +70,16 @@ export default function GameInfoSheet({ tripSpotId, onStartMission, isCurrentTil
         </View>
       </View>
 
-      {/* 대표 이미지(없으면 플레이스홀더) */}
-      <View style={styles.hero}>
-        {spot.originalImageUrl ? (
+      {/* 대표 이미지 */}
+      {!!spot.originalImageUrl && (
+        <View style={styles.hero}>
           <Image
             source={{ uri: spot.originalImageUrl }}
             style={styles.heroImg}
             resizeMode="cover"
           />
-        ) : (
-          <View style={[styles.heroImg, styles.thumbPh]}>
-            <Ionicons name="image" size={20} color={palette.gray400} />
-          </View>
-        )}
-      </View>
+        </View>
+      )}
 
       {/* 주소/상세주소 */}
       <View style={styles.section}>
