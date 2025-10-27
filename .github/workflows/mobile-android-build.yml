@@ -3,15 +3,14 @@ name: Mobile Android Build
 
 on:
   pull_request:
-    types: [labeled, unlabeled, synchronize] # PR 라벨 변경/동기화 시 실행
-    branches: [develop, main] # develop, main 브랜치에서만 실행
-    paths: # 모바일 코드/워크플로우 변경 시 실행
+    types: [labeled, unlabeled, synchronize]
+    branches: [develop, main]
+    paths:
       - 'frontend/mobile/**'
       - '.github/workflows/mobile-android-build.yml'
 
 jobs:
   build:
-    # 라벨이 'frontend-mobile' 또는 'mobile' 인 경우에만 실행
     if: contains(github.event.pull_request.labels.*.name, 'frontend-mobile') || contains(github.event.pull_request.labels.*.name, 'mobile')
     runs-on: ubuntu-latest
 
@@ -21,13 +20,43 @@ jobs:
       GRADLE_OPTS: -Xmx6144m -XX:MaxMetaspaceSize=2048m
       NODE_OPTIONS: --max-old-space-size=4096
       ANDROID_NDK_VERSION: 27.1.12297006
-
-      # keystore 관련 secrets 주입 (Gradle에서 System.getenv로 읽음)
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
     steps:
+      # 0. 오래된 아티팩트 자동 정리 (빌드 시작 전)
+      - name: Cleanup old artifacts (auto)
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const daysToKeep = 3; // 3일 이상된 아티팩트 자동 삭제
+            const now = new Date();
+            const per_page = 100;
+            let deleted = 0;
+
+            for await (const response of github.paginate.iterator(
+              github.rest.actions.listArtifactsForRepo,
+              { owner: context.repo.owner, repo: context.repo.repo, per_page }
+            )) {
+              for (const artifact of response.data) {
+                const created = new Date(artifact.created_at);
+                const ageDays = (now - created) / (1000 * 60 * 60 * 24);
+                if (ageDays > daysToKeep) {
+                  await github.rest.actions.deleteArtifact({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    artifact_id: artifact.id,
+                  });
+                  deleted++;
+                  core.info(`Deleted ${artifact.name} (${ageDays.toFixed(1)} days old)`);
+                }
+              }
+            }
+
+            core.info(`Cleanup complete. Deleted ${deleted} artifacts.`);
+
       # 1. 코드 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,7 +113,7 @@ jobs:
           ndk-version: ${{ env.ANDROID_NDK_VERSION }}
           cmake-version: 3.22.1
 
-      # 8. Yarn 의존성 설치 (캐시가 있으면 skip됨)
+      # 8. Yarn 의존성 설치
       - name: Install dependencies
         working-directory: frontend/mobile
         run: yarn install --frozen-lockfile
@@ -147,7 +176,6 @@ jobs:
           else
             BUILD_TASK="assembleDebug"
             OUTPUT_PATH="app/build/outputs/apk/debug/app-debug.apk"
-            # Debug 빌드는 clean 제거 → 속도 증가
             ./gradlew $BUILD_TASK \
               -PversionCode=${{ env.VERSION_CODE }} \
               -PversionName=${{ env.VERSION_NAME }} \
@@ -187,7 +215,7 @@ jobs:
         working-directory: frontend/mobile
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          PLAY_TRACK: ${{ vars.PLAY_TRACK || 'alpha' }} # 기본값은 alpha, repo/environment secrets/vars에서 변경 가능
+          PLAY_TRACK: ${{ vars.PLAY_TRACK || 'alpha' }}
         run: |
           echo "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON" > google-play-service-account.json
           gem install fastlane --no-document --user-install
@@ -204,4 +232,4 @@ jobs:
             --skip_upload_images \
             --skip_upload_screenshots
 
-            rm -f google-play-service-account.json
+          rm -f google-play-service-account.json
