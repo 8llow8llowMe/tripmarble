@@ -78,9 +78,9 @@ export default function ProfileHomeScreen() {
               <Text style={styles.name}>{nickname}</Text>
               <Text style={styles.email}>{email}</Text>
             </View>
-            <TouchableOpacity style={styles.editBtn} onPress={goToProfileEditScreen}>
+            {/* <TouchableOpacity style={styles.editBtn} onPress={goToProfileEditScreen}>
               <Text style={styles.editBtnText}>프로필 수정</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           <View style={styles.statsRow}>
@@ -97,18 +97,18 @@ export default function ProfileHomeScreen() {
           </TextBox>
 
           <View style={{ gap: 28 }}>
-            <TouchableOpacity>
+            {/* <TouchableOpacity>
               <View style={styles.row}>
                 <Ionicons name="chatbubble-ellipses-outline" size={18} color={palette.gray800} />
                 <TextBox size={15}>내 리뷰</TextBox>
               </View>
-            </TouchableOpacity>
-            <TouchableOpacity>
+            </TouchableOpacity> */}
+            {/* <TouchableOpacity>
               <View style={styles.row}>
                 <Ionicons name="bookmark-outline" size={18} color={palette.gray800} />
                 <TextBox size={15}>저장한 장소</TextBox>
               </View>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity onPress={() => goToGameListScreen()}>
               <View style={styles.row}>
                 <Ionicons name="game-controller-outline" size={18} color={palette.gray800} />

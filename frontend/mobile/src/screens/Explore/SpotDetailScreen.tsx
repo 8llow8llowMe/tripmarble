@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  FlatList,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +19,7 @@ import { SpotStackParamList } from '@/types/navigation/navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import KakaoMap from '@/components/ui/map/KakaoMap';
 import useReviewSummaryQuery from '@/hooks/review/useReviewSummary';
+import useReviewListInfiniteQuery from '@/hooks/review/useReviewList';
 
 type Props = NativeStackScreenProps<SpotStackParamList, 'SpotDetailScreen'>;
 
@@ -27,6 +29,17 @@ export default function SpotDetailScreen({ route }: Props) {
 
   const { tripSpot, isLoading, isError, refetch } = useTripSpotQuery({ tripSpotId });
   const { reviewSummary } = useReviewSummaryQuery({ tripSpotId });
+  const {
+    data: reviewPages,
+    isLoading: isReviewsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useReviewListInfiniteQuery({
+    tripSpotId,
+    size: 12,
+    orderType: 'DESC',
+  });
 
   if (isLoading) {
     return (
@@ -36,7 +49,7 @@ export default function SpotDetailScreen({ route }: Props) {
     );
   }
 
-  if (isError) {
+  if (isError || !tripSpot?.dataBody) {
     return (
       <SafeAreaView style={[styles.safeArea, styles.center]}>
         <Text style={{ color: palette.error }}>데이터를 불러올 수 없습니다.</Text>
@@ -47,29 +60,22 @@ export default function SpotDetailScreen({ route }: Props) {
     );
   }
 
-  // "dataBody": {"address": "제주특별자치도 서귀포시 솔동산로 26-6", "addressDetail": "", "contentTypeName": "음식점", "description": null, "homepageUrl": null, "latitude": 33.2427454939, "longitude": 126.5632393864, "originalImageUrl": "http://tong.visitkorea.or.kr/cms/resource/05/2904405_image2_1.jpg", "phoneNumber": null, "tripSpotId": "50492", "tripSpotName": "woody glade"}
+  const spot = tripSpot.dataBody;
+
+  const photoItems = reviewPages?.pages.flatMap((p) => p?.dataBody?.contents ?? []) ?? [];
+
+  console.log(photoItems);
+
+  const avgRating = reviewSummary?.dataBody?.averageRating;
+  const totalCount = reviewSummary?.dataBody?.totalCount ?? 0;
+
   console.log('🤢🤢🤢🤢🤢 tripSpot', tripSpot);
   console.log('📚📚📚📚📚 reviewSummary', reviewSummary, reviewSummary?.dataBody.totalCount);
 
-  // 더미 데이터
-  const reviews = [
-    {
-      id: 1,
-      name: '김철수',
-      date: '2025년 2월',
-      rating: 5,
-      avatar: 'https://i.pravatar.cc/50?img=3',
-      text: '바다가 눈앞에 펼쳐져 너무 아름다웠어요. 가족과 함께 최고의 추억을 만들었습니다 🙌',
-    },
-    {
-      id: 2,
-      name: '이영희',
-      date: '2025년 1월',
-      rating: 4,
-      avatar: 'https://i.pravatar.cc/50?img=5',
-      text: '근처 카페들이 너무 예쁘고 분위기 있었어요. 바람은 조금 불었지만 뷰가 다 했습니다 🌊',
-    },
-  ];
+  // 게임 생성 스크린으로 이동
+  const goToGameCreateScreen = () => {
+    navigation.navigate('CreateGameScreen');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -88,7 +94,7 @@ export default function SpotDetailScreen({ route }: Props) {
             </View>
           )}
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={26} color="#222" />
+            <Ionicons name="arrow-back" size={23} color="#222" />
           </TouchableOpacity>
         </View>
 
@@ -103,54 +109,99 @@ export default function SpotDetailScreen({ route }: Props) {
         {/* 상세 소개 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>상세정보</Text>
-          <Text style={styles.desc}>{tripSpot?.dataBody.description}</Text>
+          {!!spot.description && <Text style={styles.desc}>{spot.description}</Text>}
+
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               <Ionicons name="location" size={18} color={palette.mainColor} />
-              <Text style={styles.infoText}>{tripSpot?.dataBody.address}</Text>
+              <Text style={styles.infoText}>{spot.address}</Text>
             </View>
-            {tripSpot?.dataBody.phoneNumber && (
+            {!!spot.phoneNumber && (
               <View style={styles.infoRow}>
                 <Ionicons name="call" size={18} color={palette.mainColor} />
-                <Text style={styles.infoText}>{tripSpot?.dataBody.phoneNumber}</Text>
+                <Text style={styles.infoText}>{spot.phoneNumber}</Text>
               </View>
             )}
-            <TouchableOpacity style={styles.infoRow}>
-              <Ionicons name="globe" size={18} color={palette.mainColor} />
-              <Text style={[styles.infoText, { color: palette.mainColor }]}>홈페이지 바로가기</Text>
-            </TouchableOpacity>
+            {!!spot.homepageUrl && (
+              <TouchableOpacity style={styles.infoRow}>
+                <Ionicons name="globe" size={18} color={palette.mainColor} />
+                <Text style={[styles.infoText, { color: palette.mainColor }]}>
+                  홈페이지 바로가기
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
-          <KakaoMap
-            latitude={tripSpot?.dataBody.latitude ?? 0}
-            longitude={tripSpot?.dataBody.longitude ?? 0}
-          />
+          {/* 지도 */}
+          <KakaoMap latitude={spot.latitude ?? 0} longitude={spot.longitude ?? 0} />
         </View>
 
-        {/* 리뷰 */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>리뷰 ⭐ 4.7 (전체 210개)</Text>
-          {reviews.map((r) => (
-            <View key={r.id} style={styles.reviewCard}>
-              <View style={styles.reviewHeader}>
-                <Image source={{ uri: r.avatar }} style={styles.avatar} />
-                <View>
-                  <Text style={styles.reviewer}>{r.name}</Text>
-                  <Text style={styles.reviewDate}>{r.date}</Text>
+        {/* 리뷰 섹션 */}
+        <View style={[styles.section, { paddingBottom: 4 }]}>
+          <Text style={styles.sectionTitle}>
+            리뷰 {avgRating ? `⭐ ${Number(avgRating).toFixed(1)}` : ''} (전체 {totalCount}개)
+          </Text>
+
+          {/* 포토 리뷰 그리드 / 빈 상태 / 로딩 */}
+          {isReviewsLoading ? (
+            <ActivityIndicator style={{ marginTop: 10 }} />
+          ) : totalCount === 0 || photoItems.length === 0 ? (
+            <Text style={{ color: '#888', paddingVertical: 8 }}>아직 리뷰가 없습니다.</Text>
+          ) : (
+            <FlatList
+              data={photoItems}
+              keyExtractor={(item) => item.contentId}
+              numColumns={3}
+              columnWrapperStyle={{ gap: 6 }}
+              contentContainerStyle={{ gap: 6 }}
+              scrollEnabled={false} // 부모 ScrollView 안이라 false
+              renderItem={({ item }) => (
+                <View style={styles.photoCell}>
+                  {item.originalImageUrl ? (
+                    <Image source={{ uri: item.originalImageUrl }} style={styles.photo} />
+                  ) : (
+                    <View
+                      style={[
+                        styles.photo,
+                        { backgroundColor: '#eee', alignItems: 'center', justifyContent: 'center' },
+                      ]}
+                    >
+                      <Ionicons name="image" size={16} color="#bbb" />
+                    </View>
+                  )}
                 </View>
-                <Text style={styles.stars}>{'⭐'.repeat(r.rating)}</Text>
-              </View>
-              <Text style={styles.reviewText}>{r.text}</Text>
-            </View>
-          ))}
-          <Text style={styles.link}>리뷰 전체 보기</Text>
+              )}
+              ListFooterComponent={
+                hasNextPage ? (
+                  <TouchableOpacity
+                    style={styles.loadMoreBtn}
+                    onPress={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? (
+                      <ActivityIndicator />
+                    ) : (
+                      <Text style={styles.loadMoreText}>더 보기</Text>
+                    )}
+                  </TouchableOpacity>
+                ) : null
+              }
+            />
+          )}
+
+          {/* 리뷰 전체 보기 - (필요 시 스크린 연결) */}
+          {totalCount > 0 && !isReviewsLoading && (
+            <TouchableOpacity style={{ marginTop: 8 }}>
+              <Text style={styles.link}>리뷰 전체 보기</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
 
       {/* 하단 CTA */}
       <View style={styles.footer}>
         <View />
-        <TouchableOpacity style={styles.ctaBtn}>
+        <TouchableOpacity style={styles.ctaBtn} onPress={goToGameCreateScreen}>
           <Text style={styles.ctaText}>이 지역에서 게임 시작하기</Text>
         </TouchableOpacity>
       </View>
@@ -171,25 +222,25 @@ const styles = StyleSheet.create({
   retryText: { color: palette.gray800, fontWeight: '600' },
 
   imageWrapper: { position: 'relative' },
-  mainImage: { width: '100%', height: 260 },
+  mainImage: { width: '100%', height: 300 },
   thumbPh: {
     width: '100%',
-    height: 260,
+    height: 300,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#eef1f6',
   },
   backBtn: {
     position: 'absolute',
-    top: 20,
-    left: 16,
-    backgroundColor: '#fff',
+    top: 11,
+    left: 13,
+    backgroundColor: palette.white,
     borderRadius: 20,
     padding: 6,
   },
   topRightBtns: { position: 'absolute', top: 20, right: 16, flexDirection: 'row' },
   circleBtn: {
-    backgroundColor: '#fff',
+    backgroundColor: palette.white,
     borderRadius: 20,
     padding: 6,
     marginLeft: 8,
@@ -255,6 +306,20 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
+  // 포토 그리드
+  photoCell: { width: '32%', aspectRatio: 1, borderRadius: 8, overflow: 'hidden' },
+  photo: { width: '100%', height: '100%' },
+
+  // 로드 모어
+  loadMoreBtn: {
+    marginTop: 8,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#eef1f6',
+    alignItems: 'center',
+  },
+  loadMoreText: { color: '#333', fontWeight: '600' },
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -263,7 +328,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderTopWidth: 1,
     borderColor: '#eee',
-    backgroundColor: '#fff',
+    backgroundColor: palette.white,
   },
   footerInfo: { fontSize: 15, fontWeight: '600', color: '#222' },
   footerSub: { fontSize: 12, color: '#777' },
@@ -273,5 +338,5 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 12,
   },
-  ctaText: { color: '#fff', fontSize: 15, fontWeight: '700' },
+  ctaText: { color: palette.white, fontSize: 15, fontWeight: '700' },
 });

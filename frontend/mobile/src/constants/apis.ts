@@ -30,6 +30,7 @@ const END_POINTS = {
     LIST_REPRESENTATIVE_REGIONS: '/regions/representative',
     REPRESENTATIVE_REGION: (representativeRegionId: string) =>
       `/regions/representative/${representativeRegionId}`,
+    SEARCH_REPRESENTATIVE_REGION: `/regions/representative/search`,
 
     // 여행 콘텐츠 타입
     LIST_CONTENT_TYPES: '/trip-content-types',
@@ -54,6 +55,19 @@ const END_POINTS = {
       `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/fail`,
     MOVE_LOGS_SKIP: (tripGameId: string, tripGameMoveLogId: string) =>
       `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/skip`,
+
+    MISSON_REVIEW: (tripGameId: string, tripGameMoveLogId: string) =>
+      `/trip-games/${tripGameId}/move-logs/${tripGameMoveLogId}/review`,
+  },
+
+  //REVIEW
+  REVIEW: {
+    LIST_REVIEWS: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews`,
+    WRITE: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews`,
+    UPLOAD_PHOTO: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews/photos/temp`,
+    DETAIL: (tripSpotId: string, tripSpotReviewId: string) =>
+      `/trip-spots/${tripSpotId}/reviews/${tripSpotReviewId}`,
+    SUMMARY: (tripSpotId: string) => `/trip-spots/${tripSpotId}/reviews/summary`,
   },
 
   //REVIEW

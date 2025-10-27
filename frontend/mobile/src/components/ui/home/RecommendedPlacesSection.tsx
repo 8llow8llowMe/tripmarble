@@ -74,10 +74,10 @@ const RecommendedPlacesSection = ({
                   {item.name}
                 </TextBox>
                 <View style={styles.ratingRow}>
-                  <Ionicons name="star" size={14} color="#FFD166" />
+                  {/* <Ionicons name="star" size={14} color="#FFD166" />
                   <TextBox size={14} color={palette.white} style={{ marginLeft: 4 }}>
                     {item.score.toFixed(1)}
-                  </TextBox>
+                  </TextBox> */}
                 </View>
               </View>
             </ImageBackground>

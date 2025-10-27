@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { palette } from '@/constants/colors';
 import KakaoMap from '@/components/ui/map/KakaoMap';
+import TextBox from '@/components/atom/TextBox';
 
 type Props = {
   verified: boolean;
@@ -20,7 +21,9 @@ export default function MissionLocationForm({
 }: Props) {
   return (
     <View style={styles.card}>
-      <Text style={styles.label}>현재 위치 인증</Text>
+      <TextBox size={16} fontsName="Pretendard700" style={{ alignSelf: 'center' }}>
+        현재 위치 인증
+      </TextBox>
 
       {/* 1) 미니맵 프리뷰 */}
       {current ? (
