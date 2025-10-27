@@ -192,22 +192,22 @@ jobs:
           echo "OUTPUT_PATH=$OUTPUT_PATH" >> $GITHUB_ENV
 
       # 14. APK 업로드 (Debug 전용)
-      - name: Upload APK (Debug)
-        if: env.BUILD_TYPE == 'debug'
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-debug-${{ github.event.number }}
-          path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
+      # - name: Upload APK (Debug)
+      #   if: env.BUILD_TYPE == 'debug'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: app-debug-${{ github.event.number }}
+      #     path: frontend/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+      #     retention-days: 7
 
       # 15. AAB 업로드 (Release 전용)
-      - name: Upload AAB (Release)
-        if: env.BUILD_TYPE == 'release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-${{ github.event.number }}
-          path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
-          retention-days: 30
+      # - name: Upload AAB (Release)
+      #   if: env.BUILD_TYPE == 'release'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: app-release-${{ github.event.number }}
+      #     path: frontend/mobile/android/app/build/outputs/bundle/release/app-release.aab
+      #     retention-days: 30
 
       # 16. Google Play 업로드 (Configurable Track)
       - name: Deploy to Google Play (Open Track)
