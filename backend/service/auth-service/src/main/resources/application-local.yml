@@ -31,8 +31,10 @@ spring:
 
   data:
     redis:
+      mode: standalone
       host: localhost
       port: 6379
+      password:
 
 # log 관리
 logging:
@@ -70,15 +72,15 @@ minio:
 swagger:
   server-url: http://localhost:8081
 
-# Actuator
+# Actuator (Spring Boot Admin에서 서비스 상태/지표 모니터링용)
 management:
   endpoints:
     web:
       exposure:
-        include: "health,info" # 해당 actuator endpoint 노출
+        include: "health,info,metrics,env,beans,mappings,loggers,threaddump,heapdump,scheduledtasks"
   endpoint:
     health:
-      show-details: ALWAYS # SBA에서 상세 health 정보까지 보기 위함
+      show-details: ALWAYS  # 헬스 상태 상세 정보 표시(DB 연결 등)
 
 # Mail
 mail:
