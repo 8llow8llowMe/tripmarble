@@ -31,8 +31,16 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
+      mode: ${REDIS_MODE}
+      master-name: ${REDIS_MASTER_NAME}
+      password: ${REDIS_PASSWORD}
+      sentinels:
+        - host: ${REDIS_SENTINEL_1_HOST}
+          port: ${REDIS_SENTINEL_1_PORT}
+        - host: ${REDIS_SENTINEL_2_HOST}
+          port: ${REDIS_SENTINEL_2_PORT}
+        - host: ${REDIS_SENTINEL_3_HOST}
+          port: ${REDIS_SENTINEL_3_PORT}
 
 eureka:
   instance:
