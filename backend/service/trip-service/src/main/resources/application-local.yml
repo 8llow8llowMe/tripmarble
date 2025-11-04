@@ -31,8 +31,10 @@ spring:
 
   data:
     redis:
+      mode: standalone
       host: localhost
       port: 6379
+      password:
 
 # log 관리
 logging:
