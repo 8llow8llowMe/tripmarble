@@ -1,7 +1,6 @@
 name: Jenkins Trigger
 
 on:
-  # 1. PR 이벤트 (생성/라벨변경/동기화)
   pull_request:
     types: [opened, reopened, synchronize, labeled, unlabeled]
     branches: [develop, main]
@@ -9,7 +8,6 @@ on:
       - 'frontend/mobile/**'
       - '.github/workflows/**'
 
-  # 2. develop / main 브랜치 직접 push (머지 등)
   push:
     branches: [develop, main]
     paths-ignore:
@@ -26,7 +24,7 @@ jobs:
           JENKINS_URL:   ${{ secrets.JENKINS_URL }}
           JENKINS_USER:  ${{ secrets.JENKINS_USER }}
           JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN }}
-          MBP_PREFIX:    "tripmarble"  # 멀티브랜치 prefix
+          MBP_PREFIX:    "tripmarble"
         shell: bash
         run: |
           set -euo pipefail
@@ -39,7 +37,7 @@ jobs:
               | grep -oP '(?<="crumb":")[^"]*' || true
           }
 
-          # 2. Jenkins 빌드 트리거 함수 (400 대응 + disabled 감지)
+          # 2. Jenkins 빌드 트리거 함수
           trigger_pr_build() {
             local JOB_URL="$1"
             local SCAN_URL="$2"
@@ -52,27 +50,37 @@ jobs:
               --user "$JENKINS_USER:$JENKINS_TOKEN" "${HDR[@]}" \
               "$JOB_URL/build")
 
-            # 400 대응: 인덱싱 중이거나 disabled 상태일 때 재시도 또는 재인덱싱
             if [[ "$HTTP_CODE" == "400" ]]; then
-              echo "Job not buildable (HTTP 400) → 상태 점검 중..."
+              echo "Job not buildable (HTTP 400) → 상태 점검 및 복구 시도..."
               local STATUS_JSON=$(curl -s --user "$JENKINS_USER:$JENKINS_TOKEN" "$JOB_URL/api/json")
               local DISABLED=$(echo "$STATUS_JSON" | grep -o '"disabled":[^,]*' | cut -d':' -f2 | tr -d ' ')
               local BUILDABLE=$(echo "$STATUS_JSON" | grep -o '"buildable":[^,]*' | cut -d':' -f2 | tr -d ' ')
 
+              # disabled=true → enable API 호출
               if [[ "$DISABLED" == "true" ]]; then
-                echo "Job is disabled → re-indexing $SCAN_URL"
+                echo "Job is disabled → enabling job..."
+                curl -s -X POST \
+                  --user "$JENKINS_USER:$JENKINS_TOKEN" \
+                  "${HDR[@]}" \
+                  "$JOB_URL/enable"
+                sleep 5
+              fi
+
+              # buildable=false → re-index (change request 갱신)
+              if [[ "$BUILDABLE" == "false" ]]; then
+                echo "Job found but not buildable → re-indexing repo..."
                 curl -s -X POST --user "$JENKINS_USER:$JENKINS_TOKEN" "$SCAN_URL"
                 sleep 15
-              elif [[ "$BUILDABLE" == "false" ]]; then
-                echo "Job found but not yet buildable → waiting and retrying..."
-                for i in {1..3}; do
-                  sleep 10
-                  HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-                    --user "$JENKINS_USER:$JENKINS_TOKEN" "${HDR[@]}" \
-                    "$JOB_URL/build")
-                  [[ "$HTTP_CODE" == "201" ]] && break
-                done
               fi
+
+              # enable 후 재시도 (최대 3회)
+              for i in {1..3}; do
+                HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+                  --user "$JENKINS_USER:$JENKINS_TOKEN" "${HDR[@]}" \
+                  "$JOB_URL/build?delay=0sec")
+                [[ "$HTTP_CODE" == "201" ]] && break
+                sleep 10
+              done
             fi
 
             echo "Final HTTP_CODE: $HTTP_CODE"
@@ -82,19 +90,16 @@ jobs:
           map_services() {
             local labels="$1"
             svcs=()
-            # Backend
             if [[ "$labels" == *"backend-auth-service"* ]]; then svcs+=("auth-service:backend:service"); fi
             if [[ "$labels" == *"backend-trip-service"* ]]; then svcs+=("trip-service:backend:service"); fi
             if [[ "$labels" == *"backend-trip-game-service"* ]]; then svcs+=("trip-game-service:backend:service"); fi
             if [[ "$labels" == *"backend-api-gateway"* ]]; then svcs+=("api-gateway:backend:cloud"); fi
             if [[ "$labels" == *"backend-service-discovery"* ]]; then svcs+=("service-discovery:backend:cloud"); fi
-            # Frontend
             if [[ "$labels" == *"frontend-web"* ]]; then svcs+=("web:frontend:web"); fi
           }
 
           # 4. 이벤트별 분기 (PR / Push)
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            ACTION="${{ github.event.action }}"
             BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
             HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
             PR_NUMBER="${{ github.event.pull_request.number }}"
@@ -102,11 +107,7 @@ jobs:
 
             echo "PR 이벤트 감지 → #${PR_NUMBER} (${HEAD_BRANCH} → ${BASE_BRANCH})"
             map_services "$LABELS"
-
-            if [[ ${#svcs[@]} -eq 0 ]]; then
-              echo "관련 라벨 없음 → Jenkins 빌드 스킵"
-              exit 0
-            fi
+            [[ ${#svcs[@]} -eq 0 ]] && { echo "관련 라벨 없음 → Jenkins 빌드 스킵"; exit 0; }
 
             TARGET_BRANCH="$BASE_BRANCH"
             echo "TARGET_BRANCH = $TARGET_BRANCH"
@@ -121,7 +122,6 @@ jobs:
               HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
                 --user "$JENKINS_USER:$JENKINS_TOKEN" "$JOB_URL/api/json")
 
-              # 존재하지 않으면 인덱싱 먼저 트리거
               if [[ "$HTTP_CODE" == "404" ]]; then
                 echo "No PR job found → Triggering repo scan for $MBP"
                 curl -s -X POST --user "$JENKINS_USER:$JENKINS_TOKEN" "$SCAN_URL"
@@ -129,7 +129,6 @@ jobs:
                 sleep 15
               fi
 
-              # 실제 PR 빌드 트리거
               echo "Triggering PR job build → $JOB_URL"
               trigger_pr_build "$JOB_URL" "$SCAN_URL"
             done
