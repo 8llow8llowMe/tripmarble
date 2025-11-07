@@ -48,11 +48,21 @@ jobs:
             [[ -n "$CRUMB" ]] && HDR=(-H "Jenkins-Crumb:$CRUMB")
 
             echo "::group::Trigger $job_url"
-            curl -s -o /dev/null -w "HTTP:%{http_code}\n" -X POST \
-              --user "$JENKINS_USER:$JENKINS_TOKEN" \
-              "${HDR[@]}" \
-              "$job_url/buildWithParameters" \
-              "${params[@]}"
+
+            # PR(change-request) job은 /build, 일반 job은 /buildWithParameters
+            if [[ "$job_url" == *"/view/change-requests/"* ]]; then
+              curl -s -o /dev/null -w "HTTP:%{http_code}\n" -X POST \
+                --user "$JENKINS_USER:$JENKINS_TOKEN" \
+                "${HDR[@]}" \
+                "$job_url/build"
+            else
+              curl -s -o /dev/null -w "HTTP:%{http_code}\n" -X POST \
+                --user "$JENKINS_USER:$JENKINS_TOKEN" \
+                "${HDR[@]}" \
+                "$job_url/buildWithParameters" \
+                "${params[@]}"
+            fi
+
             echo "::endgroup::"
           }
 
@@ -72,7 +82,7 @@ jobs:
 
           # 4. 이벤트 종류에 따른 분기 (PR / PUSH)
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # -------- PR 이벤트 처리 --------
+            # PR 이벤트 처리
             ACTION="${{ github.event.action }}"
             BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
             HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
