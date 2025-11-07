@@ -93,7 +93,7 @@ jobs:
             # 각 서비스별 Jenkins Job 확인 + Scan + Trigger
             for svc in "${svcs[@]}"; do
               IFS=":" read -r NAME GROUP TYPE <<< "$svc"
-              MBP="${MBP_PREFIX}-${GROUP}-${TYPE}-${NAME}"
+              MBP="${MBP_PREFIX}-${GROUP}-${NAME}"
               JOB_URL="$JENKINS_URL/job/$MBP/view/change-requests/job/PR-$PR_NUMBER"
               SCAN_URL="$JENKINS_URL/job/$MBP/build?delay=0"
 
@@ -101,38 +101,19 @@ jobs:
               http_code=$(curl -s -o /dev/null -w "%{http_code}" \
                 --user "$JENKINS_USER:$JENKINS_TOKEN" "$JOB_URL/api/json")
 
-              # (1) 존재하지 않으면 Repository Scan 먼저 실행
               if [[ "$http_code" == "404" ]]; then
-                echo "⚙️  No PR job found → triggering repository scan for $MBP"
-                scan_resp=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST \
-                  --user "$JENKINS_USER:$JENKINS_TOKEN" "$SCAN_URL")
-                scan_code=$(echo "$scan_resp" | grep -oP 'HTTP_CODE:\K\\d+')
-                echo "Scan request HTTP $scan_code (waiting for job indexing...)"
-
-                # (2) 인덱싱 완료 대기
-                for i in {1..12}; do
-                  sleep 5
-                  check_code=$(curl -s -o /dev/null -w "%{http_code}" \
-                    --user "$JENKINS_USER:$JENKINS_TOKEN" "$JOB_URL/api/json")
-                  if [[ "$check_code" == "200" ]]; then
-                    echo "PR job detected after scan (attempt $i/12)"
-                    break
-                  fi
-                  echo "   Attempt $i/12 - still waiting..."
-                  if [[ $i == 12 ]]; then
-                    echo "Timeout: PR job not indexed after 60s"
-                    continue 2
-                  fi
-                done
+                echo "No PR job found → triggering repository scan for $MBP"
+                curl -s -X POST --user "$JENKINS_USER:$JENKINS_TOKEN" "$SCAN_URL"
+                echo "Waiting 10s for indexing..."
+                sleep 10
               fi
 
-              # (3) 이제 빌드 트리거
               echo "Triggering PR job build → $JOB_URL"
               trigger_build "$JOB_URL" \
                 --data-urlencode "SERVICE_GROUP=$TYPE" \
                 --data-urlencode "SERVICE_NAME=$NAME" \
                 --data-urlencode "TARGET_BRANCH=$TARGET_BRANCH" \
-                --data-urlencode "PR_NUMBER=$PR_NUMBER"
+                --data-urlencode "PR_NUMBER=$PR_NUMBER" \
             done
 
           else
