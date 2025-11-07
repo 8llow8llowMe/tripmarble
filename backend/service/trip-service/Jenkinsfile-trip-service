@@ -1,7 +1,18 @@
 pipeline {
-    agent any
+    agent { label 'backend' }   // 에이전트 라벨
 
-    // 파라미터
+    // 빌드/아티팩트 보존 전략 (모든 브랜치에 적용되지만, 아티팩트는 main에서만 생성)
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+        buildDiscarder(logRotator(
+            daysToKeepStr: '30', // 빌드 로그 30일 보관
+            numToKeepStr: '50', // 빌드 50개 보관
+            artifactDaysToKeepStr: '14', // 아티팩트는 14일 보관
+            artifactNumToKeepStr: '20' // 아티팩트 20개 보관
+        ))
+    }
+
     parameters {
         string(
             name: 'SERVICE_GROUP',
@@ -19,18 +30,12 @@ pipeline {
             description: 'PR 타겟 브랜치 (배포 환경 결정용)'
         )
         string(
-            name: 'PR_SHA',
-            defaultValue: '',
-            description: 'PR 커밋 SHA (빌드할 코드)'
-        )
-        string(
             name: 'PR_NUMBER',
             defaultValue: '',
             description: 'PR 번호'
         )
     }
 
-    // 공통 환경 변수
     environment {
         BACKEND_DIR = 'backend'
         MODULE_PATH = "${params.SERVICE_GROUP}:${params.SERVICE_NAME}"
@@ -41,67 +46,26 @@ pipeline {
         DEV_ENV_FILE = "${ENV_SUBMODULE}/.env-backend-dev"
         PROD_ENV_FILE = "${ENV_SUBMODULE}/.env-backend-prod"
         REMOTE_DIR = 'deploy/tripmarble/backend-app'
-        SSH_CONFIG = 'backend-1 server ssh'
     }
 
     stages {
-
-        stage('Environment Info') {
+        stage('Env Info') {
             steps {
                 script {
-                    echo "=== Build Information ==="
-                    echo "Branch: ${env.BRANCH_NAME}"
-                    echo "Service: ${params.SERVICE_NAME}"
-                    echo "Target Branch: ${params.TARGET_BRANCH}"
-                    echo "PR SHA: ${params.PR_SHA ?: 'Not provided'}"
-                    echo "PR Number: ${params.PR_NUMBER ?: 'Not provided'}"
-                    
-                    // 타겟 브랜치 기준으로 배포 환경 결정
-                    if (params.TARGET_BRANCH == 'main') {
-                        env.DEPLOY_ENV = 'prod'
-                        echo "Deploy Target: Production (based on target branch)"
-                    } else if (params.TARGET_BRANCH == 'develop') {
-                        env.DEPLOY_ENV = 'dev'
-                        echo "Deploy Target: Development (based on target branch)"
-                    } else {
-                        env.DEPLOY_ENV = 'none'
-                        echo "Deploy Target: None"
-                    }
-                    echo "========================="
+                    echo "BRANCH_NAME: ${env.BRANCH_NAME}"
+                    echo "SERVICE: ${params.SERVICE_NAME}"
+                    echo "TARGET_BRANCH(base): ${params.TARGET_BRANCH}"
+                    env.DEPLOY_ENV = (params.TARGET_BRANCH == 'main') ? 'prod' :
+                                     (params.TARGET_BRANCH == 'develop') ? 'dev' : 'none'
+                    echo "DEPLOY_ENV: ${env.DEPLOY_ENV}"
                 }
             }
         }
 
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                script {
-                    // PR SHA가 있으면 해당 커밋 체크아웃, 없으면 브랜치 HEAD 사용
-                    if (params.PR_SHA && params.PR_SHA != '') {
-                        echo "Checking out PR commit: ${params.PR_SHA}"
-                        checkout([
-                            $class: 'GitSCM',
-                            branches: [[name: params.PR_SHA]],
-                            userRemoteConfigs: scm.userRemoteConfigs,
-                            extensions: [
-                                [$class: 'SubmoduleOption',
-                                 recursiveSubmodules: true,
-                                 parentCredentials: true]
-                            ]
-                        ])
-                    } else {
-                        echo "Using PR branch code (Jenkins 멀티브랜치가 자동으로 PR 브랜치 체크아웃)"
-                        checkout([
-                            $class: 'GitSCM',
-                            branches: scm.branches,
-                            userRemoteConfigs: scm.userRemoteConfigs,
-                            extensions: [
-                                [$class: 'SubmoduleOption',
-                                 recursiveSubmodules: true,
-                                 parentCredentials: true]
-                            ]
-                        ])
-                    }
-                }
+                // 멀티브랜치가 올바른 ref로 체크아웃해줌 (별도 처리 불필요)
+                checkout scm
             }
         }
 
@@ -110,115 +74,58 @@ pipeline {
                 dir("${env.BACKEND_DIR}") {
                     sh "chmod +x gradlew"
                     sh """
-                        ./gradlew :${env.MODULE_PATH}:bootJar \
-                        --no-daemon \
-                        --parallel \
-                        --build-cache \
-                        --stacktrace
+                      ./gradlew :${env.MODULE_PATH}:bootJar \
+                        --no-daemon --parallel --build-cache --stacktrace
                     """
                 }
             }
-            post {
-                success {
-                    archiveArtifacts "${env.FS_PATH}/build/libs/*.jar"
-                }
+        }
+
+        stage('Archive (main only)') {
+            when { expression { params.TARGET_BRANCH == 'main' } }
+            steps {
+                archiveArtifacts artifacts: "${env.FS_PATH}/build/libs/*.jar",
+                fingerprint: true,
+                onlyIfSuccessful: true
             }
         }
 
-        stage('Deploy to Dev') {
-            when {
-                // 타겟 브랜치가 develop인 경우 dev 환경에 배포
-                expression { params.TARGET_BRANCH == 'develop' }
-            }
+        stage('Deploy Dev (develop only)') {
+            when { expression { params.TARGET_BRANCH == 'develop' } }
             steps {
-                script {
-                    echo "Deploying ${params.SERVICE_NAME} to Development"
-                    
-                    sshPublisher publishers: [sshPublisherDesc(
-                        configName: SSH_CONFIG,
-                        transfers: [sshTransfer(
-                            sourceFiles: "${DEV_ENV_FILE}",
-                            removePrefix: 'backend/env',
-                            remoteDirectory: REMOTE_DIR
-                        )],
-                        verbose: true
-                    )]
-                    
-                    sshPublisher publishers: [sshPublisherDesc(
-                        configName: SSH_CONFIG,
-                        transfers: [sshTransfer(
-                            sourceFiles: """
-                                ${env.FS_PATH}/build/libs/*.jar,
-                                ${env.FS_PATH}/${DOCKERFILE},
-                                ${env.FS_PATH}/${COMPOSE_FILE}
-                            """.trim(),
-                            removePrefix: "${env.FS_PATH}",
-                            remoteDirectory: REMOTE_DIR,
-                            execCommand: """
-                                set -x
-                                cd ~/${REMOTE_DIR}
-                                mkdir -p env
-                                mv .env-backend-dev env/.env-backend-dev
-                                docker compose -f ${COMPOSE_FILE} \\
-                                    --env-file env/.env-backend-dev \\
-                                    up -d --build ${params.SERVICE_NAME}-dev
-                            """.stripIndent()
-                        )],
-                        verbose: true
-                    )]
-                }
+                sh """
+                  set -eux
+                  mkdir -p ~/${REMOTE_DIR}/env
+                  cp ${DEV_ENV_FILE} ~/${REMOTE_DIR}/env/.env-backend-dev
+                  cp ${env.FS_PATH}/build/libs/*.jar ~/${REMOTE_DIR}/
+                  cp ${env.FS_PATH}/${DOCKERFILE} ~/${REMOTE_DIR}/
+                  cp ${env.FS_PATH}/${COMPOSE_FILE} ~/${REMOTE_DIR}/
+                  cd ~/${REMOTE_DIR}
+                  docker compose -f ${COMPOSE_FILE} --env-file env/.env-backend-dev \
+                    up -d --build ${params.SERVICE_NAME}-dev
+                """
             }
         }
 
-        stage('Deploy to Prod') {
-            when {
-                // 타겟 브랜치가 main인 경우 prod 환경에 배포
-                expression { params.TARGET_BRANCH == 'main' }
-            }
+        stage('Deploy Prod (main only)') {
+            when { expression { params.TARGET_BRANCH == 'main' } }
             steps {
-                script {
-                    echo "Deploying ${params.SERVICE_NAME} to Production"
-                    
-                    sshPublisher publishers: [sshPublisherDesc(
-                        configName: SSH_CONFIG,
-                        transfers: [sshTransfer(
-                            sourceFiles: "${PROD_ENV_FILE}",
-                            removePrefix: 'backend/env',
-                            remoteDirectory: REMOTE_DIR
-                        )],
-                        verbose: true
-                    )]
-                    
-                    sshPublisher publishers: [sshPublisherDesc(
-                        configName: SSH_CONFIG,
-                        transfers: [sshTransfer(
-                            sourceFiles: """
-                                ${env.FS_PATH}/build/libs/*.jar,
-                                ${env.FS_PATH}/${DOCKERFILE},
-                                ${env.FS_PATH}/${COMPOSE_FILE}
-                            """.trim(),
-                            removePrefix: "${env.FS_PATH}",
-                            remoteDirectory: REMOTE_DIR,
-                            execCommand: """
-                                set -x
-                                cd ~/${REMOTE_DIR}
-                                mkdir -p env
-                                mv .env-backend-prod env/.env-backend-prod
-                                docker compose -f ${COMPOSE_FILE} \\
-                                    --env-file env/.env-backend-prod \\
-                                    up -d --build ${params.SERVICE_NAME}-prod
-                            """.stripIndent()
-                        )],
-                        verbose: true
-                    )]
-                }
+                sh """
+                  set -eux
+                  mkdir -p ~/${REMOTE_DIR}/env
+                  cp ${PROD_ENV_FILE} ~/${REMOTE_DIR}/env/.env-backend-prod
+                  cp ${env.FS_PATH}/build/libs/*.jar ~/${REMOTE_DIR}/
+                  cp ${env.FS_PATH}/${DOCKERFILE} ~/${REMOTE_DIR}/
+                  cp ${env.FS_PATH}/${COMPOSE_FILE} ~/${REMOTE_DIR}/
+                  cd ~/${REMOTE_DIR}
+                  docker compose -f ${COMPOSE_FILE} --env-file env/.env-backend-prod \
+                    up -d --build ${params.SERVICE_NAME}-prod
+                """
             }
         }
     }
 
     post {
-        always {
-            cleanWs()
-        }
+        always { cleanWs() }
     }
 }
