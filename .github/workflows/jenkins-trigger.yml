@@ -113,11 +113,11 @@ jobs:
                 --data-urlencode "SERVICE_GROUP=$TYPE" \
                 --data-urlencode "SERVICE_NAME=$NAME" \
                 --data-urlencode "TARGET_BRANCH=$TARGET_BRANCH" \
-                --data-urlencode "PR_NUMBER=$PR_NUMBER" \
+                --data-urlencode "PR_NUMBER=$PR_NUMBER"
             done
 
           else
-            # PUSH 이벤트 처리 
+            # PUSH 이벤트 처리
             BRANCH="${{ github.ref_name }}"  # develop 또는 main
             TARGET_BRANCH="$BRANCH"
             echo "Push 이벤트 감지 → 브랜치: $BRANCH"
