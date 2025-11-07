@@ -94,7 +94,7 @@ jobs:
             for svc in "${svcs[@]}"; do
               IFS=":" read -r NAME GROUP TYPE <<< "$svc"
               MBP="${MBP_PREFIX}-${GROUP}-${TYPE}-${NAME}"
-              JOB_URL="$JENKINS_URL/job/$MBP/job/PR-$PR_NUMBER"
+              JOB_URL="$JENKINS_URL/job/$MBP/view/change-requests/job/PR-$PR_NUMBER"
               SCAN_URL="$JENKINS_URL/job/$MBP/build?delay=0"
 
               echo "Checking existence of $JOB_URL ..."
