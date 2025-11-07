@@ -1,213 +1,140 @@
 name: Jenkins Trigger
 
 on:
+  # 1. PR 이벤트 (라벨 추가/삭제, PR 생성/동기화 시 작동)
   pull_request:
-    types: [labeled, unlabeled, synchronize, opened, reopened]
+    types: [opened, reopened, synchronize, labeled, unlabeled]
     branches: [develop, main]
     paths-ignore:
       - 'frontend/mobile/**'
-      - '.github/workflows/mobile-android-build.yml'
+      - '.github/workflows/**'
+
+  # 2. develop / main 브랜치로 직접 push된 경우 (ex. 머지)
+  push:
+    branches: [develop, main]
+    paths-ignore:
+      - 'frontend/mobile/**'
+      - '.github/workflows/**'
 
 jobs:
   trigger-jenkins:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check and trigger Jenkins
+      - name: Trigger Jenkins Multibranch Pipeline
+        env:
+          JENKINS_URL:   ${{ secrets.JENKINS_URL }}
+          JENKINS_USER:  ${{ secrets.JENKINS_USER }}
+          JENKINS_TOKEN: ${{ secrets.JENKINS_TOKEN }}
+          MBP_PREFIX:    "tripmarble"  # 멀티브랜치 파이프라인 prefix
+        shell: bash
         run: |
-          # 1. GitHub 이벤트 변수
-          action="${{ github.event.action }}"
-          labels="${{ join(github.event.pull_request.labels.*.name, ' ') }}"
-          base_branch="${{ github.event.pull_request.base.ref }}"
-          head_branch="${{ github.event.pull_request.head.ref }}"
-          pr_number="${{ github.event.pull_request.number }}"
+          set -euo pipefail
+          JENKINS_URL="${JENKINS_URL%/}"
 
-          should_trigger=false
-
-          # 2. Jenkins 트리거 대상 라벨 체크 (frontend-mobile 단독이면 스킵)
-          if [[ "$labels" != *"backend-"* && "$labels" != *"frontend-web"* ]]; then
-            echo "Skip: No Jenkins target labels found"
-            echo "Labels: $labels"
-            exit 0
-          fi
-
-          # 3. PR opened/reopened → Jenkins 트리거
-          if [[ "$action" == "opened" || "$action" == "reopened" ]]; then
-            should_trigger=true
-            echo "Trigger: PR $action"
-
-          # 4. 라벨 변경 시 → Jenkins 트리거
-          elif [[ "$action" == "labeled" || "$action" == "unlabeled" ]]; then
-            should_trigger=true
-            echo "Trigger: Label changed"
-
-          # 5. synchronize 시 최근 1시간 push → Jenkins 트리거
-          elif [[ "$action" == "synchronize" ]]; then
-            commit_time=$(date -d "${{ github.event.pull_request.head.repo.pushed_at }}" +%s)
-            current_time=$(date -u +%s)
-            if [[ $((current_time - commit_time)) -lt 3600 ]]; then
-              should_trigger=true
-              echo "Trigger: Recent push with service labels"
-            else
-              echo "Skip: Push is older than 1 hour"
-            fi
-          fi
-
-          # 6. Jenkins 트리거 실행
-          if [[ "$should_trigger" == "true" ]]; then
-            echo "=== Jenkins Trigger Start ==="
-            echo "Base branch (target): $base_branch"
-            echo "Head branch (source): $head_branch"
-            echo "PR: #$pr_number"
-            echo "Labels: $labels"
-
-            JENKINS_URL="${{ secrets.JENKINS_URL }}"
-            JENKINS_USER="${{ secrets.JENKINS_USER }}"
-            JENKINS_TOKEN="${{ secrets.JENKINS_TOKEN }}"
-            JENKINS_URL="${JENKINS_URL%/}"
-
-            # 7. 환경 변수 결정 (develop -> main PR일 때는 main, 그 외는 develop)
-            if [[ "$head_branch" == "develop" && "$base_branch" == "main" ]]; then
-              target_branch="main"
-              echo "Environment: main (develop -> main PR)"
-            else
-              target_branch="develop"
-              echo "Environment: develop (feature -> develop PR)"
-            fi
-
-            # 8. Jenkins Crumb 가져오기 (CSRF 보호)
-            CRUMB=$(curl -s "$JENKINS_URL/crumbIssuer/api/json" \
+          # 1. Jenkins Crumb (CSRF 보호용 토큰) 가져오기
+          crumb() {
+            curl -s "$JENKINS_URL/crumbIssuer/api/json" \
               --user "$JENKINS_USER:$JENKINS_TOKEN" \
-              | grep -oP '(?<="crumb":")[^"]*' || echo "")
-            
-            CRUMB_HEADER=""
-            if [[ -n "$CRUMB" ]]; then
-              CRUMB_HEADER="-H Jenkins-Crumb:$CRUMB"
-              echo "Jenkins Crumb obtained"
+              | grep -oP '(?<="crumb":")[^"]*' || true
+          }
+
+          # 2. Jenkins 빌드 트리거 함수
+          trigger_build() {
+            local job_url="$1"; shift
+            local params=( "$@" )
+            local CRUMB="$(crumb)"
+            local HDR=()
+            [[ -n "$CRUMB" ]] && HDR=(-H "Jenkins-Crumb:$CRUMB")
+
+            echo "::group::Trigger $job_url"
+            curl -s -o /dev/null -w "HTTP:%{http_code}\n" -X POST \
+              --user "$JENKINS_USER:$JENKINS_TOKEN" \
+              "${HDR[@]}" \
+              "$job_url/buildWithParameters" \
+              "${params[@]}"
+            echo "::endgroup::"
+          }
+
+          # 3. 라벨 기반 서비스 매핑
+          map_services() {
+            local labels="$1"
+            svcs=()
+            # Backend
+            if [[ "$labels" == *"backend-auth-service"* ]]; then svcs+=("auth-service:backend:service"); fi
+            if [[ "$labels" == *"backend-trip-service"* ]]; then svcs+=("trip-service:backend:service"); fi
+            if [[ "$labels" == *"backend-trip-game-service"* ]]; then svcs+=("trip-game-service:backend:service"); fi
+            if [[ "$labels" == *"backend-api-gateway"* ]]; then svcs+=("api-gateway:backend:cloud"); fi
+            if [[ "$labels" == *"backend-service-discovery"* ]]; then svcs+=("service-discovery:backend:cloud"); fi
+            # Frontend
+            if [[ "$labels" == *"frontend-web"* ]]; then svcs+=("web:frontend:web"); fi
+          }
+
+          # 4. 이벤트 종류에 따른 분기 (PR / PUSH)
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # PR 이벤트 처리
+            ACTION="${{ github.event.action }}"
+            BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+            HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+            LABELS="$(printf "%s " ${{ join(github.event.pull_request.labels.*.name, ' ') }})"
+
+            echo "PR 이벤트 감지 → #${PR_NUMBER} (${HEAD_BRANCH} → ${BASE_BRANCH})"
+            map_services "$LABELS"
+
+            if [[ ${#svcs[@]} -eq 0 ]]; then
+              echo "백엔드/프론트엔드 관련 라벨이 없습니다. Jenkins 빌드 스킵."
+              exit 0
             fi
 
-            # 9. Jenkins job 트리거 함수 (PR job 자동 생성 + 빌드)
-            trigger_service() {
-              local service_name="$1"
-              local service_group="$2"
-              local gradle_group="$3"
-              local job_name="tripmarble-${service_group}-${service_name}"
-              local pr_job="PR-$pr_number"
-              local pr_job_url="$JENKINS_URL/job/$job_name/job/$pr_job"
+            # Target 브랜치 결정
+            TARGET_BRANCH="$BASE_BRANCH"  # base 브랜치 기준으로 배포 환경 결정
+            echo "TARGET_BRANCH = $TARGET_BRANCH"
 
-              echo ""
-              echo "===================================="
-              echo "Service: $job_name"
-              echo "===================================="
+            # PR job 트리거
+            for svc in "${svcs[@]}"; do
+              IFS=":" read -r NAME GROUP TYPE <<< "$svc"
+              MBP="${MBP_PREFIX}-${GROUP}-${TYPE}-${NAME}"
+              JOB_URL="$JENKINS_URL/job/$MBP/job/PR-$PR_NUMBER"
 
-              # 10. PR job 존재 여부 확인
-              http_code=$(curl -s -o /dev/null -w "%{http_code}" \
-                --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                "$pr_job_url/api/json")
+              echo "Trigger PR-job: $MBP / PR-$PR_NUMBER"
+              trigger_build "$JOB_URL" \
+                --data-urlencode "SERVICE_GROUP=$TYPE" \
+                --data-urlencode "SERVICE_NAME=$NAME" \
+                --data-urlencode "TARGET_BRANCH=$TARGET_BRANCH" \
+                --data-urlencode "PR_NUMBER=$PR_NUMBER"
+            done
 
-              if [[ "$http_code" == "404" ]]; then
-                echo "PR job not found (HTTP 404)"
-                echo "Triggering branch scan for: $job_name"
-                
-                # 11. 멀티브랜치 파이프라인 스캔 트리거
-                scan_response=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST \
-                  --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                  $CRUMB_HEADER \
-                  "$JENKINS_URL/job/$job_name/build?delay=0")
-                
-                scan_http_code=$(echo "$scan_response" | grep -oP 'HTTP_CODE:\K\d+')
-                
-                if [[ "$scan_http_code" =~ ^(200|201)$ ]]; then
-                  echo "Branch scan triggered (HTTP $scan_http_code)"
-                else
-                  echo "Branch scan failed (HTTP $scan_http_code)"
-                  echo "$scan_response" | grep -v "HTTP_CODE"
-                fi
-
-                # 12. PR job 생성 대기 (최대 60초)
-                echo "Waiting for branch indexing..."
-                for i in {1..12}; do
-                  sleep 5
-                  check_code=$(curl -s -o /dev/null -w "%{http_code}" \
-                    --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                    "$pr_job_url/api/json")
-                  
-                  if [[ "$check_code" == "200" ]]; then
-                    echo "PR job indexed successfully (attempt $i/12)"
-                    break
-                  fi
-                  
-                  echo "   Attempt $i/12 - still waiting..."
-                  
-                  if [[ $i == 12 ]]; then
-                    echo "Timeout: PR job not created after 60 seconds"
-                    echo "Please check Jenkins logs or trigger scan manually"
-                    echo "Jenkins URL: $pr_job_url"
-                    return 1
-                  fi
-                done
-              else
-                echo "PR job already exists (HTTP $http_code)"
-              fi
-
-              # 13. PR job 빌드 트리거
-              echo "Triggering build with parameters:"
-              echo "SERVICE_GROUP: $gradle_group"
-              echo "SERVICE_NAME: $service_name"
-              echo "TARGET_BRANCH: $target_branch"
-              echo "BASE_BRANCH: $base_branch"
-              echo "HEAD_BRANCH: $head_branch"
-              echo "PR_NUMBER: $pr_number"
-
-              build_response=$(curl -s -w "\nHTTP_CODE:%{http_code}" -X POST \
-                --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                $CRUMB_HEADER \
-                "$pr_job_url/buildWithParameters" \
-                --data-urlencode "SERVICE_GROUP=$gradle_group" \
-                --data-urlencode "SERVICE_NAME=$service_name" \
-                --data-urlencode "TARGET_BRANCH=$target_branch" \
-                --data-urlencode "BASE_BRANCH=$base_branch" \
-                --data-urlencode "HEAD_BRANCH=$head_branch" \
-                --data-urlencode "PR_NUMBER=$pr_number")
-              
-              build_http_code=$(echo "$build_response" | grep -oP 'HTTP_CODE:\K\d+')
-              
-              # 14. 빌드 트리거 결과 확인
-              if [[ "$build_http_code" =~ ^(200|201)$ ]]; then
-                echo "Build triggered successfully (HTTP $build_http_code)"
-                echo "Build URL: $pr_job_url"
-              else
-                echo "Build trigger failed (HTTP $build_http_code)"
-                echo "$build_response" | grep -v "HTTP_CODE"
-              fi
-            }
-
-            # 15. 라벨별 Jenkins job 매핑 및 실행
-            if [[ "$labels" == *"backend-auth-service"* ]]; then
-              trigger_service "auth-service" "backend" "service"
-            fi
-            
-            if [[ "$labels" == *"backend-trip-service"* ]]; then
-              trigger_service "trip-service" "backend" "service"
-            fi
-            
-            if [[ "$labels" == *"backend-trip-game-service"* ]]; then
-              trigger_service "trip-game-service" "backend" "service"
-            fi
-            
-            if [[ "$labels" == *"backend-api-gateway"* ]]; then
-              trigger_service "api-gateway" "backend" "cloud"
-            fi
-            
-            if [[ "$labels" == *"backend-service-discovery"* ]]; then
-              trigger_service "service-discovery" "backend" "cloud"
-            fi
-            
-            if [[ "$labels" == *"frontend-web"* ]]; then
-              trigger_service "web" "frontend" "web"
-            fi
-
-            echo ""
-            echo "=== Jenkins Trigger Completed ==="
           else
-            echo "Skip: No matching condition"
+            # PUSH 이벤트 처리 
+            BRANCH="${{ github.ref_name }}"  # develop 또는 main
+            TARGET_BRANCH="$BRANCH"
+            echo "Push 이벤트 감지 → 브랜치: $BRANCH"
+
+            # Push 시 전체 서비스 빌드
+            svcs=(
+              "auth-service:backend:service"
+              "trip-service:backend:service"
+              "trip-game-service:backend:service"
+              "api-gateway:backend:cloud"
+              "service-discovery:backend:cloud"
+              "web:frontend:web"
+            )
+
+            # 각 서비스별 빌드 트리거 
+            for svc in "${svcs[@]}"; do
+              IFS=":" read -r NAME GROUP TYPE <<< "$svc"
+              MBP="${MBP_PREFIX}-${GROUP}-${TYPE}-${NAME}"
+              JOB_URL="$JENKINS_URL/job/$MBP/job/$BRANCH"
+
+              echo "Trigger Branch-job: $MBP ($BRANCH)"
+              trigger_build "$JOB_URL" \
+                --data-urlencode "SERVICE_GROUP=$TYPE" \
+                --data-urlencode "SERVICE_NAME=$NAME" \
+                --data-urlencode "TARGET_BRANCH=$TARGET_BRANCH"
+            done
           fi
+
+          # 5. 종료 로그
+          echo ""
+          echo "Jenkins Trigger Completed."
