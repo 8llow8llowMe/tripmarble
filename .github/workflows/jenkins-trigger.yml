@@ -1,7 +1,7 @@
 name: Jenkins Trigger
 
 on:
-  # 1. PR 이벤트 (PR 생성/라벨 변경/동기화 등)
+  # 1. PR 이벤트 (생성/라벨변경/동기화)
   pull_request:
     types: [opened, reopened, synchronize, labeled, unlabeled]
     branches: [develop, main]
@@ -9,7 +9,7 @@ on:
       - 'frontend/mobile/**'
       - '.github/workflows/**'
 
-  # 2. develop / main 브랜치 직접 push (ex. 머지)
+  # 2. develop / main 브랜치 직접 push (머지 등)
   push:
     branches: [develop, main]
     paths-ignore:
@@ -32,41 +32,41 @@ jobs:
           set -euo pipefail
           JENKINS_URL="${JENKINS_URL%/}"
 
-          # 1. Jenkins Crumb (CSRF 보호용 토큰)
+          # 1. CSRF Crumb 발급
           crumb() {
             curl -s "$JENKINS_URL/crumbIssuer/api/json" \
               --user "$JENKINS_USER:$JENKINS_TOKEN" \
               | grep -oP '(?<="crumb":")[^"]*' || true
           }
 
-          # 2. Jenkins 빌드 트리거 함수
-          trigger_build() {
-            local job_url="$1"; shift
-            local params=( "$@" )
+          # 2. Jenkins 빌드 트리거 함수 (view 경로 우선, buildable retry)
+          trigger_pr_build() {
+            local JOB_URL="$1"
             local CRUMB="$(crumb)"
             local HDR=()
             [[ -n "$CRUMB" ]] && HDR=(-H "Jenkins-Crumb:$CRUMB")
 
-            echo "::group::Trigger $job_url"
+            echo "Trigger $JOB_URL/build"
+            local HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+              --user "$JENKINS_USER:$JENKINS_TOKEN" "${HDR[@]}" \
+              "$JOB_URL/build")
 
-            # PR(change-request) job은 /build, 일반 job은 /buildWithParameters
-            if [[ "$job_url" == *"/view/change-requests/"* ]]; then
-              curl -s -o /dev/null -w "HTTP:%{http_code}\n" -X POST \
-                --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                "${HDR[@]}" \
-                "$job_url/build"
-            else
-              curl -s -o /dev/null -w "HTTP:%{http_code}\n" -X POST \
-                --user "$JENKINS_USER:$JENKINS_TOKEN" \
-                "${HDR[@]}" \
-                "$job_url/buildWithParameters" \
-                "${params[@]}"
+            # 400 대응: 인덱싱 중이거나 buildable=false 상태일 때 재시도
+            if [[ "$HTTP_CODE" == "400" ]]; then
+              echo "Job not yet buildable (HTTP 400). Retrying up to 3 times..."
+              for i in {1..3}; do
+                sleep 10
+                HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
+                  --user "$JENKINS_USER:$JENKINS_TOKEN" "${HDR[@]}" \
+                  "$JOB_URL/build")
+                [[ "$HTTP_CODE" == "201" ]] && break
+              done
             fi
 
-            echo "::endgroup::"
+            echo "Final HTTP_CODE: $HTTP_CODE"
           }
 
-          # 3. 라벨 기반 서비스 매핑
+          # 3. 라벨별 서비스 매핑
           map_services() {
             local labels="$1"
             svcs=()
@@ -80,9 +80,8 @@ jobs:
             if [[ "$labels" == *"frontend-web"* ]]; then svcs+=("web:frontend:web"); fi
           }
 
-          # 4. 이벤트 종류에 따른 분기 (PR / PUSH)
+          # 4. 이벤트별 분기 (PR / Push)
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # PR 이벤트 처리
             ACTION="${{ github.event.action }}"
             BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
             HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
@@ -93,14 +92,13 @@ jobs:
             map_services "$LABELS"
 
             if [[ ${#svcs[@]} -eq 0 ]]; then
-              echo "백엔드/프론트엔드 관련 라벨이 없습니다. Jenkins 빌드 스킵."
+              echo "관련 라벨 없음 → Jenkins 빌드 스킵"
               exit 0
             fi
 
-            TARGET_BRANCH="$BASE_BRANCH"  # base 브랜치 기준
+            TARGET_BRANCH="$BASE_BRANCH"
             echo "TARGET_BRANCH = $TARGET_BRANCH"
 
-            # 각 서비스별 Jenkins Job 확인 + Scan + Trigger
             for svc in "${svcs[@]}"; do
               IFS=":" read -r NAME GROUP TYPE <<< "$svc"
               MBP="${MBP_PREFIX}-${GROUP}-${NAME}"
@@ -108,27 +106,24 @@ jobs:
               SCAN_URL="$JENKINS_URL/job/$MBP/build?delay=0"
 
               echo "Checking existence of $JOB_URL ..."
-              http_code=$(curl -s -o /dev/null -w "%{http_code}" \
+              HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
                 --user "$JENKINS_USER:$JENKINS_TOKEN" "$JOB_URL/api/json")
 
-              if [[ "$http_code" == "404" ]]; then
-                echo "No PR job found → triggering repository scan for $MBP"
+              # 존재하지 않으면 인덱싱 먼저 트리거
+              if [[ "$HTTP_CODE" == "404" ]]; then
+                echo "No PR job found → Triggering repo scan for $MBP"
                 curl -s -X POST --user "$JENKINS_USER:$JENKINS_TOKEN" "$SCAN_URL"
-                echo "Waiting 10s for indexing..."
-                sleep 10
+                echo "Waiting 15s for indexing..."
+                sleep 15
               fi
 
+              # 실제 PR 빌드 트리거
               echo "Triggering PR job build → $JOB_URL"
-              trigger_build "$JOB_URL" \
-                --data-urlencode "SERVICE_GROUP=$TYPE" \
-                --data-urlencode "SERVICE_NAME=$NAME" \
-                --data-urlencode "TARGET_BRANCH=$TARGET_BRANCH" \
-                --data-urlencode "PR_NUMBER=$PR_NUMBER"
+              trigger_pr_build "$JOB_URL"
             done
 
           else
-            # PUSH 이벤트 처리
-            BRANCH="${{ github.ref_name }}"  # develop 또는 main
+            BRANCH="${{ github.ref_name }}"
             TARGET_BRANCH="$BRANCH"
             echo "Push 이벤트 감지 → 브랜치: $BRANCH"
 
@@ -145,15 +140,10 @@ jobs:
               IFS=":" read -r NAME GROUP TYPE <<< "$svc"
               MBP="${MBP_PREFIX}-${GROUP}-${TYPE}-${NAME}"
               JOB_URL="$JENKINS_URL/job/$MBP/job/$BRANCH"
-
               echo "Trigger Branch-job: $MBP ($BRANCH)"
-              trigger_build "$JOB_URL" \
-                --data-urlencode "SERVICE_GROUP=$TYPE" \
-                --data-urlencode "SERVICE_NAME=$NAME" \
-                --data-urlencode "TARGET_BRANCH=$TARGET_BRANCH"
+              trigger_pr_build "$JOB_URL"
             done
           fi
 
-          # 5. 종료 로그
           echo ""
           echo "Jenkins Trigger Completed."
