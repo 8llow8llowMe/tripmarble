@@ -64,8 +64,20 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                // 멀티브랜치가 올바른 ref로 체크아웃해줌 (별도 처리 불필요)
-                checkout scm
+                checkout([
+                    $class: 'GitSCM',
+                    branches: scm.branches,
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [
+                        [$class: 'SubmoduleOption',
+                         disableSubmodules: false,
+                         recursiveSubmodules: true, // 모든 하위 submodule 포함
+                         parentCredentials: true, // Jenkins 자격증명 재사용
+                         reference: '',
+                         trackingSubmodules: false]
+                    ],
+                    userRemoteConfigs: scm.userRemoteConfigs
+                ])
             }
         }
 
