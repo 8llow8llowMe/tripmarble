@@ -109,7 +109,7 @@ pipeline {
                   set -eux
                   mkdir -p ~/${REMOTE_DIR}/env
                   cp ${DEV_ENV_FILE} ~/${REMOTE_DIR}/env/.env-backend-dev
-                  cp ${env.FS_PATH}/build/libs/*.jar ~/${REMOTE_DIR}/
+                  cp ${env.FS_PATH}/build/libs/${params.SERVICE_NAME}.jar ~/${REMOTE_DIR}/${params.SERVICE_NAME}.jar
                   cp ${env.FS_PATH}/${DOCKERFILE} ~/${REMOTE_DIR}/
                   cp ${env.FS_PATH}/${COMPOSE_FILE} ~/${REMOTE_DIR}/
                   cd ~/${REMOTE_DIR}
