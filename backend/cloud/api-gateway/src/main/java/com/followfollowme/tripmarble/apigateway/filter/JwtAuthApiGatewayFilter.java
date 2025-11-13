@@ -15,10 +15,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthGatewayFilter extends AbstractGatewayFilterFactory<Config> {
+public class JwtAuthApiGatewayFilter extends AbstractGatewayFilterFactory<Config> {
 
     private static final String BEARER_PREFIX = "Bearer ";
     private final JwtVerifier jwtVerifier;
@@ -27,22 +28,30 @@ public class JwtAuthGatewayFilter extends AbstractGatewayFilterFactory<Config> {
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
-
             String jwt = getJwtFrom(request);
 
-            try {
-                jwtVerifier.validate(jwt);
-            } catch (ExpiredJwtException e) {
-                throw new JwtException(JwtErrorCode.TOKEN_EXPIRED);
-            } catch (SignatureException e) {
-                throw new JwtException(JwtErrorCode.TOKEN_SIGNATURE_INVALID);
-            } catch (MalformedJwtException e) {
-                throw new JwtException(JwtErrorCode.TOKEN_MALFORMED);
-            } catch (SecurityException | IllegalArgumentException e) {
-                throw new JwtException(JwtErrorCode.TOKEN_INVALID);
+            // JWT가 없으면 바로 다음 필터로 (인증 불필요한 경로일 수 있음)
+            if (!StringUtils.hasText(jwt)) {
+                return chain.filter(exchange);
             }
 
-            return chain.filter(exchange);
+            // JWT 검증을 Reactive 방식으로 처리
+            // JwtException 발생 시 ErrorWebExceptionHandler로 전파
+            return Mono.fromRunnable(() -> {
+                    try {
+                        jwtVerifier.validate(jwt);
+                    } catch (ExpiredJwtException e) {
+                        throw new JwtException(JwtErrorCode.TOKEN_EXPIRED);
+                    } catch (SignatureException e) {
+                        throw new JwtException(JwtErrorCode.TOKEN_SIGNATURE_INVALID);
+                    } catch (MalformedJwtException e) {
+                        throw new JwtException(JwtErrorCode.TOKEN_MALFORMED);
+                    } catch (SecurityException | IllegalArgumentException e) {
+                        throw new JwtException(JwtErrorCode.TOKEN_INVALID);
+                    }
+                })
+                .then(chain.filter(exchange))  // 검증 성공 시 다음 필터로
+                .onErrorResume(JwtException.class, Mono::error);
         };
     }
 
