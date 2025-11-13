@@ -13,6 +13,6 @@ public enum TripErrorCode {
     TRIP_SPOT_DETAIL_NOT_FOUND("TRIP_003", "해당 여행지 상세 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND);
 
     private final String code;
-    private final String errorMessage;
+    private final String message;
     private final HttpStatus httpStatus;
 }

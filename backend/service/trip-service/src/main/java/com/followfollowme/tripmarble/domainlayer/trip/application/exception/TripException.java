@@ -8,7 +8,7 @@ public class TripException extends RuntimeException {
     private final TripErrorCode errorCode;
 
     public TripException(TripErrorCode errorCode) {
-        super(errorCode.getErrorMessage());
+        super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 }

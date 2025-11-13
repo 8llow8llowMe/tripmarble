@@ -13,8 +13,7 @@ public enum SecurityErrorCode {
     TOKEN_INVALID("SECURITY_003", "토큰이 유효하지 않습니다.", HttpStatus.UNAUTHORIZED),
     TOKEN_SIGNATURE_INVALID("SECURITY_004", "토큰의 서명 검증에 실패하였습니다.", HttpStatus.UNAUTHORIZED),
     TOKEN_MALFORMED("SECURITY_005", "토큰 형식이 올바르지 않습니다.", HttpStatus.UNAUTHORIZED),
-    TOKEN_MISSING("SECURITY_006", "토큰이 존재하지 않습니다.", HttpStatus.UNAUTHORIZED),
-    FORBIDDEN("SECURITY_007", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN);
+    FORBIDDEN("SECURITY_006", "접근 권한이 없습니다.", HttpStatus.FORBIDDEN);
 
     private final String code;
     private final String message;

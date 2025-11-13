@@ -27,6 +27,6 @@ public enum TripGameErrorCode {
     INVALID_MISSION_TYPE("TRIP_GAME_017", "해당 타일에서 허용되지 않은 미션 타입입니다.", HttpStatus.BAD_REQUEST);
 
     private final String code;
-    private final String errorMessage;
+    private final String message;
     private final HttpStatus httpStatus;
 }

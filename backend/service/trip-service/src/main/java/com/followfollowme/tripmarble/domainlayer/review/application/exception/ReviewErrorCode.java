@@ -13,6 +13,6 @@ public enum ReviewErrorCode {
     REVIEW_FORBIDDEN("REVIEW_003", "본인 리뷰가 아니므로 삭제할 수 없습니다.", HttpStatus.FORBIDDEN);
 
     private final String code;
-    private final String errorMessage;
+    private final String message;
     private final HttpStatus httpStatus;
 }

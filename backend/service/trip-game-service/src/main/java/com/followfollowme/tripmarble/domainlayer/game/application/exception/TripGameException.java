@@ -8,7 +8,7 @@ public class TripGameException extends RuntimeException {
     private final TripGameErrorCode errorCode;
 
     public TripGameException(TripGameErrorCode errorCode) {
-        super(errorCode.getErrorMessage());
+        super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 }

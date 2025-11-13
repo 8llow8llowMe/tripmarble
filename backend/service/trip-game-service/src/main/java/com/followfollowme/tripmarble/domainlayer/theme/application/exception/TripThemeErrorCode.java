@@ -11,6 +11,6 @@ public enum TripThemeErrorCode {
     TRIP_THEME_NOT_FOUND("TRIP_THEME_001", "존재하지 않는 여행 테마 입니다.", HttpStatus.NOT_FOUND);
 
     private final String code;
-    private final String errorMessage;
+    private final String message;
     private final HttpStatus httpStatus;
 }

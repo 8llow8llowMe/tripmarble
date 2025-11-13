@@ -15,7 +15,8 @@ public enum MemberErrorCode {
     MEMBER_NOT_WITHDRAWN("MEMBER_005", "탈퇴한 회원이 아닙니다.", HttpStatus.BAD_REQUEST),
     MEMBER_ALREADY_WITHDRAWN("MEMBER_006", "이미 탈퇴한 회원입니다.", HttpStatus.BAD_REQUEST),
     MEMBER_SUSPENDED("MEMBER_007", "정지된 회원입니다.", HttpStatus.FORBIDDEN);
+
     private final String code;
-    private final String errorMessage;
+    private final String message;
     private final HttpStatus httpStatus;
 }
