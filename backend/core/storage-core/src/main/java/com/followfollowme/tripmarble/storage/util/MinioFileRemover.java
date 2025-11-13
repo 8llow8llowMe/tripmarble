@@ -33,7 +33,7 @@ public class MinioFileRemover {
             // 커스텀 예외 그대로 던짐
             throw e;
         } catch (Exception e) {
-            log.error("MinIO 파일 삭제 실패: {}", fileUrl, e);
+            log.error("[MinioFileRemover] MinIO 파일 삭제 실패: {}", fileUrl, e);
             throw new MinioException(MinioErrorCode.FILE_DELETE_FAILED);
         }
     }
