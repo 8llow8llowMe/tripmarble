@@ -12,6 +12,6 @@ public enum RegionErrorCode {
     REGION_NOT_FOUND("REGION_001", "해당 지역이 존재하지 않습니다.", HttpStatus.NOT_FOUND);
 
     private final String code;
-    private final String errorMessage;
+    private final String message;
     private final HttpStatus httpStatus;
 }

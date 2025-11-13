@@ -8,7 +8,7 @@ public class ReviewException extends RuntimeException {
     private final ReviewErrorCode errorCode;
 
     public ReviewException(ReviewErrorCode errorCode) {
-        super(errorCode.getErrorMessage());
+        super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 }

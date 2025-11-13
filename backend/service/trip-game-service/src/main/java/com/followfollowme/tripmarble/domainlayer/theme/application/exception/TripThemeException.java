@@ -8,7 +8,7 @@ public class TripThemeException extends RuntimeException {
     private final TripThemeErrorCode errorCode;
 
     public TripThemeException(TripThemeErrorCode errorCode) {
-        super(errorCode.getErrorMessage());
+        super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 }
