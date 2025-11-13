@@ -20,7 +20,9 @@ public class ErrorCodeAggregationFacade implements ErrorCodeInternalUseCase {
 
     private static final Map<String, String> SERVICE_PATHS = Map.of(
         "API-GATEWAY", "/internal/api-gateway/error-codes",
-        "AUTH-SERVICE", "/internal/auth-service/error-codes"
+        "AUTH-SERVICE", "/internal/auth-service/error-codes",
+        "TRIP-SERVICE", "internal/trip-service/error-codes",
+        "TRIP-GAME-SERVICE", "internal/trip-game-service/error-codes"
     );
 
     private final WebClient errorCodeWebClient;
