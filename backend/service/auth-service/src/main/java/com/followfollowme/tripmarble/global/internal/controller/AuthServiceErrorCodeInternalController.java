@@ -80,6 +80,6 @@ public class AuthServiceErrorCodeInternalController {
                 )
             ));
 
-        return ResponseEntity.ok(errorCodes);
+        return ResponseEntity.ok().body(errorCodes);
     }
 }
