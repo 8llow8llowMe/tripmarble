@@ -8,15 +8,13 @@ import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.Verif
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberErrorCode;
 import com.followfollowme.tripmarble.domainlayer.member.application.exception.MemberException;
 import com.followfollowme.tripmarble.domainlayer.member.application.port.out.MemberRepositoryPort;
-import com.followfollowme.tripmarble.redis.exception.RedisInfraException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.scheduler.Schedulers;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
@@ -38,10 +36,8 @@ public class MailVerificationProcessor {
 
         String code = generateCode();
 
-        try {
-            codeStorePort.save(email, code, EXPIRES_MIN);
-        } catch (RedisInfraException e) {
-            log.error("인증 코드 저장 실패 - email: {}, error: {}", email, e.getMessage());
+        boolean saved = codeStorePort.save(email, code, EXPIRES_MIN);
+        if (!saved) {
             throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_STORE_FAILURE);
         }
 
@@ -53,14 +49,8 @@ public class MailVerificationProcessor {
     }
 
     public void verifyCode(String email, String code) {
-        String stored;
-        try {
-            stored = codeStorePort.find(email)
-                .orElseThrow(() -> new AuthException(AuthErrorCode.NOT_FOUND_VERIFICATION_CODE));
-        } catch (RedisInfraException e) {
-            log.error("인증 코드 조회 실패 - email: {}, error: {}", email, e.getMessage());
-            throw new AuthException(AuthErrorCode.EMAIL_VERIFICATION_STORE_FAILURE);
-        }
+        String stored = codeStorePort.find(email)
+            .orElseThrow(() -> new AuthException(AuthErrorCode.NOT_FOUND_VERIFICATION_CODE));
 
         if (!stored.equals(code)) {
             throw new AuthException(AuthErrorCode.INVALID_VERIFICATION_CODE);
