@@ -7,7 +7,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SecurityException;
 import io.jsonwebtoken.security.SignatureException;
-import java.io.ObjectInputFilter.Config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -19,7 +18,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class JwtAuthApiGatewayFilter extends AbstractGatewayFilterFactory<Config> {
+public class JwtAuthApiGatewayFilter extends AbstractGatewayFilterFactory<JwtAuthApiGatewayFilter.Config> {
 
     private static final String BEARER_PREFIX = "Bearer ";
     private final JwtVerifier jwtVerifier;
@@ -61,5 +60,9 @@ public class JwtAuthApiGatewayFilter extends AbstractGatewayFilterFactory<Config
             return bearerToken.substring(BEARER_PREFIX.length());
         }
         return null;
+    }
+
+    public static class Config {
+
     }
 }
