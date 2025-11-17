@@ -35,23 +35,23 @@ public class JwtAuthApiGatewayFilter extends AbstractGatewayFilterFactory<Config
                 return chain.filter(exchange);
             }
 
-            // JWT 검증을 Reactive 방식으로 처리
-            // JwtException 발생 시 ErrorWebExceptionHandler로 전파
-            return Mono.fromRunnable(() -> {
-                    try {
-                        jwtVerifier.validate(jwt);
-                    } catch (ExpiredJwtException e) {
-                        throw new JwtException(JwtErrorCode.TOKEN_EXPIRED);
-                    } catch (SignatureException e) {
-                        throw new JwtException(JwtErrorCode.TOKEN_SIGNATURE_INVALID);
-                    } catch (MalformedJwtException e) {
-                        throw new JwtException(JwtErrorCode.TOKEN_MALFORMED);
-                    } catch (SecurityException | IllegalArgumentException e) {
-                        throw new JwtException(JwtErrorCode.TOKEN_INVALID);
-                    }
-                })
-                .then(chain.filter(exchange))  // 검증 성공 시 다음 필터로
-                .onErrorResume(JwtException.class, Mono::error);
+            // JWT 검증을 reactive-safe 하게 처리
+            return Mono.defer(() -> {
+
+                try {
+                    jwtVerifier.validate(jwt);
+                    return chain.filter(exchange); // 검증 성공하면 다음 필터 실행
+                } catch (ExpiredJwtException e) {
+                    throw new JwtException(JwtErrorCode.TOKEN_EXPIRED);
+                } catch (SignatureException e) {
+                    throw new JwtException(JwtErrorCode.TOKEN_SIGNATURE_INVALID);
+                } catch (MalformedJwtException e) {
+                    throw new JwtException(JwtErrorCode.TOKEN_MALFORMED);
+                } catch (SecurityException | IllegalArgumentException e) {
+                    throw new JwtException(JwtErrorCode.TOKEN_INVALID);
+                }
+
+            }); // Mono.defer
         };
     }
 
