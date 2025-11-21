@@ -53,14 +53,10 @@ spring:
           uri: lb://TRIP-SERVICE-DEV
           predicates:
             - Path=/api/v1/regions/**, /api/v1/trip-spots/**, /api/v1/trip-content-types/**, /api/v1/me/reviews/**
-          filters:
-            - JwtAuthApiGatewayFilter
         - id: trip-game-service
           uri: lb://TRIP-GAME-SERVICE-DEV
           predicates:
             - Path=/api/v1/trip-themes/**, /api/v1/trip-games/**
-          filters:
-            - JwtAuthApiGatewayFilter
 
 eureka:
   instance:
