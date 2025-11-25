@@ -1,15 +1,15 @@
 package com.followfollowme.tripmarble.domainlayer.auth.adapter.out.persistence;
 
 import com.followfollowme.tripmarble.domainlayer.auth.application.port.out.JwtTokenStorePort;
-import com.followfollowme.tripmarble.redis.exception.RedisErrorCode;
-import com.followfollowme.tripmarble.redis.exception.RedisInfraException;
 import com.followfollowme.tripmarble.security.auth.jwt.JwtAuthProperties;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RedisJwtTokenStoreAdapter implements JwtTokenStorePort {
@@ -21,22 +21,38 @@ public class RedisJwtTokenStoreAdapter implements JwtTokenStorePort {
     @Override
     public void save(long memberId, String token) {
         try {
-            redisTemplate.opsForValue().set(buildKey(memberId), token, jwtAuthProperties.refreshExpiration());
+            redisTemplate.opsForValue().set(
+                buildKey(memberId),
+                token,
+                jwtAuthProperties.refreshExpiration()
+            );
         } catch (RedisConnectionFailureException e) {
-            throw new RedisInfraException(RedisErrorCode.CONNECTION_FAILURE);
+            // 로그만 남기고 예외 안 던짐
+            log.error("[RedisJwtTokenStoreAdapter] RefreshToken 저장 실패 (AccessToken은 발급됨) - 사용자는 나중에 재로그인 필요: memberId={}, error={}",
+                memberId, e.getMessage());
         }
-
     }
 
     @Override
     public Optional<String> find(long memberId) {
-        String token = redisTemplate.opsForValue().get(buildKey(memberId));
-        return Optional.ofNullable(token);
+        try {
+            String token = redisTemplate.opsForValue().get(buildKey(memberId));
+            return Optional.ofNullable(token);
+
+        } catch (RedisConnectionFailureException e) {
+            log.error("[RedisJwtTokenStoreAdapter] RefreshToken 조회 실패: memberId={}, error={}",
+                memberId, e.getMessage());
+            return Optional.empty();
+        }
     }
 
     @Override
     public void delete(long memberId) {
-        redisTemplate.delete(buildKey(memberId));
+        try {
+            redisTemplate.delete(buildKey(memberId));
+        } catch (RedisConnectionFailureException e) {
+            log.error("[RedisJwtTokenStoreAdapter] RefreshToken 삭제 실패 (무시): memberId={}", memberId);
+        }
     }
 
     private String buildKey(long memberId) {

@@ -8,12 +8,12 @@ public class MemberException extends RuntimeException {
     private final MemberErrorCode errorCode;
 
     public MemberException(MemberErrorCode errorCode) {
-        super(errorCode.getErrorMessage());
+        super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 
     public MemberException(MemberErrorCode errorCode, Object... args) {
-        super(String.format(errorCode.getErrorMessage(), args));
+        super(String.format(errorCode.getMessage(), args));
         this.errorCode = errorCode;
     }
 }

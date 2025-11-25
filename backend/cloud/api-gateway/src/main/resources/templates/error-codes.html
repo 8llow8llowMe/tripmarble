@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>TripMarble API 에러코드 문서</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 5px;
+    }
+
+    .search-box {
+      padding: 30px 40px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 1rem;
+      border: 2px solid #dee2e6;
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+
+    #searchInput:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .service-section {
+      margin-bottom: 50px;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .service-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 3px solid #667eea;
+    }
+
+    .service-name {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #2d3748;
+    }
+
+    .service-badge {
+      background: #667eea;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .error-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .error-table thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .error-table th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .error-table tbody tr {
+      border-bottom: 1px solid #e9ecef;
+      transition: all 0.2s;
+    }
+
+    .error-table tbody tr:hover {
+      background: #f8f9fa;
+      transform: scale(1.002);
+    }
+
+    .error-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .error-table td {
+      padding: 15px;
+    }
+
+    .error-code {
+      font-family: 'Courier New', 'Consolas', monospace;
+      font-weight: bold;
+      color: #667eea;
+      font-size: 1rem;
+    }
+
+    .error-message {
+      color: #4a5568;
+      line-height: 1.5;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* HTTP 상태별 색상 및 아이콘 */
+    .status-200 {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    .status-200::before {
+      content: "";
+    }
+
+    .status-400 {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+
+    .status-400::before {
+      content: "";
+    }
+
+    .status-401 {
+      background: #feebc8;
+      color: #7c2d12;
+    }
+
+    .status-401::before {
+      content: "";
+    }
+
+    .status-403 {
+      background: #fef5e7;
+      color: #744210;
+    }
+
+    .status-403::before {
+      content: "";
+    }
+
+    .status-404 {
+      background: #e9d8fd;
+      color: #44337a;
+    }
+
+    .status-404::before {
+      content: "";
+    }
+
+    .status-409 {
+      background: #fbb6ce;
+      color: #702459;
+    }
+
+    .status-409::before {
+      content: "";
+    }
+
+    .status-500 {
+      background: #feb2b2;
+      color: #63171b;
+    }
+
+    .status-500::before {
+      content: "";
+    }
+
+    .status-503 {
+      background: #90cdf4;
+      color: #2c5282;
+    }
+
+    .status-503::before {
+      content: "";
+    }
+
+    .status-text {
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+    }
+
+    .status-name {
+      font-size: 0.75rem;
+      opacity: 0.85;
+      font-weight: 500;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 60px;
+      color: #a0aec0;
+      font-size: 1.2rem;
+    }
+
+    .empty-service {
+      text-align: center;
+      padding: 40px;
+      color: #a0aec0;
+      font-style: italic;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+
+    .footer {
+      background: #f8f9fa;
+      padding: 30px;
+      text-align: center;
+      color: #718096;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .footer a {
+      color: #667eea;
+      text-decoration: none;
+      margin: 0 10px;
+      font-weight: 500;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    .back-to-top {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #667eea;
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      font-size: 1.5rem;
+      border: none;
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .back-to-top:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    /* 반응형 디자인 */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .stats {
+        gap: 20px;
+      }
+
+      .stat-number {
+        font-size: 1.5rem;
+      }
+
+      .content {
+        padding: 20px;
+      }
+
+      .service-name {
+        font-size: 1.4rem;
+      }
+
+      .error-table {
+        font-size: 0.9rem;
+      }
+
+      .error-table th,
+      .error-table td {
+        padding: 10px;
+      }
+
+      .status-badge {
+        font-size: 0.75rem;
+        padding: 4px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- 헤더 -->
+  <div class="header">
+    <h1>TripMarble API</h1>
+    <p>에러코드 통합 문서</p>
+    <div class="stats">
+      <div class="stat-item">
+        <div class="stat-number" th:text="${serviceCount}">0</div>
+        <div class="stat-label">서비스</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number" th:text="${totalCount}">0</div>
+        <div class="stat-label">에러코드</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 검색 -->
+  <div class="search-box">
+    <input id="searchInput"
+           placeholder="🔍 에러코드, 메시지, HTTP 상태로 검색... (예: AUTH_001, 인증코드, 400, BAD_REQUEST)"
+           type="text">
+  </div>
+
+  <!-- 콘텐츠 -->
+  <div class="content">
+    <div class="service-section" th:each="entry : ${errorCodes}">
+      <div class="service-header">
+        <div class="service-name" th:text="${entry.key}">SERVICE</div>
+        <div class="service-badge" th:text="${entry.value.size()} + '개'">0개</div>
+      </div>
+
+      <!-- 에러코드가 없는 경우 -->
+      <div class="empty-service" th:if="${entry.value.isEmpty()}">
+        이 서비스는 현재 에러코드가 없거나 조회에 실패했습니다.
+      </div>
+
+      <!-- 에러코드 테이블 -->
+      <table class="error-table" th:if="${!entry.value.isEmpty()}">
+        <thead>
+        <tr>
+          <th style="width: 180px;">에러코드</th>
+          <th>메시지</th>
+          <th style="width: 200px;">HTTP 상태</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="error : ${entry.value}">
+          <td class="error-code" th:text="${error.code()}">CODE</td>
+          <td class="error-message" th:text="${error.message()}">Message</td>
+          <td>
+            <span class="status-badge"
+                  th:classappend="'status-' + ${error.httpStatusCode}"
+                  th:title="${error.httpStatusCode()} + ' ' + ${error.httpStatusName()}">
+              <span class="status-text" th:text="${error.httpStatusCode()}">000</span>
+              <span class="status-name" th:text="${error.httpStatusName()}">STATUS</span>
+            </span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 검색 결과 없음 -->
+    <div class="no-results" id="noResults" style="display: none;">
+      검색 결과가 없습니다.
+    </div>
+  </div>
+
+  <!-- 푸터 -->
+  <div class="footer">
+    <p>TripMarble API Gateway • 최종 업데이트: <span th:text="${lastUpdated}">2024-01-01 00:00:00</span></p>
+    <p style="margin-top: 10px;">
+      <a href="/swagger-ui.html" target="_blank">Swagger UI</a> |
+      <a href="/docs/error-codes/json" target="_blank">JSON으로 보기</a>
+    </p>
+  </div>
+</div>
+
+<!-- Back to Top 버튼 -->
+<button aria-label="맨 위로" class="back-to-top" id="backToTop"
+        onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+  ↑
+</button>
+
+<script>
+  // 검색 기능
+  document.getElementById('searchInput').addEventListener('input', function (e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const sections = document.querySelectorAll('.service-section');
+    let hasResults = false;
+
+    sections.forEach(section => {
+      const rows = section.querySelectorAll('tbody tr');
+      let sectionHasVisibleRows = false;
+
+      rows.forEach(row => {
+        const code = row.querySelector('.error-code').textContent.toLowerCase();
+        const message = row.querySelector('.error-message').textContent.toLowerCase();
+        const statusBadge = row.querySelector('.status-badge');
+        const statusText = statusBadge ? statusBadge.textContent.toLowerCase() : '';
+
+        // 에러코드, 메시지, HTTP 상태코드(숫자 + 이름) 모두 검색
+        if (code.includes(searchTerm) ||
+            message.includes(searchTerm) ||
+            statusText.includes(searchTerm)) {
+          row.style.display = '';
+          sectionHasVisibleRows = true;
+          hasResults = true;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // 빈 서비스 메시지는 검색 시 항상 숨김
+      const emptyMessage = section.querySelector('.empty-service');
+      if (emptyMessage) {
+        sectionHasVisibleRows = false;
+      }
+
+      section.style.display = sectionHasVisibleRows ? '' : 'none';
+    });
+
+    document.getElementById('noResults').style.display = hasResults ? 'none' : 'block';
+  });
+
+  // Back to Top 버튼 표시
+  window.addEventListener('scroll', function () {
+    const backToTop = document.getElementById('backToTop');
+    if (window.scrollY > 300) {
+      backToTop.classList.add('visible');
+    } else {
+      backToTop.classList.remove('visible');
+    }
+  });
+
+  // 초기 로딩 애니메이션
+  document.addEventListener('DOMContentLoaded', function () {
+    const sections = document.querySelectorAll('.service-section');
+    sections.forEach((section, index) => {
+      section.style.animationDelay = `${index * 0.1}s`;
+    });
+  });
+</script>
+</body>
+</html>

@@ -29,6 +29,25 @@ spring:
             - Path=/trip-game-service/**
           filters:
             - StripPrefix=1
+        # 에러코드 조회용 라우트
+        - id: internal-auth-service-error-codes
+          uri: lb://AUTH-SERVICE-DEV
+          predicates:
+            - Path=/internal/auth-service/error-codes # Gateway로 들어오는 경로
+          filters:
+            - RewritePath=/internal/auth-service/error-codes, /internal/v1/error-codes # Auth Service로 전달할 경로
+        - id: internal-trip-service-error-codes
+          uri: lb://TRIP-SERVICE-DEV
+          predicates:
+            - Path=/internal/trip-service/error-codes # Gateway로 들어오는 경로
+          filters:
+            - RewritePath=/internal/trip-service/error-codes, /internal/v1/error-codes # Auth Service로 전달할 경로
+        - id: internal-trip-game-service-error-codes
+          uri: lb://TRIP-GAME-SERVICE-DEV
+          predicates:
+            - Path=/internal/trip-game-service/error-codes # Gateway로 들어오는 경로
+          filters:
+            - RewritePath=/internal/trip-game-service/error-codes, /internal/v1/error-codes # Auth Service로 전달할 경로
         # 기존 API 라우트
         - id: trip-service
           uri: lb://TRIP-SERVICE-DEV

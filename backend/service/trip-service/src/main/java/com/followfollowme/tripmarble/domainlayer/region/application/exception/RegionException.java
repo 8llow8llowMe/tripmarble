@@ -8,7 +8,7 @@ public class RegionException extends RuntimeException {
     private final RegionErrorCode errorCode;
 
     public RegionException(RegionErrorCode errorCode) {
-        super(errorCode.getErrorMessage());
+        super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 }

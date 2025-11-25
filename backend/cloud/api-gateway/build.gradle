@@ -12,4 +12,8 @@ dependencies {
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.9'
     // Spring Boot Actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // Thymeleaf (HTML 템플릿 렌더링용)
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    // WebFlux
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }

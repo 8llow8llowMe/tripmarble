@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum ValidationErrorCode {
 
-    VALIDATION_ERROR("V001", "입력값이 유효하지 않습니다.", HttpStatus.BAD_REQUEST);
+    VALIDATION_ERROR("VALIDATION_001", "입력값이 유효하지 않습니다.", HttpStatus.BAD_REQUEST);
 
     private final String code;
-    private final String errorMessage;
+    private final String message;
     private final HttpStatus httpStatus;
 }
