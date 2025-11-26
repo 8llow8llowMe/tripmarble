@@ -5,6 +5,7 @@ x-api-gateway-environment: &api_gateway_environment
   API_GATEWAY_PORT: ${API_GATEWAY_PORT}
   SERVICE_DISCOVERY_HOSTNAME: ${SERVICE_DISCOVERY_HOSTNAME}
   SERVICE_DISCOVERY_PORT: ${SERVICE_DISCOVERY_PORT}
+  JWT_ACCESS_KEY: ${JWT_ACCESS_KEY}
 
 services:
   api-gateway-dev:
