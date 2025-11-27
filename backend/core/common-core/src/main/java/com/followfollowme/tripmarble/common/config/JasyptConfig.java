@@ -1,7 +1,6 @@
 package com.followfollowme.tripmarble.common.config;
 
 import com.followfollowme.tripmarble.common.properties.JasyptProperties;
-import lombok.RequiredArgsConstructor;
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
@@ -9,13 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@RequiredArgsConstructor
 public class JasyptConfig {
-
-    private final JasyptProperties jasyptProperties;
-
+    
     @Bean("jasyptStringEncryptor")
-    public StringEncryptor stringEncryptor() {
+    public StringEncryptor stringEncryptor(JasyptProperties jasyptProperties) {
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
         SimpleStringPBEConfig config = new SimpleStringPBEConfig();
 
