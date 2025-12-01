@@ -1,8 +1,6 @@
 dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-    // HttpStatus 사용을 위한 최소 web 의존성
-    implementation 'org.springframework:spring-web'
 }
 
 jar { enabled = true }
