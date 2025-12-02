@@ -2,10 +2,13 @@ package com.followfollowme.tripmarble.security.resourceserver.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.followfollowme.tripmarble.security.common.handler.CustomAccessDeniedHandler;
-import com.followfollowme.tripmarble.security.common.handler.CustomAuthenticationEntryPoint;
+import com.followfollowme.tripmarble.security.common.resolver.JwtTokenErrorResolver;
+import com.followfollowme.tripmarble.security.resourceserver.handler.OAuth2AuthenticationFailureHandler;
 import com.followfollowme.tripmarble.security.resourceserver.jwt.JwtResourceServerProperties;
 import com.followfollowme.tripmarble.security.resourceserver.jwt.JwtToMemberConverter;
-import lombok.RequiredArgsConstructor;
+import com.followfollowme.tripmarble.security.resourceserver.resolver.OAuth2ResourceTokenErrorResolver;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -14,44 +17,46 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 @Configuration
-@RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true)
 public class ResourceServerSecurityConfig {
 
-    private final ObjectMapper objectMapper;
-    private final JwtResourceServerProperties properties;
-
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+        HttpSecurity http, JwtToMemberConverter jwtToMemberConverter,
+        AuthenticationEntryPoint authenticationEntryPoint, AccessDeniedHandler accessDeniedHandler) throws Exception {
 
         http
-            // CORS, CSRF 비활성화
+            // 1. 불필요한 기능 비활성화
             .cors(AbstractHttpConfigurer::disable) // CORS는 Gateway에서 처리
             .csrf(AbstractHttpConfigurer::disable)
-
-            // 세션, 폼, 기본 인증 비활성화
+            // 1-1. 세션, 폼, 기본 인증 비활성화
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
-
-            // 인가 규칙 (추후에 화이트 리스트 설정)
-            .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
-            )
-            // 리소스 서버 설정
+            // 2. 모든 요청 허용 (인증은 JWT ++ @PreAuthorize로 처리)
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+            // 3. OAuth2 Resource Server 설정
             .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(new JwtToMemberConverter()))
-                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper))
-                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtToMemberConverter))
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler)
             );
 
         return http.build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder(JwtResourceServerProperties properties) {
+        SecretKey secretKey = new SecretKeySpec(properties.accessKey().getBytes(), "HmacSHA512");
+        return NimbusJwtDecoder
+            .withSecretKey(secretKey)
+            .macAlgorithm(MacAlgorithm.HS512)
+            .build();
     }
 
     @Bean
@@ -60,11 +65,17 @@ public class ResourceServerSecurityConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder() {
-        SecretKey secretKey = new SecretKeySpec(properties.accessKey().getBytes(), "HmacSHA512");
-        return NimbusJwtDecoder
-            .withSecretKey(secretKey)
-            .macAlgorithm(MacAlgorithm.HS512)
-            .build();
+    public JwtTokenErrorResolver jwtTokenErrorResolver() {
+        return new OAuth2ResourceTokenErrorResolver();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint(ObjectMapper objectMapper, JwtTokenErrorResolver jwtTokenErrorResolver) {
+        return new OAuth2AuthenticationFailureHandler(objectMapper, jwtTokenErrorResolver);
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler(ObjectMapper objectMapper) {
+        return new CustomAccessDeniedHandler(objectMapper);
     }
 }
