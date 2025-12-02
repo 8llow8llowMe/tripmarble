@@ -1,5 +1,5 @@
 dependencies {
-    implementation 'io.minio:minio:8.5.17'
+    implementation 'io.minio:minio:8.6.0'
     // HttpStatus 사용을 위한 최소 web 의존성
     implementation 'org.springframework:spring-web'
 }
