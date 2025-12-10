@@ -1,21 +1,20 @@
 package com.followfollowme.tripmarble.global.config;
 
+import com.followfollowme.tripmarble.common.config.SwaggerSecurityConfigurer;
 import com.followfollowme.tripmarble.common.properties.SwaggerProperties;
-import com.followfollowme.tripmarble.common.support.SwaggerSecurityCommon;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
+import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
-import java.util.List;
-
 @Configuration
 @Profile("!prod")
-@Import(SwaggerSecurityCommon.class)
+@Import(SwaggerSecurityConfigurer.class)
 public class AuthServiceSwaggerConfig {
 
     @Bean
