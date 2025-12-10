@@ -1,10 +1,10 @@
-package com.followfollowme.tripmarble.common.support;
+package com.followfollowme.tripmarble.common.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 
-public class SwaggerSecurityCommon {
+public class SwaggerSecurityConfigurer {
 
     @Bean
     public Components swaggerComponents() {
