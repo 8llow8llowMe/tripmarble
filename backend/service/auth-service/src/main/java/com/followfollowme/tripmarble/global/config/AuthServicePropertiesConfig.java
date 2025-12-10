@@ -18,6 +18,6 @@ import org.springframework.context.annotation.Import;
     RedisPropertiesConfig.class,
     MinioPropertiesConfig.class
 })
-public class AuthServiceInfraPropertiesConfig {
+public class AuthServicePropertiesConfig {
 
 }
