@@ -1,15 +1,18 @@
 "use client";
 import { ProfileInfo } from "@/features/profile/ProfileInfo";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import styles from "./Profile.module.scss";
 import HorizontalList from "@/shared/ui/common/HorizontalList/HorizontalList";
 import useMyReviews from "@/entities/reviews/hooks/useMyReviews";
 import EmptyGameState from "@/widgets/game-empty-state/EmptyGameState";
 import { useMemo } from "react";
+import Button from "@/shared/ui/common/Button/Button";
 
 export default function Profile() {
-  const { data, isLoading, isError } = useMyReviews({
+  const router = useRouter();
+  const { data, isLoading, isError, refetch, isFetching } = useMyReviews({
     size: 10,
     orderType: "DESC",
   });
@@ -50,17 +53,42 @@ export default function Profile() {
           ) : null}
           {!isLoading && reviewItems.length === 0 && !isError ? (
             <EmptyGameState
-              message="아직 작성한 리뷰가 없어요."
+              title="작성한 리뷰가 없습니다."
+              message="여행지에 방문한 기록을 리뷰로 남겨보세요."
+              action={
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
+                  onClick={() => router.push("/spots")}
+                >
+                  여행지 둘러보기
+                </Button>
+              }
               className={styles.emptyState}
             />
           ) : null}
-          {isLoading ? (
+          {isLoading || isFetching ? (
             <p className={styles.reviewMessage}>내 리뷰를 불러오는 중...</p>
           ) : null}
           {isError ? (
-            <p className={styles.reviewMessage}>
-              내 리뷰 정보를 불러오지 못했어요.
-            </p>
+            <div className={styles.reviewActions}>
+              <EmptyGameState
+                role="alert"
+                title="리뷰를 불러오지 못했습니다."
+                message="네트워크 상태를 확인한 뒤 다시 시도해 주세요."
+                action={
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="md"
+                    onClick={() => void refetch()}
+                  >
+                    다시 시도
+                  </Button>
+                }
+              />
+            </div>
           ) : null}
         </section>
       </div>

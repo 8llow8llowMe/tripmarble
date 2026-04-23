@@ -2,15 +2,26 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
-  gap: 3rem;
-  background-color: white;
+  min-height: calc(100vh - var(--header-height));
+  padding: var(--page-section-y-md) var(--page-gutter-sm)
+    var(--page-section-y-lg);
+  gap: var(--space-10);
+  background-color: var(--color-page);
+
+  @media (min-width: 834px) {
+    padding-inline: var(--page-gutter-md);
+  }
+
+  @media (min-width: 1080px) {
+    padding-inline: var(--page-gutter-lg);
+  }
 }
 
 .lists {
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  width: min(100%, var(--container-lg));
+  gap: var(--space-10);
 }
 
 .reviewSection {
@@ -21,31 +32,56 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
 }
 
 .sectionTitle {
-  font-size: 1.75rem;
-  font-weight: 700;
   margin: 0;
-  color: #1f2a44;
+  color: var(--color-text-strong);
+  font-family: var(--font-display);
+  font-size: var(--type-tile-title-size);
+  font-weight: var(--type-tile-title-weight);
+  line-height: var(--type-tile-title-line-height);
+  letter-spacing: var(--type-tile-title-letter-spacing);
 }
 
 .seeAll {
-  font-size: 0.95rem;
-  color: #4f7df0;
-  font-weight: 600;
-  text-decoration: underline;
+  color: var(--color-link);
+  font-size: var(--type-caption-bold-size);
+  font-weight: var(--type-caption-bold-weight);
+  line-height: var(--type-caption-bold-line-height);
+  letter-spacing: var(--type-caption-bold-letter-spacing);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
 }
 
 .emptyState {
-  margin-top: 1.5rem;
+  margin-top: var(--space-6);
 }
 
 .reviewMessage {
-  margin-top: 1.5rem;
+  margin-top: var(--space-6);
   text-align: center;
-  color: #607192;
-  font-size: 0.98rem;
+  color: var(--color-text-muted);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-line-height);
+  letter-spacing: var(--type-caption-letter-spacing);
+}
+
+.reviewActions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+@media (max-width: 640px) {
+  .sectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

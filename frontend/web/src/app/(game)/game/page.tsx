@@ -36,10 +36,8 @@ export default function Game() {
       <div className={styles.titleAndButton}>
         <div className={styles.sectionTitle}>모든 게임</div>
         <Button
-          radius="md"
-          bgColor="primary"
-          paddingSize="md"
-          width="clamp(120px, 40vw, 180px)"
+          variant="primary"
+          size="md"
           className={styles.createButton}
           onClick={handleCreateClick}
         >
@@ -48,7 +46,14 @@ export default function Game() {
       </div>
       {games && (
         <div className={styles.flexRow}>
-          <GameList games={games} />
+          <GameList
+            games={games}
+            emptyAction={
+              <Button variant="primary" size="md" onClick={handleCreateClick}>
+                게임 만들기
+              </Button>
+            }
+          />
         </div>
       )}
 

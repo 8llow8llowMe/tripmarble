@@ -56,9 +56,9 @@
     height: 90px;
     background: #f3f5f7;
     border: 2px solid #ddd;
-    border-radius: 50%;
+    border-radius: var(--radius-circle);
     margin-bottom: 6px;
-    transition: border 0.2s, box-shadow 0.2s;
+    transition: border var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -73,6 +73,6 @@
 
 .selected .circle {
   border: 3px solid #38bdf8;
-  box-shadow: 0 0 0 2px #bae6fd;
+  box-shadow: var(--shadow-card);
   background: #e0f7fa;
 }

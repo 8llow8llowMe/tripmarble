@@ -1,148 +1,93 @@
+@use "../../../shared/styles/form" as formStyles;
+
 .form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  @include formStyles.form-shell;
 }
 
 .label {
-  font-weight: bold;
-  font-size: 1.1rem;
+  @include formStyles.label;
+}
+
+.fieldGroup {
+  @include formStyles.field-group;
 }
 
 .input {
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  width: 100%;
+  @include formStyles.field;
 }
 
 .options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
+  @include formStyles.helper-text;
 
   label {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: var(--space-3);
+    min-height: var(--size-touch-target);
   }
 
-  .links {
-    a {
-      color: #666;
-      text-decoration: none;
-    }
-  }
-}
-
-.loginButton {
-  padding: 0.75rem;
-  background-color: #4d36ff;
-  color: #fff;
-  font-weight: bold;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: #3728c7;
+  input {
+    width: var(--space-6);
+    height: var(--space-6);
+    accent-color: var(--color-accent);
   }
 }
 
 .socialLogin {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 2rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-.socialWord {
-  display: flex;
-  justify-content: space-between;
-  gap: 2px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin-top: var(--space-8);
 }
 
-@media (max-width: 540px) {
-  .loginWrapper {
-    padding: 2rem 1rem;
-  }
-  .card {
-    padding: 2rem 1.5rem;
-  }
-  .socialWord {
-    flex-direction: column;
-  }
+.socialWord {
+  display: inline-flex;
+  align-items: center;
 }
 
 .socialItem {
-  flex: 1 1 30%;
-  // min-width: 100px;
-  text-align: center;
-  border: 1px solid #eee;
-  padding: 0.75rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.85rem;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
+  min-width: 0;
+  width: 100%;
+  border-color: var(--color-border-muted);
+  color: var(--color-text-strong);
 }
 
 @media (max-width: 360px) {
-  .socialItem {
-    flex: 1 1 100%;
+  .socialLogin {
+    grid-template-columns: 1fr;
   }
 }
 
-/* Small screens: icon-only, horizontal row */
 @media (max-width: 480px) {
   .socialLogin {
-    justify-content: center;
-    flex-wrap: nowrap;
-    gap: 0.75rem;
-    margin-top: 1.25rem;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
   }
 
   .socialItem {
-    flex: 1 1 30%;
-    width: 56px;
-    height: 56px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  // .socialItem img {
-  //   width: 28px;
-  //   height: 28px;
-  //   object-fit: contain;
-  // }
-
-  .socialWord {
-    display: none;
+    min-height: 48px;
+    padding-inline: var(--space-5);
   }
 }
 
 .footer {
-  margin-top: 2rem;
-  font-size: 0.85rem;
+  margin-top: var(--space-8);
+  @include formStyles.helper-text;
   text-align: center;
 
   strong {
-    font-weight: bold;
-    color: #333;
+    font-weight: var(--type-caption-bold-weight);
+    color: var(--color-text-strong);
   }
 
   a {
-    margin-left: 0.5rem;
-    color: #4d36ff;
-    font-weight: bold;
+    margin-left: var(--space-4);
+    color: var(--color-link);
+    font-weight: var(--type-caption-bold-weight);
     text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
   }
 }

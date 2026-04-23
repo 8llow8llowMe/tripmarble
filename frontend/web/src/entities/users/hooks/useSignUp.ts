@@ -11,12 +11,12 @@ export const signUp = (data: {
 };
 
 const useSignUp = () => {
-  const { mutate: signUpMutate } = useMutation({
+  const { mutate: signUpMutate, isPending: isSigningUp } = useMutation({
     mutationFn: signUp,
     onError: (error) => {
       console.log("signUp 에러", error);
     },
   });
-  return { signUpMutate };
+  return { signUpMutate, isSigningUp };
 };
 export default useSignUp;

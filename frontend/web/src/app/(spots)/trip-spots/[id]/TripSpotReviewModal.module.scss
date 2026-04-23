@@ -32,15 +32,15 @@
   padding: 10px 12px;
   font-size: 15px;
   color: #1f2937;
-  background-color: #fff;
-  transition: border-color 0.2s ease;
+  background-color: var(--color-surface);
+  transition: border-color var(--motion-fast) var(--ease-standard);
 }
 
 .select:focus,
 .textarea:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-card);
 }
 
 .textarea {
@@ -62,7 +62,7 @@
 .uploadTile {
   width: 94px;
   aspect-ratio: 1 / 1;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   border: 1px solid #d8dfea;
   background: #f6f9ff;
   display: inline-flex;
@@ -78,9 +78,9 @@
   position: relative;
   width: 94px;
   aspect-ratio: 1 / 1;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  background: #eef3fb;
+  background: var(--color-surface-muted);
 }
 
 .thumbImg {
@@ -97,7 +97,7 @@
   right: 6px;
   width: 22px;
   height: 22px;
-  border-radius: 50%;
+  border-radius: var(--radius-circle);
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: rgba(255, 255, 255, 0.9);
   color: #2a2f3a;
@@ -121,7 +121,7 @@
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
 }
 
 .cancelButton {
@@ -134,8 +134,8 @@
 }
 
 .submitButton {
-  background-color: #2563eb;
-  color: #fff;
+  background-color: var(--color-accent);
+  color: var(--color-text-inverse);
 }
 
 .submitButton:hover {

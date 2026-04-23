@@ -1,14 +1,10 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/entities/users/model";
 import { fetchMe } from "@/entities/users/model/user/userSlice";
 
 export default function ClientLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const hasHeader = pathname !== "/" && pathname !== "/spots";
-
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
   // user 값 store에서 읽기
@@ -27,9 +23,5 @@ export default function ClientLayout({ children }: { children: ReactNode }) {
     }
   }, [accessToken, user, dispatch]);
 
-  return (
-    <div className={`layoutWrapper ${hasHeader ? " hasHeader" : ""}`}>
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 }

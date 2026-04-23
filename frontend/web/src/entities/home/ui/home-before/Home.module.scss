@@ -13,7 +13,7 @@
   background-position: center;
   text-align: center;
   padding: 4rem 2rem;
-  transition: background-color 0.3s ease;
+  transition: background-color var(--motion-standard) var(--ease-standard);
 }
 
 .parallaxSection {
@@ -36,7 +36,7 @@
 }
 
 .content {
-  color: #fff;
+  color: var(--color-text-inverse);
   max-width: 1024px;
   display: flex;
   align-items: center;

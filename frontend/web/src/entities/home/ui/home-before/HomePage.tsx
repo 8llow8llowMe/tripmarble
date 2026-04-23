@@ -42,14 +42,13 @@ export default function HomePage() {
               </p>
               <div className={styles.buttonContainer}>
                 <Link href="/recommend">
-                  <Button radius="md" bgColor="accent" paddingSize="lg">
+                  <Button variant="secondary" size="lg">
                     랜덤 여행지 추천받기
                   </Button>
                 </Link>
                 <Button
-                  radius="md"
-                  bgColor="primary"
-                  paddingSize="lg"
+                  variant="primary"
+                  size="lg"
                   onClick={handleCreateClick}
                 >
                   게임 만들기

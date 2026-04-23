@@ -1,46 +1,61 @@
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 import styles from "./Button.module.scss";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  children: React.ReactNode;
-  paddingSize?: "sm" | "md" | "lg" | "xl";
-  radius?: "sm" | "md" | "lg";
-  bgColor?: "primary" | "secondary" | "accent";
-  width?: string;
-  height?: string;
-  fontSize?: string;
+type ButtonVariant = "primary" | "secondary" | "ghost" | "link" | "danger";
+type ButtonSize = "sm" | "md" | "lg";
+
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  block?: boolean;
+  leadingIcon?: ReactNode;
+  trailingIcon?: ReactNode;
+  isLoading?: boolean;
 }
 
 const Button = ({
   children,
-  paddingSize,
-  radius,
-  bgColor,
-  width,
-  height,
-  fontSize,
+  variant = "primary",
+  size = "md",
+  block = false,
+  leadingIcon,
+  trailingIcon,
+  isLoading = false,
   className,
+  disabled,
+  type = "button",
   ...props
 }: ButtonProps) => {
-  const style: React.CSSProperties = {};
-  if (width) style.width = width;
-  if (height) style.height = height;
-  if (fontSize) style.fontSize = fontSize;
-
   const classes = [
     styles.button,
-    radius && styles[`rounded-${radius}`],
-    paddingSize && styles[`padding-${paddingSize}`],
-    bgColor && styles[`bg-${bgColor}`],
+    styles[`variant-${variant}`],
+    styles[`size-${size}`],
+    block && styles.block,
+    isLoading && styles.loading,
     className
   ].filter(Boolean).join(" ");
 
   return (
     <button
       className={classes}
+      type={type}
+      disabled={disabled || isLoading}
+      aria-busy={isLoading || undefined}
       {...props}
-      style={Object.keys(style).length > 0 ? style : undefined}
     >
-      {children}
+      {isLoading && <span className={styles.spinner} aria-hidden="true" />}
+      {leadingIcon && !isLoading && (
+        <span className={styles.icon} aria-hidden="true">
+          {leadingIcon}
+        </span>
+      )}
+      <span className={styles.label}>{children}</span>
+      {trailingIcon && (
+        <span className={styles.icon} aria-hidden="true">
+          {trailingIcon}
+        </span>
+      )}
     </button>
   );
 };

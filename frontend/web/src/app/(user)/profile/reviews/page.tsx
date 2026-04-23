@@ -4,6 +4,9 @@ import { Suspense, useEffect, useMemo, useRef, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import styles from "./MyReviewsPage.module.scss";
+import Button from "@/shared/ui/common/Button/Button";
+import CardGrid from "@/shared/ui/common/Card/CardGrid";
+import MediaCard from "@/shared/ui/common/Card/MediaCard";
 import {
   ReviewSourceType,
   ReviewOrderType,
@@ -58,6 +61,7 @@ const ReviewsPageInner = () => {
     isFetchingNextPage,
     isLoading,
     isError,
+    refetch,
   } = useMyReviewsInfinite({
     sourceType: validSource === "ALL" ? undefined : validSource,
     size: 12,
@@ -68,13 +72,13 @@ const ReviewsPageInner = () => {
   useEffect(() => {
     if (!observerRef.current) return;
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && hasNextPage) {
+      if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
         fetchNextPage();
       }
     });
     observer.observe(observerRef.current);
     return () => observer.disconnect();
-  }, [hasNextPage, fetchNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const updateQuery = (updater: (params: URLSearchParams) => void) => {
     const params = new URLSearchParams(searchParams);
@@ -109,7 +113,7 @@ const ReviewsPageInner = () => {
 
   const reviews =
     data?.pages.flatMap((page) => page.data.dataBody.contents) ?? [];
-  const showEmpty = !isLoading && reviews.length === 0;
+  const showEmpty = !isLoading && !isError && reviews.length === 0;
 
   return (
     <div className={`${styles.pageWrapper} appPage`}>
@@ -159,53 +163,65 @@ const ReviewsPageInner = () => {
       </header>
 
       {isError && (
-        <p className={styles.error}>
-          리뷰를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
-        </p>
+        <div className={styles.error} role="alert">
+          <p>리뷰를 불러오지 못했습니다.</p>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => void refetch()}
+          >
+            다시 시도
+          </Button>
+        </div>
       )}
 
       {showEmpty ? (
-        <EmptyGameState message="작성한 리뷰가 아직 없어요." />
-      ) : (
-        <section className={styles.grid}>
-          {reviews.map((review) => (
-            <Link
-              key={review.tripSpotReviewId}
-              href={`/trip-spots/${review.tripSpotId}`}
-              className={styles.reviewCard}
+        <EmptyGameState
+          title="작성한 리뷰가 없습니다."
+          message="여행지에 방문한 기록을 리뷰로 남겨보세요."
+          action={
+            <Button
+              type="button"
+              variant="primary"
+              size="md"
+              onClick={() => router.push("/spots")}
             >
-              <div className={styles.imageWrapper}>
-                <img
-                  src={review.photos?.[0]?.photoUrl || "/images/no-image.png"}
-                  alt="리뷰 이미지"
-                  loading="lazy"
-                />
-              </div>
-              <div className={styles.reviewContent}>
-                <div className={styles.reviewMeta}>
-                  <span className={styles.rating}>
-                    {typeof review.rating === "number"
-                      ? review.rating.toFixed(1)
-                      : "0.0"}
-                    점
-                  </span>
-                  <span className={styles.source}>
-                    {review.reviewSourceTypeDescription ||
-                      (review.reviewSourceTypeCode === "GAME_MISSION"
-                        ? "게임 리뷰"
-                        : "일반 리뷰")}
-                  </span>
-                </div>
-                <p className={styles.reviewText}>
-                  {review.content?.length
-                    ? review.content
-                    : "리뷰 내용을 불러오지 못했습니다."}
-                </p>
-              </div>
-            </Link>
-          ))}
+              여행지 둘러보기
+            </Button>
+          }
+        />
+      ) : (
+        <CardGrid className={styles.grid} minItemWidth="260px">
+          {reviews.map((review) => {
+            const rating =
+              typeof review.rating === "number"
+                ? review.rating.toFixed(1)
+                : "0.0";
+            const source =
+              review.reviewSourceTypeDescription ||
+              (review.reviewSourceTypeCode === "GAME_MISSION"
+                ? "게임 리뷰"
+                : "일반 리뷰");
+            const content = review.content?.length
+              ? review.content
+              : "리뷰 내용을 불러오지 못했습니다.";
+
+            return (
+              <MediaCard
+                key={review.tripSpotReviewId}
+                href={`/trip-spots/${review.tripSpotId}`}
+                imageUrl={review.photos?.[0]?.photoUrl || "/images/no-image.png"}
+                imageAlt="리뷰 이미지"
+                title={content}
+                badge={source}
+                meta={`${rating}점`}
+                ratio="landscape"
+              />
+            );
+          })}
           <div ref={observerRef} />
-        </section>
+        </CardGrid>
       )}
 
       {(isLoading || isFetchingNextPage || isPending) && (

@@ -1,7 +1,9 @@
 .avatar {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
+  width: clamp(120px, 22vw, 184px);
+  height: clamp(120px, 22vw, 184px);
+  border-radius: var(--radius-circle);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border-muted);
   overflow: hidden;
 }
 

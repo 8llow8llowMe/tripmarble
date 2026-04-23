@@ -1,0 +1,131 @@
+@mixin type-display {
+  font-family: var(--font-display);
+  font-size: var(--type-display-size);
+  font-weight: var(--type-display-weight);
+  line-height: var(--type-display-line-height);
+  letter-spacing: var(--type-display-letter-spacing);
+}
+
+@mixin type-section-title {
+  font-family: var(--font-display);
+  font-size: var(--type-section-title-size);
+  font-weight: var(--type-section-title-weight);
+  line-height: var(--type-section-title-line-height);
+  letter-spacing: var(--type-section-title-letter-spacing);
+}
+
+@mixin type-tile-title {
+  font-family: var(--font-display);
+  font-size: var(--type-tile-title-size);
+  font-weight: var(--type-tile-title-weight);
+  line-height: var(--type-tile-title-line-height);
+  letter-spacing: var(--type-tile-title-letter-spacing);
+}
+
+@mixin type-card-title {
+  font-family: var(--font-display);
+  font-size: var(--type-card-title-size);
+  font-weight: var(--type-card-title-weight);
+  line-height: var(--type-card-title-line-height);
+  letter-spacing: var(--type-card-title-letter-spacing);
+}
+
+@mixin type-body {
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--type-body-line-height);
+  letter-spacing: var(--type-body-letter-spacing);
+}
+
+@mixin type-body-emphasis {
+  font-family: var(--font-body);
+  font-size: var(--type-body-emphasis-size);
+  font-weight: var(--type-body-emphasis-weight);
+  line-height: var(--type-body-emphasis-line-height);
+  letter-spacing: var(--type-body-emphasis-letter-spacing);
+}
+
+@mixin type-caption {
+  font-family: var(--font-body);
+  font-size: var(--type-caption-size);
+  font-weight: var(--type-caption-weight);
+  line-height: var(--type-caption-line-height);
+  letter-spacing: var(--type-caption-letter-spacing);
+}
+
+@mixin type-caption-bold {
+  font-family: var(--font-body);
+  font-size: var(--type-caption-bold-size);
+  font-weight: var(--type-caption-bold-weight);
+  line-height: var(--type-caption-bold-line-height);
+  letter-spacing: var(--type-caption-bold-letter-spacing);
+}
+
+@mixin type-micro {
+  font-family: var(--font-body);
+  font-size: var(--type-micro-size);
+  font-weight: var(--type-micro-weight);
+  line-height: var(--type-micro-line-height);
+  letter-spacing: var(--type-micro-letter-spacing);
+}
+
+@mixin type-micro-bold {
+  font-family: var(--font-body);
+  font-size: var(--type-micro-bold-size);
+  font-weight: var(--type-micro-bold-weight);
+  line-height: var(--type-micro-bold-line-height);
+  letter-spacing: var(--type-micro-bold-letter-spacing);
+}
+
+@mixin type-nano {
+  font-family: var(--font-body);
+  font-size: var(--type-nano-size);
+  font-weight: var(--type-nano-weight);
+  line-height: var(--type-nano-line-height);
+  letter-spacing: var(--type-nano-letter-spacing);
+}
+
+.type-display {
+  @include type-display;
+}
+
+.type-section-title {
+  @include type-section-title;
+}
+
+.type-tile-title {
+  @include type-tile-title;
+}
+
+.type-card-title {
+  @include type-card-title;
+}
+
+.type-body {
+  @include type-body;
+}
+
+.type-body-emphasis {
+  @include type-body-emphasis;
+}
+
+.type-caption {
+  @include type-caption;
+}
+
+.type-caption-bold {
+  @include type-caption-bold;
+}
+
+.type-micro {
+  @include type-micro;
+}
+
+.type-micro-bold {
+  @include type-micro-bold;
+}
+
+.type-nano {
+  @include type-nano;
+}

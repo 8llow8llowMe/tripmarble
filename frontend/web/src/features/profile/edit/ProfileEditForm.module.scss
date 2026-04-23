@@ -1,14 +1,24 @@
+@use "../../../shared/styles/form" as formStyles;
+
 .container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  @include formStyles.form-shell;
+}
+
+.fieldGroup {
+  @include formStyles.field-group;
+}
+
+.label {
+  @include formStyles.label;
 }
 
 .nickname {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
+  @include formStyles.field;
+}
+
+.helperText {
+  @include formStyles.helper-text;
+  margin: 0;
 }
 
 .imageUploader {
@@ -17,16 +27,29 @@
   align-items: center;
 
   label {
-    display: block;
-    width: 150px;
-    height: 150px;
-    border: 1px dashed #ccc;
-    border-radius: 50%;
     display: flex;
+    width: var(--size-avatar-upload);
+    height: var(--size-avatar-upload);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-circle);
     justify-content: center;
     align-items: center;
     cursor: pointer;
     overflow: hidden;
+    color: var(--color-text-muted);
+    background: var(--color-surface-muted);
+    font-size: var(--type-caption-bold-size);
+    font-weight: var(--type-caption-bold-weight);
+    line-height: var(--type-caption-bold-line-height);
+    transition:
+      border-color var(--motion-fast) var(--ease-standard),
+      box-shadow var(--motion-fast) var(--ease-standard),
+      background-color var(--motion-fast) var(--ease-standard);
+
+    &:hover {
+      border-color: var(--color-accent);
+      background: var(--color-accent-soft);
+    }
 
     img {
       width: 100%;
@@ -40,11 +63,19 @@
   }
 }
 
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+}
+
 .submitButton {
-  padding: 0.5rem 1rem;
-  border: 1px solid #ddd;
-  background: #f9f9f9;
-  background: #f9f9f9;
-  cursor: pointer;
-  border-radius: 4px;
+  min-width: var(--size-form-action-min-width);
+}
+
+@media (max-width: 520px) {
+  .actions {
+    flex-direction: column-reverse;
+  }
 }

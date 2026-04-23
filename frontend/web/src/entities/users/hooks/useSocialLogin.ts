@@ -35,7 +35,11 @@ const useSocialLogin = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const { mutate: socialLoginMutate } = useMutation<
+  const {
+    mutate: socialLoginMutate,
+    isPending: isSocialLoginPending,
+    isError: isSocialLoginError,
+  } = useMutation<
     SocialLoginResponse,
     Error,
     SocialLoginParams
@@ -65,7 +69,7 @@ const useSocialLogin = () => {
     },
   });
 
-  return { socialLoginMutate };
+  return { socialLoginMutate, isSocialLoginPending, isSocialLoginError };
 };
 
 export default useSocialLogin;

@@ -1,17 +1,28 @@
 "use client";
 
-import Link from "next/link";
+import type { ReactNode } from "react";
 import styles from "./Games.module.scss";
 import { GameSummary } from "@/entities/games/hooks/useMyGameList";
-import Carousel from "@/shared/ui/common/Carousel/Carousel";
+import CardRail from "@/shared/ui/common/Card/CardRail";
+import MediaCard from "@/shared/ui/common/Card/MediaCard";
 import type { CardListItem } from "@/shared/ui/common/CardList/CardList";
 import EmptyGameState from "@/widgets/game-empty-state/EmptyGameState";
 
-export function GameList({ games }: { games: GameSummary[] }) {
+export function GameList({
+  games,
+  emptyAction,
+}: {
+  games: GameSummary[];
+  emptyAction?: ReactNode;
+}) {
   if (!games?.length) {
     return (
       <div className={styles.gamesContainer}>
-        <EmptyGameState />
+        <EmptyGameState
+          title="아직 만든 게임이 없습니다."
+          message="여행지를 골라 첫 게임을 만들어 보세요."
+          action={emptyAction}
+        />
       </div>
     );
   }
@@ -29,36 +40,22 @@ export function GameList({ games }: { games: GameSummary[] }) {
 
   return (
     <div className={styles.gamesContainer}>
-      <Carousel<CardListItem>
+      <CardRail<CardListItem>
         items={items}
+        itemWidth={280}
+        gap={24}
         renderItem={(item) => (
-          <Link href={item.href ?? "#"} className={styles.carouselCard}>
-            <img
-              src={item.imageUrl}
-              alt={item.title || "대표 게임 이미지"}
-              className={styles.cardImage}
-              loading="lazy"
-            />
-            <div className={styles.imageOverlay}>
-              {(item.regionName || item.status) && (
-                <div className={styles.overlayMeta}>
-                  {item.regionName && (
-                    <span className={styles.overlayTag}>{item.regionName}</span>
-                  )}
-                  {item.status && (
-                    <span className={styles.statusBadge}>{item.status}</span>
-                  )}
-                </div>
-              )}
-              <div className={styles.overlayTitle}>{item.title}</div>
-              {item.description && (
-                <div className={styles.overlayDesc}>{item.description}</div>
-              )}
-              {item.date && (
-                <div className={styles.overlayDate}>{item.date}</div>
-              )}
-            </div>
-          </Link>
+          <MediaCard
+            href={item.href}
+            imageUrl={item.imageUrl}
+            imageAlt={item.title || "대표 게임 이미지"}
+            title={item.title}
+            description={item.description}
+            badge={item.regionName}
+            meta={[item.status, item.date].filter(Boolean).join(" · ")}
+            variant="overlay"
+            ratio="portrait"
+          />
         )}
       />
     </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import styles from "./LoginForm.module.scss";
 import { kakao, naver } from "@/shared/assets/images/social-logo";
+import Button from "@/shared/ui/common/Button/Button";
 import useLogin from "@/entities/users/hooks/useLogin";
 import { authApiClient } from "@/shared/lib/api/client";
 
@@ -57,20 +58,34 @@ export default function LoginPage() {
   return (
     <>
       <form className={styles.form} onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="이메일"
-          className={styles.input}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="비밀번호 (영문, 숫자, 특수문자 조합 8~30자)"
-          className={styles.input}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className={styles.fieldGroup}>
+          <label className={styles.label} htmlFor="login-email">
+            이메일
+          </label>
+          <input
+            id="login-email"
+            type="email"
+            autoComplete="email"
+            placeholder="이메일"
+            className={styles.input}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className={styles.fieldGroup}>
+          <label className={styles.label} htmlFor="login-password">
+            비밀번호
+          </label>
+          <input
+            id="login-password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="영문, 숫자, 특수문자 조합 8~30자"
+            className={styles.input}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
         <div className={styles.options}>
           <label>
             <input
@@ -81,42 +96,42 @@ export default function LoginPage() {
             이메일 저장
           </label>
         </div>
-        <button type="submit" className={styles.loginButton}>
+        <Button type="submit" variant="primary" size="md" block>
           로그인
-        </button>
+        </Button>
       </form>
 
       {/* ✅ 소셜 로그인 */}
       <div className={styles.socialLogin}>
-        <div
+        <Button
+          type="button"
+          variant="secondary"
+          size="md"
           className={styles.socialItem}
           onClick={() => handleSocialLogin("NAVER")}
+          leadingIcon={<img src={naverIcon} alt="" width={24} height={24} />}
         >
-          <img src={naverIcon} alt="naver" width={24} height={24} />
-          <div className={styles.socialWord}>
-            <a>네이버</a>
-            <a>로그인</a>
-          </div>
-        </div>
+          <span className={styles.socialWord}>네이버 로그인</span>
+        </Button>
 
-        <div
+        <Button
+          type="button"
+          variant="secondary"
+          size="md"
           className={styles.socialItem}
           onClick={() => handleSocialLogin("KAKAO")}
+          leadingIcon={<img src={kakaoIcon} alt="" width={32} height={24} />}
         >
-          <img src={kakaoIcon} alt="kakao" width={50} height={24} />
-          <div className={styles.socialWord}>
-            <a>카카오</a>
-            <a>로그인</a>
-          </div>
-        </div>
+          <span className={styles.socialWord}>카카오 로그인</span>
+        </Button>
 
-        {/* <div className={styles.socialItem}>
+        {/* <button type="button" className={styles.socialItem}>
           <img src={googleIcon} alt="google" width={24} height={24} />
           <div className={styles.socialWord}>
-            <a>구글</a>
-            <a>로그인</a>
+            <span>구글</span>
+            <span>로그인</span>
           </div>
-        </div> */}
+        </button> */}
       </div>
 
       <div className={styles.footer}>

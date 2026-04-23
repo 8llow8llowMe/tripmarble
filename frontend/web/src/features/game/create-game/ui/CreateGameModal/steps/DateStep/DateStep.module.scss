@@ -24,7 +24,7 @@
 }
 
 .customCalendar :global(.react-datepicker__header) {
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   border-bottom: 1px solid #e5e7eb;
   padding: 0;
 }
@@ -46,7 +46,7 @@
   font-size: 1.5rem; /* 24px */
   cursor: pointer;
   color: #6b7280;
-  transition: color 150ms ease-in-out;
+  transition: color var(--motion-fast) var(--ease-standard);
   padding: 0 0.5rem;
 
   &:hover {
@@ -89,7 +89,7 @@
   line-height: 2.5rem; /* 40px */
   border-radius: 0.5rem; /* 8px */
   font-size: 0.875rem; /* 14px */
-  transition: background-color 150ms ease-in-out, color 150ms ease-in-out;
+  transition: background-color var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
 
   &:hover {
     background-color: #f3f4f6; /* light gray */
@@ -112,13 +112,13 @@
 .selectedRangeStrong,
 .customCalendar :global(.react-datepicker__day--in-selecting-range) {
   background-color: #3b82f6 !important; /* primary blue */
-  color: #ffffff !important;
+  color: var(--color-text-inverse) !important;
 }
 
 .selectedRangeLight,
 .customCalendar :global(.react-datepicker__day--in-range) {
   background-color: #3b82f6 !important; /* light primary blue */
-  color: #ffffff !important; /* dark primary blue */
+  color: var(--color-text-inverse) !important; /* dark primary blue */
 }
 
 /* Fix for start/end of range to have rounded corners */

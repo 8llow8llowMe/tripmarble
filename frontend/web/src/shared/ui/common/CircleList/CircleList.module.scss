@@ -22,8 +22,8 @@
 }
 
 .circleItem {
-  background-color: #e0f7fa;
-  border-radius: 50%;
+  background-color: var(--color-surface-muted);
+  border-radius: var(--radius-circle);
   aspect-ratio: 1;
   display: flex;
   justify-content: center;
@@ -31,18 +31,18 @@
   font-weight: 500;
   cursor: pointer;
   padding: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all var(--motion-standard) var(--ease-standard);
+  box-shadow: var(--shadow-none);
 
   &:hover {
-    background-color: #b2ebf2;
+    background-color: var(--color-accent-soft);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-card);
   }
 }
 
 .label {
-  color: white;
+  color: var(--color-text-inverse);
   font-weight: 500;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
   text-align: center;

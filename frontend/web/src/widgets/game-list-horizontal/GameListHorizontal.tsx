@@ -55,11 +55,14 @@ export function GameListHorizontal({ type }: { type: GameStatus }) {
             title=""
             items={items}
             itemWidth={250}
-            gap={18}
+            gap={16}
             onItemClick={(item) => handleClick(item.id)}
           />
         ) : (
-          <EmptyGameState />
+          <EmptyGameState
+            title="표시할 게임이 없습니다."
+            message="조건에 맞는 게임이 생기면 여기에 표시됩니다."
+          />
         )}
       </div>
     </>

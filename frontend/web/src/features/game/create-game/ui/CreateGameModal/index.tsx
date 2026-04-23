@@ -11,6 +11,7 @@ import {
 } from "@/features/game/create-game/model/createGameSlice";
 import styles from "./CreateGameModal.module.scss";
 import Modal from "@/shared/ui/common/Modal";
+import Button from "@/shared/ui/common/Button/Button";
 
 // Step 컴포넌트 import
 import TitleStep from "./steps/TitleStep/TitleStep";
@@ -198,6 +199,8 @@ export default function CreateGameModal({
   }, [dispatch, onClose]);
 
   useEffect(() => {
+    if (!isOpen) return;
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
         const ae = document.activeElement as HTMLElement | null;
@@ -211,18 +214,23 @@ export default function CreateGameModal({
           e.preventDefault();
           nextStep(); // 전역은 “입력 중이 아닐 때”에만 동작
         }
-      } else if (e.key === "Escape") {
-        handleClose();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [nextStep, handleClose]);
+  }, [isOpen, nextStep]);
 
   const canNext = !hasError;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="게임 만들기"
+      size="lg"
+      panelClassName={styles.modalPanel}
+      bodyClassName={styles.modalBody}
+    >
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.progress}>
@@ -276,22 +284,26 @@ export default function CreateGameModal({
 
         <div className={styles.footer}>
           {step > 0 && (
-            <button
+            <Button
               className={styles.secondary}
               onClick={prevStep}
               type="button"
+              variant="secondary"
+              size="md"
             >
               뒤로
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             className={styles.primary}
             onClick={nextStep}
             disabled={!canNext}
             type="button"
+            variant="primary"
+            size="md"
           >
             {step !== steps.length - 1 ? "계속하기" : "게임 생성하기"}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

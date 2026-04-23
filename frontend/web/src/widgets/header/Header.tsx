@@ -1,33 +1,36 @@
 "use client";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./Header.module.scss";
 import { useAppSelector } from "@/entities/users/model";
 import { toast } from "react-toastify";
+import MobileNavMenu from "./MobileNavMenu";
+import { getHeaderNavItems, type HeaderNavItem } from "./navItems";
+
+const MOBILE_MENU_ID = "tripmarble-mobile-navigation";
 
 const Header = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(
-    pathname !== "/" && pathname !== "/spots"
-  );
   const menuRef = useRef<HTMLDivElement>(null);
-  const hamburgerRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const user = useAppSelector((state) => state.user.user);
+  const router = useRouter();
+  const navItems = getHeaderNavItems(Boolean(user));
 
   const toggleMenu = () => {
     setIsOpen((prev) => !prev);
   };
-  const closeMenu = () => setIsOpen(false);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: globalThis.MouseEvent) => {
       if (
         menuRef.current &&
         !menuRef.current.contains(event.target as Node) &&
-        hamburgerRef.current &&
-        !hamburgerRef.current.contains(event.target as Node)
+        menuButtonRef.current &&
+        !menuButtonRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -44,123 +47,101 @@ const Header = () => {
     };
   }, [isOpen]);
 
-  const router = useRouter();
+  useEffect(() => {
+    if (!isOpen) return;
 
-  // 게임 목록 클릭 핸들러
-  const handleGameClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!user) {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+
+  const handleNavClick = (
+    event: ReactMouseEvent<HTMLAnchorElement>,
+    item: HeaderNavItem
+  ) => {
+    if (item.requiresAuth && !user) {
+      event.preventDefault();
       toast.info("로그인 후 이용해보세요!");
       router.push("/login");
-    } else {
-      router.push("/game");
     }
   };
 
-  useEffect(() => {
-    if (pathname !== "/" && pathname !== "/spots") {
-      setScrolled(true);
-      return;
-    }
-    // 초기 상태 동기화
-    setScrolled(window.scrollY > 0);
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 0);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [pathname]);
+  const handleMobileNavClick = (
+    event: ReactMouseEvent<HTMLAnchorElement>,
+    item: HeaderNavItem
+  ) => {
+    handleNavClick(event, item);
+    setIsOpen(false);
+  };
 
-  const isActive = (path: string) => (pathname === path ? styles.active : "");
+  const isActive = (item: HeaderNavItem) => {
+    const activePaths = item.activePaths ?? [item.href];
+    return activePaths.some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`)
+    );
+  };
 
   return (
-    <header className={`${styles.header} ${scrolled ? styles.scrolled : ""}`}>
-      <div className={`${styles.logo} ${scrolled ? styles.scrolled : ""}`}>
-        <Link href="/">TripMarble</Link>
-      </div>
-
-      <nav className={`${styles.nav} ${scrolled ? styles.scrolled : ""}`}>
-        <Link href="/search" className={isActive("/search")}>
-          검색
+    <header className={styles.header}>
+      <div className={styles.inner}>
+        <Link href="/" className={styles.logo}>
+          TripMarble
         </Link>
-        <Link href="/spots" className={isActive("/spots")}>
-          여행지 목록
-        </Link>
-        <a
-          href="/game"
-          onClick={handleGameClick}
-          className={isActive("/game")}
-          style={{ cursor: "pointer" }}
-        >
-          게임 목록
-        </a>
-        {user ? (
-          <Link href="/profile" className={isActive("/profile")}>
-            마이페이지
-          </Link>
-        ) : (
-          <Link href="/login" className={isActive("/login")}>
-            로그인
-          </Link>
-        )}
-      </nav>
 
-      <div
-        className={`${styles.hamburger} ${scrolled ? styles.scrolled : ""}`}
-        ref={hamburgerRef}
-        onClick={toggleMenu}
-      >
-        ☰
-      </div>
+        <nav className={styles.nav} aria-label="주 메뉴">
+          {navItems.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href}
+              className={`${styles.navLink} ${
+                isActive(item) ? styles.active : ""
+              }`}
+              onClick={(event) => handleNavClick(event, item)}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
 
-      {isOpen && (
-        <div className={styles.mobileMenu} ref={menuRef}>
-          <Link
-            href="/search"
-            className={isActive("/search")}
-            onClick={closeMenu}
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className={`${styles.menuButton} ${isOpen ? styles.open : ""}`}
+            ref={menuButtonRef}
+            onClick={toggleMenu}
+            aria-label={isOpen ? "메뉴 닫기" : "메뉴 열기"}
+            aria-expanded={isOpen}
+            aria-controls={MOBILE_MENU_ID}
           >
-            검색
-          </Link>
-          <Link
-            href="/spots"
-            className={isActive("/spots")}
-            onClick={closeMenu}
-          >
-            여행지 목록
-          </Link>
-          <a
-            href="/game"
-            onClick={(e) => {
-              handleGameClick(e);
-              closeMenu();
-            }}
-            className={isActive("/game")}
-            style={{ cursor: "pointer" }}
-          >
-            게임 목록
-          </a>
-          {user ? (
-            <Link
-              href="/profile"
-              className={isActive("/profile")}
-              onClick={closeMenu}
-            >
-              마이페이지
-            </Link>
-          ) : (
-            <Link
-              href="/login"
-              className={isActive("/login")}
-              onClick={closeMenu}
-            >
-              로그인
-            </Link>
-          )}
+            <span className={styles.menuIcon} aria-hidden="true">
+              <span className={styles.menuLine} />
+              <span className={styles.menuLine} />
+              <span className={styles.menuLine} />
+            </span>
+          </button>
         </div>
-      )}
+      </div>
+
+      <MobileNavMenu
+        id={MOBILE_MENU_ID}
+        isOpen={isOpen}
+        items={navItems}
+        menuRef={menuRef}
+        isActive={isActive}
+        onItemClick={handleMobileNavClick}
+      />
     </header>
   );
 };

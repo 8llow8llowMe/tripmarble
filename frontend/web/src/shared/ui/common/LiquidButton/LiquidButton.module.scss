@@ -6,15 +6,15 @@
   gap: 0.5rem;
   padding: 1rem 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
   font-weight: 600;
   line-height: 1;
-  transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease,
-    border-color 0.25s ease;
+  transition: transform var(--motion-fast) var(--ease-standard), box-shadow var(--motion-standard) var(--ease-standard), background var(--motion-standard) var(--ease-standard),
+    border-color var(--motion-standard) var(--ease-standard);
   outline: none;
   overflow: hidden;
 }
@@ -35,8 +35,7 @@
     );
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.08), 0 8px 28px rgba(17, 24, 39, 0.25);
+  box-shadow: var(--shadow-card);
 }
 
 /* Moving liquid blob */
@@ -56,7 +55,7 @@
       transparent 65%
     );
   filter: blur(10px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
   will-change: transform;
 }
 
@@ -75,20 +74,18 @@
   //   rgba(255, 255, 255, 0) 60%
   // );
   transform: translateX(-120%);
-  transition: transform 0.8s ease;
+  transition: transform var(--motion-slow) var(--ease-standard);
   pointer-events: none;
 }
 
 .button:hover {
   transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 14px 38px rgba(17, 24, 39, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  box-shadow: var(--shadow-card);
 }
 
 .button:active {
   transform: translateY(0);
-  box-shadow: 0 6px 18px rgba(17, 24, 39, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow: var(--shadow-none);
 }
 
 .button:hover.glass::after {
@@ -102,8 +99,7 @@
 }
 
 .button:focus-visible {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6),
-    0 0 0 6px rgba(0, 112, 243, 0.45);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .button:disabled {
@@ -113,9 +109,9 @@
 
 /* Solid variant (fallback to current color utilities) */
 .solid {
-  color: white;
-  background-color: #0070f3;
-  box-shadow: 0 6px 18px rgba(0, 112, 243, 0.35);
+  color: var(--color-text-inverse);
+  background-color: var(--color-accent);
+  box-shadow: var(--shadow-card);
 }
 
 /* Optional shimmer toggle */
@@ -128,24 +124,24 @@
 
 /* Size & radius utilities (kept from your original file, slightly normalized) */
 .rounded-sm {
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
 }
 .rounded-md {
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }
 .rounded-lg {
-  border-radius: 14px;
+  border-radius: var(--radius-md);
 }
 
 .bg-primary {
-  background-color: #0070f3;
+  background-color: var(--color-accent);
 }
 .bg-secondary {
-  background-color: #e2e8f0;
-  color: #0f172a;
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-strong);
 }
 .bg-accent {
-  background-color: #4f46e5;
+  background-color: var(--color-accent);
 }
 
 .padding-sm {

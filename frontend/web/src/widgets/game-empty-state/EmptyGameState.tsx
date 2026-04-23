@@ -1,23 +1,27 @@
 "use client";
 
+import type { ReactNode } from "react";
 import styles from "./EmptyGameState.module.scss";
-import { NoGame } from "@/shared/assets/images";
 
 type EmptyGameStateProps = {
+  title?: string;
   message?: string;
+  action?: ReactNode;
   className?: string;
   role?: "status" | "alert";
 };
 
-const fallbackMessage = "현재 표시할 게임이 없어요.";
-const emptyIllustration = typeof NoGame === "string" ? NoGame : NoGame.src;
+const fallbackTitle = "표시할 게임이 없습니다.";
+const fallbackMessage = "새 게임을 만들거나 다른 목록을 확인해 주세요.";
 
 function mergeClassNames(...names: Array<string | undefined | false>) {
   return names.filter(Boolean).join(" ");
 }
 
 const EmptyGameState = ({
+  title = fallbackTitle,
   message = fallbackMessage,
+  action,
   className,
   role = "status",
 }: EmptyGameStateProps) => {
@@ -27,17 +31,10 @@ const EmptyGameState = ({
       role={role}
       aria-live="polite"
     >
-      <div className={styles.emptyImageWrapper}>
-        <img
-          src={emptyIllustration}
-          alt="표시할 게임이 없음"
-          className={styles.emptyImage}
-          loading="lazy"
-        />
-        <div className={styles.emptyOverlay}>
-          <div className={styles.emptyText}>{message}</div>
-        </div>
-      </div>
+      <p className={styles.eyebrow}>TripMarble</p>
+      <h2 className={styles.title}>{title}</h2>
+      <p className={styles.message}>{message}</p>
+      {action ? <div className={styles.action}>{action}</div> : null}
     </div>
   );
 };

@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { seoul2 } from "@/shared/assets/images/places";
-import Filter from "@/shared/ui/common/Filter/Filter";
 import { FilterOption } from "@/shared/ui/common/Filter/types";
 import KakaoMap from "@/shared/ui/map/KakaoMap";
 
@@ -18,133 +16,23 @@ import { TripSpotDetailResponse } from "@/entities/trips/model/tripsType";
 
 import TripSpotReviewModal from "@/app/(spots)/trip-spots/[id]/TripSpotReviewModal";
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
+import MediaCard from "@/shared/ui/common/Card/MediaCard";
 
+import SpotDetailPanel from "./SpotDetailPanel";
+import SpotListPanel from "./SpotListPanel";
+import {
+  formatRating,
+  isValidCoordinate,
+  MapMarkerPoint,
+  normalizeDetail,
+  parseBoundaryPolygons,
+} from "./spotDetailUtils";
+import { useIsMobileSheet } from "./useIsMobileSheet";
 import styles from "./Spot.module.scss";
 
-const toImageSrc = (value: string | { src: string } | null | undefined) =>
-  (typeof value === "string" ? value : value?.src) || "";
-
-// Trip content type option (for Filter)
 type TripContentTypeOption = {
   contentTypeId: string;
   contentTypeName: string;
-};
-
-type MapMarkerPoint = {
-  id: string;
-  lat: number;
-  lng: number;
-  title: string;
-};
-
-type PolygonCoordinate = {
-  lat: number;
-  lng: number;
-};
-
-type PolygonRing = PolygonCoordinate[];
-type RegionPolygon = PolygonRing[];
-
-type BoundaryGeoJsonItem =
-  | {
-      type?: string;
-      coordinates?: unknown;
-    }
-  | null
-  | undefined;
-
-const MIN_POLYGON_POINTS = 3;
-
-const parseBoundaryPolygons = (
-  boundary: BoundaryGeoJsonItem
-): RegionPolygon[] => {
-  if (!boundary) return [];
-  const { coordinates } = boundary;
-  if (!coordinates) return [];
-
-  let raw: unknown = coordinates;
-  if (typeof raw === "string") {
-    try {
-      raw = JSON.parse(raw);
-    } catch {
-      return [];
-    }
-  }
-
-  const toCoordinate = (point: unknown): PolygonCoordinate | null => {
-    if (Array.isArray(point) && point.length >= 2) {
-      const [latRaw, lngRaw] = point as [unknown, unknown];
-      const lat = Number(latRaw);
-      const lng = Number(lngRaw);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-      return { lat, lng };
-    }
-    if (point && typeof point === "object") {
-      const record = point as Record<string, unknown>;
-      const lat =
-        typeof record.lat === "number"
-          ? record.lat
-          : typeof record.latitude === "number"
-          ? record.latitude
-          : Number(record.lat ?? record.latitude);
-      const lng =
-        typeof record.lng === "number"
-          ? record.lng
-          : typeof record.longitude === "number"
-          ? record.longitude
-          : Number(record.lng ?? record.longitude);
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-      return { lat, lng };
-    }
-    return null;
-  };
-
-  const unwrapList = (value: unknown): unknown[] | null => {
-    if (Array.isArray(value)) return value;
-    if (value && typeof value === "object") {
-      const record = value as Record<string, unknown>;
-      if (Array.isArray(record.points)) return record.points;
-      if (Array.isArray(record.coordinates)) return record.coordinates;
-      if (Array.isArray(record.rings)) return record.rings;
-    }
-    return null;
-  };
-
-  const toRing = (data: unknown): PolygonRing | null => {
-    const list = unwrapList(data);
-    if (!list) return null;
-    const coords = list
-      .map(toCoordinate)
-      .filter((coord): coord is PolygonCoordinate => coord !== null);
-    return coords.length >= MIN_POLYGON_POINTS ? coords : null;
-  };
-
-  const toPolygon = (data: unknown): RegionPolygon | null => {
-    const list = unwrapList(data);
-    if (!list) return null;
-    const rings = list
-      .map(toRing)
-      .filter((ring): ring is PolygonRing => ring !== null);
-    return rings.length ? rings : null;
-  };
-
-  const extractPolygons = (data: unknown): RegionPolygon[] => {
-    const ring = toRing(data);
-    if (ring) {
-      return [[ring]];
-    }
-    const polygon = toPolygon(data);
-    if (polygon) {
-      return [polygon];
-    }
-    const list = unwrapList(data);
-    if (!list) return [];
-    return list
-      .flatMap((item) => extractPolygons(item))
-      .filter((poly) => poly.length > 0);
-  };
-
-  return extractPolygons(raw);
 };
 
 type Props = {
@@ -152,37 +40,6 @@ type Props = {
     id: string;
   };
 };
-
-const normalizeDetail = (
-  raw?: Partial<TripSpotDetailResponse>
-): TripSpotDetailResponse | undefined => {
-  if (!raw) return undefined;
-
-  const latitude = Number(raw.latitude ?? 0);
-  const longitude = Number(raw.longitude ?? 0);
-
-  return {
-    tripSpotId: raw.tripSpotId ?? 0,
-    tripSpotName: raw.tripSpotName ?? "이름 없는 여행지",
-    contentTypeName: raw.contentTypeName ?? "",
-    description: raw.description ?? "",
-    homepageUrl: raw.homepageUrl ?? "",
-    phoneNumber: raw.phoneNumber ?? "",
-    address: raw.address ?? "",
-    addressDetail: raw.addressDetail ?? "",
-    latitude: Number.isFinite(latitude) ? latitude : 0,
-    longitude: Number.isFinite(longitude) ? longitude : 0,
-    imageUrl: raw.imageUrl ?? "/images/no-image.png",
-    originalImageUrl:
-      raw.originalImageUrl ?? raw.imageUrl ?? "/images/no-image.png",
-  };
-};
-
-const isValidCoordinate = (value: number) =>
-  Number.isFinite(value) && Math.abs(value) > 0.000001;
-
-const formatRating = (rating: number) =>
-  Number.isInteger(rating) ? rating.toString() : rating.toFixed(1);
 
 export default function SpotDetail({ params }: Props) {
   const observerRef = useRef<HTMLDivElement>(null);
@@ -197,21 +54,16 @@ export default function SpotDetail({ params }: Props) {
   const [isGameCreateOpen, setIsGameCreateOpen] = useState(false);
   const [fitBoundsKey, setFitBoundsKey] = useState(0);
   const [isRegionDescOpen, setIsRegionDescOpen] = useState(false);
-  const [isMobileSheet, setIsMobileSheet] = useState(false); // <= 800px
-
-  // keep track of viewport width to toggle sheet behavior
-  useEffect(() => {
-    const update = () => setIsMobileSheet(window.innerWidth <= 800);
-    update();
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
-  }, []);
+  const isMobileSheet = useIsMobileSheet();
 
   const {
     data,
     fetchNextPage: fetchNextSpotPage,
     hasNextPage: hasNextSpotPage,
     isFetchingNextPage: isFetchingNextSpotPage,
+    isLoading: isSpotsLoading,
+    isError: isSpotsError,
+    refetch: refetchSpots,
   } = useTripSpotsByRepresentativeRegion(String(params.id), selectedFilter);
 
   const spots = useMemo(
@@ -624,106 +476,28 @@ export default function SpotDetail({ params }: Props) {
         />
 
         <div className={styles.panels}>
-          <aside className={styles.listPanel} ref={listPanelRef}>
-            <div className={styles.regionSummary}>
-              <img
-                src={region?.representativeRegionImageUrl || toImageSrc(seoul2)}
-                alt={region?.representativeRegionName || "대표 지역 이미지"}
-                className={styles.regionImage}
-                loading="eager"
-              />
-              <div className={styles.regionText}>
-                <div className={styles.regionHeader}>
-                  <h2 className={styles.regionTitle}>
-                    {region?.representativeRegionName || "대표 지역"}
-                  </h2>
-                  {hasRegionDescription && !isRegionDescOpen && (
-                    <button
-                      type="button"
-                      className={`${styles.toggleDescBtn} ${styles.inlineToggle}`}
-                      onClick={() => setIsRegionDescOpen(true)}
-                      aria-expanded="false"
-                    >
-                      자세히
-                    </button>
-                  )}
-                </div>
-
-                {hasRegionDescription && isRegionDescOpen && (
-                  <>
-                    <p className={styles.regionDescription}>
-                      {regionDescriptionText}
-                    </p>
-                    <button
-                      type="button"
-                      className={`${styles.toggleDescBtn} ${styles.blockToggle}`}
-                      onClick={() => setIsRegionDescOpen(false)}
-                      aria-expanded="true"
-                    >
-                      닫기
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className={styles.filterSection}>
-              {filterOptions.length > 0 && (
-                <Filter
-                  options={filterOptions}
-                  selected={effectiveFilterSelection}
-                  onChange={handleFilterChange}
-                />
-              )}
-            </div>
-
-            <div className={styles.listContent} ref={listContainerRef}>
-              {spots.map((spot) => {
-                const spotKey = String(spot.tripSpotId ?? "");
-                const isActive = spotKey === (selectedSpotId ?? "");
-                return (
-                  <button
-                    type="button"
-                    key={spotKey}
-                    className={`${styles.listItem} ${
-                      isActive ? styles.listItemActive : ""
-                    }`}
-                    data-spot-id={spotKey}
-                    onClick={() => handleSpotClick(spotKey)}
-                    aria-current={isActive ? "true" : undefined}
-                  >
-                    <div className={styles.listItemImage}>
-                      <img
-                        src={spot.originalImageUrl || "/images/no-image.png"}
-                        alt={spot.tripSpotName}
-                        loading="lazy"
-                      />
-                    </div>
-                    <div className={styles.listItemBody}>
-                      <span className={styles.listItemName}>
-                        {spot.tripSpotName}
-                      </span>
-                      <span className={styles.listItemHint}>상세 보기</span>
-                    </div>
-                  </button>
-                );
-              })}
-
-              {!spots.length && (
-                <p className={styles.listFallback}>
-                  조건에 맞는 여행지를 찾지 못했습니다.
-                </p>
-              )}
-
-              <div ref={observerRef} className={styles.listSentinel} />
-              {isFetchingNextSpotPage && (
-                <p className={styles.listLoader}>여행지를 불러오는 중입니다…</p>
-              )}
-              {!hasNextSpotPage && spots.length > 0 && (
-                <p className={styles.listEnd}>모든 여행지를 둘러봤어요.</p>
-              )}
-            </div>
-          </aside>
+          <SpotListPanel
+            listPanelRef={listPanelRef}
+            listContainerRef={listContainerRef}
+            observerRef={observerRef}
+            region={region}
+            regionDescriptionText={regionDescriptionText}
+            hasRegionDescription={hasRegionDescription}
+            isRegionDescOpen={isRegionDescOpen}
+            filterOptions={filterOptions}
+            effectiveFilterSelection={effectiveFilterSelection}
+            spots={spots}
+            selectedSpotId={selectedSpotId}
+            isSpotsLoading={isSpotsLoading}
+            isSpotsError={isSpotsError}
+            isFetchingNextSpotPage={isFetchingNextSpotPage}
+            hasNextSpotPage={hasNextSpotPage}
+            onRegionDescOpen={() => setIsRegionDescOpen(true)}
+            onRegionDescClose={() => setIsRegionDescOpen(false)}
+            onFilterChange={handleFilterChange}
+            onSpotClick={handleSpotClick}
+            onRetrySpots={() => void refetchSpots()}
+          />
 
           {!isMobileSheet && (
             <div
@@ -941,35 +715,24 @@ export default function SpotDetail({ params }: Props) {
                                 {reviews.map((review) => (
                                   <li
                                     key={review.tripSpotReviewId}
-                                    className={styles.reviewCard}
+                                    className={styles.reviewItem}
                                   >
-                                    <div className={styles.reviewMeta}>
-                                      <span className={styles.reviewRating}>
-                                        {review.rating.toFixed(1)}점
-                                      </span>
-                                      <span className={styles.reviewSource}>
-                                        {review.reviewSourceTypeDescription}
-                                      </span>
-                                    </div>
-                                    <p className={styles.reviewText}>
-                                      {review.content}
-                                    </p>
-                                    {review.photos?.length ? (
-                                      <div className={styles.reviewPhotos}>
-                                        {review.photos.map((photo) => (
-                                          <div
-                                            key={photo.tripSpotReviewPhotoId}
-                                            className={styles.reviewPhoto}
-                                          >
-                                            <img
-                                              src={photo.photoUrl}
-                                              alt="리뷰 사진"
-                                              loading="lazy"
-                                            />
-                                          </div>
-                                        ))}
-                                      </div>
-                                    ) : null}
+                                    <MediaCard
+                                      imageUrl={
+                                        review.photos?.[0]?.photoUrl ||
+                                        "/images/no-image.png"
+                                      }
+                                      imageAlt="리뷰 사진"
+                                      title={review.content}
+                                      badge={`${review.rating.toFixed(1)}점`}
+                                      meta={review.reviewSourceTypeDescription}
+                                      action={
+                                        review.photos?.length
+                                          ? `${review.photos.length}장`
+                                          : undefined
+                                      }
+                                      ratio="wide"
+                                    />
                                   </li>
                                 ))}
                               </ul>
@@ -1032,135 +795,32 @@ export default function SpotDetail({ params }: Props) {
               />
 
               {selectedSpotId ? (
-                <div className={styles.detailContent} ref={detailContentRef}>
-                  <div className={styles.detailHero}>
-                    <img src={heroImage} alt={displayName} loading="lazy" />
-                  </div>
-
-                  <div className={styles.detailPrimary}>
-                    {displayDetail?.contentTypeName ? (
-                      <span className={styles.detailBadge}>
-                        {displayDetail.contentTypeName}
-                      </span>
-                    ) : null}
-                    <h3 className={styles.detailTitle}>{displayName}</h3>
-                  </div>
-
-                  {isDetailLoading && (
-                    <p className={styles.detailHint}>
-                      상세 정보를 불러오는 중입니다…
-                    </p>
-                  )}
-                  {isDetailError && (
-                    <p className={styles.detailWarning}>
-                      상세 정보를 불러오지 못했어요. 잠시 후 다시 시도해주세요.
-                    </p>
-                  )}
-
-                  <div className={styles.tabSection}>
-                    <div className={styles.tabList}>
-                      <button
-                        type="button"
-                        className={`${styles.tabButton} ${
-                          activeTab === "details" ? styles.activeTab : ""
-                        }`}
-                        onClick={() => handleTabChange("details")}
-                      >
-                        정보
-                      </button>
-                      <button
-                        type="button"
-                        className={`${styles.tabButton} ${
-                          activeTab === "reviews" ? styles.activeTab : ""
-                        }`}
-                        onClick={() => handleTabChange("reviews")}
-                      >
-                        리뷰
-                      </button>
-                    </div>
-
-                    <div className={styles.tabPanel}>
-                      {activeTab === "details" ? (
-                        <div className={styles.detailInfo}>
-                          {displayDetail && hasContactInfo ? (
-                            <div className={styles.infoGroup}>
-                              {displayDetail.address && (
-                                <p className={styles.infoRow}>
-                                  <span className={styles.infoLabel}>주소</span>
-                                  <span className={styles.infoValue}>
-                                    {displayDetail.address}
-                                    {displayDetail.addressDetail
-                                      ? ` ${displayDetail.addressDetail}`
-                                      : ""}
-                                  </span>
-                                </p>
-                              )}
-                              {displayDetail.phoneNumber && (
-                                <p className={styles.infoRow}>
-                                  <span className={styles.infoLabel}>
-                                    연락처
-                                  </span>
-                                  <span className={styles.infoValue}>
-                                    <a
-                                      href={`tel:${displayDetail.phoneNumber}`}
-                                    >
-                                      {displayDetail.phoneNumber}
-                                    </a>
-                                  </span>
-                                </p>
-                              )}
-                              {displayDetail.homepageUrl && (
-                                <p className={styles.infoRow}>
-                                  <span className={styles.infoLabel}>
-                                    홈페이지
-                                  </span>
-                                  <span className={styles.infoValue}>
-                                    <a
-                                      href={displayDetail.homepageUrl}
-                                      target="_blank"
-                                      rel="noreferrer noopener"
-                                    >
-                                      {displayDetail.homepageUrl}
-                                    </a>
-                                  </span>
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <p className={styles.infoPlaceholder}>
-                              {isDetailLoading
-                                ? "추가 정보를 불러오는 중입니다..."
-                                : "등록된 연락처 정보가 없습니다."}
-                            </p>
-                          )}
-
-                          <p className={styles.detailDescription}>
-                            {descriptionText}
-                          </p>
-
-                          <div className={styles.detailActions}>
-                            <button
-                              type="button"
-                              className={styles.scheduleButton}
-                              onClick={handleOpenGameCreate}
-                              disabled={isDetailLoading || isDetailError}
-                            >
-                              일정 만들기
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className={styles.reviewContent}>
-                          {/* 유지: 리뷰 목록 렌더링은 데스크톱과 동일 */}
-                          {/* 간결화를 위해 기존 JSX 재사용 생략 */}
-                          <p className={styles.summaryPlaceholder}>
-                            리뷰 탭은 데스크톱과 동일하게 표시됩니다.
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <SpotDetailPanel
+                  selectedSpotId={selectedSpotId}
+                  detailContentRef={detailContentRef}
+                  heroImage={heroImage}
+                  displayName={displayName}
+                  displayDetail={displayDetail}
+                  isDetailLoading={isDetailLoading}
+                  isDetailError={isDetailError}
+                  hasContactInfo={hasContactInfo}
+                  descriptionText={descriptionText}
+                  summary={summary}
+                  isSummaryLoading={isSummaryLoading}
+                  hasReviews={hasReviews}
+                  averageRatingText={averageRatingText}
+                  totalReviews={totalReviews}
+                  activeTab={activeTab}
+                  reviews={reviews}
+                  isReviewsLoading={isReviewsLoading}
+                  hasNextReviewPage={hasNextReviewPage}
+                  isFetchingNextReviewPage={isFetchingNextReviewPage}
+                  showReviewSummary={false}
+                  onTabChange={handleTabChange}
+                  onOpenReviewModal={handleOpenReviewModal}
+                  onOpenGameCreate={handleOpenGameCreate}
+                  onLoadMoreReviews={handleLoadMoreReviews}
+                />
               ) : null}
             </div>
           </div>

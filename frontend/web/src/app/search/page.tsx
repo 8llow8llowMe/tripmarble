@@ -157,6 +157,8 @@ export default function Search() {
             onChange={setKeyword}
             onSubmit={handleSearchSubmit}
             isLoading={isSearching}
+            isInvalid={hasSearchError}
+            aria-label="여행지 검색"
           />
           {keyword.trim() && (
             <div className={styles.suggestionList}>

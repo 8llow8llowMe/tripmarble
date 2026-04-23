@@ -1,8 +1,9 @@
 .uxTrigger {
   width: 100%;
   min-height: 6000px;
-  background: linear-gradient(180deg, #fafbff 0%, #d7e0fa 100%);
+  background: var(--color-black);
   position: relative;
+  color: var(--color-text-inverse);
 }
 
 .canvasWrapper {
@@ -13,47 +14,53 @@
   z-index: 40; /* Dice canvas is on top */
 }
 
-.logoText {
+.heroCopy {
   position: fixed;
-  top: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 15vw;
-  font-weight: bold;
-  text-align: center;
-  color: #0070f3;
-  z-index: 50;
-  pointer-events: none;
-  opacity: 1;
-  transition: opacity 0.5s ease;
+  top: 84px;
+  left: var(--page-gutter-lg);
+  z-index: 60;
+  display: flex;
+  width: min(460px, calc(100% - var(--page-gutter-lg) * 2));
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-6);
+  pointer-events: auto;
 }
 
-.fadeText {
-  width: 100%;
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 2.5rem;
-  font-weight: bold;
-  text-align: center;
-  color: #000;
-  z-index: 20;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.5s ease;
+.eyebrow {
+  color: var(--color-link-inverse);
+  font-size: var(--type-caption-bold-size);
+  font-weight: var(--type-caption-bold-weight);
+  line-height: var(--type-caption-bold-line-height);
+  letter-spacing: var(--type-caption-bold-letter-spacing);
 }
 
-.fadeText[data-index="0"] {
-  top: 16%;
-}
-.fadeText[data-index="1"] {
-  top: 23%;
+.heroTitle {
+  color: var(--color-text-inverse);
+  font-family: var(--font-display);
+  font-size: var(--type-hero-responsive-size);
+  font-weight: var(--type-hero-responsive-weight);
+  line-height: var(--type-hero-responsive-line-height);
+  letter-spacing: var(--type-hero-responsive-letter-spacing);
 }
 
-@media screen and (max-width: 700px) {
-  .fadeText {
-    font-size: 1.5rem;
-  }
+.heroBody {
+  max-width: 30rem;
+  color: var(--color-header-text);
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--type-body-line-height);
+  letter-spacing: var(--type-body-letter-spacing);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+
+.heroButton {
+  min-width: 132px;
 }
 
 .polaroidContainer {
@@ -69,19 +76,18 @@
 
 .polaroidHint {
   position: fixed;
-  /* Center of the right half of the viewport */
   left: 75vw;
   top: 50%;
   transform: translate(-50%, -50%);
   z-index: 30; /* below dice(40), above board(20) */
   opacity: 0; /* revealed by GSAP */
   pointer-events: none;
-  color: #0b1630;
-  font-weight: 600;
-  /* Use viewport-based fluid size so it scales on small screens */
-  font-size: clamp(24px, 4vw + 0.5rem, 36px);
-  // font-size: 2.5rem;
-  line-height: 1.35;
+  color: var(--color-text-inverse);
+  font-family: var(--font-display);
+  font-size: var(--type-tile-title-size);
+  font-weight: var(--type-tile-title-weight);
+  line-height: var(--type-tile-title-line-height);
+  letter-spacing: var(--type-tile-title-letter-spacing);
   text-align: center;
   width: 100%;
 }
@@ -141,19 +147,49 @@
 }
 
 @media screen and (max-width: 700px) {
-  .buttonContainer {
-    width: 45vw;
+  .heroCopy {
+    top: calc(var(--header-height) + var(--space-8));
+    left: var(--space-6);
+    right: var(--space-6);
+    width: auto;
+    align-items: center;
+    gap: var(--space-5);
+    text-align: center;
   }
+
+  .heroBody {
+    max-width: 22rem;
+    font-size: var(--type-caption-size);
+    line-height: var(--type-caption-line-height);
+    letter-spacing: var(--type-caption-letter-spacing);
+  }
+
+  .heroActions {
+    width: 100%;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+
+  .heroButton {
+    min-width: 124px;
+  }
+
   .polaroidContainer {
     width: 60vw;
     left: 20%;
   }
+
   .polaroidHint {
     left: 50%;
     top: calc(85%);
     transform: translate(-50%, 0);
     text-align: center;
+    font-size: var(--type-card-title-size);
+    font-weight: var(--type-card-title-weight);
+    line-height: var(--type-card-title-line-height);
+    letter-spacing: var(--type-card-title-letter-spacing);
   }
+
   .mobileBr {
     display: inline;
   }
@@ -172,6 +208,20 @@
 }
 
 @media screen and (max-width: 600px) {
+  .heroCopy {
+    top: calc(var(--header-height) + var(--space-7));
+    gap: var(--space-4);
+  }
+
+  .heroActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .heroButton {
+    width: 100%;
+  }
+
   .polaroidHint {
     left: 50%;
     top: calc(60% + 22vh);

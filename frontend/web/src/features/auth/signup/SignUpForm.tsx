@@ -9,6 +9,7 @@ import useVerifyEmailCode from "@/entities/users/hooks/useVerifyEmailCode";
 // store
 import { useAppDispatch, useAppSelector } from "@/entities/users/model";
 import { resetForm, updateField } from "@/entities/users/model/form/formSlice";
+import Button from "@/shared/ui/common/Button/Button";
 //style
 import styles from "./SignUpForm.module.scss";
 
@@ -37,7 +38,7 @@ export default function SignUpPage() {
   const [emailCode, setEmailCode] = useState("");
   const [isEmailVerified, setIsEmailVerified] = useState(false);
 
-  const { signUpMutate } = useSignUp();
+  const { signUpMutate, isSigningUp } = useSignUp();
   const { sendCodeMutate, isSending } = useSendEmailCode();
   const { verifyCodeMutate, isVerifying } = useVerifyEmailCode();
 
@@ -107,16 +108,16 @@ export default function SignUpPage() {
             router.push("/login");
             toast.success(
               <>
-                가입이 완료되었습니다!
+                가입이 완료되었습니다.
                 <br />
-                로그인 후 여행의 재미를 경험하세요.
+                로그인하고 여행을 시작하세요.
               </>
             );
           },
           onError: (error) => {
             console.error("회원가입 실패:", error);
             toast.error(
-              "회원가입에 실패했습니다. 입력하신 정보를 다시 확인해주세요."
+              "가입할 수 없습니다. 정보를 다시 확인해주세요."
             );
             router.push("/login");
           },
@@ -126,7 +127,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <>
+    <div className={styles.formShell}>
       <div className={styles.progress}>
         <div className={styles.barWrapper}>
           <div
@@ -137,12 +138,22 @@ export default function SignUpPage() {
       </div>
 
       <div className={styles.titleDiv}>
-        <div className={styles.info}>{current.label} 입력하기</div>
-        {step + 1} / {steps.length}
+        <div>
+          <div className={styles.info}>{current.label}</div>
+          <p className={styles.helper}>필요한 정보만 순서대로 입력합니다.</p>
+        </div>
+        <span className={styles.stepCount}>
+          {step + 1} / {steps.length}
+        </span>
       </div>
 
       <div className={styles.contentContainer}>
-        <label className={styles.label}>{current.label}</label>
+        <label
+          className={styles.label}
+          htmlFor={step === 0 ? "signup-email" : `signup-${key}`}
+        >
+          {current.label}
+        </label>
         {step === 0 ? (
           <>
             {/* 이메일 입력 + 전송 버튼 (한 줄) */}
@@ -150,17 +161,22 @@ export default function SignUpPage() {
               <input
                 className={`${styles.input} ${styles.grow}`}
                 type="text"
+                id="signup-email"
                 placeholder={current.placeholder}
                 value={form.email}
+                aria-invalid={hasError && !isEmailVerified}
                 onChange={handleChange}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") nextStep();
                 }}
               />
-              <button
+              <Button
                 className={styles.inlineBtn}
                 type="button"
+                variant="primary"
+                size="sm"
                 disabled={!validateInput() || isSending || isEmailVerified}
+                isLoading={isSending}
                 onClick={() => sendCodeMutate({ email: form.email })}
               >
                 {isEmailVerified
@@ -168,7 +184,7 @@ export default function SignUpPage() {
                   : isSending
                   ? "전송중..."
                   : "인증코드 전송"}
-              </button>
+              </Button>
             </div>
 
             {/* 인증코드 입력 + 확인 버튼 (아래 줄) */}
@@ -176,19 +192,24 @@ export default function SignUpPage() {
               <input
                 className={`${styles.input} ${styles.grow}`}
                 type="text"
+                id="signup-email-code"
                 placeholder="인증코드 입력"
                 value={emailCode}
+                aria-invalid={hasError && !isEmailVerified}
                 onChange={(e) => setEmailCode(e.target.value)}
                 disabled={isEmailVerified}
               />
-              <button
+              <Button
                 className={styles.inlineBtn}
                 type="button"
+                variant="primary"
+                size="sm"
                 disabled={
                   isVerifying ||
                   isEmailVerified ||
                   emailCode.trim().length === 0
                 }
+                isLoading={isVerifying}
                 onClick={() =>
                   verifyCodeMutate(
                     { email: form.email, code: emailCode.trim() },
@@ -201,15 +222,17 @@ export default function SignUpPage() {
                   : isVerifying
                   ? "확인중..."
                   : "인증 확인"}
-              </button>
+              </Button>
             </div>
           </>
         ) : (
           <input
             className={styles.input}
+            id={`signup-${key}`}
             type={current.type || "text"}
             placeholder={current.placeholder}
             value={value}
+            aria-invalid={hasError}
             onChange={handleChange}
             onKeyDown={(e) => {
               if (e.key === "Enter") nextStep();
@@ -217,16 +240,24 @@ export default function SignUpPage() {
           />
         )}
         {hasError && (
-          <div style={{ color: "red", fontSize: "0.85rem" }}>
+          <div className={styles.errorText}>
             {step === 0 && !isEmailVerified
               ? "이메일 인증을 완료해주세요."
               : `올바른 ${current.label}을 입력해주세요.`}
           </div>
         )}
-        <button className={styles.nextButton} onClick={nextStep}>
+        <Button
+          className={styles.nextButton}
+          type="button"
+          variant="primary"
+          size="md"
+          block
+          isLoading={isSigningUp}
+          onClick={nextStep}
+        >
           {step !== 4 ? "계속하기" : "회원가입하기"}
-        </button>
+        </Button>
       </div>
-    </>
+    </div>
   );
 }

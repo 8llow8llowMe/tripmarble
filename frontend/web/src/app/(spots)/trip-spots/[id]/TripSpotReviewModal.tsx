@@ -166,7 +166,11 @@ const TripSpotReviewModal = ({
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      ariaLabel="리뷰 작성하기"
+    >
       <form className={styles.modal} onSubmit={handleSubmit}>
         <h2 className={styles.title}>리뷰 작성하기</h2>
 

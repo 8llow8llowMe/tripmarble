@@ -10,6 +10,8 @@ import { TripSpotDetailResponse } from "@/entities/trips/model/tripsType";
 import TripSpotReviewModal from "./TripSpotReviewModal";
 import styles from "./TripSpotDetail.module.scss";
 import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
+import Button from "@/shared/ui/common/Button/Button";
+import MediaCard from "@/shared/ui/common/Card/MediaCard";
 import KakaoMap from "@/shared/ui/map/KakaoMap";
 
 type Props = {
@@ -244,11 +246,17 @@ export default function TripSpotDetail({ params }: Props) {
           <p className={styles.spotType}>{spot.contentTypeName}</p>
           <h1 className={styles.spotName}>{spot.tripSpotName}</h1>
 
-          {/* {isSpotLoading ? (
+          {isSpotLoading ? (
             <p className={styles.summaryLoading}>
               여행지 정보를 불러오는 중입니다...
             </p>
-          ) : null} */}
+          ) : null}
+          {isSpotError ? (
+            <p className={styles.errorState} role="alert">
+              여행지 정보를 불러오지 못했습니다. 저장된 기본 정보로
+              표시합니다.
+            </p>
+          ) : null}
 
           <div className={styles.reviewSummary}>
             {isSummaryLoading ? (
@@ -358,25 +366,29 @@ export default function TripSpotDetail({ params }: Props) {
               ) : null}
 
               <div className={styles.buttonRow}>
-                <button
+                <Button
+                  variant="primary"
+                  size="md"
                   className={styles.scheduleButton}
                   onClick={handleOpenGameCreate}
                 >
                   일정 만들기
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
             <div className={styles.reviewContent}>
               <div className={styles.reviewHeader}>
                 <h2 className={styles.reviewTitle}>방문자 리뷰</h2>
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   className={styles.reviewButton}
                   onClick={handleOpenReviewModal}
                 >
                   리뷰 작성하기
-                </button>
+                </Button>
               </div>
 
               {isReviewsLoading && !reviews.length ? (
@@ -388,36 +400,23 @@ export default function TripSpotDetail({ params }: Props) {
                   {reviews.map((review) => (
                     <li
                       key={review.tripSpotReviewId}
-                      className={styles.reviewCard}
+                      className={styles.reviewItem}
                     >
-                      <div className={styles.reviewMeta}>
-                        <span className={styles.reviewRating}>
-                          {review.rating.toFixed(1)}점
-                        </span>
-                        <span className={styles.reviewSource}>
-                          {review.reviewSourceTypeDescription}
-                        </span>
-                      </div>
-                      <p className={styles.reviewContentText}>
-                        {review.content}
-                      </p>
-                      {review.photos?.length ? (
-                        <div className={styles.reviewPhotos}>
-                          {review.photos.map((photo) => (
-                            <div
-                              key={photo.tripSpotReviewPhotoId}
-                              className={styles.reviewPhoto}
-                            >
-                              <img
-                                src={photo.photoUrl}
-                                alt="리뷰 사진"
-                                className={styles.squareImage}
-                                loading="lazy"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
+                      <MediaCard
+                        imageUrl={
+                          review.photos?.[0]?.photoUrl || "/images/no-image.png"
+                        }
+                        imageAlt="리뷰 사진"
+                        title={review.content}
+                        badge={`${review.rating.toFixed(1)}점`}
+                        meta={review.reviewSourceTypeDescription}
+                        action={
+                          review.photos?.length
+                            ? `${review.photos.length}장`
+                            : undefined
+                        }
+                        ratio="wide"
+                      />
                     </li>
                   ))}
                 </ul>
@@ -428,14 +427,17 @@ export default function TripSpotDetail({ params }: Props) {
               )}
 
               {hasNextPage && reviews.length ? (
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   className={styles.loadMoreButton}
                   onClick={handleLoadMore}
                   disabled={isFetchingNextPage}
+                  isLoading={isFetchingNextPage}
                 >
-                  {isFetchingNextPage ? "불러오는 중..." : "리뷰 더 보기"}
-                </button>
+                  리뷰 더 보기
+                </Button>
               ) : null}
             </div>
           )}

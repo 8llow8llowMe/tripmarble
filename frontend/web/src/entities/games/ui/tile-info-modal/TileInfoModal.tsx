@@ -2,6 +2,7 @@ import React from "react";
 import styles from "./TileInfoModal.module.scss";
 import { GameInfoDataBody } from "@/entities/games/model/gameInfoDummy";
 import Modal from "@/shared/ui/common/Modal";
+import Button from "@/shared/ui/common/Button/Button";
 
 type Tile = GameInfoDataBody["tripGameTileViews"][number];
 
@@ -15,17 +16,30 @@ const TileInfoModal = ({ tile, isOpen, onClose }: TileInfoModalProps) => {
   if (!tile) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="sm"
+      title={
+        <span className={styles.titleWrap}>
+          {tile.tripSpotName}
+          <span className={styles.blockBadge}>
+            {tile.missionTypeDescription}
+          </span>
+        </span>
+      }
+      footer={
+        <>
+          <Button type="button" variant="secondary" size="md">
+            미션 보기
+          </Button>
+          <Button type="button" variant="primary" size="md">
+            미션 인증
+          </Button>
+        </>
+      }
+    >
       <div className={styles.blockDetail}>
-        <div className={styles.blockHeader}>
-          <div className={styles.blockTitle}>
-            {tile.tripSpotName}
-            <span className={styles.blockBadge}>
-              {tile.missionTypeDescription}
-            </span>
-          </div>
-        </div>
-
         <div className={styles.blockMission}>미션: 해당 장소에서 사진 찍기</div>
 
         <div className={styles.reviewSection}>
@@ -37,11 +51,6 @@ const TileInfoModal = ({ tile, isOpen, onClose }: TileInfoModalProps) => {
               여기에 플레이 기록/메모가 표시됩니다.
             </span>
           </div>
-        </div>
-
-        <div className={styles.buttonRow}>
-          <button className={styles.actionBtnSecondary}>미션 보기</button>
-          <button className={styles.actionBtn}>미션 인증</button>
         </div>
       </div>
     </Modal>

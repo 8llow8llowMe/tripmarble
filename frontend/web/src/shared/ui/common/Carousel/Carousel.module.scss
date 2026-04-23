@@ -6,26 +6,43 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: var(--space-5);
 }
 
 .title {
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: var(--type-body-emphasis-size);
+  font-weight: var(--type-body-emphasis-weight);
+  line-height: var(--type-body-emphasis-line-height);
+  color: var(--color-text-strong);
 }
 
 .arrowButtons {
   display: flex;
-  gap: 8px;
+  gap: var(--space-4);
 }
 
 .arrow {
-  border: 1px solid #d8dfea;
-  background: #fff;
-  color: #4a5b78;
-  border-radius: 10px;
-  padding: 4px 4px 2px;
+  border: 1px solid var(--color-border-muted);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
   cursor: pointer;
+  transition:
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard);
+}
+
+.arrow:hover {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+}
+
+.arrow:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 .embla {
@@ -34,7 +51,7 @@
 
 .emblaContainer {
   display: flex;
-  gap: var(--embla-gap, 16px);
+  gap: var(--embla-gap, var(--card-gap));
 }
 
 .slide {

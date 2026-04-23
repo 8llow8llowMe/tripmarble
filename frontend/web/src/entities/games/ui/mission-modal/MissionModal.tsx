@@ -8,6 +8,7 @@ import Modal from "@/shared/ui/common/Modal";
 import styles from "./MissionModal.module.scss";
 import type { TripGameTileView } from "@/entities/games/model/gameInfoDummy";
 import KakaoMap from "@/shared/ui/map/KakaoMap";
+import Button from "@/shared/ui/common/Button/Button";
 
 type Props = {
   tile: TripGameTileView | null;
@@ -157,12 +158,16 @@ export default function MissionModal({
   }, [isOpen, allowMission, tile]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={tile?.tripSpotName ?? "미션 상세"}
+      size="lg"
+      panelClassName={styles.modalPanel}
+      bodyClassName={styles.modalBody}
+    >
       <div className={styles.sheet}>
         <div className={styles.header}>
-          <div className={styles.title}>
-            {tile?.tripSpotName ?? "미션 상세"}
-          </div>
           <div className={styles.tabs}>
             <button
               className={`${styles.tabBtn} ${
@@ -265,7 +270,10 @@ export default function MissionModal({
                 </div>
               </div>
               <div className={styles.footer}>
-                <button
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="md"
                   className={`${styles.primary} ${
                     !canSubmit || submitting ? styles.disabled : ""
                   }`}
@@ -276,8 +284,11 @@ export default function MissionModal({
                   }}
                 >
                   {submitting ? "제출 중…" : "제출"}
-                </button>
-                <button
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="md"
                   className={`${styles.secondary} ${
                     skipping ? styles.disabled : ""
                   }`}
@@ -285,8 +296,7 @@ export default function MissionModal({
                   onClick={() => onSkip()}
                 >
                   {skipping ? "건너뛰는 중…" : "건너뛰기"}
-                </button>
-                {/* <button className={`${styles.secondary} ${failing ? styles.disabled : ""}`} disabled={!!failing} onClick={() => onFail()}> {failing ? "실패 처리 중…" : "실패"} </button> */}
+                </Button>
               </div>
             </div>
           </div>

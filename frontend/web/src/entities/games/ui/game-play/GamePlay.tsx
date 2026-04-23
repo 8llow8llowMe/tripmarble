@@ -23,6 +23,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { DotThreeIcon } from "@/shared/assets/icons";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import Button from "@/shared/ui/common/Button/Button";
 
 type Props = {
   tripGameView: TripGameView;
@@ -88,7 +89,6 @@ const GamePlay = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const boardRef = useRef<GameBoardHandle | null>(null);
-  const [diceValue, setDiceValue] = useState<number | null>(null);
   const [activeSection, setActiveSection] = useState<"timeline" | "help">(
     "timeline"
   );
@@ -364,6 +364,7 @@ const GamePlay = ({
                 ref={menuBtnRef}
                 className={styles.moreBtn}
                 aria-label="옵션 메뉴 열기"
+                type="button"
                 onClick={() => setMenuOpen((v) => !v)}
               >
                 <DotThreeIcon size={22} />
@@ -375,6 +376,7 @@ const GamePlay = ({
                     onClick={confirmEndGame}
                     disabled={isEnding}
                     role="menuitem"
+                    type="button"
                   >
                     게임 종료하기
                   </button>
@@ -405,7 +407,6 @@ const GamePlay = ({
               order: i + 1,
               status: log.missionResultCode,
             }))}
-            onDiceChange={setDiceValue}
             onCellClick={(tile) => {
               setActiveStep(tile.stepNo);
               setModalTile(tile);
@@ -445,40 +446,32 @@ const GamePlay = ({
           />
         )}
 
-        {/* CTA 상태 텍스트 */}
-        <div className={styles.buttonRow}>
-          {/* <div className={styles.boardText}>
-            {diceValue !== null
-              ? `주사위 결과: ${diceValue}`
-              : "주사위를 굴려주세요"}
-          </div> */}
-          <audio
-            id="mouse-click"
-            src="/sounds/mouse-click.mp3"
-            preload="auto"
-          />
-        </div>
+        <audio id="mouse-click" src="/sounds/mouse-click.mp3" preload="auto" />
 
         {/* 큰 버튼: 종료 시 비활성, 아니면 주사위/미션 중 하나 */}
         {isGameEnd ? (
           <div className={styles.endedGameText}>게임이 종료되었습니다.</div>
         ) : canRollDice ? (
-          <button
+          <Button
             className={styles.moveButton}
+            variant="primary"
+            size="lg"
             onClick={handleRollDice}
             disabled={!canRollDice || isRolling}
-            aria-disabled={!canRollDice || isRolling}
+            isLoading={isRolling}
             title={
               !canRollDice
                 ? "미션 인증 후에 주사위를 던질 수 있어요"
                 : "주사위 던지기"
             }
           >
-            {isRolling ? "주사위…" : "주사위 던지기"}
-          </button>
+            주사위 던지기
+          </Button>
         ) : (
-          <button
+          <Button
             className={styles.moveButton}
+            variant="secondary"
+            size="lg"
             onClick={() => {
               const landed = tripGameTileViews.find(
                 (t) => t.tripGameTileId === missionReadyTileId
@@ -487,7 +480,6 @@ const GamePlay = ({
               setIsModalOpen(true);
             }}
             disabled={!missionEnabled}
-            aria-disabled={!missionEnabled}
             title={
               missionEnabled
                 ? "도착 칸 미션 인증"
@@ -495,7 +487,7 @@ const GamePlay = ({
             }
           >
             미션 인증
-          </button>
+          </Button>
         )}
 
         {/* 하단 세그먼트 */}
@@ -505,6 +497,7 @@ const GamePlay = ({
               activeSection === "timeline" ? styles.segActive : ""
             }`}
             onClick={() => setActiveSection("timeline")}
+            type="button"
           >
             타임 라인
           </button>
@@ -513,6 +506,7 @@ const GamePlay = ({
               activeSection === "help" ? styles.segActive : ""
             }`}
             onClick={() => setActiveSection("help")}
+            type="button"
           >
             게임 방법
           </button>
@@ -525,19 +519,19 @@ const GamePlay = ({
               <li className={styles.timelineItem}>
                 <div className={styles.timelineDot} />
                 <div className={styles.timelineText}>
-                  {`step1 "게임 시작하기" 버튼을 눌러 트립마블 시작`}
+                  step1 게임 시작 후 주사위를 던집니다.
                 </div>
               </li>
               <li className={styles.timelineItem}>
                 <div className={styles.timelineDot} />
                 <div className={styles.timelineText}>
-                  step2 주사위를 던져 나온 수만큼 말 이동
+                  step2 도착한 칸의 여행지 미션을 확인합니다.
                 </div>
               </li>
               <li className={styles.timelineItem}>
                 <div className={styles.timelineDot} />
                 <div className={styles.timelineText}>
-                  step3 해당 칸에서 미션 확인 후 미션 인증
+                  step3 리뷰 또는 인증을 남기면 다음 턴이 열립니다.
                 </div>
               </li>
             </ul>

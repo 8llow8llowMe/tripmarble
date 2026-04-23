@@ -1,7 +1,7 @@
 "use client";
 
 import Card from "@/shared/ui/common/Card/Card";
-import Carousel from "@/shared/ui/common/Carousel/Carousel";
+import CardRail from "@/shared/ui/common/Card/CardRail";
 
 export interface CardListItem {
   id: string;
@@ -18,7 +18,7 @@ export default function CardList({
   items,
   title,
   itemWidth = 250,
-  gap = 18,
+  gap = 16,
   onItemClick,
 }: {
   items: CardListItem[];
@@ -28,7 +28,7 @@ export default function CardList({
   onItemClick?: (item: CardListItem) => void;
 }) {
   return (
-    <Carousel<CardListItem>
+    <CardRail<CardListItem>
       title={title}
       items={items}
       itemWidth={itemWidth}
@@ -42,6 +42,7 @@ export default function CardList({
             title={item.title}
             description={item.description}
             date={item.date}
+            interactive
           />
         ) : (
           <Card

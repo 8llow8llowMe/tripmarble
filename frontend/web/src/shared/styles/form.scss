@@ -1,0 +1,80 @@
+@use "./typography";
+
+@mixin form-shell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+}
+
+@mixin field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+@mixin label {
+  @include typography.type-caption-bold;
+  color: var(--color-text-strong);
+}
+
+@mixin helper-text {
+  @include typography.type-caption;
+  color: var(--color-text-muted);
+}
+
+@mixin error-text {
+  @include typography.type-caption;
+  color: var(--color-danger);
+}
+
+@mixin field {
+  width: 100%;
+  min-height: var(--size-control-min-height);
+  padding: var(--space-5) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-strong);
+  font-family: var(--font-body);
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: var(--type-body-line-height);
+  letter-spacing: var(--type-body-letter-spacing);
+  transition:
+    border-color var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    color var(--motion-fast) var(--ease-standard);
+
+  &::placeholder {
+    color: var(--color-placeholder);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-text-muted);
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    background: var(--color-disabled-surface);
+    border-color: var(--color-disabled-border);
+    color: var(--color-disabled);
+  }
+
+  &[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+
+  &[aria-invalid="true"]:focus,
+  &[aria-invalid="true"]:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-danger-soft);
+  }
+}

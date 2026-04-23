@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { RefObject } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 import { useAppSelector } from "@/entities/users/model";
 // three
 import * as THREE from "three";
@@ -19,6 +21,7 @@ import CreateGameModal from "@/features/game/create-game/ui/CreateGameModal";
 import useRepresentativeRegions from "@/entities/trips/hooks/useRepresentativeRegions";
 import noImage from "/public/images/no-image.png";
 import PolaroidStack from "@/entities/home/ui/polaroid-stack/PolaroidStack";
+import Button from "@/shared/ui/common/Button/Button";
 
 const getAssetSrc = (asset: string | { src: string }) =>
   (typeof asset === "string" ? asset : asset.src) || "";
@@ -30,6 +33,158 @@ const BOARD_IMAGE_SRCS = [
   "/images/board/Board04.png",
   "/images/board/Board03.png",
 ] as const;
+
+type PolaroidItem = {
+  id: number | string;
+  name: string;
+  imgUrl: string;
+};
+
+type HeroCopyProps = {
+  onCreateGame: () => void;
+  onExplore: () => void;
+};
+
+function HeroCopy({ onCreateGame, onExplore }: HeroCopyProps) {
+  return (
+    <div className={styles.heroCopy}>
+      <p className={styles.eyebrow}>TripMarble</p>
+      <h1 className={styles.heroTitle} aria-label="TripMarble">
+        {"TripMarble".split("").map((char, i) => (
+          <span key={i} className="split-char" data-char-index={i}>
+            {char}
+          </span>
+        ))}
+      </h1>
+      <p className={styles.heroBody}>
+        주사위를 굴리고, 여행지를 고르고, 미션을 따라 이동하는 여행 게임.
+      </p>
+      <div className={styles.heroActions}>
+        <Button
+          variant="primary"
+          size="lg"
+          className={styles.heroButton}
+          onClick={onCreateGame}
+        >
+          게임 만들기
+        </Button>
+        <Button
+          variant="secondary"
+          size="lg"
+          className={styles.heroButton}
+          onClick={onExplore}
+        >
+          여행지 보기
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+type BoardLayerProps = {
+  boardRef: RefObject<HTMLDivElement>;
+  onPieceLoaded: () => void;
+};
+
+function BoardLayer({ boardRef, onPieceLoaded }: BoardLayerProps) {
+  return (
+    <div className={styles.boardLayerWrapper} ref={boardRef} aria-hidden="true">
+      <div className={styles.boardGroup}>
+        <div className={`${styles.pieceBox} ${styles.pOuterLeft}`}>
+          <img
+            className={styles.piece}
+            src={BOARD_IMAGE_SRCS[0]}
+            alt=""
+            onLoad={onPieceLoaded}
+          />
+        </div>
+        <div className={`${styles.pieceBox} ${styles.pMidLeft}`}>
+          <img
+            className={styles.piece}
+            src={BOARD_IMAGE_SRCS[1]}
+            alt=""
+            onLoad={onPieceLoaded}
+          />
+        </div>
+        <div className={`${styles.pieceBox} ${styles.pOuterRight}`}>
+          <img
+            className={styles.piece}
+            src={BOARD_IMAGE_SRCS[2]}
+            alt=""
+            onLoad={onPieceLoaded}
+          />
+        </div>
+        <div className={`${styles.pieceBox} ${styles.pMidRight}`}>
+          <img
+            className={styles.piece}
+            src={BOARD_IMAGE_SRCS[3]}
+            alt=""
+            onLoad={onPieceLoaded}
+          />
+        </div>
+        <div className={`${styles.pieceBox} ${styles.pCenter}`}>
+          <img
+            className={styles.piece}
+            src={BOARD_IMAGE_SRCS[4]}
+            alt=""
+            onLoad={onPieceLoaded}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RegionRail({ items }: { items: PolaroidItem[] }) {
+  return (
+    <>
+      <div className={`polaroid-container ${styles.polaroidContainer}`}>
+        <PolaroidStack items={items} />
+      </div>
+      <div className={styles.polaroidHint}>
+        <span>사진을 눌러</span>
+        <br className={styles.mobileBr} />
+        <span>여행지를 찾아보세요.</span>
+      </div>
+    </>
+  );
+}
+
+type HomeHeroSceneProps = {
+  containerRef: RefObject<HTMLDivElement>;
+  portalEl: HTMLElement | null;
+  boardRef: RefObject<HTMLDivElement>;
+  polaroidItems: PolaroidItem[];
+  onPieceLoaded: () => void;
+  onCreateGame: () => void;
+  onExplore: () => void;
+};
+
+function HomeHeroScene({
+  containerRef,
+  portalEl,
+  boardRef,
+  polaroidItems,
+  onPieceLoaded,
+  onCreateGame,
+  onExplore,
+}: HomeHeroSceneProps) {
+  return (
+    <section className={`ux-trigger ${styles.uxTrigger}`} aria-label="홈 히어로">
+      <div
+        className={`canvas-wrapper ${styles.canvasWrapper}`}
+        ref={containerRef}
+      />
+      <HeroCopy onCreateGame={onCreateGame} onExplore={onExplore} />
+      {portalEl &&
+        createPortal(
+          <BoardLayer boardRef={boardRef} onPieceLoaded={onPieceLoaded} />,
+          portalEl
+        )}
+      <RegionRail items={polaroidItems} />
+    </section>
+  );
+}
 
 export default function HomeDicePage() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,7 +199,7 @@ export default function HomeDicePage() {
 
   // Prefetch representative regions early to avoid delay
   const { data: regionsData } = useRepresentativeRegions();
-  const polaroidItems = (regionsData?.data?.dataBody || [])
+  const polaroidItems: PolaroidItem[] = (regionsData?.data?.dataBody || [])
     .slice(0, 6)
     .map((r: any) => ({
       id: r.representativeRegionId,
@@ -189,6 +344,12 @@ export default function HomeDicePage() {
     });
 
     tl.to(
+      `.${styles.heroCopy}`,
+      { autoAlpha: 0, y: -16, duration: 0.5, ease: "power2.in" },
+      2.7
+    );
+
+    tl.to(
       [
         `.${styles.pOuterLeft}`,
         `.${styles.pMidLeft}`,
@@ -290,30 +451,6 @@ export default function HomeDicePage() {
       )
       .set(".polaroid-container", { pointerEvents: "none" });
 
-    // 텍스트 애니메이션
-
-    const texts = gsap.utils.toArray<HTMLElement>(".text");
-
-    texts.forEach((el, i) => {
-      const delay = parseFloat(String(Number(el.dataset.index) * 0.5) || "0");
-      tl.to(
-        el,
-        {
-          opacity: 1,
-          duration: 0.6,
-          ease: "power2.out",
-        },
-        1.5 + delay
-      ).to(
-        el,
-        {
-          opacity: 0,
-          duration: 0.6,
-          ease: "power2.in",
-        },
-        2.5
-      );
-    });
     ScrollTrigger.refresh();
 
     const chars = gsap.utils.toArray<HTMLElement>(".split-char");
@@ -377,98 +514,34 @@ export default function HomeDicePage() {
   const router = useRouter();
   const user = useAppSelector((state) => state.user.user);
 
-  // const handleCreateClick = () => {
-  //   if (!user) {
-  //     toast.info("로그인 후 게임을 만들 수 있습니다.");
-  //     router.push("/login");
-  //     return;
-  //   }
-  //   setCreateModalOpen(true);
-  // };
+  const handleCreateClick = () => {
+    if (!user) {
+      toast.info("로그인 후 게임을 만들 수 있습니다.");
+      router.push("/login");
+      return;
+    }
+    setCreateModalOpen(true);
+  };
+
+  const handleExploreClick = () => {
+    router.push("/spots");
+  };
 
   return (
     <>
-      <div className={`ux-trigger ${styles.uxTrigger}`}>
-        <div
-          className={`canvas-wrapper ${styles.canvasWrapper}`}
-          ref={containerRef}
-        />
-        <div className={`${styles.logoText}`}>
-          {"TripMarble".split("").map((char, i) => (
-            <span key={i} className={`split-char`} data-char-index={i}>
-              {char}
-            </span>
-          ))}
-        </div>
-        <div className={`text ${styles.fadeText}`} data-index="0">
-          여행지 추천을 랜덤으로!
-        </div>
-        <div className={`text ${styles.fadeText}`} data-index="1">
-          주사위를 굴려 여행을 떠나보세요!
-        </div>
-        {/* Board (over canvas) rendered via portal to disconnect from parent transforms */}
-        {portalEl &&
-          createPortal(
-            <div className={styles.boardLayerWrapper} ref={boardRef}>
-              <div className={styles.boardGroup}>
-                <div className={`${styles.pieceBox} ${styles.pOuterLeft}`}>
-                  <img
-                    className={styles.piece}
-                    src={BOARD_IMAGE_SRCS[0]}
-                    alt="Board outer left"
-                    onLoad={handlePieceLoaded}
-                  />
-                </div>
-                <div className={`${styles.pieceBox} ${styles.pMidLeft}`}>
-                  <img
-                    className={styles.piece}
-                    src={BOARD_IMAGE_SRCS[1]}
-                    alt="Board mid left"
-                    onLoad={handlePieceLoaded}
-                  />
-                </div>
-                <div className={`${styles.pieceBox} ${styles.pOuterRight}`}>
-                  <img
-                    className={styles.piece}
-                    src={BOARD_IMAGE_SRCS[2]}
-                    alt="Board outer right"
-                    onLoad={handlePieceLoaded}
-                  />
-                </div>
-                <div className={`${styles.pieceBox} ${styles.pMidRight}`}>
-                  <img
-                    className={styles.piece}
-                    src={BOARD_IMAGE_SRCS[3]}
-                    alt="Board mid right"
-                    onLoad={handlePieceLoaded}
-                  />
-                </div>
-                <div className={`${styles.pieceBox} ${styles.pCenter}`}>
-                  <img
-                    className={styles.piece}
-                    src={BOARD_IMAGE_SRCS[4]}
-                    alt="Board center"
-                    onLoad={handlePieceLoaded}
-                  />
-                </div>
-              </div>
-            </div>,
-            portalEl
-          )}
-        {/* 폴라로이드 스택 */}
-        <div className={`polaroid-container ${styles.polaroidContainer}`}>
-          <PolaroidStack items={polaroidItems} />
-        </div>
-        <div className={styles.polaroidHint}>
-          <span>사진을 눌러</span>
-          <br className={styles.mobileBr} />
-          <span>여행지를 찾아보세요!</span>
-        </div>
-        <CreateGameModal
-          isOpen={isCreateModalOpen}
-          onClose={() => setCreateModalOpen(false)}
-        />
-      </div>
+      <HomeHeroScene
+        containerRef={containerRef}
+        portalEl={portalEl}
+        boardRef={boardRef}
+        polaroidItems={polaroidItems}
+        onPieceLoaded={handlePieceLoaded}
+        onCreateGame={handleCreateClick}
+        onExplore={handleExploreClick}
+      />
+      <CreateGameModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+      />
     </>
   );
 }

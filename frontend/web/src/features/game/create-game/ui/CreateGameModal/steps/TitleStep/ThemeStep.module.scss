@@ -4,12 +4,12 @@
   padding: 16px 22px;
   border-radius: 10px;
   border: 2px solid #d0d7e5;
-  background: #fff;
+  background: var(--color-surface);
   color: #23262f;
   outline: none;
   width: 100%;
   height: auto;
-  transition: border-color 0.2s;
+  transition: border-color var(--motion-fast) var(--ease-standard);
 }
 
 .input:focus {
