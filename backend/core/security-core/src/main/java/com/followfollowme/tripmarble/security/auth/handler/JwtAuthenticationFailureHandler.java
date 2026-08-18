@@ -1,0 +1,38 @@
+package com.followfollowme.tripmarble.security.auth.handler;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.followfollowme.tripmarble.security.common.exception.SecurityErrorCode;
+import com.followfollowme.tripmarble.security.common.exception.SecurityJwtException;
+import com.followfollowme.tripmarble.security.common.handler.AuthenticationFailureHandler;
+import com.followfollowme.tripmarble.security.common.handler.SecurityExceptionHandler;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+public class JwtAuthenticationFailureHandler extends SecurityExceptionHandler implements AuthenticationFailureHandler {
+
+    public JwtAuthenticationFailureHandler(ObjectMapper objectMapper) {
+        super(objectMapper);
+    }
+
+    @Override
+    public boolean handleAuthenticationFailure(
+        HttpServletRequest request, HttpServletResponse response, Throwable exception) throws IOException {
+
+        if (!supports(exception)) {
+            return false;
+        }
+
+        SecurityJwtException jwtException = (SecurityJwtException) exception;
+        SecurityErrorCode errorCode = jwtException.getErrorCode();
+
+        sendErrorResponse(response, errorCode, errorCode.getMessage());
+
+        return true;
+    }
+
+    @Override
+    public boolean supports(Throwable exception) {
+        return exception instanceof SecurityJwtException;
+    }
+}

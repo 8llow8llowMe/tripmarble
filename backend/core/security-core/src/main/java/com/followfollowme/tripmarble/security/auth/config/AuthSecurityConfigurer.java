@@ -1,17 +1,16 @@
 package com.followfollowme.tripmarble.security.auth.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.followfollowme.tripmarble.security.auth.handler.JwtAuthenticationFailureHandler;
 import com.followfollowme.tripmarble.security.auth.jwt.JwtAuthFilter;
 import com.followfollowme.tripmarble.security.auth.jwt.JwtAuthProperties;
 import com.followfollowme.tripmarble.security.auth.jwt.JwtAuthProvider;
+import com.followfollowme.tripmarble.security.common.handler.AuthenticationFailureHandler;
 import com.followfollowme.tripmarble.security.common.handler.CustomAccessDeniedHandler;
-import com.followfollowme.tripmarble.security.common.handler.CustomAuthenticationEntryPoint;
 import java.util.Arrays;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,47 +24,39 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-@Configuration
-@RequiredArgsConstructor
 @EnableMethodSecurity(securedEnabled = true)
-public class AuthSecurityConfig {
-
-    private final ObjectMapper objectMapper;
+public class AuthSecurityConfigurer {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthProvider jwtAuthProvider)
-        throws Exception {
+    public SecurityFilterChain securityFilterChain(
+        HttpSecurity http, JwtAuthFilter jwtAuthFilter, CustomAccessDeniedHandler customAccessDeniedHandler) throws Exception {
 
         http
-            // CORS(Cross-Origin Resource Sharing) 설정을 적용합니다.
+            // 1. CORS(Cross-Origin Resource Sharing) 설정 적용
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-            // CSRF 설정 비활성화
+            // 2. 불필요한 기본 기능 비활성화
+            // 2-1. CSRF 설정 비활성화
             .csrf(AbstractHttpConfigurer::disable)
-
-            // HTTP Basic 인증 방식을 비활성화합니다. (ID/PW 기반 인증 사용하지 않음)
+            // 2-2. HTTP Basic 인증 방식을 비활성화 (ID/PW 기반 인증 사용하지 않음)
             .httpBasic(AbstractHttpConfigurer::disable)
-
-            // X-Frame-Options 비활성화 (H2 Console 접근 등 필요시 사용)
-            .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
-
-            // 모든 HTTP 요청에 대해 접근을 허용합니다.
-            // 인증이 필요한 요청은 JwtAuthFilter에서 직접 토큰 검증을 수행하며,
-            // @PreAuthorize 등 메서드 수준의 인가 처리는 EnableMethodSecurity에 의해 적용됩니다.
-            .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
-            )
-
-            // Spring Security 기본 로그인/로그아웃 기능 비활성화
+            // 2-3. Spring Security 기본 로그인/로그아웃 기능 비활성화
             .formLogin(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
-            .addFilterBefore(new JwtAuthFilter(jwtAuthProvider, objectMapper),
-                UsernamePasswordAuthenticationFilter.class)
+            // 2-4. X-Frame-Options 비활성화 (H2 Console 접근 등 필요시 사용)
+            .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
+            // 3. 모든 HTTP 요청에 대해 접근을 허용
+            // 인증이 필요한 요청은 JwtAuthFilter에서 직접 토큰 검증을 수행하며,
+            // @PreAuthorize 등 메서드 수준의 인가 처리는 EnableMethodSecurity에 의해 적용
+            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+            // 4. JWT 인증 필터 등록
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            // 5. 예외 처리 (권한 실패만 처리, 인증 실패는 Filter에서 처리)
             .exceptionHandling(ex -> ex
                 // Auth‐Service 에서도 권한 체크(@PreAuthorize) 시 403 을 JSON으로 내려줌
-                // (인증 실패는 JwtAuthFilter 안에서 처리 -> 커스텀 응답)
-                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper))
-                .authenticationEntryPoint(new CustomAuthenticationEntryPoint(objectMapper))
+                // AuthenticationEntryPoint 등록 안 함
+                // 인증 실패는 JwtAuthFilter 안에서 처리 -> 커스텀 응답
+                .accessDeniedHandler(customAccessDeniedHandler)
             );
 
         return http.build();
@@ -101,8 +92,18 @@ public class AuthSecurityConfig {
     }
 
     @Bean
-    public JwtAuthFilter jwtAuthFilter(JwtAuthProvider jwtAuthProvider) {
-        return new JwtAuthFilter(jwtAuthProvider, objectMapper);
+    public JwtAuthFilter jwtAuthFilter(JwtAuthProvider jwtAuthProvider, AuthenticationFailureHandler jwtAuthenticationFailureHandler) {
+        return new JwtAuthFilter(jwtAuthProvider, jwtAuthenticationFailureHandler);
+    }
+
+    @Bean
+    public CustomAccessDeniedHandler customAccessDeniedHandler(ObjectMapper objectMapper) {
+        return new CustomAccessDeniedHandler(objectMapper);
+    }
+
+    @Bean
+    public AuthenticationFailureHandler jwtAuthenticationFailureHandler(ObjectMapper objectMapper) {
+        return new JwtAuthenticationFailureHandler(objectMapper);
     }
 
     private CorsConfiguration getCorsConfiguration(long maxAge) {

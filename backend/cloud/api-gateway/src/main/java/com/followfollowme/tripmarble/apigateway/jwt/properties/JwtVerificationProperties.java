@@ -1,4 +1,4 @@
-package com.followfollowme.tripmarble.apigateway.jwt;
+package com.followfollowme.tripmarble.apigateway.jwt.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

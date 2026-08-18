@@ -1,5 +1,6 @@
 package com.followfollowme.tripmarble.apigateway.jwt;
 
+import com.followfollowme.tripmarble.apigateway.jwt.properties.JwtVerificationProperties;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
