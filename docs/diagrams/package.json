@@ -1,0 +1,14 @@
+{
+  "name": "tripmarble-diagrams",
+  "private": true,
+  "version": "1.0.0",
+  "description": "README 아키텍처 다이어그램 생성기 (문서 전용 도구)",
+  "type": "module",
+  "scripts": {
+    "build": "node generate-diagrams.mjs"
+  },
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "simple-icons": "^16.28.0"
+  }
+}
